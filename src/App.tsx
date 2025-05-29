@@ -1,35 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { BrowserRouter } from 'react-router-dom';
 
+import Routers from './routers';
+import useLanguage from './hooks/useLanguage';
+import useSidebar from './hooks/useSidebar';
+import { getMenuAsText, MenuModel } from './constants/sideBarData';
+import { MenuItem } from './Types';
+import Sidebar from './components/common/navigation/sidebar';
+import TopNavbar from './components/common/navigation/topNav';
 function App() {
-  const [count, setCount] = useState(0)
+  const { language, toggleLanguage } = useLanguage();
+  const { isSidebarOpen, toggleSidebar } = useSidebar();
+  const [activeMenu, setActiveMenu] = useState<'text' | 'model'>('text');
+
+  const getMenuItems = (): MenuItem[] =>
+    activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();
+
+  const handleItemClick = (path: string) => {
+    // No sidebar means full width content
+    if (isSidebarOpen) toggleSidebar();
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <BrowserRouter>
+      <div className={
+          `flex min-h-screen ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
+        }>
+        {/* Render sidebar only when open */}
+        {isSidebarOpen && (
+          <Sidebar
+            menu={getMenuItems()}
+            isOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+            isRTL={language === 'ARABIC'}
+            onItemClick={handleItemClick}
+          />
+        )}
+
+        {/* Main area takes full width when sidebar closed */}
+        <div className="flex-1 flex flex-col">
+          <TopNavbar
+            userName="Mai Shalabi"
+            userPosition="Last sign in on {date}"
+            language={language}
+            onLanguageToggle={toggleLanguage}
+            onMenuToggle={toggleSidebar}
+          />
+
+          <main className="flex-1 overflow-auto p-4">
+            <Routers />
+          </main>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

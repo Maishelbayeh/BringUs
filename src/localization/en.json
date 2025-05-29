@@ -1,0 +1,73 @@
+{  
+  "general":{
+   "internaalServerError":"An error occurred, please try again later",
+    "true" : "true",
+    "false":"false",
+    "edit":"edit",
+    "deactivate":"deactivate",
+    "delete":"delete",
+    "add":"Add",
+      "language": "Language",
+    "lastSignIn": "Last sign in on {{date}}"
+},
+ 
+  "dashboard": {
+    "greeting": "Hello, {{name}}! 👋"
+ 
+   
+    },
+  "sideBar":{
+
+      "xstore": "XStore",
+      "categories": "Categories",
+      "products": "Products",
+      "customers": "Customers",
+      "orders": "Orders",
+      "storeSlider": "Store Slider",
+      "storePreview": "Store Preview",
+      "storeVideos": "Store Videos",
+      "wholesalersRegistration": "Wholesalers Registration",
+      "wholesalersDetails": "Wholesalers Details",
+      "affiliateTeamRegistration": "Affiliate Team Registration",
+      "affiliateDetails": "Affiliate Details",
+      "stockPreview": "Stock Preview",
+      "paymentsSettings": "Payments Settings",
+      "deliverySettings": "Delivery Settings"
+   },
+ 
+    
+    "fields":{
+      "id_no":"ID Number",
+      "email":"Email",
+      "username":"Username",
+      "first_name": "First Name",
+     "second_name": "Second Name",
+      "third_name": "Third Name",
+      "last_name": "Last Name",
+      "gender" : "Gender",
+      "password":"password",
+      "name":"name",
+      "address":"address",
+      "phone_number":"phone number",
+      "idno":"ID Number",
+      "role":"role",
+      "birth_date":"birth date",
+
+      "group_id":"group id"    
+
+},
+  "chart": {
+    "salesByProductType": "Sales by Product Type",
+    "salesDistributionByCategory": "Sales Distribution by Category"
+  },
+  "statCard": {
+    "totalOrders": "Total Orders",
+    "revenue": "Revenue",
+    "activeCustomers": "Active Customers",
+    "conversionRate": "Conversion Rate"
+  },
+  "paymentCard": {
+    "setAsDefault": "Set as default",
+    "default": "Default"
+  }
+}
