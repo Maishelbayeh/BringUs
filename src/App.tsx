@@ -24,7 +24,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className={
-          `flex min-h-screen ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
+          `flex min-h-screen bg-main ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
         }>
         {/* Render sidebar only when open */}
         {isSidebarOpen && (

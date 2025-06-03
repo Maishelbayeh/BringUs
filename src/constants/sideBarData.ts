@@ -17,6 +17,12 @@ import {
 
 export const getMenuAsText = (): MenuItem[] => [
   {
+    id: 0,
+    title: 'sideBar.dashboard',
+    icon: ChartBarIcon,
+    path: '/',
+  },
+  {
     id: 1,
     title: 'sideBar.xstore',
     icon: ShoppingCartIcon,

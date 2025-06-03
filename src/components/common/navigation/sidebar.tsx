@@ -61,89 +61,39 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       className={`
-        h-screen w-80 p-2 bg-white transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        h-screen w-80 p-4 bg-primary-light flex flex-col transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'}
         overflow-y-auto custom-scrollbar-hide
+        ${isRTL ? 'items-end' : 'items-start'}
       `}
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Logo */}
-      <div className="mb-4 text-center">
-        <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">
-          Bring Us
-        </span>
+      <div className={`mb-8 mt-2 text-center w-full ${isRTL ? 'text-right' : 'text-left'}`}>
+        <span className="text-2xl font-bold text-primary">Dashboard</span>
       </div>
 
-      <nav className="space-y-4">
+      <nav className="flex flex-col gap-2 w-full">
         {menu.map((item, idx) => {
-          const hasChildren = item.children && item.children.length > 0;
-          // if any child matches current path, mark parent active
-          const isParentActive = false;
-          // for top-level leaf
-          const isTopActive = !hasChildren && item.path === currentPath;
-
-          if (hasChildren) {
-            const isExpanded = expandedRegion === item.id;
-            const Icon = item.icon;
-            return (
-              <div key={item.id} className="space-y-1">
-                {/* Parent header */}
-                <button
-                  onClick={() => toggleRegion(item.id)}
-                  className={getButtonClass(isParentActive)}
-                  ref={el => (menuItemRefs.current[idx] = el)}
-                >
-                  <div className="flex items-center gap-2">
-                    {Icon && <Icon className="h-5 w-5" />}
-                    <span className="font-semibold">{t(item.title)}</span>
-                  </div>
-                  <ChevronRightIcon
-                    className={`h-4 w-4 transform ${
-                      isExpanded ? 'rotate-90' : 'rotate-0'
-                    } text-gray-500`}
-                  />
-                </button>
-
-                {/* Children */}
-                {isExpanded &&
-                  item.children!.map(child => {
-                    const isActive = child.path === currentPath;
-                    const IconChild = child.icon;
-                    if (IconChild) {
-                      return (
-                        <button
-                          key={child.id}
-                          onClick={() => handleItemClick(child.path)}
-                          className={`flex items-center w-full text-left px-10 py-2 rounded-lg ${
-                            isActive
-                              ? 'bg-blue-500 text-white'
-                              : 'text-gray-800 hover:bg-gray-100'
-                          }`}
-                        >
-                          <IconChild className="h-5 w-5 mr-2" />
-                          <span>{t(child.title)}</span>
-                        </button>
-                      );
-                    }
-                    return null;
-                  })}
-              </div>
-            );
-          }
-
-          // Top-level (no children)
-          const IconTop = item.icon;
+          const isActive = item.path === currentPath;
+          const Icon = item.icon;
           return (
             <button
               key={item.id}
               onClick={() => handleItemClick(item.path)}
               ref={el => (menuItemRefs.current[idx] = el)}
-              className={getButtonClass(isTopActive)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-full transition-colors duration-200
+                ${isActive ? 'bg-primary text-white shadow-md' : 'text-black hover:bg-primary/10'}
+                font-medium text-base flex-row ${isRTL ? 'text-right' : 'text-left'}`}
+              style={{ justifyContent: isRTL ? 'flex-end' : 'flex-start' }}
             >
-              <div className="flex items-center gap-3">
-                {IconTop && <IconTop className="h-6 w-6" />}
-                <span>{t(item.title)}</span>
-              </div>
-              {isTopActive && <ChevronRightIcon className="h-5 w-5 text-white" />}
+              {Icon && <Icon className="h-6 w-6" />}
+              <span className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t(item.title)}</span>
+              {isActive ? (
+                <ChevronRightIcon className={`h-4 w-4 text-white ${isRTL ? 'rotate-180' : ''}`} />
+              ) : (
+                <span className="text-lg">{isRTL ? '←' : '→'}</span>
+              )}
             </button>
           );
         })}
@@ -152,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Logout */}
       <div
         onClick={handleLogoutClick}
-        className="flex items-center mt-6 px-6 py-3 text-red-600 cursor-pointer hover:opacity-80 rounded-lg"
+        className={`flex items-center mt-6 px-6 py-3 text-red-600 cursor-pointer hover:opacity-80 rounded-lg ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -160,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
-          className="w-6 h-6 mr-2"
+          className={`w-6 h-6 ${isRTL ? 'ml-2' : 'mr-2'}`}
         >
           <path
             strokeLinecap="round"
@@ -175,15 +125,15 @@ const Sidebar: React.FC<SidebarProps> = ({
       <Dialog
         open={isDialogOpen}
         onClose={handleCloseDialog}
-        PaperProps={{ sx: { borderRadius: 4, p: 2 } }}
+        PaperProps={{ sx: { borderRadius: 4, p: 2, direction: isRTL ? 'rtl' : 'ltr' } }}
       >
-        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
+        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem', textAlign: isRTL ? 'right' : 'left' }}>
           {t('general.confirmLogout')}
         </DialogTitle>
         <DialogContent>
-          <p className="text-body">{t('general.areYouSureLogout')}</p>
+          <p className={`text-body ${isRTL ? 'text-right' : 'text-left'}`}>{t('general.areYouSureLogout')}</p>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ justifyContent: isRTL ? 'flex-start' : 'flex-end' }}>
           <button onClick={handleCloseDialog} className="px-4 py-2 border rounded-lg">
             {t('general.cancel')}
           </button>

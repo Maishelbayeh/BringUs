@@ -1,3 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom thin and smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1b6e3;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a89ad6;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c1b6e3 transparent;
+}
+
+body {
+  font-family: 'Tajawal', sans-serif;
+}
+
+@layer base {
+  html {
+    font-family: 'Tajawal', sans-serif;
+  }
+}

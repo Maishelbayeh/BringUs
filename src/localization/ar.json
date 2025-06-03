@@ -35,7 +35,6 @@
       }
     },
    "sideBar":{
-     
        "xstore": "إكس ستور",
        "categories": "الفئات",
        "products": "المنتجات",
@@ -50,7 +49,8 @@
        "affiliateDetails": "تفاصيل التسويق",
        "stockPreview": "معاينة المخزون",
        "paymentsSettings": "إعدادات الدفع",
-       "deliverySettings": "إعدادات التوصيل"
+       "deliverySettings": "إعدادات التوصيل",
+       "dashboard": "الرئيسية"
    },
   "chart": {
     "salesByProductType": "المبيعات حسب نوع المنتج",

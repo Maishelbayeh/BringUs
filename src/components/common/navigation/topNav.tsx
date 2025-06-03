@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { ArrowCircleDownIcon } from '@heroicons/react/outline';
 import { MenuIcon } from '@heroicons/react/outline';
-
+import { CubeIcon } from '@heroicons/react/solid';
+import logo from '../../../assets/bringus.svg';
 type TopNavbarProps = {
   userName: string;
   userPosition: string;
@@ -23,17 +24,19 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
 
   return (
     <header className={`w-full h-20 bg-white px-6 py-4 flex items-center justify-between ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}>
-      <div className='flex flex-row gap-2'>
-         {/* <div className="text-lg font-bold text-gray-800">{t('dashboard.greeting', { name: userName })}</div> */}
-
-         <button
+      <div className={`flex flex-row items-center gap-4 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}>
+        <button
           onClick={onMenuToggle}
           className="text-gray-800 hover:text-gray-500 focus:outline-none"
         >
           <MenuIcon className="h-6 w-6" />
-        </button> 
+        </button>
+        <div className="flex items-center gap-2">
+          <img src={logo} alt="logo" className="h-7 w-7" />
+          <span className="text-xl font-bold text-primary tracking-wide">bring us</span>
         </div>
-       
+      </div>
+     
       <div className={`flex items-center gap-6 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}>
         <div className="flex items-center gap-2">
           <span className="text-gray-800 font-semibold">{t('general.language')}:</span>
