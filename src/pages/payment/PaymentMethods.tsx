@@ -1,30 +1,26 @@
-// src/components/PaymentMethods/DeliveryMethods.tsx
+// src/components/PaymentMethods/PaymentMethods.tsx
 import React, { useState } from 'react';
-import { Box, Typography, Divider} from '@mui/material';
+import { Box, Typography, Divider } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { DelieveryMethod } from '../../Types';
-import DlieveryCard from './componant/DlieveryCard';
-import Delieverydrawer from './componant/Delieverydrawer';
+import { PaymentMethod } from '../../Types';
+import PaymentCard from './componant/paymentcard';
+import PaymentDrawer from './componant/settingdrawer';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '../../components/common/CustomButton';
 import useLanguage from '../../hooks/useLanguage';
 
-// dummy initial data
-const INITIAL_DELIVERY: DelieveryMethod[] = [
-  { id: 1, locationAr: 'الضفة الغربية', locationEn: 'West Bank', price: 20, whatsappNumber: '+970598516067' },
-  { id: 2, locationAr: 'القدس', locationEn: 'Jerusalem', price: 30, whatsappNumber: '+970598516067' },
-  { id: 3, locationAr: 'الداخل', locationEn: '1948 Areas', price: 70, whatsappNumber: '+970598516067' },
+const initial: PaymentMethod[] = [
+  { id: 1, title: 'Cash on Delivery', titleAr: 'الدفع عند الاستلام', titleEn: 'Cash on Delivery', isDefault: true },
+  { id: 2, title: 'PayPal', titleAr: 'باي بال', titleEn: 'PayPal', isDefault: false },
+  { id: 3, title: 'Visa and Master', titleAr: 'فيزا وماستر', titleEn: 'Visa and Master', isDefault: false },
 ];
 
-
-
-const DeliveryMethods: React.FC = () => {
+const PaymentMethods: React.FC = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const [areas, setAreas] = useState<DelieveryMethod[]>(INITIAL_DELIVERY);
+  const [methods, setMethods] = useState<PaymentMethod[]>(initial);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [current, setCurrent] = useState<DelieveryMethod | null>(null);
-  const isEditMode = current !== null;
+  const [current, setCurrent] = useState<PaymentMethod | null>(null);
 
   // Open drawer for add
   const openDrawer = () => {
@@ -32,32 +28,39 @@ const DeliveryMethods: React.FC = () => {
     setDrawerOpen(true);
   };
   // Open drawer for edit
-  const openDrawerEdit = (area: DelieveryMethod) => {
-    setCurrent(area);
+  const openDrawerEdit = (method: PaymentMethod) => {
+    setCurrent(method);
     setDrawerOpen(true);
   };
-
   const closeDrawer = () => {
     setDrawerOpen(false);
     setCurrent(null);
   };
 
-  const handleSave = (area: DelieveryMethod) => {
-    setAreas(prev =>
-      prev.some(a => a.id === area.id)
-        ? prev.map(a => (a.id === area.id ? area : a))
-        : [...prev, area]
+  const handleDelete = (id: number) => {
+    setMethods(prev => prev.filter(m => m.id !== id));
+  };
+
+  const handleSetDefault = (id: number) => {
+    setMethods(prev =>
+      prev.map(m => ({ ...m, isDefault: m.id === id }))
     );
+  };
+
+  const handleSave = (method: PaymentMethod) => {
+    setMethods(prev => {
+      const exists = prev.some(m => m.id === method.id);
+      if (exists) {
+        return prev.map(m => (m.id === method.id ? method : m));
+      }
+      return [...prev, method];
+    });
     closeDrawer();
   };
 
-  const handleDelete = (id: number) => {
-    setAreas(prev => prev.filter(a => a.id !== id));
-  };
-
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 4 }, minHeight: '100vh' }} className='bg-white'>
-      <Box
+    <Box sx={{ p: { xs: 1, sm: 2, md: 4 ,mt:10 }, minHeight: '100vh' }} className='bg-white'>
+       <Box
         sx={{
           display: 'flex',
           flexDirection: language === 'ARABIC' ? { xs: 'column', sm: 'row-reverse' } : { xs: 'column', sm: 'row' },
@@ -74,7 +77,7 @@ const DeliveryMethods: React.FC = () => {
             sx={{ fontWeight: 'bold', textAlign: language === 'ARABIC' ? 'right' : 'left' }}
             className='text-primary'
           >
-            {t('deliveryDetails.title')}
+            {t('paymentMethods.title')}
           </Typography>
           <Typography
             variant="body2"
@@ -82,45 +85,46 @@ const DeliveryMethods: React.FC = () => {
             paragraph
             sx={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
           >
-            {t('deliveryDetails.description')}
+            {t('paymentMethods.description')}
           </Typography>
         </Box>
         <CustomButton
           color="primary"
-          text={ t('deliveryDetails.addNewDeliveryArea')}
+          text={ t('paymentMethods.addPaymentMethod')}
           alignment={language === 'ARABIC' ? 'right' : 'left'}
           action={openDrawer}
           icon={<AddIcon />}
           textColor="white"
         />
       </Box>
-
       <Divider sx={{ mb: { xs: 2, sm: 3 } }} />
-
+     
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 2 } }}>
-        {areas.map(area => (
-          <DlieveryCard
-            key={area.id}
-            area={area}
-            onManage={() => openDrawerEdit(area)}
-            onClick={() => openDrawerEdit(area)}
-            onEdit={() => openDrawerEdit(area)}
+        {methods.map(m => (
+          <PaymentCard
+            key={m.id}
+            method={m}
+            onClick={() => openDrawerEdit(m)}
+            onEdit={() => openDrawerEdit(m)}
             onDelete={handleDelete}
+            onSetDefault={handleSetDefault}
             language={language}
           />
         ))}
       </Box>
 
-      <Delieverydrawer
+     
+
+      <PaymentDrawer
         open={drawerOpen}
         onClose={closeDrawer}
+        method={current}
         onSave={handleSave}
-        area={current}
         language={language}
-        isEditMode={isEditMode}
+        isEditMode={current !== null}
       />
     </Box>
   );
 };
 
-export default DeliveryMethods;
+export default PaymentMethods;

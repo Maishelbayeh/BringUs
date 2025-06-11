@@ -65,5 +65,38 @@
   "paymentCard": {
     "setAsDefault": "تعيين كافتراضي",
     "default": "افتراضي"
+  },
+  "deliveryDetails": {
+    "title": "تفاصيل التوصيل",
+    "description": "إعدادات التوصيل, المناطق, المبلغ ورقم الواتساب.",
+    "addNewDeliveryArea": "إضافة منطقة توصيل جديدة",
+    "editDeliveryArea": "تعديل منطقة التوصيل",
+    "manage": "تعديل المنطقة",
+    "locationAr": "المنطقة (عربي)",
+    "locationEn": "المنطقة (انجليزي)",
+    "price": "السعر (ILS)",
+    "whatsappNumber": "رقم الواتساب",
+    "cancel": "إلغاء",
+    "updateArea": "تعديل المنطقة",
+    "createArea": "إضافة منطقة",
+    "locationArPlaceholder": "مثال: الضفة الغربية",
+    "locationEnPlaceholder": "مثال: الضفة الغربية",
+    "pricePlaceholder": "مثال: 20",
+    "whatsappNumberPlaceholder": "مثال: +972501234567"
+  },
+  "paymentMethods": {
+    "title": "إعدادات الدفع",
+    "description": "إعدادات الدفع, الطرق, المبلغ ورقم الواتساب.",
+    "addPaymentMethod": "إضافة طريقة دفع",
+    "editPaymentMethod": "تعديل طريقة الدفع",
+    "manage": "تعديل الطريقة",
+    "cashOnDelivery": "الدفع عند الإستلام",
+    "cashOnDeliveryDescription": "الدفع عند الإستلام",
+    "cashOnDeliveryLogo": "الدفع عند الإستلام",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "setDefault": "تعيين كافتراضي",
+    "default": "افتراضي",
+    "cashOnDeliveryLogoDescription": "الدفع عند الإستلام"
   }
 }

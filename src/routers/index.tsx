@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Homepage from "../pages/HomePage/homepage";
-import PaymentMethods from "../pages/pageSettings/PaymentMethods";
+import PaymentMethods from "../pages/payment/PaymentMethods";
 import DeliveryMethods from "../pages/delivery/DlieveryMethods";
 import CategoriesPage from '../pages/categories';
 

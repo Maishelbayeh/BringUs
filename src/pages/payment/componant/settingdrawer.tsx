@@ -11,27 +11,29 @@ interface Props {
   onClose: () => void;
   method: PaymentMethod | null;
   onSave: (m: PaymentMethod) => void;
+  language: 'ENGLISH' | 'ARABIC';
+  isEditMode: boolean;
 }
 
-const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave }) => {
+const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave, language, isEditMode }) => {
   const { t } = useTranslation();
 
   return (
     <Drawer
-      anchor="right"
+      anchor={language === 'ARABIC' ? 'right' : 'left'}
       open={open}
       onClose={onClose}
       PaperProps={{ sx: { width: { xs: '100%', sm: 400 }, borderRadius: 0, p: 3 } }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">
-          {method ? t('Edit Payment Method') : t('Add Payment Method')}
+          {isEditMode ? t('paymentMethods.editPaymentMethod') : t('paymentMethods.addPaymentMethod')}
         </Typography>
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Box>
-      <PaymentForm method={method} onSubmit={onSave} onCancel={onClose} />
+      <PaymentForm method={method} onSubmit={onSave} onCancel={onClose} language={language} />
     </Drawer>
   );
 };
