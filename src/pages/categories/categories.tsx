@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/outline';
 import { useTranslation } from 'react-i18next';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { ViewListIcon, CollectionIcon } from '@heroicons/react/outline';
+import CategoriesDrawer from './components/CategoriesDrawer';
+import CategoriesNav from './components/CategoriesNav';
+import useLanguage from '../../hooks/useLanguage';
 
 interface Category {
   id: number;
@@ -142,7 +146,11 @@ const subCategoryDescriptions: { [key: number]: { en: string; ar: string } } = {
 };
 
 const CategoriesPage: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRTL = language === 'ARABIC';
+  console.log(isRTL);
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', image: '' });
@@ -160,7 +168,7 @@ const CategoriesPage: React.FC = () => {
     setForm({ name: '', description: '', image: '' });
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -218,8 +226,6 @@ const CategoriesPage: React.FC = () => {
     setShowSubForm(false);
   };
 
-  const isRTL = i18n.language === 'ARABIC';
-
   // Filter and sort categories
   const filteredCategories = categories
     .filter(cat => cat.name.toLowerCase().includes(search.toLowerCase()))
@@ -231,7 +237,13 @@ const CategoriesPage: React.FC = () => {
     });
 
   // Helper to get subcategory count for selected category
-  const subCount = selectedCategoryId ? subCategories.filter(sub => sub.categoryId === selectedCategoryId).length : subCategories.length;
+  const getSubCount = (catId: number) => subCategories.filter(sub => sub.categoryId === catId).length;
+  // Helper to get product count for selected category (no subcategories)
+  const getProductCount = (catId: number) => {
+    // You may want to import products from a shared state or context
+    // For now, just return 0 or use a placeholder
+    return 0;
+  };
 
   return (
     <div className={`p-4 w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}> 
@@ -274,7 +286,7 @@ const CategoriesPage: React.FC = () => {
           >
             <CollectionIcon className="h-5 w-5" />
             <span>{isRTL ? 'الفئات الفرعية' : 'Subcategories'}</span>
-            <span className={`${isRTL ? 'mr-2' : 'ml-2'} bg-primary text-white rounded-full px-2 py-0.5 text-xs font-bold`}>{subCount}</span>
+            <span className={`${isRTL ? 'mr-2' : 'ml-2'} bg-primary text-white rounded-full px-2 py-0.5 text-xs font-bold`}>{getSubCount(selectedCategoryId || 0)}</span>
           </button>
         </div>
         {/* Centered Search Field */}
@@ -313,25 +325,38 @@ const CategoriesPage: React.FC = () => {
       {/* Categories Grid */}
       {activeTab === 'categories' && (
         <div className=" bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
-          {filteredCategories.map((cat) => (
-            <div
-              key={cat.id}
-              className={`p-4 flex flex-col items-center gap-2 cursor-pointer ${selectedCategoryId === cat.id ? 'ring-2 ring-primary' : ''}`}
-              onClick={() => {
-                setSelectedCategoryId(cat.id);
-                setActiveTab('subcategories');
-              }}
-            >
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className="h-40 w-40 object-cover rounded-full"
-              />
-              <h2 className="text-lg font-semibold text-primary">{categoryNames[cat.id] ? (isRTL ? categoryNames[cat.id].ar : categoryNames[cat.id].en) : cat.name}</h2>
-              <p className="text-gray-500 text-sm">{categoryDescriptions[cat.id] ? (isRTL ? categoryDescriptions[cat.id].ar : categoryDescriptions[cat.id].en) : cat.description}</p>
-              <p className="text-xs text-gray-400">{t('Created At') || 'Created At'}: {cat.createdAt}</p>
-            </div>
-          ))}
+          {filteredCategories.map((cat) => {
+            const subCount = getSubCount(cat.id);
+            // You may want to get product count from a shared state
+            const productCount = getProductCount(cat.id);
+            return (
+              <div
+                key={cat.id}
+                className={`p-4 flex flex-col items-center gap-2 cursor-pointer ${selectedCategoryId === cat.id ? 'ring-2 ring-primary' : ''}`}
+                onClick={() => {
+                  if (subCount > 0) {
+                    navigate(`/subcategories?categoryId=${cat.id}`);
+                  } else {
+                    navigate(`/products?categoryId=${cat.id}`);
+                  }
+                }}
+              >
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="h-40 w-40 object-cover rounded-full"
+                />
+                <h2 className="text-lg font-semibold text-primary">{categoryNames[cat.id] ? (isRTL ? categoryNames[cat.id].ar : categoryNames[cat.id].en) : cat.name}</h2>
+                <p className="text-gray-500 text-sm">{categoryDescriptions[cat.id] ? (isRTL ? categoryDescriptions[cat.id].ar : categoryDescriptions[cat.id].en) : cat.description}</p>
+                <p className="text-xs text-gray-400">
+                  {subCount > 0
+                    ? `${subCount} ${isRTL ? 'فئة فرعية' : 'Subcategories'}`
+                    : `${productCount} ${isRTL ? 'منتج' : 'Products'}`}
+                </p>
+                <p className="text-xs text-gray-400">{t('Created At') || 'Created At'}: {cat.createdAt}</p>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -388,121 +413,19 @@ const CategoriesPage: React.FC = () => {
         </>
       )}
 
-      {/* Add Category Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <form
-            onSubmit={handleSubmit}
-            className={`bg-white rounded-2xl p-6 w-full max-w-md shadow-lg flex flex-col gap-4 ${isRTL ? 'text-right' : 'text-left'}`}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          >
-            <h2 className="text-xl font-bold text-primary mb-2">{t('Add Category') || 'Add Category'}</h2>
-            <input
-              name="name"
-              type="text"
-              placeholder={t('Category Name') || 'Category Name'}
-              value={form.name}
-              onChange={handleFormChange}
-              className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <textarea
-              name="description"
-              placeholder={t('Description') || 'Description'}
-              value={form.description}
-              onChange={handleFormChange}
-              className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <input
-              name="image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="border rounded-lg px-3 py-2"
-            />
-            <div className="flex gap-2 mt-2">
-              <button
-                type="submit"
-                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex-1"
-              >
-                {t('Save') || 'Save'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition flex-1"
-              >
-                {t('Cancel') || 'Cancel'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Add Subcategory Form Modal */}
-      {showSubForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <form
-            onSubmit={handleSubSubmit}
-            className={`bg-white rounded-xl p-6 w-full max-w-md shadow-lg flex flex-col gap-4 ${isRTL ? 'text-right' : 'text-left'}`}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          >
-            <h2 className="text-xl font-bold text-primary mb-2">{isRTL ? 'إضافة فئة فرعية' : 'Add Subcategory'}</h2>
-            <select
-              name="categoryId"
-              value={subForm.categoryId}
-              onChange={handleSubFormChange}
-              className="border rounded-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            >
-              <option value="">{isRTL ? 'اختر الفئة الرئيسية' : 'Select Category'}</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{categoryNames[cat.id] ? (isRTL ? categoryNames[cat.id].ar : categoryNames[cat.id].en) : cat.name}</option>
-              ))}
-            </select>
-            <input
-              name="name"
-              type="text"
-              placeholder={isRTL ? 'اسم الفئة الفرعية' : 'Subcategory Name'}
-              value={subForm.name}
-              onChange={handleSubFormChange}
-              className="border rounded-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <textarea
-              name="description"
-              placeholder={isRTL ? 'الوصف' : 'Description'}
-              value={subForm.description}
-              onChange={handleSubFormChange}
-              className="border rounded-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <input
-              name="image"
-              type="file"
-              accept="image/*"
-              onChange={handleSubImageChange}
-              className="border rounded-full px-3 py-2"
-            />
-            <div className="flex gap-2 mt-2">
-              <button
-                type="submit"
-                className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition flex-1"
-              >
-                {isRTL ? 'حفظ' : 'Save'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowSubForm(false)}
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-300 transition flex-1"
-              >
-                {isRTL ? 'إلغاء' : 'Cancel'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      {/* Add Category Form Drawer */}
+      <CategoriesDrawer
+        open={showForm || showSubForm}
+        onClose={() => { setShowForm(false); setShowSubForm(false); }}
+        isRTL={isRTL}
+        title={activeTab === 'categories' ? (isRTL ? 'إضافة فئة' : 'Add Category') : (isRTL ? 'إضافة فئة فرعية' : 'Add Subcategory')}
+        form={activeTab === 'categories' ? form : subForm}
+        onFormChange={activeTab === 'categories' ? handleFormChange : handleSubFormChange}
+        onImageChange={activeTab === 'categories' ? handleImageChange : handleSubImageChange}
+        onSubmit={activeTab === 'categories' ? handleSubmit : handleSubSubmit}
+        isSubcategory={activeTab === 'subcategories'}
+        categories={categories.map(c => ({ id: c.id, name: c.name }))}
+      />
     </div>
   );
 };

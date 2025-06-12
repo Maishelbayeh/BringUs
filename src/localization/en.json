@@ -101,8 +101,38 @@
     "edit": "Edit",
     "delete": "Delete",
     "setDefault": "Set as Default",
-    "default": "Default"
+    "default": "Default",
+    "qrPicture": "Picture",
+    "qrPictureDescription": "Picture",
+    "qrPictureDescription2": "Use pictures 500×500 px, 1:1 square, max 300 KB.",
+    "paymentMethod": "Payment Method",
+    "chooseFile": "Choose File",
+    "save": "Save",
+    "cancel": "Cancel"
 
 
+    },
+  "categories": {
+    "title": "Categories",
+    "description": "Configure categories, subcategories and products.",
+    "addCategory": "Add Category",
+    "editCategory": "Edit Category",
+    "manage": "Edit Category",
+    "allCategories": "All Categories",
+    "allSubcategories": "All Subcategories"
+  },
+  "products": {
+    "title": "Products",
+    "add": "Add Product",
+    "search": "Search products...",
+    "allCategories": "All Categories",
+    "allSubcategories": "All Subcategories"
+    },
+  "subcategories": {
+    "title": "Subcategories",
+    "add": "Add Subcategory",
+    "search": "Search subcategories...",
+    "allSubcategories": "All Subcategories",
+    "allCategories": "All Categories"
   }
 }

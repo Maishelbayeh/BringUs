@@ -25,7 +25,7 @@ export interface LogInFormValues {
     id: number;
     title: string;
     icon?: React.ElementType;
-    path: string;
+    path?: string;
     children?: MenuItem[];
   }
 

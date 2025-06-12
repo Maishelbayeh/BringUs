@@ -12,7 +12,8 @@ import {
   TruckIcon,
   EyeIcon,
   UserAddIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  CollectionIcon
 } from '@heroicons/react/outline';
 
 export const getMenuAsText = (): MenuItem[] => [
@@ -26,7 +27,6 @@ export const getMenuAsText = (): MenuItem[] => [
     id: 1,
     title: 'sideBar.xstore',
     icon: ShoppingCartIcon,
-    path: '/dashboard',
     children: [
       {
         id: 11,
@@ -47,6 +47,18 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.categories',
     icon: ViewListIcon,
     path: '/categories',
+    children: [
+    
+
+      {
+        id: 21,
+        title: 'sideBar.subcategories',
+        icon: CollectionIcon,
+        path: '/subcategories',
+       
+
+      }
+    ]
   },
   {
     id: 3,

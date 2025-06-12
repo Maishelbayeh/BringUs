@@ -6,18 +6,21 @@ import { useTranslation } from 'react-i18next';
 import CustomInput from '../../../components/common/CustomInput';
 import CustomButton from '../../../components/common/CustomButton';
 import CustomFileInput from '../../../components/common/CustomFileInput';
+import CustomSelect from '../../../components/common/CustomSelect';
 
 interface Props {
   method: PaymentMethod | null;
   onSubmit: (m: PaymentMethod) => void;
   onCancel: () => void;
   language: 'ENGLISH' | 'ARABIC';
+  isEditMode?: boolean;
 }
 
-const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language }) => {
+const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language, isEditMode }) => {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<string>(method?.title || '');
   const [file, setFile] = useState<File | null>(null);
+  const isRTL = language === 'ARABIC';
 
   const AVAILABLE_METHODS = [
     { value: 'Cash on Delivery', label: t('Cash on Delivery') },
@@ -55,31 +58,27 @@ const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language }) 
         borderRadius: 3,
       }}
     >
-      <CustomInput
-        label={t('Payment Method')}
-        id="payment_method"
-        type="select"
+      <CustomSelect
+        label={t('paymentMethods.paymentMethod')}
         value={selected}
         onChange={e => setSelected(e.target.value)}
         options={AVAILABLE_METHODS}
-        required
-        style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-        labelAlign={language === 'ARABIC' ? 'right' : 'left'}
+        isRTL={isRTL}
       />
       <CustomFileInput
-        label={t('QR Picture')}
+            label={t('paymentMethods.qrPicture')}
         id="qr_picture"
         value={file ? file.name : ''}
         onChange={setFile}
-        placeholder={t('Choose File')}
+        placeholder={t('paymentMethods.chooseFile')}
+        labelAlign={isRTL ? 'right' : 'left'}
+        style={{ textAlign: isRTL ? 'right' : 'left' }}
       />
-      <Typography variant="caption" color="text.secondary">
-        {t('Use pictures 500×500 px, 1:1 square, max 300 KB.')}
-      </Typography>
+     
       <Box
         sx={{
           display: 'flex',
-          flexDirection: language === 'ARABIC' ? 'row-reverse' : 'row',
+          flexDirection: isRTL ? 'row-reverse' : 'row',
           justifyContent: 'flex-start',
           gap: 2,
           mt: 4,
@@ -88,13 +87,13 @@ const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language }) 
         <CustomButton
           color="primary"
           textColor="white"
-          text={t('Save')}
+          text={isEditMode ? t('paymentMethods.edit') : t('paymentMethods.save')}
           type="submit"
         />
         <CustomButton
           color="white"
           textColor="primary"
-          text={t('Cancel')}
+          text={t('paymentMethods.cancel')}
           action={onCancel}
         />
       </Box>

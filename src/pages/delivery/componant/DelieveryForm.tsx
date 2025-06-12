@@ -1,6 +1,6 @@
 // src/components/DeliveryAreas/DeliveryAreaForm.tsx
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Typography, Button, useTheme, Paper, colors } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { DeliveryArea } from '../../../Types';
 
 import CustomInput from '../../../components/common/CustomInput';
@@ -15,7 +15,6 @@ interface Props {
 }
 
 const DeliveryAreaForm: React.FC<Props> = ({ area, onSubmit, onCancel, language }) => {
-  const theme = useTheme();
   const [locationAr, setLocationAr] = useState(area?.locationAr || '');
   const [locationEn, setLocationEn] = useState(area?.locationEn || '');
   const [price, setPrice] = useState(area?.price !== undefined ? area.price.toString() : '');

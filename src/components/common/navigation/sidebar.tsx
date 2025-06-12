@@ -88,13 +88,14 @@ const Sidebar: React.FC<SidebarProps> = ({
               <button
                 onClick={() => {
                   if (!isOpen) {
-                    handleItemClick(item.path);
+                    if (item.path) handleItemClick(item.path);
                     return;
                   }
                   if (hasChildren) {
                     toggleRegion(item.id);
+                    if (item.path) handleItemClick(item.path);
                   } else {
-                    handleItemClick(item.path);
+                    if (item.path) handleItemClick(item.path);
                   }
                 }}
                 ref={el => (menuItemRefs.current[idx] = el)}
@@ -107,15 +108,24 @@ const Sidebar: React.FC<SidebarProps> = ({
                 {isOpen && (
                   <span className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t(item.title)}</span>
                 )}
-                {isOpen && (hasChildren ? (
-                  <ChevronRightIcon
-                    className={`h-4 w-4 transition-transform ${isExpanded ? (isRTL ? '-rotate-90' : 'rotate-90') : ''}`}
-                  />
-                ) : isActive ? (
-                  <ChevronRightIcon className={`h-4 w-4 text-white ${isRTL ? 'rotate-180' : ''}`} />
-                ) : (
-                  <span className="text-lg">{isRTL ? '←' : '→'}</span>
-                ))}
+                {isOpen && (
+                  hasChildren ? (
+                    <ChevronRightIcon
+                      className={`h-4 w-4 transition-transform
+                        ${isExpanded
+                          ? isRTL
+                            ? 'rotate-90'
+                            : 'rotate-90'
+                          : isRTL
+                            ? '-rotate-180'
+                            : ''
+                        }`
+                      }
+                    />
+                  ) : (
+                    <ChevronRightIcon className={`h-4 w-4 ${isActive ? 'text-white' : ''} ${isRTL ? 'rotate-180' : ''}`} />
+                  )
+                )}
               </button>
               {/* Submenu */}
               {isOpen && hasChildren && isExpanded && (
@@ -126,7 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     return (
                       <button
                         key={child.id}
-                        onClick={() => handleItemClick(child.path)}
+                        onClick={() => child.path && handleItemClick(child.path)}
                         className={`flex items-center gap-2 px-4 py-2 rounded transition-colors duration-200 text-sm
                           ${isChildActive ? 'bg-primary text-white' : 'text-black hover:bg-primary/10'}
                           ${isRTL ? 'text-right' : 'text-left'}`}

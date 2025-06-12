@@ -97,6 +97,33 @@
     "delete": "حذف",
     "setDefault": "تعيين كافتراضي",
     "default": "افتراضي",
-    "cashOnDeliveryLogoDescription": "الدفع عند الإستلام"
+    "cashOnDeliveryLogoDescription": "الدفع عند الإستلام",
+    "qrPicture": "صورة",
+    "qrPictureDescription": "صورة",
+    "qrPictureDescription2": "استخدم صور 500×500 بكسل, مربع 1:1, أقصى 300 كيلوبايت.",
+    "paymentMethod": "طريقة الدفع",
+    "chooseFile": "اختر ملف",
+    "save": "حفظ",
+    "cancel": "إلغاء"
+  },
+  "categories": {
+    "title": "الفئات",
+    "description": "إعدادات الفئات, الفئات الفرعية, المنتجات.",
+    "addCategory": "إضافة فئة",
+    "editCategory": "تعديل الفئة",
+    "manage": "تعديل الفئة",
+    "allCategories": "جميع الفئات"
+  },
+  "products": {
+    "title": "المنتجات",
+    "add": "إضافة منتج",
+    "search": "ابحث عن منتجات...",
+    "allCategories": "جميع الفئات"
+  },
+  "subcategories": {
+    "title": "الفئات الفرعية",
+    "add": "إضافة فئة فرعية",
+    "search": "ابحث عن فئات فرعية...",
+    "allSubcategories": "جميع الفئات الفرعية"
   }
 }
