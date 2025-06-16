@@ -6,6 +6,7 @@ import DeliveryMethods from "../pages/delivery/DlieveryMethods";
 import CategoriesPage from '../pages/categories/categories';
 import SubcategoriesPage from "../pages/subcategories/subcategories";
 import ProductsPage from "../pages/products/products";
+import ProductVariants from "../pages/productVariant/PaymentVariants";
 
 export default function Routers() {
   return (
@@ -19,6 +20,7 @@ export default function Routers() {
       <Route path="/categories" element={<CategoriesPage />} />
       <Route path="/subcategories" element={<SubcategoriesPage />} />
       <Route path="/products" element={<ProductsPage />} />
+      <Route path="/product-variants" element={<ProductVariants />} />  
     </Routes>
   );
 }

@@ -18,6 +18,13 @@ interface CategoriesDrawerProps {
 
 const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onImageChange, onSubmit, isSubcategory, categories }) => {
   if (!open) return null;
+
+  const handleInputChange = (name: string, value: string) => {
+    onFormChange({
+      target: { name, value }
+    } as React.ChangeEvent<HTMLInputElement>);
+  };
+
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black bg-opacity-30" onClick={onClose} />
@@ -45,7 +52,7 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
           label={isSubcategory ? (isRTL ? 'اسم الفئة الفرعية' : 'Subcategory Name') : (isRTL ? 'اسم الفئة' : 'Category Name')}
           name="name"
           value={form.name}
-          onChange={onFormChange}
+          onChange={(e) => handleInputChange('name', e.target.value)}
           required
           labelAlign={isRTL ? 'right' : 'left'}
         />
@@ -53,7 +60,7 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
           label={isRTL ? 'الوصف' : 'Description'}
           name="description"
           value={form.description}
-          onChange={onFormChange}
+          onChange={(e) => handleInputChange('description', e.target.value)}
           required
           labelAlign={isRTL ? 'right' : 'left'}
         />
@@ -63,7 +70,6 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
           value={form.image}
           onChange={file => onImageChange({ target: { files: file ? [file] : [] } } as any)}
           labelAlign={isRTL ? 'right' : 'left'}
-
         />
         <div className="flex gap-2 mt-2">
           <CustomButton
