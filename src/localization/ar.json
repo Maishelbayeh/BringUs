@@ -125,5 +125,22 @@
     "add": "إضافة فئة فرعية",
     "search": "ابحث عن فئات فرعية...",
     "allSubcategories": "جميع الفئات الفرعية"
+  },
+  "customers": {
+    "title": "العملاء",
+    "phone": "رقم الهاتف",
+    "lastOrder": "آخر طلب",
+    "orders": "الطلبات",
+    "orderNumber": "رقم الطلب",
+    "orderDate": "تاريخ الطلب",
+    "orderStatus": "الحالة",
+    "close": "إغلاق",
+    "totalSpent": "إجمالي الإنفاق",
+    "averageOrderValue": "متوسط قيمة الطلب",
+    "orderPrice": "السعر",
+    "orderPaid": "مدفوع",
+    "orderUnpaid": "غير مدفوع",
+    "orderDelivered": "تم التوصيل",
+    "orderInProgress": "قيد التنفيذ"
   }
 }

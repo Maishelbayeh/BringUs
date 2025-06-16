@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ArrowCircleDownIcon } from '@heroicons/react/outline';
 import { MenuIcon } from '@heroicons/react/outline';
-import { CubeIcon } from '@heroicons/react/solid';
+
 import logo from '../../../assets/bringus.svg';
 type TopNavbarProps = {
   userName: string;
@@ -15,7 +15,6 @@ type TopNavbarProps = {
 
 const TopNavbar: React.FC<TopNavbarProps> = ({
   userName,
-  userPosition,
   language,
   onLanguageToggle,
   onMenuToggle,
@@ -31,8 +30,6 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
           onClick={onMenuToggle}
           className="text-gray-800 hover:text-gray-500 focus:outline-none text-primary"
         >
-
-
           <MenuIcon className="h-6 w-6" />
         </button>
         <div className={`flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 

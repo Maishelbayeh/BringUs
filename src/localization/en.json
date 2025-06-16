@@ -134,5 +134,23 @@
     "search": "Search subcategories...",
     "allSubcategories": "All Subcategories",
     "allCategories": "All Categories"
+  },
+  "customers": {
+    "title": "Customers",
+    "phone": "Phone Number",
+    "lastOrder": "Last Order",
+    "orders": "Orders",
+    "orderNumber": "Order Number",
+    "orderDate": "Order Date",
+    "orderStatus": "Status",
+    "close": "Close",
+    "totalSpent": "Total Spent",
+    "averageOrderValue": "Average Order Value",
+    "orderPrice": "Price",
+    "orderPaid": "Paid",
+    "orderUnpaid": "Unpaid", 
+    "orderDelivered": "Delivered",
+  "orderInProgress": "In Progress"
   }
+ 
 }
