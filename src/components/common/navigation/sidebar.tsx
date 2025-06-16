@@ -61,8 +61,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       className={`
-        h-screen w-80 p-4 bg-primary-light flex flex-col transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'}
+        h-screen ${isOpen ? 'w-80' : 'w-20'} p-4 bg-primary-light flex flex-col transition-all duration-300 ease-in-out
+        ${isOpen ? (isRTL ? 'translate-x-0' : 'translate-x-0') : isRTL ? 'translate-x-full' : '-translate-x-full'}
         overflow-y-auto custom-scrollbar-hide
         ${isRTL ? 'items-end' : 'items-start'}
       `}
@@ -70,31 +70,87 @@ const Sidebar: React.FC<SidebarProps> = ({
     >
       {/* Logo */}
       <div className={`mb-8 mt-2 text-center w-full ${isRTL ? 'text-right' : 'text-left'}`}>
-        <span className="text-2xl font-bold text-primary">Dashboard</span>
+        {isOpen ? (
+          <span className="text-2xl font-bold text-primary">Dashboard</span>
+        ) : (
+          <span className="text-2xl font-bold text-primary">BU</span>
+        )}
       </div>
 
       <nav className="flex flex-col gap-2 w-full">
         {menu.map((item, idx) => {
           const isActive = item.path === currentPath;
           const Icon = item.icon;
+          const hasChildren = item.children && item.children.length > 0;
+          const isExpanded = expandedRegion === item.id;
           return (
-            <button
-              key={item.id}
-              onClick={() => handleItemClick(item.path)}
-              ref={el => (menuItemRefs.current[idx] = el)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-full transition-colors duration-200
-                ${isActive ? 'bg-primary text-white shadow-md' : 'text-black hover:bg-primary/10'}
-                font-medium text-base flex-row ${isRTL ? 'text-right' : 'text-left'}`}
-              style={{ justifyContent: isRTL ? 'flex-end' : 'flex-start' }}
-            >
-              {Icon && <Icon className="h-6 w-6" />}
-              <span className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t(item.title)}</span>
-              {isActive ? (
-                <ChevronRightIcon className={`h-4 w-4 text-white ${isRTL ? 'rotate-180' : ''}`} />
-              ) : (
-                <span className="text-lg">{isRTL ? '←' : '→'}</span>
+            <div key={item.id} className="w-full">
+              <button
+                onClick={() => {
+                  if (!isOpen) {
+                    if (item.path) handleItemClick(item.path);
+                    return;
+                  }
+                  if (hasChildren) {
+                    toggleRegion(item.id);
+                    if (item.path) handleItemClick(item.path);
+                  } else {
+                    if (item.path) handleItemClick(item.path);
+                  }
+                }}
+                ref={el => (menuItemRefs.current[idx] = el)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-full transition-colors duration-200
+                  ${isActive ? 'bg-primary text-white shadow-md' : 'text-black hover:bg-primary/10'}
+                  font-medium text-base flex-row ${isRTL ? 'text-right' : 'text-left'}`}
+                style={{ justifyContent: isRTL ? 'flex-end' : 'flex-start' }}
+              >
+                {Icon && <Icon className="h-6 w-6 mx-auto" />}
+                {isOpen && (
+                  <span className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t(item.title)}</span>
+                )}
+                {isOpen && (
+                  hasChildren ? (
+                    <ChevronRightIcon
+                      className={`h-4 w-4 transition-transform
+                        ${isExpanded
+                          ? isRTL
+                            ? 'rotate-90'
+                            : 'rotate-90'
+                          : isRTL
+                            ? '-rotate-180'
+                            : ''
+                        }`
+                      }
+                    />
+                  ) : (
+                    <ChevronRightIcon className={`h-4 w-4 ${isActive ? 'text-white' : ''} ${isRTL ? 'rotate-180' : ''}`} />
+                  )
+                )}
+              </button>
+              {/* Submenu */}
+              {isOpen && hasChildren && isExpanded && (
+                <div className="ml-8 mt-1 flex flex-col gap-1">
+                  {item.children?.map((child, cidx) => {
+                    const ChildIcon = child.icon;
+                    const isChildActive = child.path === currentPath;
+                    return (
+                      <button
+                        key={child.id}
+                        onClick={() => child.path && handleItemClick(child.path)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded transition-colors duration-200 text-sm
+                          ${isChildActive ? 'bg-primary text-white' : 'text-black hover:bg-primary/10'}
+                          ${isRTL ? 'text-right' : 'text-left'}`}
+                        style={{ justifyContent: isRTL ? 'flex-end' : 'flex-start' }}
+                      >
+                        {ChildIcon && <ChildIcon className="h-5 w-5" />}
+                        <span className="flex-1">{t(child.title)}</span>
+                        {isChildActive && <ChevronRightIcon className={`h-3 w-3 text-white ${isRTL ? 'rotate-180' : ''}`} />}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-            </button>
+            </div>
           );
         })}
       </nav>
@@ -118,7 +174,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
           />
         </svg>
-        <span className="font-medium">{t('home.logout')}</span>
+        {isOpen && <span className="font-medium">{t('home.logout')}</span>}
       </div>
 
       {/* Confirm Logout Dialog */}

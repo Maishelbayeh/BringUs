@@ -1,40 +1,32 @@
-// src/components/DeliveryAreas/DeliveryAreaDrawer.tsx
+// src/components/PaymentMethods/componant/PaymentDrawer.tsx
 import React from 'react';
-import { Drawer, Box, IconButton, Typography, useTheme } from '@mui/material';
+import { Drawer, Box, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import DeliveryAreaForm from './DelieveryForm';
-import { DeliveryArea } from '../../../Types';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import PaymentForm from './paymentForm';
+import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
+import PaymentIcon from '@mui/icons-material/Payment';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  area: DeliveryArea | null;
-  onSave: (area: DeliveryArea) => void;
+  method: PaymentMethod | null;
+  onSave: (m: PaymentMethod) => void;
   language: 'ENGLISH' | 'ARABIC';
   isEditMode: boolean;
 }
 
-const DeliveryAreaDrawer: React.FC<Props> = ({ open, onClose, area, onSave, language, isEditMode }) => {
+const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave, language, isEditMode }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
 
   return (
     <Drawer
       anchor={language === 'ARABIC' ? 'right' : 'left'}
       open={open}
       onClose={onClose}
-      PaperProps={{ 
-        sx: { 
-          width: { xs: '100%', sm: 450 },
-          p: 3,
-         
-          borderLeft: '1.5px solid #1976d233',
-        } 
-      }}
+      PaperProps={{ sx: { width: { xs: '100%', sm: 400 }, borderRadius: 0, p: 3 } }}
     >
-      <Box
+       <Box
         className='border-b-2 border-primary'
         sx={{
           display: 'flex',
@@ -57,8 +49,9 @@ const DeliveryAreaDrawer: React.FC<Props> = ({ open, onClose, area, onSave, lang
             textAlign: language === 'ARABIC' ? 'right' : 'left',
           }}
         >
-          <LocalShippingIcon fontSize="large" />
-          {isEditMode ? t('deliveryDetails.editDeliveryArea') : t('deliveryDetails.addNewDeliveryArea')}
+         
+          {isEditMode ? t('paymentMethods.editPaymentMethod') : t('paymentMethods.addPaymentMethod')}
+          <PaymentIcon fontSize="large" />
         </Typography>
         <IconButton
           className='text-primary hover:text-primary'
@@ -67,9 +60,9 @@ const DeliveryAreaDrawer: React.FC<Props> = ({ open, onClose, area, onSave, lang
           <CloseIcon />
         </IconButton>
       </Box>
-      <DeliveryAreaForm area={area} onSubmit={onSave} onCancel={onClose} language={language} />
+      <PaymentForm method={method} onSubmit={onSave} onCancel={onClose} language={language} isEditMode={isEditMode} />
     </Drawer>
   );
 };
 
-export default DeliveryAreaDrawer;
+export default PaymentDrawer;

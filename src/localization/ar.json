@@ -65,5 +65,65 @@
   "paymentCard": {
     "setAsDefault": "تعيين كافتراضي",
     "default": "افتراضي"
+  },
+  "deliveryDetails": {
+    "title": "تفاصيل التوصيل",
+    "description": "إعدادات التوصيل, المناطق, المبلغ ورقم الواتساب.",
+    "addNewDeliveryArea": "إضافة منطقة توصيل جديدة",
+    "editDeliveryArea": "تعديل منطقة التوصيل",
+    "manage": "تعديل المنطقة",
+    "locationAr": "المنطقة (عربي)",
+    "locationEn": "المنطقة (انجليزي)",
+    "price": "السعر (ILS)",
+    "whatsappNumber": "رقم الواتساب",
+    "cancel": "إلغاء",
+    "updateArea": "تعديل المنطقة",
+    "createArea": "إضافة منطقة",
+    "locationArPlaceholder": "مثال: الضفة الغربية",
+    "locationEnPlaceholder": "مثال: الضفة الغربية",
+    "pricePlaceholder": "مثال: 20",
+    "whatsappNumberPlaceholder": "مثال: +972501234567"
+  },
+  "paymentMethods": {
+    "title": "إعدادات الدفع",
+    "description": "إعدادات الدفع, الطرق, المبلغ ورقم الواتساب.",
+    "addPaymentMethod": "إضافة طريقة دفع",
+    "editPaymentMethod": "تعديل طريقة الدفع",
+    "manage": "تعديل الطريقة",
+    "cashOnDelivery": "الدفع عند الإستلام",
+    "cashOnDeliveryDescription": "الدفع عند الإستلام",
+    "cashOnDeliveryLogo": "الدفع عند الإستلام",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "setDefault": "تعيين كافتراضي",
+    "default": "افتراضي",
+    "cashOnDeliveryLogoDescription": "الدفع عند الإستلام",
+    "qrPicture": "صورة",
+    "qrPictureDescription": "صورة",
+    "qrPictureDescription2": "استخدم صور 500×500 بكسل, مربع 1:1, أقصى 300 كيلوبايت.",
+    "paymentMethod": "طريقة الدفع",
+    "chooseFile": "اختر ملف",
+    "save": "حفظ",
+    "cancel": "إلغاء"
+  },
+  "categories": {
+    "title": "الفئات",
+    "description": "إعدادات الفئات, الفئات الفرعية, المنتجات.",
+    "addCategory": "إضافة فئة",
+    "editCategory": "تعديل الفئة",
+    "manage": "تعديل الفئة",
+    "allCategories": "جميع الفئات"
+  },
+  "products": {
+    "title": "المنتجات",
+    "add": "إضافة منتج",
+    "search": "ابحث عن منتجات...",
+    "allCategories": "جميع الفئات"
+  },
+  "subcategories": {
+    "title": "الفئات الفرعية",
+    "add": "إضافة فئة فرعية",
+    "search": "ابحث عن فئات فرعية...",
+    "allSubcategories": "جميع الفئات الفرعية"
   }
 }

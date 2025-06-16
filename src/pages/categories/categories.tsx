@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/outline';
 import { useTranslation } from 'react-i18next';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { ViewListIcon, CollectionIcon } from '@heroicons/react/outline';
+import CategoriesDrawer from './components/CategoriesDrawer';
+import CategoriesNav from './components/CategoriesNav';
+import useLanguage from '../../hooks/useLanguage';
 
 interface Category {
   id: number;
@@ -10,7 +14,6 @@ interface Category {
   description: string;
   image: string;
   createdAt: string;
-  children?: Category[];
 }
 
 interface SubCategory {
@@ -29,86 +32,6 @@ const initialCategories: Category[] = [
     description: 'Devices and gadgets',
     image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
     createdAt: '2024-06-01',
-    children: [
-      {
-        id: 11,
-        name: 'Smartphones',
-        description: 'Mobile phones and smartphones',
-        image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-01',
-        children: [
-          {
-            id: 111,
-            name: 'Android',
-            description: 'Android phones',
-            image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80',
-            createdAt: '2024-06-01',
-            children: [
-              {
-                id: 1111,
-                name: 'Samsung',
-                description: 'Samsung Galaxy Series',
-                image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
-                createdAt: '2024-06-01',
-              },
-              {
-                id: 1112,
-                name: 'Xiaomi',
-                description: 'Xiaomi Phones',
-                image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
-                createdAt: '2024-06-01',
-              },
-            ],
-          },
-          {
-            id: 112,
-            name: 'iPhone',
-            description: 'Apple iPhones',
-            image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
-            createdAt: '2024-06-01',
-            children: [
-              {
-                id: 1121,
-                name: 'iPhone 13',
-                description: 'iPhone 13 Series',
-                image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
-                createdAt: '2024-06-01',
-              },
-              {
-                id: 1122,
-                name: 'iPhone 14',
-                description: 'iPhone 14 Series',
-                image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
-                createdAt: '2024-06-01',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: 12,
-        name: 'Laptops',
-        description: 'Laptops and notebooks',
-        image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-01',
-        children: [
-          {
-            id: 121,
-            name: 'Gaming Laptops',
-            description: 'High performance laptops',
-            image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
-            createdAt: '2024-06-01',
-          },
-          {
-            id: 122,
-            name: 'Ultrabooks',
-            description: 'Slim and light laptops',
-            image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
-            createdAt: '2024-06-01',
-          },
-        ],
-      },
-    ],
   },
   {
     id: 2,
@@ -116,54 +39,6 @@ const initialCategories: Category[] = [
     description: 'Clothes and accessories',
     image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80',
     createdAt: '2024-06-02',
-    children: [
-      {
-        id: 21,
-        name: 'Men',
-        description: 'Men clothing',
-        image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-02',
-        children: [
-          {
-            id: 211,
-            name: 'Suits',
-            description: 'Formal suits',
-            image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80',
-            createdAt: '2024-06-02',
-          },
-          {
-            id: 212,
-            name: 'Casual',
-            description: 'Casual wear',
-            image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80',
-            createdAt: '2024-06-02',
-          },
-        ],
-      },
-      {
-        id: 22,
-        name: 'Women',
-        description: 'Women clothing',
-        image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-02',
-        children: [
-          {
-            id: 221,
-            name: 'Dresses',
-            description: 'Evening and casual dresses',
-            image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-            createdAt: '2024-06-02',
-          },
-          {
-            id: 222,
-            name: 'Hijab',
-            description: 'Hijab fashion',
-            image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-            createdAt: '2024-06-02',
-          },
-        ],
-      },
-    ],
   },
   {
     id: 3,
@@ -171,22 +46,6 @@ const initialCategories: Category[] = [
     description: 'Food and drinks',
     image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80',
     createdAt: '2024-06-03',
-    children: [
-      {
-        id: 31,
-        name: 'Fruits',
-        description: 'Fresh fruits',
-        image: 'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-03',
-      },
-      {
-        id: 32,
-        name: 'Vegetables',
-        description: 'Fresh vegetables',
-        image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-03',
-      },
-    ],
   },
   {
     id: 4,
@@ -194,22 +53,6 @@ const initialCategories: Category[] = [
     description: 'Books and literature',
     image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80',
     createdAt: '2024-06-04',
-    children: [
-      {
-        id: 41,
-        name: 'Novels',
-        description: 'Fiction and novels',
-        image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-04',
-      },
-      {
-        id: 42,
-        name: 'Comics',
-        description: 'Comics and graphic novels',
-        image: 'https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-04',
-      },
-    ],
   },
   {
     id: 5,
@@ -217,22 +60,6 @@ const initialCategories: Category[] = [
     description: 'Toys and games',
     image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
     createdAt: '2024-06-05',
-    children: [
-      {
-        id: 51,
-        name: 'Dolls',
-        description: 'Dolls and plush toys',
-        image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-05',
-      },
-      {
-        id: 52,
-        name: 'Board Games',
-        description: 'Board and family games',
-        image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-05',
-      },
-    ],
   },
   {
     id: 6,
@@ -240,22 +67,6 @@ const initialCategories: Category[] = [
     description: 'Beauty and personal care',
     image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80',
     createdAt: '2024-06-06',
-    children: [
-      {
-        id: 61,
-        name: 'Makeup',
-        description: 'Makeup and cosmetics',
-        image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-06',
-      },
-      {
-        id: 62,
-        name: 'Skincare',
-        description: 'Skincare products',
-        image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-06',
-      },
-    ],
   },
   {
     id: 7,
@@ -263,22 +74,6 @@ const initialCategories: Category[] = [
     description: 'Sports and outdoors',
     image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
     createdAt: '2024-06-07',
-    children: [
-      {
-        id: 71,
-        name: 'Football',
-        description: 'Football and soccer',
-        image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-07',
-      },
-      {
-        id: 72,
-        name: 'Tennis',
-        description: 'Tennis and rackets',
-        image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
-        createdAt: '2024-06-07',
-      },
-    ],
   },
 ];
 
@@ -351,14 +146,19 @@ const subCategoryDescriptions: { [key: number]: { en: string; ar: string } } = {
 };
 
 const CategoriesPage: React.FC = () => {
-  const { t, i18n } = useTranslation();
-  const [breadcrumb, setBreadcrumb] = useState<Category[]>([]);
-  const [currentCategories, setCurrentCategories] = useState<Category[]>(initialCategories);
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRTL = language === 'ARABIC';
+  console.log(isRTL);
+  const { t } = useTranslation();
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', image: '' });
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'name' | 'createdAtAsc' | 'createdAtDesc'>('name');
   const [activeTab, setActiveTab] = useState<'categories' | 'subcategories'>('categories');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [subCategories, setSubCategories] = useState<SubCategory[]>(initialSubCategories);
   const [showSubForm, setShowSubForm] = useState(false);
   const [subForm, setSubForm] = useState({ name: '', description: '', image: '', categoryId: '' });
   const [subSearch, setSubSearch] = useState('');
@@ -368,7 +168,7 @@ const CategoriesPage: React.FC = () => {
     setForm({ name: '', description: '', image: '' });
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -381,8 +181,8 @@ const CategoriesPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentCategories([
-      ...currentCategories,
+    setCategories([
+      ...categories,
       {
         id: Date.now(),
         name: form.name,
@@ -396,7 +196,7 @@ const CategoriesPage: React.FC = () => {
 
   const handleAddSubCategory = () => {
     setShowSubForm(true);
-    setSubForm({ name: '', description: '', image: '', categoryId: '' });
+    setSubForm({ name: '', description: '', image: '', categoryId: selectedCategoryId ? String(selectedCategoryId) : '' });
   };
 
   const handleSubFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -412,40 +212,22 @@ const CategoriesPage: React.FC = () => {
 
   const handleSubSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentCategories(prev => [
-      ...prev,
+    setSubCategories([
+      ...subCategories,
       {
         id: Date.now(),
         name: subForm.name,
         description: subForm.description,
         image: subForm.image || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80',
+        categoryId: Number(subForm.categoryId),
         createdAt: new Date().toISOString().slice(0, 10),
-        children: [],
       },
     ]);
     setShowSubForm(false);
   };
 
-  const handleCategoryClick = (cat: Category) => {
-    setBreadcrumb(prev => [...prev, cat]);
-    setCurrentCategories(cat.children || []);
-  };
-
-  const handleBreadcrumbClick = (idx: number) => {
-    const newBreadcrumb = breadcrumb.slice(0, idx + 1);
-    setBreadcrumb(newBreadcrumb);
-    setCurrentCategories(newBreadcrumb[newBreadcrumb.length - 1].children || []);
-  };
-
-  const handleBackToRoot = () => {
-    setBreadcrumb([]);
-    setCurrentCategories(initialCategories);
-  };
-
-  const isRTL = i18n.language === 'ARABIC';
-
   // Filter and sort categories
-  const filteredCategories = currentCategories
+  const filteredCategories = categories
     .filter(cat => cat.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
       if (sort === 'name') return a.name.localeCompare(b.name);
@@ -455,22 +237,28 @@ const CategoriesPage: React.FC = () => {
     });
 
   // Helper to get subcategory count for selected category
-  const subCount = currentCategories.length;
+  const getSubCount = (catId: number) => subCategories.filter(sub => sub.categoryId === catId).length;
+  // Helper to get product count for selected category (no subcategories)
+  const getProductCount = (catId: number) => {
+    // You may want to import products from a shared state or context
+    // For now, just return 0 or use a placeholder
+    return 0;
+  };
 
   return (
     <div className={`p-4 w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}> 
       {/* Breadcrumb */}
-      <nav className={`flex items-center text-gray-500 text-sm mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}
+      <nav className={`flex items-center text-gray-500 text-sm mb-4 `}
         aria-label="Breadcrumb">
-        <span className="text-primary font-bold cursor-pointer" onClick={handleBackToRoot}>{t('sideBar.dashboard') || 'Dashboard'}</span>
+        <span className="text-primary font-bold">{t('sideBar.dashboard') || 'Dashboard'}</span>
         <ChevronRightIcon className={`h-4 w-4 mx-2 ${isRTL ? 'rotate-180' : ''}`} />
-        <span className="text-gray-700 font-semibold cursor-pointer" onClick={handleBackToRoot}>{t('sideBar.categories') || 'Categories'}</span>
-        {breadcrumb.map((cat, idx) => (
-          <React.Fragment key={cat.id}>
+        <span className="text-gray-700 font-semibold">{t('sideBar.categories') || 'Categories'}</span>
+        {activeTab === 'subcategories' && selectedCategoryId && (
+          <>
             <ChevronRightIcon className={`h-4 w-4 mx-2 ${isRTL ? 'rotate-180' : ''}`} />
-            <span className="text-primary font-semibold cursor-pointer" onClick={() => handleBreadcrumbClick(idx)}>{cat.name}</span>
-          </React.Fragment>
-        ))}
+            <span className="text-primary font-semibold">{categories.find(c => c.id === selectedCategoryId)?.name}</span>
+          </>
+        )}
       </nav>
 
       {/* Tabs + Controls Bar */}
@@ -483,11 +271,12 @@ const CategoriesPage: React.FC = () => {
             `}
             onClick={() => {
               setActiveTab('categories');
+              setSelectedCategoryId(null);
             }}
           >
             <ViewListIcon className="h-5 w-5" />
             <span>{isRTL ? 'الفئات' : 'Categories'}</span>
-            <span className={`${isRTL ? 'mr-2' : 'ml-2'} bg-primary text-white rounded-full px-2 py-0.5 text-xs font-bold`}>{currentCategories.length}</span>
+            <span className={`${isRTL ? 'mr-2' : 'ml-2'} bg-primary text-white rounded-full px-2 py-0.5 text-xs font-bold`}>{categories.length}</span>
           </button>
           <button
             className={`flex items-center gap-2 px-5 py-2 rounded-full font-semibold transition border-2 text-base relative
@@ -497,7 +286,7 @@ const CategoriesPage: React.FC = () => {
           >
             <CollectionIcon className="h-5 w-5" />
             <span>{isRTL ? 'الفئات الفرعية' : 'Subcategories'}</span>
-            <span className={`${isRTL ? 'mr-2' : 'ml-2'} bg-primary text-white rounded-full px-2 py-0.5 text-xs font-bold`}>{subCount}</span>
+            <span className={`${isRTL ? 'mr-2' : 'ml-2'} bg-primary text-white rounded-full px-2 py-0.5 text-xs font-bold`}>{getSubCount(selectedCategoryId || 0)}</span>
           </button>
         </div>
         {/* Centered Search Field */}
@@ -536,22 +325,38 @@ const CategoriesPage: React.FC = () => {
       {/* Categories Grid */}
       {activeTab === 'categories' && (
         <div className=" bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
-          {filteredCategories.map((cat) => (
-            <div
-              key={cat.id}
-              className={`p-4 flex flex-col items-center gap-2 cursor-pointer`}
-              onClick={() => handleCategoryClick(cat)}
-            >
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className="h-40 w-40 object-cover rounded-full"
-              />
-              <h2 className="text-lg font-semibold text-primary">{cat.name}</h2>
-              <p className="text-gray-500 text-sm">{cat.description}</p>
-              <p className="text-xs text-gray-400">{t('Created At') || 'Created At'}: {cat.createdAt}</p>
-            </div>
-          ))}
+          {filteredCategories.map((cat) => {
+            const subCount = getSubCount(cat.id);
+            // You may want to get product count from a shared state
+            const productCount = getProductCount(cat.id);
+            return (
+              <div
+                key={cat.id}
+                className={`p-4 flex flex-col items-center gap-2 cursor-pointer ${selectedCategoryId === cat.id ? 'ring-2 ring-primary' : ''}`}
+                onClick={() => {
+                  if (subCount > 0) {
+                    navigate(`/subcategories?categoryId=${cat.id}`);
+                  } else {
+                    navigate(`/products?categoryId=${cat.id}`);
+                  }
+                }}
+              >
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="h-40 w-40 object-cover rounded-full"
+                />
+                <h2 className="text-lg font-semibold text-primary">{categoryNames[cat.id] ? (isRTL ? categoryNames[cat.id].ar : categoryNames[cat.id].en) : cat.name}</h2>
+                <p className="text-gray-500 text-sm">{categoryDescriptions[cat.id] ? (isRTL ? categoryDescriptions[cat.id].ar : categoryDescriptions[cat.id].en) : cat.description}</p>
+                <p className="text-xs text-gray-400">
+                  {subCount > 0
+                    ? `${subCount} ${isRTL ? 'فئة فرعية' : 'Subcategories'}`
+                    : `${productCount} ${isRTL ? 'منتج' : 'Products'}`}
+                </p>
+                <p className="text-xs text-gray-400">{t('Created At') || 'Created At'}: {cat.createdAt}</p>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -560,13 +365,13 @@ const CategoriesPage: React.FC = () => {
         <>
           <div className={`flex flex-col gap-4 mb-6`}>
             <div className={`flex flex-wrap gap-2 `}>
-              {currentCategories.map(cat => (
+              {categories.map(cat => (
                 <button
                   key={cat.id}
-                  className={`px-4 py-2 rounded-full border font-semibold transition ${cat.children?.length ? 'bg-primary text-white border-primary' : 'bg-white text-primary border-primary/30'}`}
-                  onClick={() => setCurrentCategories(cat.children || [])}
+                  className={`px-4 py-2 rounded-full border font-semibold transition ${selectedCategoryId === cat.id ? 'bg-primary text-white border-primary' : 'bg-white text-primary border-primary/30'}`}
+                  onClick={() => setSelectedCategoryId(cat.id)}
                 >
-                  {cat.name}
+                  {categoryNames[cat.id] ? (isRTL ? categoryNames[cat.id].ar : categoryNames[cat.id].en) : cat.name}
                 </button>
               ))}
             </div>
@@ -574,10 +379,33 @@ const CategoriesPage: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-primary">{isRTL ? 'كل الفئات الفرعية' : 'All Subcategories'}</h2>
+              {selectedCategoryId ? (
+                <h2 className="text-xl font-bold text-primary">{selectedCategoryId ? (isRTL ? 'الفئات الفرعية لـ' : 'Subcategories for') + ' ' + (categoryNames[selectedCategoryId] ? (isRTL ? categoryNames[selectedCategoryId].ar : categoryNames[selectedCategoryId].en) : categories.find(c => c.id === selectedCategoryId)?.name) : (isRTL ? 'كل الفئات الفرعية' : 'All Subcategories')}</h2>
+              ) : (
+                <h2 className="text-xl font-bold text-primary">{isRTL ? 'كل الفئات الفرعية' : 'All Subcategories'}</h2>
+              )}
             </div>
             <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
-              {(currentCategories.length === 0) && (
+              {(selectedCategoryId
+                ? subCategories.filter(sub => sub.categoryId === selectedCategoryId && (sub.name.toLowerCase().includes(subSearch.toLowerCase()) || sub.description.toLowerCase().includes(subSearch.toLowerCase())))
+                : subCategories.filter(sub => sub.name.toLowerCase().includes(subSearch.toLowerCase()) || sub.description.toLowerCase().includes(subSearch.toLowerCase()))
+              ).sort((a, b) => {
+                if (sort === 'name') return a.name.localeCompare(b.name);
+                if (sort === 'createdAtAsc') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                if (sort === 'createdAtDesc') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                return 0;
+              }).map(sub => (
+                <div key={sub.id} className=" p-4 flex flex-col items-center gap-2 ">
+                  <img src={sub.image} alt={sub.name} className="h-40 w-40 object-cover rounded-full" />
+                  <h3 className="text-lg font-semibold text-primary">{subCategoryNames[sub.id] ? (isRTL ? subCategoryNames[sub.id].ar : subCategoryNames[sub.id].en) : sub.name}</h3>
+                  <p className="text-gray-500 text-sm">{subCategoryDescriptions[sub.id] ? (isRTL ? subCategoryDescriptions[sub.id].ar : subCategoryDescriptions[sub.id].en) : sub.description}</p>
+                  <p className="text-xs text-gray-400">{t('Created At') || 'Created At'}: {sub.createdAt}</p>
+                </div>
+              ))}
+              {((selectedCategoryId
+                ? subCategories.filter(sub => sub.categoryId === selectedCategoryId && (sub.name.toLowerCase().includes(subSearch.toLowerCase()) || sub.description.toLowerCase().includes(subSearch.toLowerCase())))
+                : subCategories.filter(sub => sub.name.toLowerCase().includes(subSearch.toLowerCase()) || sub.description.toLowerCase().includes(subSearch.toLowerCase()))
+              ).length === 0) && (
                 <div className="col-span-full text-center text-gray-400 py-8">{isRTL ? 'لا يوجد فئات فرعية' : 'No subcategories found.'}</div>
               )}
             </div>
@@ -585,121 +413,19 @@ const CategoriesPage: React.FC = () => {
         </>
       )}
 
-      {/* Add Category Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <form
-            onSubmit={handleSubmit}
-            className={`bg-white rounded-2xl p-6 w-full max-w-md shadow-lg flex flex-col gap-4 ${isRTL ? 'text-right' : 'text-left'}`}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          >
-            <h2 className="text-xl font-bold text-primary mb-2">{t('Add Category') || 'Add Category'}</h2>
-            <input
-              name="name"
-              type="text"
-              placeholder={t('Category Name') || 'Category Name'}
-              value={form.name}
-              onChange={handleFormChange}
-              className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <textarea
-              name="description"
-              placeholder={t('Description') || 'Description'}
-              value={form.description}
-              onChange={handleFormChange}
-              className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <input
-              name="image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="border rounded-lg px-3 py-2"
-            />
-            <div className="flex gap-2 mt-2">
-              <button
-                type="submit"
-                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex-1"
-              >
-                {t('Save') || 'Save'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition flex-1"
-              >
-                {t('Cancel') || 'Cancel'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Add Subcategory Form Modal */}
-      {showSubForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <form
-            onSubmit={handleSubSubmit}
-            className={`bg-white rounded-xl p-6 w-full max-w-md shadow-lg flex flex-col gap-4 ${isRTL ? 'text-right' : 'text-left'}`}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          >
-            <h2 className="text-xl font-bold text-primary mb-2">{isRTL ? 'إضافة فئة فرعية' : 'Add Subcategory'}</h2>
-            <select
-              name="categoryId"
-              value={subForm.categoryId}
-              onChange={handleSubFormChange}
-              className="border rounded-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            >
-              <option value="">{isRTL ? 'اختر الفئة الرئيسية' : 'Select Category'}</option>
-              {currentCategories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-            <input
-              name="name"
-              type="text"
-              placeholder={isRTL ? 'اسم الفئة الفرعية' : 'Subcategory Name'}
-              value={subForm.name}
-              onChange={handleSubFormChange}
-              className="border rounded-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <textarea
-              name="description"
-              placeholder={isRTL ? 'الوصف' : 'Description'}
-              value={subForm.description}
-              onChange={handleSubFormChange}
-              className="border rounded-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <input
-              name="image"
-              type="file"
-              accept="image/*"
-              onChange={handleSubImageChange}
-              className="border rounded-full px-3 py-2"
-            />
-            <div className="flex gap-2 mt-2">
-              <button
-                type="submit"
-                className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition flex-1"
-              >
-                {isRTL ? 'حفظ' : 'Save'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowSubForm(false)}
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-300 transition flex-1"
-              >
-                {isRTL ? 'إلغاء' : 'Cancel'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      {/* Add Category Form Drawer */}
+      <CategoriesDrawer
+        open={showForm || showSubForm}
+        onClose={() => { setShowForm(false); setShowSubForm(false); }}
+        isRTL={isRTL}
+        title={activeTab === 'categories' ? (isRTL ? 'إضافة فئة' : 'Add Category') : (isRTL ? 'إضافة فئة فرعية' : 'Add Subcategory')}
+        form={activeTab === 'categories' ? form : subForm}
+        onFormChange={activeTab === 'categories' ? handleFormChange : handleSubFormChange}
+        onImageChange={activeTab === 'categories' ? handleImageChange : handleSubImageChange}
+        onSubmit={activeTab === 'categories' ? handleSubmit : handleSubSubmit}
+        isSubcategory={activeTab === 'subcategories'}
+        categories={categories.map(c => ({ id: c.id, name: c.name }))}
+      />
     </div>
   );
 };

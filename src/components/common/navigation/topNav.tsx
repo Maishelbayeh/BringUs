@@ -23,46 +23,49 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
   const { t } = useTranslation();
 
   return (
-    <header className={`w-full h-20 bg-white px-6 py-4 flex items-center justify-between ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}>
-      <div className={`flex flex-row items-center gap-4 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}>
+    <header className={`w-full bg-white px-2 sm:px-4 py-2 sm:py-4`}> 
+      <div className={`flex w-full items-center justify-between gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
+      <div className={`flex  items-center  gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
+
         <button
           onClick={onMenuToggle}
-          className="text-gray-800 hover:text-gray-500 focus:outline-none"
+          className="text-gray-800 hover:text-gray-500 focus:outline-none text-primary"
         >
           <MenuIcon className="h-6 w-6" />
         </button>
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
           <img src={logo} alt="logo" className="h-7 w-7" />
           <span className="text-xl font-bold text-primary tracking-wide">bring us</span>
         </div>
       </div>
-     
-      <div className={`flex items-center gap-6 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}>
-        <div className="flex items-center gap-2">
-          <span className="text-gray-800 font-semibold">{t('general.language')}:</span>
-          <span className="bg-gray-100 flex flex-row font-semibold rounded-md text-sm gap-2 px-2 py-1">
-            {language}
-            <button
-              onClick={onLanguageToggle}
-              className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors duration-300"
-            >
-              <ArrowCircleDownIcon className="h-5 w-5" />
-            </button>
-          </span>
-        </div>
-        
-        <div className="flex items-center gap-2 text-gray-800">
-          <img
-            src="public/user.jpg"
-            alt="User"
-            className="mx-auto h-10 w-10 rounded-full border-2 border-gray-300"
-          />
-          <div className="flex flex-col">
-            <span className="font-medium">{userName}</span>
-            <span className="text-sm text-gray-500">{t('general.lastSignIn')}</span>
+        {/* Language icon only on mobile, full switcher on desktop */}
+
+        <div className={`flex items-center gap-4 justify-center flex-row ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}>
+          
+          <button
+            onClick={onLanguageToggle}
+            className="flex items-center text-gray-700 hover:text-primary transition-colors duration-300"
+          >
+            <ArrowCircleDownIcon className="h-6 w-6 sm:hidden" />
+            <div className="flex flex-row bg-gray-100  font-semibold rounded-md text-sm gap-2 px-2 py-1">
+            <span className="hidden sm:inline ">
+              {t('general.language')}: {language}
+            
+            </span>
+            <ArrowCircleDownIcon className="h-5 w-5 text-primary hover:text-primary-light 
+            text-align-center" />
+            </div>
+          </button>
+          {/* User avatar and name, smaller on mobile, no last login */}
+          <div className="flex items-center gap-2 text-gray-800 ">
+            <img
+              src="public/user.jpg"
+              alt="User"
+              className="mx-auto rounded-full border-2 border-gray-300 h-8 w-8 sm:h-10 sm:w-10"
+            />
+            <span className="font-medium text-sm sm:text-base">{userName}</span>
           </div>
         </div>
-    
       </div>
     </header>
   );

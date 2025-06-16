@@ -1,9 +1,11 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Homepage from "../pages/HomePage/homepage";
-import PaymentMethods from "../pages/pageSettings/PaymentMethods";
+import PaymentMethods from "../pages/payment/PaymentMethods";
 import DeliveryMethods from "../pages/delivery/DlieveryMethods";
-import CategoriesPage from '../pages/categories';
+import CategoriesPage from '../pages/categories/categories';
+import SubcategoriesPage from "../pages/subcategories/subcategories";
+import ProductsPage from "../pages/products/products";
 
 export default function Routers() {
   return (
@@ -15,6 +17,8 @@ export default function Routers() {
       <Route path="/payment-methods" element={<PaymentMethods />} />
       <Route path="/delivery-settings" element={<DeliveryMethods />} />
       <Route path="/categories" element={<CategoriesPage />} />
+      <Route path="/subcategories" element={<SubcategoriesPage />} />
+      <Route path="/products" element={<ProductsPage />} />
     </Routes>
   );
 }

@@ -25,7 +25,7 @@ export interface LogInFormValues {
     id: number;
     title: string;
     icon?: React.ElementType;
-    path: string;
+    path?: string;
     children?: MenuItem[];
   }
 
@@ -34,19 +34,25 @@ export interface LogInFormValues {
     title: string;
     logoUrl?: string;
     isDefault: boolean;
+    titleAr?: string;
+    titleEn?: string;
   }
 
 // src/Types.ts
 export interface DeliveryArea {
   id: number;
-  location: string;
+  location?: string;
+  locationAr?: string;
+  locationEn?: string;
   price: number;
   whatsappNumber: string;
 }
 
 export interface DelieveryMethod {
   id: number;
-  location: string;
+  location?: string;
+  locationAr?: string;
+  locationEn?: string;
   price: number;
   whatsappNumber: string;
 }

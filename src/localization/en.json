@@ -70,5 +70,69 @@
   "paymentCard": {
     "setAsDefault": "Set as default",
     "default": "Default"
+  },
+  "deliveryDetails": {
+    "title": "Delivery Details",
+    "description": "Configure your delivery areas, fees and WhatsApp contact.",
+    "addNewDeliveryArea": "Add New Delivery Area",
+    "editDeliveryArea": "Edit Delivery Area",
+    "manage": "Edit Area",
+    "locationAr": "Location (Arabic)",
+    "locationEn": "Location (English)",
+    "price": "Price (ILS)",
+    "whatsappNumber": "WhatsApp Number",
+    "cancel": "Cancel",
+    "updateArea": "Update Area",
+    "createArea": "Create Area",
+    "locationArPlaceholder": "e.g. الضفة الغربية",
+    "locationEnPlaceholder": "e.g. West Bank",
+    "pricePlaceholder": "e.g. 20",
+    "whatsappNumberPlaceholder": "e.g. +972501234567"
+  },
+  "paymentMethods": {
+    "title": "Payment Methods",
+    "description": "Configure your payment methods, fees and WhatsApp contact.",
+    "addPaymentMethod": "Add Payment Method",
+    "editPaymentMethod": "Edit Payment Method",
+    "manage": "Edit Method",
+    "cashOnDelivery": "Cash on Delivery",
+    "cashOnDeliveryDescription": "Cash on Delivery",
+    "cashOnDeliveryLogo": "Cash on Delivery",
+    "edit": "Edit",
+    "delete": "Delete",
+    "setDefault": "Set as Default",
+    "default": "Default",
+    "qrPicture": "Picture",
+    "qrPictureDescription": "Picture",
+    "qrPictureDescription2": "Use pictures 500×500 px, 1:1 square, max 300 KB.",
+    "paymentMethod": "Payment Method",
+    "chooseFile": "Choose File",
+    "save": "Save",
+    "cancel": "Cancel"
+
+
+    },
+  "categories": {
+    "title": "Categories",
+    "description": "Configure categories, subcategories and products.",
+    "addCategory": "Add Category",
+    "editCategory": "Edit Category",
+    "manage": "Edit Category",
+    "allCategories": "All Categories",
+    "allSubcategories": "All Subcategories"
+  },
+  "products": {
+    "title": "Products",
+    "add": "Add Product",
+    "search": "Search products...",
+    "allCategories": "All Categories",
+    "allSubcategories": "All Subcategories"
+    },
+  "subcategories": {
+    "title": "Subcategories",
+    "add": "Add Subcategory",
+    "search": "Search subcategories...",
+    "allSubcategories": "All Subcategories",
+    "allCategories": "All Categories"
   }
 }
