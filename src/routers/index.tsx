@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Routes, Route } from "react-router-dom";
 import Homepage from "../pages/HomePage/homepage";
 import PaymentMethods from "../pages/payment/PaymentMethods";
@@ -7,6 +7,7 @@ import CategoriesPage from '../pages/categories/categories';
 import SubcategoriesPage from "../pages/subcategories/subcategories";
 import ProductsPage from "../pages/products/products";
 import ProductVariants from "../pages/productVariant/PaymentVariants";
+import CustomersPage from "../pages/customers/customers";
 
 export default function Routers() {
   return (
@@ -21,6 +22,7 @@ export default function Routers() {
       <Route path="/subcategories" element={<SubcategoriesPage />} />
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/product-variants" element={<ProductVariants />} />  
+      <Route path="/customers" element={<CustomersPage />} />
     </Routes>
   );
 }

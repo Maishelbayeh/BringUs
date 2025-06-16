@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ArrowCircleDownIcon } from '@heroicons/react/outline';
 import { MenuIcon } from '@heroicons/react/outline';
-import { CubeIcon } from '@heroicons/react/solid';
+
 import logo from '../../../assets/bringus.svg';
 type TopNavbarProps = {
   userName: string;
@@ -15,7 +15,6 @@ type TopNavbarProps = {
 
 const TopNavbar: React.FC<TopNavbarProps> = ({
   userName,
-  userPosition,
   language,
   onLanguageToggle,
   onMenuToggle,
