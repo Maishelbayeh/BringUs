@@ -31,6 +31,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
           onClick={onMenuToggle}
           className="text-gray-800 hover:text-gray-500 focus:outline-none text-primary"
         >
+
+
           <MenuIcon className="h-6 w-6" />
         </button>
         <div className={`flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 

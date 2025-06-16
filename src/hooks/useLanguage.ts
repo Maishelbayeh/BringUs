@@ -13,7 +13,7 @@ const useLanguage = () => {
       i18n.off('languageChanged', handleLangChange);
     };
   }, []);
-
+  
   const toggleLanguage = () => {
     const newLanguage = language === 'ENGLISH' ? 'ARABIC' : 'ENGLISH';
     i18n.changeLanguage(newLanguage);
