@@ -4,6 +4,12 @@ import { useTranslation } from 'react-i18next';
 import ProductsNav from './ProductsNav';
 import ProductsDrawer from './ProductsDrawer';
 
+// Add ColorVariant type for form
+interface ColorVariant {
+  id: string;
+  colors: string[];
+}
+
 const initialCategories = [
   { id: 1, name: 'Electronics' },
   { id: 2, name: 'Fashion' },
@@ -29,12 +35,52 @@ const initialProducts: any[] = [
   { id: 6, name: 'General Product', categoryId: 5, subcategoryId: '', image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80', description: 'A general product' },
 ];
 
+const initialForm: {
+  name: string;
+  categoryId: string;
+  subcategoryId: string;
+  visibility: string;
+  unit: string;
+  price: string;
+  originalPrice: string;
+  wholesalePrice: string;
+  productLabel: string;
+  productOrder: string;
+  maintainStock: string;
+  availableQuantity: string;
+  description: string;
+  parcode: string;
+  productSpecifications: string[];
+  colors: ColorVariant[];
+  images: string[];
+  productVideo: string;
+} = {
+  name: '',
+  categoryId: '',
+  subcategoryId: '',
+  visibility: 'Y',
+  unit: '',
+  price: '',
+  originalPrice: '',
+  wholesalePrice: '',
+  productLabel: '',
+  productOrder: '',
+  maintainStock: 'Y',
+  availableQuantity: '',
+  description: '',
+  parcode: '',
+  productSpecifications: [],
+  colors: [],
+  images: [],
+  productVideo: '',
+};
+
 const ProductsPage: React.FC = () => {
   const [categories] = useState(initialCategories);
   const [subcategories] = useState(initialSubcategories);
   const [products, setProducts] = useState<any[]>(initialProducts);
   const [showDrawer, setShowDrawer] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', image: '', categoryId: '', subcategoryId: '' });
+  const [form, setForm] = useState(initialForm);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
   const [search, setSearch] = useState('');
@@ -59,10 +105,14 @@ const ProductsPage: React.FC = () => {
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setForm({ ...form, image: URL.createObjectURL(e.target.files[0]) });
+  const handleImageChange = (files: File | File[] | null) => {
+    if (!files) {
+      setForm({ ...form, images: [] });
+      return;
     }
+    const fileArray = Array.isArray(files) ? files : [files];
+    const imageUrls = fileArray.map(file => URL.createObjectURL(file));
+    setForm({ ...form, images: imageUrls });
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
