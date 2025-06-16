@@ -65,6 +65,14 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.products',
     icon: TemplateIcon,
     path: '/products',
+    children: [
+      {
+        id: 31,
+        title: 'sideBar.productVariants',
+        icon: CollectionIcon,
+        path: '/product-variants',
+      }
+    ]
   },
   {
     id: 4,

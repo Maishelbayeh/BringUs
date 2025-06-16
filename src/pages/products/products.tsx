@@ -74,10 +74,10 @@ const ProductsPage: React.FC = () => {
     <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
       <ProductsNav
         isRTL={isRTL}
+        t={t}
         onAdd={() => setShowDrawer(true)}
         search={search}
         setSearch={setSearch}
-        t={t}
         categories={categories}
         subcategories={subcategories}
         selectedCategoryId={selectedCategoryId}
@@ -110,6 +110,8 @@ const ProductsPage: React.FC = () => {
         onFormChange={handleFormChange}
         onImageChange={handleImageChange}
         onSubmit={handleSubmit}
+        categories={categories}
+        subcategories={subcategories}
       />
     </div>
   );
