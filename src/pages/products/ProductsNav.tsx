@@ -24,13 +24,11 @@ const ProductsNav: React.FC<ProductsNavProps> = ({ isRTL, onAdd, search, setSear
         value={selectedCategoryId}
         onChange={e => setSelectedCategoryId(e.target.value)}
         options={[{ value: '', label: t('products.allCategories') }, ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))]}
-        isRTL={isRTL}
       />
       <CustomSelect
         value={selectedSubcategoryId}
         onChange={e => setSelectedSubcategoryId(e.target.value)}
         options={[{ value: '', label: t('products.allSubcategories') }, ...subcategories.map(sub => ({ value: String(sub.id), label: sub.name }))]}
-        isRTL={isRTL}
       />
     </div>
     <div className="flex-1 flex justify-end">
@@ -40,7 +38,6 @@ const ProductsNav: React.FC<ProductsNavProps> = ({ isRTL, onAdd, search, setSear
         value={search}
         onChange={e => setSearch(e.target.value)}
         className="rounded-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-64"
-        style={isRTL ? { direction: 'rtl' } : {}}
       />
     </div>
     <CustomButton text={t('products.add')} color="primary" textColor="white" onClick={onAdd} />

@@ -82,7 +82,7 @@ const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language, is
         </div>
       </div>
 
-      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+      {/* <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <div className="flex justify-end space-x-3">
           <CustomButton
             color="white"
@@ -97,7 +97,7 @@ const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language, is
             type="submit"
           />
         </div>
-      </div>
+      </div> */}
     </Box>
   );
 };

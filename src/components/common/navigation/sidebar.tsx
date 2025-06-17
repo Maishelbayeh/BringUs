@@ -54,10 +54,11 @@ const Sidebar: React.FC<SidebarProps> = ({
     setExpandedRegion(prev => (prev === id ? null : id));
 
 
+
   return (
     <aside
       className={`
-        h-screen ${isOpen ? 'w-80' : 'w-20'} p-4 bg-primary-light flex flex-col transition-all duration-300 ease-in-out
+       w-80 max-w-xs p-4 bg-primary-light flex flex-col transition-all duration-300 ease-in-out
         ${isOpen ? (isRTL ? 'translate-x-0' : 'translate-x-0') : isRTL ? 'translate-x-full' : '-translate-x-full'}
         overflow-y-auto custom-scrollbar-hide
         ${isRTL ? 'items-end' : 'items-start'}

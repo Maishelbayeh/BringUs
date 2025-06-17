@@ -10,6 +10,9 @@ import CustomersPage from "../pages/customers/customers";
 import OrdersPage from "../pages/orders/orders";
 import StockTable from '../pages/stockPreview/StockTable';
 
+import StoreSliderPage from "../pages/StoreSlider/storeSlider";
+import StorePreview from "../pages/StoreSlider/StorePreview";
+import StoreVideoPage from "../pages/StoreSlider/StoreVideo";
 export default function Routers() {
   return (
     <Routes>
@@ -26,6 +29,9 @@ export default function Routers() {
       <Route path="/customers" element={<CustomersPage />} />
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/stock-preview" element={<StockTable />} />
+      <Route path="/store-slider" element={<StoreSliderPage />} />
+      <Route path="/store-preview" element={<StorePreview />} />
+      <Route path="/store-videos" element={<StoreVideoPage />} />
     </Routes>
   );
 }
