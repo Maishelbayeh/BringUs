@@ -10,7 +10,6 @@ import CustomersPage from "../pages/customers/customers";
 import OrdersPage from "../pages/orders/orders";
 import StockTable from '../pages/stockPreview/StockTable';
 
-import OrdersPage from "../pages/orders";
 import StoreSliderPage from "../pages/StoreSlider/storeSlider";
 import StorePreview from "../pages/StoreSlider/StorePreview";
 import StoreVideoPage from "../pages/StoreSlider/StoreVideo";
