@@ -142,5 +142,33 @@
     "orderUnpaid": "غير مدفوع",
     "orderDelivered": "تم التوصيل",
     "orderInProgress": "قيد التنفيذ"
+  },
+  "productVariant": {
+    "title": "إعدادات المنتجات",
+    "description": "إعدادات المنتجات, المنتجات المتعددة الألوان, المنتجات المتعددة الأحجام.",
+    "addProductVariant": "إضافة منتج متعدد الألوان",
+    "editProductVariant": "تعديل منتج متعدد الألوان",
+    "manage": "تعديل المنتج",
+    "product": "المنتج",
+    "price": "السعر",
+    "quantity": "الكمية",
+    "color": "اللون",
+    "size": "الحجم",
+    "add": "إضافة",
+    "name": "الاسم",
+    "selectProduct": "اختر المنتج"
+  },
+  "common": {
+    "search": "ابحث",
+    "add": "إضافة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "emptyState": "لا يوجد منتجات",
+    "ACTIONS": "العمليات",
+    "showing": "إظهار",
+    "of": "من",
+    "results": "نتيجة"
   }
-}
+} 

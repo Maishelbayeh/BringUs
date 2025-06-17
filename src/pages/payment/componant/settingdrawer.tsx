@@ -6,6 +6,7 @@ import PaymentForm from './paymentForm';
 import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
 import PaymentIcon from '@mui/icons-material/Payment';
+import CustomButton from '@/components/common/CustomButton';
 
 interface Props {
   open: boolean;
@@ -24,16 +25,24 @@ const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave, languag
       anchor={language === 'ARABIC' ? 'right' : 'left'}
       open={open}
       onClose={onClose}
-      PaperProps={{ sx: { width: { xs: '100%', sm: 400 }, borderRadius: 0, p: 3 } }}
+      PaperProps={{ 
+        sx: { 
+          width: { xs: '100%', sm: 400 }, 
+          borderRadius: 0,
+          p: 0,
+          display: 'flex',
+          flexDirection: 'column'
+        } 
+      }}
     >
-       <Box
+      <Box
         className='border-b-2 border-primary'
         sx={{
           display: 'flex',
           flexDirection: language === 'ARABIC' ? 'row-reverse' : 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: 4,
+          p: 3,
           pb: 2,
         }}
       >
@@ -41,7 +50,6 @@ const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave, languag
           className='text-primary'
           variant="h5"
           sx={{
-            mb: 3,
             fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
@@ -49,7 +57,6 @@ const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave, languag
             textAlign: language === 'ARABIC' ? 'right' : 'left',
           }}
         >
-         
           {isEditMode ? t('paymentMethods.editPaymentMethod') : t('paymentMethods.addPaymentMethod')}
           <PaymentIcon fontSize="large" />
         </Typography>
@@ -60,7 +67,27 @@ const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave, languag
           <CloseIcon />
         </IconButton>
       </Box>
-      <PaymentForm method={method} onSubmit={onSave} onCancel={onClose} language={language} isEditMode={isEditMode} />
+
+      <div className="flex-1 overflow-y-auto p-6">
+        <PaymentForm method={method} onSubmit={onSave} onCancel={onClose} language={language} isEditMode={isEditMode} />
+      </div>
+
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+        <div className="flex justify-end space-x-3">
+          <CustomButton
+            color="white"
+            textColor="primary"
+            text={t("paymentMethods.cancel")}
+            action={onClose}
+          />
+          <CustomButton
+            color="primary"
+            textColor="white"
+            text={isEditMode ? t("paymentMethods.edit") : t("paymentMethods.save")}
+            action={() => onSave(method!)}
+          />
+        </div>
+      </div>
     </Drawer>
   );
 };

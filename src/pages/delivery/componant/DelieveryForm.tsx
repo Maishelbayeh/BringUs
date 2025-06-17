@@ -120,19 +120,7 @@ const DeliveryAreaForm: React.FC<Props> = ({ area, onSubmit, onCancel, language 
           }}
         >
          
-          <CustomButton
-            color="primary"
-            textColor="white"
-            text={area ? t("deliveryDetails.updateArea") : t("deliveryDetails.createArea")}
-            action={() => {}}
-            type="submit"
-          />
-           <CustomButton
-            color="white"
-            textColor="primary"
-            text={t("deliveryDetails.cancel")}
-            action={onCancel}
-          />
+        
         </Box>
       </Box>
     // </Paper>
