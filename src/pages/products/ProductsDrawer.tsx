@@ -145,7 +145,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
             value={form.categoryId}
             onChange={(e) => handleSelectChange('categoryId', e.target.value)}
             options={[{ value: '', label: isRTL ? 'اختر الفئة' : 'Select Category' }, ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))]}
-            isRTL={isRTL}
+            
           />
           <div style={{ display: form.categoryId ? undefined : 'none' }}>
             <CustomSelect
@@ -153,7 +153,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               value={form.subcategoryId}
               onChange={(e) => handleSelectChange('subcategoryId', e.target.value)}
               options={[{ value: '', label: isRTL ? 'اختر الفئة الفرعية (اختياري)' : 'Select Subcategory (optional)' }, ...subcategories.map(sub => ({ value: String(sub.id), label: sub.name }))]}
-              isRTL={isRTL}
+              
             />
           </div>
           <CustomSwitch
@@ -167,7 +167,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
             value={form.unit}
             onChange={(e) => handleSelectChange('unit', e.target.value)}
             options={[{ value: '', label: isRTL ? 'اختر وحدة' : 'Select Unit' }, ...unitOptions]}
-            isRTL={isRTL}
+            
           />
           <CustomInput
             label={isRTL ? 'السعر' : 'Price'}
@@ -250,7 +250,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               value={form.productSpecifications || []}
               options={specOptions}
               onChange={handleShuttleChange}
-              isRTL={isRTL}
+              
             />
           </div>
           <div className="col-span-full">
@@ -259,7 +259,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               name="colors"
               value={form.colors || []}
               onChange={handleColorChange}
-              isRTL={isRTL}
+              
             />
           </div>
           <div className="col-span-full">

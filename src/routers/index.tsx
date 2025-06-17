@@ -8,6 +8,7 @@ import SubcategoriesPage from "../pages/subcategories/subcategories";
 import ProductsPage from "../pages/products/products";
 import ProductVariants from "../pages/productVariant/PaymentVariants";
 import CustomersPage from "../pages/customers/customers";
+import OrdersPage from "../pages/orders";
 
 export default function Routers() {
   return (
@@ -23,6 +24,7 @@ export default function Routers() {
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/product-variants" element={<ProductVariants />} />  
       <Route path="/customers" element={<CustomersPage />} />
+      <Route path="/orders" element={<OrdersPage />} />
     </Routes>
   );
 }

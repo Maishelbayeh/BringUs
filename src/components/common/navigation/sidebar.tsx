@@ -99,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   }
                 }}
                 ref={el => (menuItemRefs.current[idx] = el)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-full transition-colors duration-200
+                className={`flex w-full items-center gap-3 px-4 py-3 rounded-full transition-colors duration-200
                   ${isActive ? 'bg-primary text-white shadow-md' : 'text-black hover:bg-primary/10'}
                   font-medium text-base flex-row ${isRTL ? 'text-right' : 'text-left'}`}
                 style={{ justifyContent: isRTL ? 'flex-end' : 'flex-start' }}

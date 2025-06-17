@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useLanguage from '../../hooks/useLanguage';
-import { customersData, ordersData } from './mockCustomers';
+import { customersData, ordersData } from '../../api/mockCustomers';
 import * as XLSX from 'xlsx';
 
 type Customer = {
@@ -124,7 +124,7 @@ const CustomersPage: React.FC = () => {
       </div>
       {/* شبكة العملاء */}
      
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
         {filteredCustomers.map((customer) => {
        
           return (
