@@ -53,10 +53,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const toggleRegion = (id: number) =>
     setExpandedRegion(prev => (prev === id ? null : id));
 
-  const getButtonClass = (isActive: boolean) =>
-    `flex items-center justify-between w-full text-left px-6 py-3 rounded-lg ${
-      isActive ? 'bg-blue-500 text-white' : 'text-gray-800 hover:bg-gray-100'
-    }`;
 
   return (
     <aside
@@ -130,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               {/* Submenu */}
               {isOpen && hasChildren && isExpanded && (
                 <div className="ml-8 mt-1 flex flex-col gap-1">
-                  {item.children?.map((child, cidx) => {
+                  {item.children?.map((child) => {
                     const ChildIcon = child.icon;
                     const isChildActive = child.path === currentPath;
                     return (

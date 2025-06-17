@@ -51,7 +51,7 @@ const PaymentVariants: React.FC = () => {
       key: 'id',
       label: {
         en: 'ID',
-        ar: 'المعرف'
+        ar: 'رقم المنتج'
       },
       type: 'number',
       align: 'center'
@@ -125,15 +125,15 @@ const PaymentVariants: React.FC = () => {
   return (
     <div className="p-6 w-full">
       {/* Breadcrumb */}
-      <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
+      <nav className={`flex items-center text-gray-500 text-sm mb-4 ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`} aria-label="Breadcrumb">
         {breadcrumb.map((item, idx) => (
           <React.Fragment key={item.id}>
             <span className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`} onClick={() => navigate(item.path)}>{item.name}</span>
-            {idx < breadcrumb.length - 1 && <ChevronRightIcon className={`h-4 w-4 mx-2 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />}
+            {idx < breadcrumb.length - 1 && <ChevronRightIcon className={`h-4 w-4 mx-2 ${i18n.language === 'ARABIC' ? 'rotate-180' : ''}`} />}
           </React.Fragment>
         ))}
       </nav>
-      <div className="flex justify-between items-center mb-6">
+      <div className={`flex justify-between items-center mb-6 ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
         <h1 className="text-2xl font-semibold text-gray-900">
           {t('productVariant.title')}
         </h1>
@@ -165,7 +165,7 @@ const PaymentVariants: React.FC = () => {
           { id: 1, name: { en: 'Product 1', ar: 'المنتج 1' } },
           { id: 2, name: { en: 'Product 2', ar: 'المنتج 2' } }
         ]}
-            isRTL={i18n.language === 'ar'}
+                isRTL={i18n.language === 'ARABIC'}
       />
     </div>
   );

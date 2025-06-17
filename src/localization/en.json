@@ -179,7 +179,29 @@
     "ACTIONS": "Actions",
     "showing": "Showing",
     "of": "of",
-    "results": "results"
+    "results": "results",
+    "filter": "Filter",
+    "from": "From",
+    "to": "To",
+    "all": "All",
+    "clearSort": "Clear Sort",
+    "close": "Close",
+    "apply": "Apply",
+    "clear": "Clear"
+  },
+  "orders": {
+    "title": "Orders",
+    "total": "Total",
+    "currency": "Currency",
+    "date": "Order Date",
+    "customer": "Customer",
+    "deliveryArea": "Delivery Area",
+    "affiliate": "Affiliate",
+    "status": "Status",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "delivered": "Delivered",
+    "inProgress": "In Progress"
   }
 
 }

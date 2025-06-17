@@ -140,6 +140,7 @@ export const getMenuAsText = (): MenuItem[] => [
     icon: CreditCardIcon,
     path: '/payment-methods',
   },
+ 
 ];
 
 export class MenuModel {
