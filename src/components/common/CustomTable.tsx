@@ -44,12 +44,12 @@ const CustomTable: React.FC<CustomTableProps> = ({
     return matchesSearch && matchesFilters;
   });
 
-  const handleFilterChange = (columnKey: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [columnKey]: value
-    }));
-  };
+  // const handleFilterChange = (columnKey: string, value: string) => {
+  //   setFilters(prev => ({
+  //     ...prev,
+  //     [columnKey]: value
+  //   }));
+  // };
 
   return (
     <div className="w-full">
@@ -67,7 +67,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
             <SearchIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
           </div>
         </div>
-        <div className="flex gap-2">
+        {/* <div className="flex gap-2">
           {columns.map(column => (
             <div key={column.key} className="relative">
               <input
@@ -80,7 +80,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
               <FilterIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
 
       {/* Table */}
@@ -99,7 +99,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
               ))}
               {(onEdit || onDelete) && (
                 <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('common.actions')}
+                  {t('common.ACTIONS')}
                 </th>
               )}
             </tr>

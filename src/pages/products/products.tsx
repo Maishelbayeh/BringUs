@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductsNav from './ProductsNav';
 import ProductsDrawer from './ProductsDrawer';
+import { ChevronRightIcon } from '@heroicons/react/solid';
 
 // Add ColorVariant type for form
 interface ColorVariant {
@@ -91,6 +92,11 @@ const ProductsPage: React.FC = () => {
   const categoryIdParam = params.get('categoryId');
   const subcategoryIdParam = params.get('subcategoryId');
 
+  const breadcrumb = [
+    { name: t('sideBar.dashboard') || 'Dashboard', id: null },
+    { name: t('products.title') || 'Products', id: 1 }
+  ];
+
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);
     if (subcategoryIdParam) setSelectedSubcategoryId(subcategoryIdParam);
@@ -122,6 +128,15 @@ const ProductsPage: React.FC = () => {
 
   return (
     <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Breadcrumb */}
+      <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
+        {breadcrumb.map((item, idx) => (
+          <React.Fragment key={item.id}>
+            <span className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`} onClick={() => setSelectedCategoryId('')}>{item.name}</span>
+            {idx < breadcrumb.length - 1 && <ChevronRightIcon className={`h-4 w-4 mx-2 ${isRTL ? 'rotate-180' : ''}`} />}
+          </React.Fragment>
+        ))}
+      </nav>
       <ProductsNav
         isRTL={isRTL}
         t={t}

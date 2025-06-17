@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PlusIcon } from '@heroicons/react/outline';
+import { PlusIcon, ChevronRightIcon } from '@heroicons/react/outline';
 import CustomTable from '../../components/common/CustomTable';
 import PaymentVariantsDrawer from './PaymentVariantsDrawer';
+import { useNavigate } from 'react-router-dom';
 
 interface PaymentVariant {
   id: number;
@@ -25,6 +26,7 @@ interface Column {
 
 const PaymentVariants: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<PaymentVariant | undefined>();
   const [variants, setVariants] = useState<PaymentVariant[]>([
@@ -38,6 +40,11 @@ const PaymentVariants: React.FC = () => {
     },
     // Add more sample data as needed
   ]);
+
+  const breadcrumb = [
+    { name: t('sideBar.dashboard') || 'Dashboard', id: null, path: '/' },
+    { name: t('productVariant.title') || 'Payment Variants', id: 1, path: '/product-variants' }
+  ];
 
   const columns: Column[] = [
     {
@@ -116,17 +123,26 @@ const PaymentVariants: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="p-6 w-full">
+      {/* Breadcrumb */}
+      <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
+        {breadcrumb.map((item, idx) => (
+          <React.Fragment key={item.id}>
+            <span className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`} onClick={() => navigate(item.path)}>{item.name}</span>
+            {idx < breadcrumb.length - 1 && <ChevronRightIcon className={`h-4 w-4 mx-2 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />}
+          </React.Fragment>
+        ))}
+      </nav>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">
-          {t('payment.variants.title')}
+          {t('productVariant.title')}
         </h1>
         <button
           onClick={() => setIsDrawerOpen(true)}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
         >
           <PlusIcon className="h-5 w-5 mr-2" />
-          {t('payment.variants.add')}
+          {t('productVariant.addProductVariant')}
         </button>
       </div>
 

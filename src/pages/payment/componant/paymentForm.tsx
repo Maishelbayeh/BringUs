@@ -46,57 +46,59 @@ const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language, is
     onSubmit(newMethod);
   };
 
+  const handleFileChange = (files: File | File[] | null) => {
+    if (files instanceof File) {
+      setFile(files);
+    } else if (Array.isArray(files) && files.length > 0) {
+      setFile(files[0]);
+    } else {
+      setFile(null);
+    }
+  };
+
   return (
     <Box
       component="form"
       onSubmit={handleSubmit}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 3,
-        p: 3,
-        borderRadius: 3,
-      }}
+      className="flex flex-col h-full"
     >
-      <CustomSelect
-        label={t('paymentMethods.paymentMethod')}
-        value={selected}
-        onChange={e => setSelected(e.target.value)}
-        options={AVAILABLE_METHODS}
-        isRTL={isRTL}
-      />
-      <CustomFileInput
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="space-y-6">
+          <CustomSelect
+            label={t('paymentMethods.paymentMethod')}
+            value={selected}
+            onChange={e => setSelected(e.target.value)}
+            options={AVAILABLE_METHODS}
+            isRTL={isRTL}
+          />
+          <CustomFileInput
             label={t('paymentMethods.qrPicture')}
-        id="qr_picture"
-        value={file ? file.name : ''}
-        onChange={setFile}
-        placeholder={t('paymentMethods.chooseFile')}
-        labelAlign={isRTL ? 'right' : 'left'}
-        style={{ textAlign: isRTL ? 'right' : 'left' }}
-      />
-     
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: isRTL ? 'row-reverse' : 'row',
-          justifyContent: 'flex-start',
-          gap: 2,
-          mt: 4,
-        }}
-      >
-        <CustomButton
-          color="primary"
-          textColor="white"
-          text={isEditMode ? t('paymentMethods.edit') : t('paymentMethods.save')}
-          type="submit"
-        />
-        <CustomButton
-          color="white"
-          textColor="primary"
-          text={t('paymentMethods.cancel')}
-          action={onCancel}
-        />
-      </Box>
+            id="qr_picture"
+            value={file ? file.name : ''}
+            onChange={handleFileChange}
+            placeholder={t('paymentMethods.chooseFile')}
+            labelAlign={isRTL ? 'right' : 'left'}
+            style={{ textAlign: isRTL ? 'right' : 'left' }}
+          />
+        </div>
+      </div>
+
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+        <div className="flex justify-end space-x-3">
+          <CustomButton
+            color="white"
+            textColor="primary"
+            text={t('common.cancel')}
+            action={onCancel}
+          />
+          <CustomButton
+            color="primary"
+            textColor="white"
+            text={isEditMode ? t('common.edit') : t('common.save')}
+            type="submit"
+          />
+        </div>
+      </div>
     </Box>
   );
 };

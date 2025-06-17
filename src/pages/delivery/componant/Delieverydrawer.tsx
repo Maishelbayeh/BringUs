@@ -6,6 +6,7 @@ import DeliveryAreaForm from './DelieveryForm';
 import { DeliveryArea } from '../../../Types';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useTranslation } from 'react-i18next';
+import CustomButton from '@/components/common/CustomButton';
 
 interface Props {
   open: boolean;
@@ -28,8 +29,9 @@ const DeliveryAreaDrawer: React.FC<Props> = ({ open, onClose, area, onSave, lang
       PaperProps={{ 
         sx: { 
           width: { xs: '100%', sm: 450 },
-          p: 3,
-         
+          p: 0,
+          display: 'flex',
+          flexDirection: 'column',
           borderLeft: '1.5px solid #1976d233',
         } 
       }}
@@ -41,7 +43,7 @@ const DeliveryAreaDrawer: React.FC<Props> = ({ open, onClose, area, onSave, lang
           flexDirection: language === 'ARABIC' ? 'row-reverse' : 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: 4,
+          p: 3,
           pb: 2,
         }}
       >
@@ -49,7 +51,6 @@ const DeliveryAreaDrawer: React.FC<Props> = ({ open, onClose, area, onSave, lang
           className='text-primary'
           variant="h5"
           sx={{
-            mb: 3,
             fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
@@ -67,7 +68,32 @@ const DeliveryAreaDrawer: React.FC<Props> = ({ open, onClose, area, onSave, lang
           <CloseIcon />
         </IconButton>
       </Box>
-      <DeliveryAreaForm area={area} onSubmit={onSave} onCancel={onClose} language={language} />
+
+      <form 
+        id="delivery-area-form" 
+        onSubmit={(e) => { e.preventDefault(); if (area) onSave(area); }} 
+        className="flex-1 overflow-y-auto p-6"
+      >
+        <DeliveryAreaForm area={area} onSubmit={onSave} onCancel={onClose} language={language} />
+      </form>
+
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+        <div className="flex justify-end space-x-3">
+        <CustomButton
+            color="primary"
+            textColor="white"
+            text={area ? t("deliveryDetails.updateArea") : t("deliveryDetails.createArea")}
+            action={() => {}}
+            type="submit"
+          />
+           <CustomButton
+            color="white"
+            textColor="primary"
+            text={t("deliveryDetails.cancel")}
+            action={onClose}
+          />
+        </div>
+      </div>
     </Drawer>
   );
 };

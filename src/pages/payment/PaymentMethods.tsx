@@ -8,6 +8,8 @@ import PaymentDrawer from './componant/settingdrawer';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '../../components/common/CustomButton';
 import useLanguage from '../../hooks/useLanguage';
+import { ChevronRightIcon } from '@heroicons/react/solid';
+import { useNavigate } from 'react-router-dom';
 
 const initial: PaymentMethod[] = [
   { id: 1, title: 'Cash on Delivery', titleAr: 'الدفع عند الاستلام', titleEn: 'Cash on Delivery', isDefault: true },
@@ -18,9 +20,15 @@ const initial: PaymentMethod[] = [
 const PaymentMethods: React.FC = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [methods, setMethods] = useState<PaymentMethod[]>(initial);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [current, setCurrent] = useState<PaymentMethod | null>(null);
+
+  const breadcrumb = [
+    { name: t('sideBar.dashboard') || 'Dashboard', id: null, path: '/' },
+    { name: t('paymentMethods.title') || 'Payment Methods', id: 1, path: '/payment-methods' }
+  ];
 
   // Open drawer for add
   const openDrawer = () => {
@@ -60,7 +68,16 @@ const PaymentMethods: React.FC = () => {
 
   return (
     <Box sx={{ p: { xs: 1, sm: 2, md: 4 ,mt:10 }, minHeight: '100vh' }} className='bg-white'>
-       <Box
+      {/* Breadcrumb */}
+      <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
+        {breadcrumb.map((item, idx) => (
+          <React.Fragment key={item.id}>
+            <span className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`} onClick={() => navigate(item.path)}>{item.name}</span>
+            {idx < breadcrumb.length - 1 && <ChevronRightIcon className={`h-4 w-4 mx-2 ${language === 'ARABIC' ? 'rotate-180' : ''}`} />}
+          </React.Fragment>
+        ))}
+      </nav>
+      <Box
         sx={{
           display: 'flex',
           flexDirection: language === 'ARABIC' ? { xs: 'column', sm: 'row-reverse' } : { xs: 'column', sm: 'row' },

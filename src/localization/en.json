@@ -151,6 +151,35 @@
     "orderUnpaid": "Unpaid", 
     "orderDelivered": "Delivered",
   "orderInProgress": "In Progress"
+  },
+  "productVariant": {
+    "title": "Product Variants",
+    "description": "Configure product variants, colors and sizes.",
+    "addProductVariant": "Add Product Variant",
+    "editProductVariant": "Edit Product Variant",
+    "manage": "Edit Product",
+    "product": "Product",
+    "price": "Price",
+    "quantity": "Quantity",
+    "color": "Color",
+    "size": "Size",
+    "add": "Add",
+    "name": "Name",
+    "emptyState": "No variants found",
+    "selectProduct": "Select Product"
+  },
+  "common": {
+    "search": "Search",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "emptyState": "No variants found",
+    "ACTIONS": "Actions",
+    "showing": "Showing",
+    "of": "of",
+    "results": "results"
   }
- 
+
 }

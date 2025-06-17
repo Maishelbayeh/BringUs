@@ -58,7 +58,7 @@ const PaymentVariantsDrawer: React.FC<PaymentVariantsDrawerProps> = ({
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-medium text-gray-900">
-                {initialData ? t('payment.variants.edit') : t('payment.variants.add')}
+                {initialData ? t('productVariant.editProductVariant') : t('productVariant.addProductVariant')}
               </h2>
               <button
                 onClick={onClose}
@@ -73,25 +73,28 @@ const PaymentVariantsDrawer: React.FC<PaymentVariantsDrawerProps> = ({
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
             <div className="space-y-6">
               <CustomSelect
-                label={t('payment.variants.product')}
+                label={t('productVariant.product')}
                 value={formData.productId.toString()}
                 onChange={(e) => setFormData(prev => ({ ...prev, productId: Number(e.target.value) }))}
-                options={products.map(product => ({
-                  value: product.id.toString(),
-                  label: product.name[i18n.language as 'en' | 'ar']
-                }))}
+                options={[
+                  { value: '', label: t('productVariant.selectProduct') },
+                  ...products.map(product => ({
+                    value: product.id.toString(),
+                    label: product.name[i18n.language as 'en' | 'ar']
+                  }))
+                ]}
                 isRTL={isRTL}
               />
 
               <CustomInput
-                label={t('payment.variants.name')}
+                label={t('productVariant.name')}
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 labelAlign={isRTL ? 'right' : 'left'}
               />
 
               <CustomNumberInput
-                label={t('payment.variants.price')}
+                label={t('productVariant.price')}
                 value={formData.price}
                 onChange={(value: number) => setFormData(prev => ({ ...prev, price: value }))}
                 labelAlign={isRTL ? 'right' : 'left'}
