@@ -321,10 +321,10 @@ const CustomTable: React.FC<CustomTableProps> = ({
                         <span
                           className={
                             Number(item[column.key]) < 10
-                              ? 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
+                              ? 'bg-red-100 text-red-700 px-6 py-1 rounded-full'
                               : Number(item[column.key]) <= 50
-                                ? 'bg-orange-100 text-orange-700 px-3 py-1 rounded-full'
-                                : 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
+                                ? 'bg-orange-100 text-orange-700 px-6 py-1 rounded-full'
+                                : 'bg-green-100 text-green-700 px-6 py-1 rounded-full'
                           }
                         >
                           {item[column.key]}
