@@ -8,7 +8,7 @@ import SubcategoriesPage from "../pages/subcategories/subcategories";
 import ProductsPage from "../pages/products/products";
 import ProductVariants from "../pages/productVariant/PaymentVariants";
 import CustomersPage from "../pages/customers/customers";
-import OrdersPage from "../pages/orders";
+import OrdersPage from "../pages/orders/orders";
 
 export default function Routers() {
   return (

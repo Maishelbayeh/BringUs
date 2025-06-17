@@ -200,6 +200,7 @@ const OrdersPage: React.FC = () => {
       <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <CustomTable columns={columns} data={tableData} />
       </div>
+      
       {/* شريط مجموع السعر لكل عملة */}
       {(() => {
         const totals: { [currencyId: number]: number } = {};
