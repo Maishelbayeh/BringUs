@@ -3,13 +3,12 @@ import CustomButton from '../../components/common/CustomButton';
 import CustomInput from '../../components/common/CustomInput';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomSelect from '../../components/common/CustomSelect';
-// New custom components (to be created if not exist)
 import CustomSwitch from '../../components/common/CustomSwitch';
 import CustomRadioGroup from '../../components/common/CustomRadioGroup';
 import CustomShuttle from '../../components/common/CustomShuttle';
 import CustomColorPicker from '../../components/common/CustomColorPicker';
-import { useTranslation } from 'react-i18next';
-import { XIcon } from '@heroicons/react/outline';
+
+
 
 interface ColorVariant {
   id: string;
@@ -69,7 +68,7 @@ const specOptions = [
 ].map(s => ({ value: s, label: s }));
 
 const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onImageChange, onSubmit, categories = [], subcategories = [] }) => {
-  const { t } = useTranslation();
+
   if (!open) return null;
 
   // handle shuttle and color picker changes

@@ -127,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               {/* Submenu */}
               {isOpen && hasChildren && isExpanded && (
                 <div className="ml-8 mt-1 flex flex-col gap-1">
-                  {item.children?.map((child, cidx) => {
+                  {item.children?.map((child) => {
                     const ChildIcon = child.icon;
                     const isChildActive = child.path === currentPath;
                     return (

@@ -7,6 +7,9 @@ import SubcategoriesPage from "../pages/subcategories/subcategories";
 import ProductsPage from "../pages/products/products";
 import ProductVariants from "../pages/productVariant/PaymentVariants";
 import CustomersPage from "../pages/customers/customers";
+import OrdersPage from "../pages/orders/orders";
+import StockTable from '../pages/stockPreview/StockTable';
+
 import OrdersPage from "../pages/orders";
 import StoreSliderPage from "../pages/StoreSlider/storeSlider";
 import StorePreview from "../pages/StoreSlider/StorePreview";
@@ -26,6 +29,7 @@ export default function Routers() {
       <Route path="/product-variants" element={<ProductVariants />} />  
       <Route path="/customers" element={<CustomersPage />} />
       <Route path="/orders" element={<OrdersPage />} />
+      <Route path="/stock-preview" element={<StockTable />} />
       <Route path="/store-slider" element={<StoreSliderPage />} />
       <Route path="/store-preview" element={<StorePreview />} />
       <Route path="/store-videos" element={<StoreVideoPage />} />

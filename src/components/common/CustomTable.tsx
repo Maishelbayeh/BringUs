@@ -17,6 +17,7 @@ interface CustomTableProps {
   data: any[];
   onEdit?: (item: any) => void;
   onDelete?: (item: any) => void;
+  onFilteredDataChange?: (filtered: any[]) => void;
 }
 
 const CustomTable: React.FC<CustomTableProps> = ({
@@ -24,6 +25,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   data,
   onEdit,
   onDelete,
+  onFilteredDataChange,
 }) => {
   const { t, i18n } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,23 +35,51 @@ const CustomTable: React.FC<CustomTableProps> = ({
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const headerRefs = useRef<{ [key: string]: HTMLTableCellElement | null }>({});
   const popupRef = useRef<HTMLDivElement | null>(null);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const lastSent = useRef<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
-  const filteredData = data.filter(item => {
-    const matchesSearch = Object.values(item).some(value =>
+  // دالة استخراج القيم الفريدة من أي مصدر بيانات
+  const getUniqueColumnValuesFromData = (source: any[], colKey: string): string[] => {
+    const values = source.map((item: any) => item[colKey]).filter((v: any) => v !== undefined && v !== null);
+    return Array.from(new Set(values)).map(String);
+  };
+
+  const filteredData: any[] = data.filter((item: any) => {
+    const matchesSearch = Object.values(item).some((value: any) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const matchesFilters = Object.entries(filters).every(([key, value]) => {
+    const matchesFilters: boolean = Object.entries(filters).every(([key, value]: [string, string]) => {
       if (!value) return true;
+      // دعم فلترة الفترة الزمنية
+      if (key.endsWith('_from')) {
+        const colKey = key.replace('_from', '');
+        if (!item[colKey]) return false;
+        return item[colKey] >= value;
+      }
+      if (key.endsWith('_to')) {
+        const colKey = key.replace('_to', '');
+        if (!item[colKey]) return false;
+        return item[colKey] <= value;
+      }
+      // دعم خاص لفلاتر الكمية المتبقية
+      if (key === 'stock') {
+        if (value === 'lt10') return Number(item[key]) < 10;
+        if (value === '10to50') return Number(item[key]) >= 10 && Number(item[key]) <= 50;
+        if (value === 'gt50') return Number(item[key]) > 50;
+      }
+      // إذا كانت القيمة من السيليكت (موجودة ضمن unique values)، استخدم المطابقة التامة
+      const uniqueValues = getUniqueColumnValuesFromData(data, key);
+      if (uniqueValues.includes(value)) {
+        return String(item[key]) === value;
+      }
+      // وإلا ابقِ البحث النصي
       return String(item[key]).toLowerCase().includes(value.toLowerCase());
     });
     return matchesSearch && matchesFilters;
   });
-
-  // استخراج القيم الفريدة للعمود الحالي
-  const getUniqueColumnValues = (colKey: string) => {
-    const values = data.map(item => item[colKey]).filter(v => v !== undefined && v !== null);
-    return Array.from(new Set(values));
-  };
 
   // تطبيق الفرز الصحيح حسب نوع العمود
   let sortedData = [...filteredData];
@@ -74,14 +104,31 @@ const CustomTable: React.FC<CustomTableProps> = ({
     });
   }
 
+  const totalPages = Math.ceil(sortedData.length / rowsPerPage);
+  const paginatedData = sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
   const handleApplyFilter = () => {
-    setFilters(prev => ({ ...prev, [activeFilterColumn!]: filterValue }));
+    if (activeFilterColumn) {
+      const col = columns.find(c => c.key === activeFilterColumn);
+      if (col?.type === 'date') {
+        setFilters(prev => ({
+          ...prev,
+          [activeFilterColumn]: filterValue,
+          [`${activeFilterColumn}_from`]: dateFrom,
+          [`${activeFilterColumn}_to`]: dateTo,
+        }));
+      } else {
+        setFilters(prev => ({ ...prev, [activeFilterColumn]: filterValue }));
+      }
+    }
     setActiveFilterColumn(null);
   };
 
   const handleClearFilter = () => {
-    setFilters(prev => ({ ...prev, [activeFilterColumn!]: '' }));
+    setFilters(prev => ({ ...prev, [activeFilterColumn!]: '', [`${activeFilterColumn}_from`]: '', [`${activeFilterColumn}_to`]: '' }));
     setFilterValue('');
+    setDateFrom('');
+    setDateTo('');
     setActiveFilterColumn(null);
   };
 
@@ -100,6 +147,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
   const handleHeaderClick = (colKey: string) => {
     setActiveFilterColumn(colKey);
     setFilterValue(filters[colKey] || '');
+    setDateFrom(filters[`${colKey}_from`] || '');
+    setDateTo(filters[`${colKey}_to`] || '');
   };
 
   // منطق ترتيب الأعمدة عند الضغط على السهم
@@ -132,6 +181,28 @@ const CustomTable: React.FC<CustomTableProps> = ({
     };
   }, [activeFilterColumn]);
 
+  useEffect(() => {
+    if (onFilteredDataChange) {
+      const isSame = lastSent.current.length === filteredData.length;
+      if (!isSame) {
+        onFilteredDataChange(filteredData);
+        lastSent.current = filteredData;
+      }
+    }
+  }, [filteredData, onFilteredDataChange]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, JSON.stringify(filters)]);
+
+  // SVGs للأسهم
+  const ArrowRight = (
+    <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+  );
+  const ArrowLeft = (
+    <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+  );
+
   return (
     <div className="w-full">
       {/* Search and Filter Bar */}
@@ -140,19 +211,20 @@ const CustomTable: React.FC<CustomTableProps> = ({
           <div className="relative">
             <input
               type="text"
+              dir={i18n.language === 'ARABIC' ? 'rtl' : 'ltr'}
               placeholder={t('common.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+              className={`w-full  py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary ${i18n.language === 'ARABIC' ? 'text-right pr-10 pl-4' : 'text-left pl-10 pr-4'}`}
             />
-            <SearchIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <SearchIcon className={`h-5 w-5 text-gray-400 absolute ${i18n.language === 'ARABIC' ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2`} />
           </div>
         </div>
       </div>
 
       {/* Active Filters Bar */}
       {Object.entries(filters).filter(([_, v]) => v).length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-2 items-center">
+        <div className={`mb-2 flex flex-wrap gap-2 items-center ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
           {Object.entries(filters).filter(([_, v]) => v).map(([key, value]) => {
             const col = columns.find(c => c.key === key);
             return (
@@ -178,154 +250,244 @@ const CustomTable: React.FC<CustomTableProps> = ({
       )}
 
       {/* Table */}
-      <div className="relative">
-        <table
-          className="min-w-full divide-y divide-gray-200"
-          dir={i18n.language === 'ARABIC' || i18n.language === 'ar' ? 'rtl' : 'ltr'}
-        >
-          <thead className="bg-gray-50">
-            <tr>
-              {columns.map(column => (
-                <th
-                  key={column.key}
-                  ref={el => (headerRefs.current[column.key] = el)}
-                  scope="col"
-                  className={`px-6 py-3 text-${column.align || 'left'} text-xs font-medium uppercase tracking-wider transition relative ${((filters[column.key] && filters[column.key] !== '') || (sortConfig?.key === column.key)) ? 'text-primary' : 'text-gray-500'}`}
-                >
-                  <span className={`inline-block select-none ${(filters[column.key] && filters[column.key] !== '') || (sortConfig?.key === column.key) ? 'text-primary' : ''}`}>
-                    {i18n.language === 'ARABIC' ? column.label.ar : column.label.en}
-                  </span>
-                  {/* أيقونة سهم الترتيب */}
-                  <span
-                    className={`inline-block ml-1 cursor-pointer select-none ${(sortConfig?.key === column.key) ? 'text-primary' : ''}`}
-                    onClick={e => { e.stopPropagation(); handleHeaderSort(column.key); }}
-                  >
-                    {sortConfig?.key === column.key ? (
-                      sortConfig.direction === 'asc' ? (
-                        <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
-                      ) : (
-                        <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                      )
-                    ) : (
-                      <svg className="w-4 h-4 text-gray-400 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 11l5-5 5 5M7 13l5 5 5-5" /></svg>
-                    )}
-                  </span>
-                  {/* أيقونة فلتر البوب أب */}
-                  <span
-                    className={`inline-block ml-1 cursor-pointer select-none ${(filters[column.key] && filters[column.key] !== '') ? 'text-primary' : ''}`}
-                    onClick={e => { e.stopPropagation(); handleHeaderClick(column.key); }}
-                  >
-                    <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M3 12h18M3 18h18" /></svg>
-                  </span>
-                </th>
-              ))}
-              {(onEdit || onDelete) && (
-                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('common.ACTIONS')}
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sortedData.map((item, index) => (
-              <tr key={index} className="hover:bg-gray-50">
+      <div className="relative overflow-x-auto">
+        <div className="w-full bg-primary/5 p-2 rounded-xl">
+          <table
+            className="min-w-full"
+            dir={i18n.language === 'ARABIC' || i18n.language === 'ar' ? 'rtl' : 'ltr'}
+          >
+            <thead className=" rounded-t-lg">
+              <tr>
                 {columns.map(column => (
-                  <td
+                  <th
                     key={column.key}
-                    className={`px-6 py-4 whitespace-nowrap text-${column.align || 'left'} text-sm text-gray-900`}
+                    ref={el => (headerRefs.current[column.key] = el)}
+                    scope="col"
+                    className={` px-6 py-3 text-${column.align || 'left'} text-xs font-medium uppercase tracking-wider transition relative ${((filters[column.key] && filters[column.key] !== '') || (sortConfig?.key === column.key)) ? 'text-primary' : 'text-gray-500'}`}
                   >
-                    {item[column.key]}
-                  </td>
+                    <span className={`inline-block select-none ${(filters[column.key] && filters[column.key] !== '') || (sortConfig?.key === column.key) ? 'text-primary' : ''}`}>
+                      {i18n.language === 'ARABIC' ? column.label.ar : column.label.en}
+                    </span>
+                    {/* أيقونة سهم الترتيب */}
+                    <span
+                      className={`inline-block ml-1 cursor-pointer select-none ${(sortConfig?.key === column.key) ? 'text-primary' : ''}`}
+                      onClick={e => { e.stopPropagation(); handleHeaderSort(column.key); }}
+                    >
+                      {sortConfig?.key === column.key ? (
+                        sortConfig.direction === 'asc' ? (
+                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                        ) : (
+                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        )
+                      ) : (
+                        <svg className="w-4 h-4 text-gray-400 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 11l5-5 5 5M7 13l5 5 5-5" /></svg>
+                      )}
+                    </span>
+                    {/* أيقونة فلتر البوب أب */}
+                    <span
+                      className={`inline-block ml-1 cursor-pointer select-none ${(filters[column.key] && filters[column.key] !== '') ? 'text-primary' : ''}`}
+                      onClick={e => { e.stopPropagation(); handleHeaderClick(column.key); }}
+                    >
+                      <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M3 12h18M3 18h18" /></svg>
+                    </span>
+                  </th>
                 ))}
                 {(onEdit || onDelete) && (
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <div className="flex justify-center space-x-2">
-                      {onEdit && (
-                        <button
-                          onClick={() => onEdit(item)}
-                          className="text-primary hover:text-primary-dark"
-                        >
-                          <span className="sr-only">{t('common.edit')}</span>
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                      )}
-                      {onDelete && (
-                        <button
-                          onClick={() => onDelete(item)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <span className="sr-only">{t('common.delete')}</span>
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  </td>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('common.ACTIONS')}
+                  </th>
                 )}
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {/* Popup Filter */}
-        {activeFilterColumn && (
-          <div
-            ref={popupRef}
-            className="fixed z-50 bg-white border rounded-lg shadow p-4 min-w-[240px]"
-            style={{ ...getPopupPosition() }}
-          >
-            <div className="mb-2 font-bold text-primary text-sm">فلترة {columns.find(c => c.key === activeFilterColumn)?.label[i18n.language as 'en' | 'ar']}</div>
-            <input
-              type="text"
-              value={filterValue}
-              onChange={e => {
-                setFilterValue(e.target.value);
-              }}
-              className="w-full border rounded px-2 py-1 mb-2 focus:ring-primary focus:border-primary"
-              placeholder={`بحث في ${columns.find(c => c.key === activeFilterColumn)?.label[i18n.language as 'en' | 'ar']}`}
-              autoFocus
-            />
-            {/* سيليكت القيم الفريدة */}
-            <select
-              className="w-full border rounded px-2 py-1 mb-2 focus:ring-primary focus:border-primary"
-              value={filterValue}
-              onChange={e => {
-                setFilterValue(e.target.value);
-                setFilters(prev => ({ ...prev, [activeFilterColumn]: e.target.value }));
-                setActiveFilterColumn(null);
-              }}
-            >
-              <option value="">كل القيم</option>
-              {getUniqueColumnValues(activeFilterColumn).map((val, idx) => (
-                <option key={idx} value={val}>{val}</option>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {paginatedData.map((item, idx) => (
+                <tr key={idx} className="mb-4 bg-white rounded-lg shadow border-0">
+                  {columns.map(column => (
+                    <td
+                      key={column.key}
+                      className={`px-6 py-6 text-${column.align || 'left'} text-sm text-gray-900`}
+                    >
+                      {column.key === 'status' ? (
+                        <span
+                          className={
+                            item[column.key] === 'مدفوع' || item[column.key] === 'Paid'
+                              ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
+                              : 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
+                          }
+                        >
+                          {item[column.key]}
+                        </span>
+                      ) : column.key === 'stock' ? (
+                        <span
+                          className={
+                            Number(item[column.key]) < 10
+                              ? 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
+                              : Number(item[column.key]) <= 50
+                                ? 'bg-orange-100 text-orange-700 px-3 py-1 rounded-full'
+                                : 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
+                          }
+                        >
+                          {item[column.key]}
+                        </span>
+                      ) : column.key === 'visibility' ? (
+                        <span
+                          className={
+                            item[column.key] === 'ظاهر' || item[column.key] === 'Visible'
+                              ? 'bg-primary/10 text-primary px-3 py-1 rounded-full font-bold'
+                              : 'bg-gray-100 text-gray-300 px-3 py-1 rounded-full font-bold'
+                          }
+                        >
+                          {item[column.key]}
+                        </span>
+                      ) : (
+                        item[column.key]
+                      )}
+                    </td>
+                  ))}
+                  {(onEdit || onDelete) && (
+                    <td className="px-6 py-6 whitespace-nowrap text-center text-sm font-medium">
+                      <div className="flex justify-center space-x-2">
+                        {onEdit && (
+                          <button
+                            onClick={() => onEdit(item)}
+                            className="text-primary hover:text-primary-dark"
+                          >
+                            <span className="sr-only">{t('common.edit')}</span>
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        )}
+                        {onDelete && (
+                          <button
+                            onClick={() => onDelete(item)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <span className="sr-only">{t('common.delete')}</span>
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                </tr>
               ))}
-            </select>
-            {/* خيارات الترتيب */}
-            <div className="flex gap-2 mb-2">
-              <button
-                className="flex-1 px-2 py-1 rounded border bg-gray-100 text-gray-700"
-                onClick={handleClearSort}
+            </tbody>
+          </table>
+          {/* Popup Filter */}
+          {activeFilterColumn && (
+            <div
+              ref={popupRef}
+              className="fixed z-50 bg-white border rounded-lg shadow p-4 min-w-[240px]"
+              style={{ ...getPopupPosition() }}
+            >
+              <div className="mb-2 font-bold text-primary text-sm">{t('common.filter')} {columns.find(c => c.key === activeFilterColumn)?.label[i18n.language as 'en' | 'ar']}</div>
+              {columns.find(c => c.key === activeFilterColumn)?.type === 'date' && (
+                <div className="flex flex-col gap-2 mb-2">
+                  <label className="text-xs text-gray-600">{t('common.from')}</label>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={e => setDateFrom(e.target.value)}
+                    className="w-full border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                  />
+                  <label className="text-xs text-gray-600">{t('common.to')}</label>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={e => setDateTo(e.target.value)}
+                    className="w-full border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                  />
+                </div>
+              )}
+              <input
+                type="text"
+                value={filterValue}
+                onChange={e => {
+                  setFilterValue(e.target.value);
+                }}
+                className={`w-full border rounded px-2 py-1 mb-2 focus:ring-primary focus:border-primary ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}
+                placeholder={`${t('common.search')} ${columns.find(c => c.key === activeFilterColumn)?.label[i18n.language === 'ARABIC' ? 'ar' : 'en']}`}
+                autoFocus
+              />
+              {/* سيليكت القيم الفريدة */}
+              <select
+                className={`w-full border rounded px-2 py-1 mb-2 focus:ring-primary focus:border-primary ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}
+                value={filterValue}
+                onChange={e => {
+                  setFilterValue(e.target.value);
+                  // منطق خاص للكمية المتبقية
+                  if (activeFilterColumn === 'stock') {
+                    setFilters(prev => ({ ...prev, [activeFilterColumn]: e.target.value }));
+                    setActiveFilterColumn(null);
+                    return;
+                  }
+                  setFilters(prev => ({ ...prev, [activeFilterColumn]: e.target.value }));
+                  setActiveFilterColumn(null);
+                }}
               >
-                مسح الترتيب
-              </button>
+                <option value="">{t('common.all')}</option>
+                {activeFilterColumn === 'stock' ? (
+                  <>
+                    <option value="lt10">{i18n.language === 'ARABIC' ? 'أقل من 10' : 'Less than 10'}</option>
+                    <option value="10to50">{i18n.language === 'ARABIC' ? 'من 10 إلى 50' : '10 to 50'}</option>
+                    <option value="gt50">{i18n.language === 'ARABIC' ? 'أكثر من 50' : 'More than 50'}</option>
+                  </>
+                ) : (
+                  getUniqueColumnValuesFromData(filteredData, activeFilterColumn).map((val: string, idx: number) => (
+                    <option key={idx} value={val}>{val}</option>
+                  ))
+                )}
+              </select>
+              {/* خيارات الترتيب */}
+              <div className="flex gap-2 mb-2">
+                <button
+                  className="flex-1 px-2 py-1 rounded border bg-gray-100 text-gray-700"
+                  onClick={handleClearSort}
+                >
+                  {t('common.clearSort')}
+                </button>
+              </div>
+              <div className={`flex gap-2 justify-between ${i18n.language === 'ARABIC' ? 'flex-row' : 'flex-row-reverse'}`}>
+                <button onClick={handleClearFilter} className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">{t('common.clear')}</button>
+              
+                <button onClick={handleApplyFilter} className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark transition">{t('common.apply')}</button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={handleClearFilter} className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">مسح</button>
-              <button onClick={() => setActiveFilterColumn(null)} className="bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition">إغلاق</button>
-              <button onClick={handleApplyFilter} className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark transition">تطبيق</button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Pagination */}
-      <div className="mt-4 flex items-center justify-between">
-        <div className="text-sm text-gray-700">
-          {t('common.showing')} <span className="font-medium">{filteredData.length}</span> {t('common.of')} <span className="font-medium">{data.length}</span> {t('common.results')}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <button
+            className="px-3 py-1 rounded border bg-white text-primary disabled:opacity-50"
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            {ArrowLeft}
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              className={`px-3 py-1 rounded border ${currentPage === i + 1 ? 'bg-primary text-white' : 'bg-white text-primary'}`}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            className="px-3 py-1 rounded border bg-white text-primary disabled:opacity-50"
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            {ArrowRight}
+          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 };
