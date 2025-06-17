@@ -1,0 +1,97 @@
+export const customersData = [
+  { id: 1, nameAr: 'أحمد علي', nameEn: 'Ahmed Ali', phone: '0501234567' },
+  { id: 2, nameAr: 'سارة محمد', nameEn: 'Sara Mohammed', phone: '0559876543' },
+  { id: 3, nameAr: 'خالد يوسف', nameEn: 'Khaled Youssef', phone: '0533333333' },
+  { id: 4, nameAr: 'منى صالح', nameEn: 'Mona Saleh', phone: '0544444444' },
+  { id: 5, nameAr: 'ليلى حسن', nameEn: 'Laila Hassan', phone: '0522222222' },
+  { id: 6, nameAr: 'يوسف إبراهيم', nameEn: 'Yousef Ibrahim', phone: '0599999999' },
+  { id: 7, nameAr: 'جمال عوض', nameEn: 'Jamal Awad', phone: '0588888888' },
+  { id: 8, nameAr: 'هبة سمير', nameEn: 'Hiba Sameer', phone: '0577777777' },
+  { id: 9, nameAr: 'رامي جابر', nameEn: 'Rami Jaber', phone: '0566666666' },
+  { id: 10, nameAr: 'سلوى ناصر', nameEn: 'Salwa Naser', phone: '0555555555' },
+];
+
+export const ordersData = [
+  { id: 101, customerId: 1, date: '2025-06-01', price: 200,currencyId: 1, paid: true,deliveryAreaId: 1,affiliateId: 1 },
+  { id: 95, customerId: 1, date: '2025-05-20', price: 150,currencyId: 1, paid: false,deliveryAreaId: 2,affiliateId: 1 },
+  { id: 99, customerId: 2, date: '2025-05-29', price: 250,currencyId: 2, paid: true,deliveryAreaId: 2,affiliateId: 2 },
+  { id: 90, customerId: 2, date: '2025-05-10', price: 150,currencyId: 5, paid: true,deliveryAreaId: 3,affiliateId: 3 },
+  { id: 88, customerId: 3, date: '2025-05-15', price: 120,currencyId: 3, paid: true,deliveryAreaId: 1,affiliateId: 4 },
+  { id: 77, customerId: 4, date: '2025-05-10', price: 100,currencyId: 2, paid: false ,deliveryAreaId: 4,affiliateId: 5},
+  { id: 70, customerId: 4, date: '2025-04-30', price: 200,currencyId: 5, paid: true ,deliveryAreaId: 5,affiliateId: 5},
+  { id: 110, customerId: 5, date: '2025-06-03', price: 300,currencyId: 1, paid: true ,deliveryAreaId: 6,affiliateId: 2},
+  { id: 111, customerId: 5, date: '2025-06-04', price: 180,currencyId: 2, paid: false ,deliveryAreaId: 7,affiliateId: 1},
+  { id: 112, customerId: 5, date: '2025-06-05', price: 220,currencyId: 1, paid: true ,deliveryAreaId: 8,affiliateId: 1},
+  { id: 120, customerId: 6, date: '2025-05-30', price: 90,currencyId: 1, paid: false ,deliveryAreaId: 8,affiliateId: 1},
+  { id: 121, customerId: 6, date: '2025-06-01', price: 400,currencyId: 3, paid: true ,deliveryAreaId: 10,affiliateId: 3},
+  { id: 130, customerId: 7, date: '2025-06-02', price: 500,currencyId: 3, paid: true ,deliveryAreaId: 10,affiliateId: 1},
+  { id: 140, customerId: 8, date: '2025-05-25', price: 210,currencyId: 4, paid: false ,deliveryAreaId: 1,affiliateId: 2},
+  { id: 160, customerId: 10, date: '2025-05-29', price: 250,currencyId: 1, paid: true ,deliveryAreaId: 2,affiliateId: 3},
+  { id: 161, customerId: 10, date: '2025-06-02', price: 175,currencyId: 4, paid: true ,deliveryAreaId: 3,affiliateId: 4},
+]; 
+
+export const units = [
+  { id: 1, labelAr: 'Bundle', labelEn: 'Bundle' },
+  { id: 2, labelAr: 'كرتونة', labelEn: 'Carton' },
+  { id: 3, labelAr: 'سنتيمتر', labelEn: 'Centimeter (cm)' },
+  { id: 4, labelAr: 'سنتيمتر مكعب', labelEn: 'Cubic centimeter (cu cm)' },
+  { id: 5, labelAr: 'قدم مكعب', labelEn: 'Cubic foot (cu ft)' },
+  { id: 6, labelAr: 'بوصة مكعبة', labelEn: 'Cubic inch (cu in)' },
+  { id: 7, labelAr: 'متر مكعب', labelEn: 'Cubic meter (cu m)' },
+  { id: 8, labelAr: 'ياردة مكعبة', labelEn: 'Cubic yard (cu yd)' },
+  { id: 9, labelAr: 'عشرة', labelEn: 'Dozen' },
+  { id: 10, labelAr: 'أونصة مائعة', labelEn: 'Fluid ounce (fl oz)' },
+  { id: 11, labelAr: 'قدم', labelEn: 'Foot (ft)' },
+  { id: 12, labelAr: 'غالون', labelEn: 'Gallon (gal)' },
+  { id: 13, labelAr: 'جرام', labelEn: 'Gram (g)' },
+  { id: 14, labelAr: 'بوصة', labelEn: 'Inch (in)' },
+  { id: 15, labelAr: 'كيلوجرام', labelEn: 'Kilogram (kg)' },
+  { id: 16, labelAr: 'لتر', labelEn: 'Liter (L)' },
+  { id: 17, labelAr: 'متر', labelEn: 'Meter (m)' },
+  { id: 18, labelAr: 'مليلتر', labelEn: 'Milliliter (mL)' },
+  { id: 19, labelAr: 'أونصة', labelEn: 'Ounce (oz)' },
+  { id: 20, labelAr: 'زوج', labelEn: 'Pair' },
+  { id: 21, labelAr: 'بالتر', labelEn: 'Pallet' },
+  { id: 22, labelAr: 'قطعة', labelEn: 'Piece' },
+  { id: 23, labelAr: 'بينت', labelEn: 'Pint (pt)' },
+  { id: 24, labelAr: 'رطل', labelEn: 'Pound (lb)' },
+  { id: 25, labelAr: 'ريم', labelEn: 'Ream' },
+  { id: 26, labelAr: 'لفة', labelEn: 'Roll' },
+  { id: 27, labelAr: 'مجموعة', labelEn: 'Set' },  
+  { id: 28, labelAr: 'سنتيمتر مربع', labelEn: 'Square centimeter (sq cm)' },
+  { id: 29, labelAr: 'قدم مربع', labelEn: 'Square foot (sq ft)' },
+  { id: 30, labelAr: 'بوصة مربعة', labelEn: 'Square inch (sq in)' },
+  { id: 31, labelAr: 'متر مربع', labelEn: 'Square meter (sq m)' },
+  { id: 32, labelAr: 'ياردة مربعة', labelEn: 'Square yard (sq yd)' },
+  { id: 33, labelAr: 'ياردة', labelEn: 'Yard (yd)' },
+];
+
+export const currencies = [
+  { id: 1, labelAr: 'شيكل (₪)', labelEn: 'Shekel (₪)' },
+  { id: 2, labelAr: 'دولار ($)', labelEn: 'Dollar ($)' },
+  { id: 3, labelAr: 'دينار أردني (JD)', labelEn: 'Jordanian Dinar (JD)' },
+  { id: 4, labelAr: 'يورو (€)', labelEn: 'Euro (€)' },
+  { id: 5, labelAr: 'ريال سعودي (SAR)', labelEn: 'Saudi Riyal (SAR)' },
+];
+
+export const deliveryAreas = [
+  { id: 1, labelAr: 'رام الله', labelEn: 'Ramallah' },
+  { id: 2, labelAr: 'القدس', labelEn: 'Jerusalem' },
+  { id: 3, labelAr: 'نابلس', labelEn: 'Nablus' },
+  { id: 4, labelAr: 'الخليل', labelEn: 'Hebron' },
+  { id: 5, labelAr: 'بيت لحم', labelEn: 'Bethlehem' },
+  { id: 6, labelAr: 'طولكرم', labelEn: 'Tulkarm' },
+  { id: 7, labelAr: 'قلقيلية', labelEn: 'Qalqilya' },
+  { id: 8, labelAr: 'جنين', labelEn: 'Jenin' },
+  { id: 9, labelAr: 'أريحا', labelEn: 'Arara' },
+  { id: 10, labelAr: 'سلفيت', labelEn: 'Salfit' },
+];
+
+export const affiliates = [
+  { id: 1, nameAr: 'محمد عادل', nameEn: 'Mohammad Adel', phone: '0591111111',email: 'mohammad@gmail.com' ,active: true},
+  { id: 2, nameAr: 'سعيد منصور', nameEn: 'Saeed Mansour', phone: '0592222222',email: 'saeed@gmail.com' ,active: true},
+  { id: 3, nameAr: 'أحمد سمير', nameEn: 'Ahmad Sameer', phone: '0593333333',email: 'ahmad@gmail.com' ,active: true},
+  { id: 4, nameAr: 'ليلى يوسف', nameEn: 'Laila Yousef', phone: '0594444444',email: 'laila@gmail.com' ,active: true},
+  { id: 5, nameAr: 'سارة جابر', nameEn: 'Sara Jaber', phone: '0595555555',email: 'sara@gmail.com' ,active: true},
+];
+

@@ -1,5 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { CloudUploadIcon } from '@heroicons/react/outline';
+import React, { useRef,  useState } from 'react';
 import { Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -18,7 +17,7 @@ interface CustomFileInputProps {
 
 const CustomFileInput: React.FC<CustomFileInputProps> = ({ 
   label, 
-  value, 
+  // value, 
   onChange, 
   error, 
   placeholder, 

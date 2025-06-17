@@ -151,7 +151,6 @@ const PaymentVariants: React.FC = () => {
         data={variants}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        isRTL={i18n.language === 'ar'}
       />
 
       <PaymentVariantsDrawer
@@ -166,7 +165,7 @@ const PaymentVariants: React.FC = () => {
           { id: 1, name: { en: 'Product 1', ar: 'المنتج 1' } },
           { id: 2, name: { en: 'Product 2', ar: 'المنتج 2' } }
         ]}
-        isRTL={i18n.language === 'ar'}
+            isRTL={i18n.language === 'ar'}
       />
     </div>
   );
