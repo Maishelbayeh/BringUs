@@ -114,11 +114,10 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={onClose} />
-      <form
-        className={`fixed top-0 ${isRTL ? 'left-0' : 'right-0'} h-full w-full max-w-4xl bg-white shadow-2xl p-8 flex flex-col gap-6 transition-transform duration-300 transform overflow-y-auto`}
+      <div
+        className={`fixed top-0 ${isRTL ? 'left-0' : 'right-0'} h-full w-full max-w-4xl bg-white shadow-2xl p-8 flex flex-col gap-6 transition-transform duration-300 transform`}
         style={{ [isRTL ? 'left' : 'right']: 0 }}
         dir={isRTL ? 'rtl' : 'ltr'}
-        onSubmit={onSubmit}
       >
         <div className="flex items-center justify-between border-b pb-4">
           <h2 className="text-2xl font-bold text-primary">{title}</h2>
@@ -132,173 +131,178 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
             </svg>
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="col-span-full">
+        <form onSubmit={onSubmit} className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="col-span-full">
+              <CustomInput
+                label={isRTL ? 'اسم المنتج' : 'Product Name'}
+                name="name"
+                value={form.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                required
+                labelAlign={isRTL ? 'right' : 'left'}
+              />
+            </div>
+            <CustomSelect
+              label={isRTL ? 'الفئة' : 'Category'}
+              value={form.categoryId}
+              onChange={(e) => handleSelectChange('categoryId', e.target.value)}
+              options={[{ value: '', label: isRTL ? 'اختر الفئة' : 'Select Category' }, ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))]}
+              
+            />
+            <div style={{ display: form.categoryId ? undefined : 'none' }}>
+              <CustomSelect
+                label={isRTL ? 'الفئة الفرعية' : 'Subcategory'}
+                value={form.subcategoryId}
+                onChange={(e) => handleSelectChange('subcategoryId', e.target.value)}
+                options={[{ value: '', label: isRTL ? 'اختر الفئة الفرعية (اختياري)' : 'Select Subcategory (optional)' }, ...subcategories.map(sub => ({ value: String(sub.id), label: sub.name }))]}
+                
+              />
+            </div>
+            <CustomSwitch
+              label={isRTL ? 'مرئي' : 'Visibility'}
+              name="visibility"
+              checked={form.visibility === 'Y'}
+              onChange={onFormChange}
+            />
+            <CustomSelect
+              label={isRTL ? 'الوحدة' : 'Unit'}
+              value={form.unit}
+              onChange={(e) => handleSelectChange('unit', e.target.value)}
+              options={[{ value: '', label: isRTL ? 'اختر وحدة' : 'Select Unit' }, ...unitOptions]}
+              
+            />
             <CustomInput
-              label={isRTL ? 'اسم المنتج' : 'Product Name'}
-              name="name"
-              value={form.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              label={isRTL ? 'السعر' : 'Price'}
+              name="price"
+              value={form.price}
+              onChange={(e) => handleInputChange('price', e.target.value)}
+              type="number"
               required
               labelAlign={isRTL ? 'right' : 'left'}
             />
-          </div>
-          <CustomSelect
-            label={isRTL ? 'الفئة' : 'Category'}
-            value={form.categoryId}
-            onChange={(e) => handleSelectChange('categoryId', e.target.value)}
-            options={[{ value: '', label: isRTL ? 'اختر الفئة' : 'Select Category' }, ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))]}
-            
-          />
-          <div style={{ display: form.categoryId ? undefined : 'none' }}>
-            <CustomSelect
-              label={isRTL ? 'الفئة الفرعية' : 'Subcategory'}
-              value={form.subcategoryId}
-              onChange={(e) => handleSelectChange('subcategoryId', e.target.value)}
-              options={[{ value: '', label: isRTL ? 'اختر الفئة الفرعية (اختياري)' : 'Select Subcategory (optional)' }, ...subcategories.map(sub => ({ value: String(sub.id), label: sub.name }))]}
-              
+            <CustomInput
+              label={isRTL ? 'السعر الأصلي' : 'Original Price'}
+              name="originalPrice"
+              value={form.originalPrice}
+              onChange={(e) => handleInputChange('originalPrice', e.target.value)}
+              type="number"
+              labelAlign={isRTL ? 'right' : 'left'}
             />
-          </div>
-          <CustomSwitch
-            label={isRTL ? 'مرئي' : 'Visibility'}
-            name="visibility"
-            checked={form.visibility === 'Y'}
-            onChange={onFormChange}
-          />
-          <CustomSelect
-            label={isRTL ? 'الوحدة' : 'Unit'}
-            value={form.unit}
-            onChange={(e) => handleSelectChange('unit', e.target.value)}
-            options={[{ value: '', label: isRTL ? 'اختر وحدة' : 'Select Unit' }, ...unitOptions]}
-            
-          />
-          <CustomInput
-            label={isRTL ? 'السعر' : 'Price'}
-            name="price"
-            value={form.price}
-            onChange={(e) => handleInputChange('price', e.target.value)}
-            type="number"
-            required
-            labelAlign={isRTL ? 'right' : 'left'}
-          />
-          <CustomInput
-            label={isRTL ? 'السعر الأصلي' : 'Original Price'}
-            name="originalPrice"
-            value={form.originalPrice}
-            onChange={(e) => handleInputChange('originalPrice', e.target.value)}
-            type="number"
-            labelAlign={isRTL ? 'right' : 'left'}
-          />
-          <CustomInput
-            label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
-            name="wholesalePrice"
-            value={form.wholesalePrice}
-            onChange={(e) => handleInputChange('wholesalePrice', e.target.value)}
-            type="number"
-            labelAlign={isRTL ? 'right' : 'left'}
-          />
-          <div className="col-span-full">
-            <CustomRadioGroup
-              label={isRTL ? 'تصنيف المنتج' : 'Product Label'}
-              name="productLabel"
-              value={form.productLabel}
-              options={labelOptions}
+            <CustomInput
+              label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
+              name="wholesalePrice"
+              value={form.wholesalePrice}
+              onChange={(e) => handleInputChange('wholesalePrice', e.target.value)}
+              type="number"
+              labelAlign={isRTL ? 'right' : 'left'}
+            />
+            <div className="col-span-full">
+              <CustomRadioGroup
+                label={isRTL ? 'تصنيف المنتج' : 'Product Label'}
+                name="productLabel"
+                value={form.productLabel}
+                options={labelOptions}
+                onChange={onFormChange}
+                labelAlign={isRTL ? 'right' : 'left'}
+              />
+            </div>
+            <CustomInput
+              label={isRTL ? 'ترتيب المنتج' : 'Product Order'}
+              name="productOrder"
+              value={form.productOrder}
+              onChange={(e) => handleInputChange('productOrder', e.target.value)}
+              type="number"
+              labelAlign={isRTL ? 'right' : 'left'}
+            />
+            <CustomSwitch
+              label={isRTL ? 'إدارة المخزون' : 'Maintain Stock'}
+              name="maintainStock"
+              checked={form.maintainStock === 'Y'}
               onChange={onFormChange}
-              labelAlign={isRTL ? 'right' : 'left'}
             />
-          </div>
-          <CustomInput
-            label={isRTL ? 'ترتيب المنتج' : 'Product Order'}
-            name="productOrder"
-            value={form.productOrder}
-            onChange={(e) => handleInputChange('productOrder', e.target.value)}
-            type="number"
-            labelAlign={isRTL ? 'right' : 'left'}
-          />
-          <CustomSwitch
-            label={isRTL ? 'إدارة المخزون' : 'Maintain Stock'}
-            name="maintainStock"
-            checked={form.maintainStock === 'Y'}
-            onChange={onFormChange}
-          />
-          <CustomInput
-            label={isRTL ? 'الكمية المتوفرة' : 'Available Quantity'}
-            name="availableQuantity"
-            value={form.availableQuantity}
-            onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
-            type="number"
-            labelAlign={isRTL ? 'right' : 'left'}
-            style={{ display: form.maintainStock === 'Y' ? undefined : 'none' }}
-          />
-          <div className="col-span-full">
             <CustomInput
-              label={isRTL ? 'الوصف' : 'Description'}
-              name="description"
-              value={form.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
+              label={isRTL ? 'الكمية المتوفرة' : 'Available Quantity'}
+              name="availableQuantity"
+              value={form.availableQuantity}
+              onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
+              type="number"
               labelAlign={isRTL ? 'right' : 'left'}
+              style={{ display: form.maintainStock === 'Y' ? undefined : 'none' }}
             />
-          </div>
-          <CustomInput
-            label={isRTL ? 'الباركود' : 'Parcode'}
-            name="parcode"
-            value={form.parcode}
-            onChange={(e) => handleInputChange('parcode', e.target.value)}
-            labelAlign={isRTL ? 'right' : 'left'}
-          />
-          <div className="col-span-full">
-            <CustomShuttle
-              label={isRTL ? 'مواصفات المنتج' : 'Product Specifications'}
-              name="productSpecifications"
-              value={form.productSpecifications || []}
-              options={specOptions}
-              onChange={handleShuttleChange}
-              
-            />
-          </div>
-          <div className="col-span-full">
-            <CustomColorPicker
-              label={isRTL ? 'الألوان' : 'Colors'}
-              name="colors"
-              value={form.colors || []}
-              onChange={handleColorChange}
-              
-            />
-          </div>
-          <div className="col-span-full">
-            <CustomFileInput
-              label={isRTL ? 'الصور' : 'Pictures'}
-              id="images"
-              value={form.images}
-              onChange={files => onImageChange(files)}
-              labelAlign={isRTL ? 'right' : 'left'}
-              multiple={true}
-            />
-          </div>
-          <div className="col-span-full">
+            <div className="col-span-full">
+              <CustomInput
+                label={isRTL ? 'الوصف' : 'Description'}
+                name="description"
+                value={form.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                labelAlign={isRTL ? 'right' : 'left'}
+              />
+            </div>
             <CustomInput
-              label={isRTL ? 'رابط فيديو المنتج' : 'Product Video'}
-              name="productVideo"
-              value={form.productVideo}
-              onChange={(e) => handleInputChange('productVideo', e.target.value)}
+              label={isRTL ? 'الباركود' : 'Parcode'}
+              name="parcode"
+              value={form.parcode}
+              onChange={(e) => handleInputChange('parcode', e.target.value)}
               labelAlign={isRTL ? 'right' : 'left'}
             />
+            <div className="col-span-full">
+              <CustomShuttle
+                label={isRTL ? 'مواصفات المنتج' : 'Product Specifications'}
+                name="productSpecifications"
+                value={form.productSpecifications || []}
+                options={specOptions}
+                onChange={handleShuttleChange}
+                
+              />
+            </div>
+            <div className="col-span-full">
+              <CustomColorPicker
+                label={isRTL ? 'الألوان' : 'Colors'}
+                name="colors"
+                value={form.colors || []}
+                onChange={handleColorChange}
+                
+              />
+            </div>
+            <div className="col-span-full">
+              <CustomFileInput
+                label={isRTL ? 'الصور' : 'Pictures'}
+                id="images"
+                value={form.images}
+                onChange={files => onImageChange(files)}
+                labelAlign={isRTL ? 'right' : 'left'}
+                multiple={true}
+              />
+            </div>
+            <div className="col-span-full">
+              <CustomInput
+                label={isRTL ? 'رابط فيديو المنتج' : 'Product Video'}
+                name="productVideo"
+                value={form.productVideo}
+                onChange={(e) => handleInputChange('productVideo', e.target.value)}
+                labelAlign={isRTL ? 'right' : 'left'}
+              />
+            </div>
           </div>
-        </div>
-        <div className="flex gap-4 mt-6 pt-4 border-t">
-          <CustomButton 
-            color="primary" 
-            text={isRTL ? 'حفظ' : 'Save'} 
-            type="submit" 
-            style={{ flex: 1, padding: '12px' }} 
-          />
-          <CustomButton 
-            color="white" 
-            text={isRTL ? 'إلغاء' : 'Cancel'} 
-            textColor="primary" 
-            onClick={onClose} 
-            style={{ flex: 1, padding: '12px' }} 
-          />
+        </form>
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 mt-4">
+          <div className="flex justify-end space-x-3">
+            <CustomButton
+              color="white"
+              textColor="primary"
+              text={isRTL ? 'إلغاء' : 'Cancel'}
+              action={onClose}
+              bordercolor="primary"
+            />
+            <CustomButton
+              color="primary"
+              textColor="white"
+              text={isRTL ? 'حفظ' : 'Save'}
+              type="submit"
+              form="product-form"
+            />
+          </div>
         </div>
       </div>
     </div>

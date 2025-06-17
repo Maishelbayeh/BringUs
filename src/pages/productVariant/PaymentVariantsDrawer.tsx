@@ -83,7 +83,6 @@ const PaymentVariantsDrawer: React.FC<PaymentVariantsDrawerProps> = ({
                     label: product.name[i18n.language as 'en' | 'ar']
                   }))
                 ]}
-                isRTL={isRTL}
               />
 
               <CustomInput

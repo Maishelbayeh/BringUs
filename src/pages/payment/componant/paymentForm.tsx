@@ -69,7 +69,6 @@ const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language, is
             value={selected}
             onChange={e => setSelected(e.target.value)}
             options={AVAILABLE_METHODS}
-            isRTL={isRTL}
           />
           <CustomFileInput
             label={t('paymentMethods.qrPicture')}

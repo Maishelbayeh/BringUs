@@ -42,7 +42,7 @@ const SubcategoriesDrawer: React.FC<SubcategoriesDrawerProps> = ({ open, onClose
                 { value: '', label: isRTL ? 'اختر الفئة' : 'Select Category' },
                 ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))
               ]}
-              isRTL={isRTL}
+              
             />
             <SubcategoriesForm
               form={form}
