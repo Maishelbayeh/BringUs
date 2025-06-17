@@ -33,7 +33,9 @@
       "stockPreview": "Stock Preview",
       "paymentsSettings": "Payments Settings",
       "deliverySettings": "Delivery Settings",
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "store": "Store",
+      "productVariants": "Product Variants"
    },
  
     
@@ -179,7 +181,31 @@
     "ACTIONS": "Actions",
     "showing": "Showing",
     "of": "of",
-    "results": "results"
+    "results": "results",
+    "mobile" :"mobile",
+    "tablet":"tablet",
+    "desktop":"desktop"
+  
+    
+
+  },
+  "storeSlider": {
+    "title": "Store Slider",
+    "description": "Configure store slider, images, categories and subcategories.",
+    "add": "Add Store Slider",
+    "edit": "Edit Store Slider",
+    "manage": "Edit Store Slider",
+    "addButton": "Add Store Slider",
+    "searchPlaceholder": "Search store slider..."
+  },
+  "storeVideos": {
+    "title": "Store Videos",
+    "description": "Configure store videos, categories and subcategories.",
+    "add": "Add Store Video",
+    "edit": "Edit Store Video",
+    "manage": "Edit Store Video",
+    "addButton": "Add Store Video",
+    "searchPlaceholder": "Search store videos..."
   }
 
 }

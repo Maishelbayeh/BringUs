@@ -53,15 +53,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   const toggleRegion = (id: number) =>
     setExpandedRegion(prev => (prev === id ? null : id));
 
-  const getButtonClass = (isActive: boolean) =>
-    `flex items-center justify-between w-full text-left px-6 py-3 rounded-lg ${
-      isActive ? 'bg-blue-500 text-white' : 'text-gray-800 hover:bg-gray-100'
-    }`;
+
 
   return (
     <aside
       className={`
-        h-screen ${isOpen ? 'w-80' : 'w-20'} p-4 bg-primary-light flex flex-col transition-all duration-300 ease-in-out
+       w-80 max-w-xs p-4 bg-primary-light flex flex-col transition-all duration-300 ease-in-out
         ${isOpen ? (isRTL ? 'translate-x-0' : 'translate-x-0') : isRTL ? 'translate-x-full' : '-translate-x-full'}
         overflow-y-auto custom-scrollbar-hide
         ${isRTL ? 'items-end' : 'items-start'}

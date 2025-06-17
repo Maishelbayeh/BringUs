@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import Homepage from "../pages/HomePage/homepage";
 import PaymentMethods from "../pages/payment/PaymentMethods";
@@ -9,7 +8,9 @@ import ProductsPage from "../pages/products/products";
 import ProductVariants from "../pages/productVariant/PaymentVariants";
 import CustomersPage from "../pages/customers/customers";
 import OrdersPage from "../pages/orders";
-
+import StoreSliderPage from "../pages/StoreSlider/storeSlider";
+import StorePreview from "../pages/StoreSlider/StorePreview";
+import StoreVideoPage from "../pages/StoreSlider/StoreVideo";
 export default function Routers() {
   return (
     <Routes>
@@ -25,6 +26,9 @@ export default function Routers() {
       <Route path="/product-variants" element={<ProductVariants />} />  
       <Route path="/customers" element={<CustomersPage />} />
       <Route path="/orders" element={<OrdersPage />} />
+      <Route path="/store-slider" element={<StoreSliderPage />} />
+      <Route path="/store-preview" element={<StorePreview />} />
+      <Route path="/store-videos" element={<StoreVideoPage />} />
     </Routes>
   );
 }

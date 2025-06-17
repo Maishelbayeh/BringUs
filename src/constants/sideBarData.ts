@@ -88,22 +88,34 @@ export const getMenuAsText = (): MenuItem[] => [
   },
   {
     id: 6,
-    title: 'sideBar.storeSlider',
+    title: 'sideBar.store',
     icon: AdjustmentsIcon,
-    path: '/store-slider',
+   
+    children: [
+      {
+        id: 61,
+        title: 'sideBar.storeSlider',
+        icon: AdjustmentsIcon,
+        path: '/store-slider',
+      },
+      {
+        id: 62,
+        title: 'sideBar.storePreview',
+        icon: EyeIcon,
+        path: '/store-preview',
+      },
+      {
+        id: 63,
+        title: 'sideBar.storeVideos',
+        icon: VideoCameraIcon,
+        path: '/store-videos',
+      },
+
+    ],
+
   },
-  {
-    id: 7,
-    title: 'sideBar.storePreview',
-    icon: EyeIcon,
-    path: '/store-preview',
-  },
-  {
-    id: 8,
-    title: 'sideBar.storeVideos',
-    icon: VideoCameraIcon,
-    path: '/store-videos',
-  },
+ 
+  
   {
     id: 9,
     title: 'sideBar.wholesalersRegistration',

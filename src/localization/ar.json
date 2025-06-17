@@ -50,7 +50,9 @@
        "stockPreview": "معاينة المخزون",
        "paymentsSettings": "إعدادات الدفع",
        "deliverySettings": "إعدادات التوصيل",
-       "dashboard": "الرئيسية"
+       "dashboard": "الرئيسية",
+       "store": "المتجر",
+       "productVariants": "أنواع المنتجات"
    },
   "chart": {
     "salesByProductType": "المبيعات حسب نوع المنتج",
@@ -169,6 +171,27 @@
     "ACTIONS": "العمليات",
     "showing": "إظهار",
     "of": "من",
-    "results": "نتيجة"
+    "results": "نتيجة",
+    "mobile" :"موبايل",
+    "tablet":"تابلت",
+    "desktop":"كمبيوتر"
+  },
+  "storeSlider": {
+    "title": "شريط المتجر",
+    "description": "إعدادات شريط المتجر, الصور, الفئات, الفئات الفرعية.",
+    "add": "إضافة شريط متجر",
+    "edit": "تعديل شريط المتجر",
+    "manage": "تعديل شريط المتجر",
+    "addButton": "إضافة شريط متجر",
+    "searchPlaceholder": "ابحث عن شريط المتجر..."
+  },
+  "storeVideos": {
+    "title": "فيديوهات المتجر",
+    "description": "إعدادات فيديوهات المتجر, الفئات, الفئات الفرعية.",
+    "add": "إضافة فيديو متجر",
+    "edit": "تعديل فيديو المتجر",
+    "manage": "تعديل فيديو المتجر",
+    "addButton": "إضافة فيديو متجر",
+    "searchPlaceholder": "ابحث عن فيديوهات المتجر..."
   }
 } 

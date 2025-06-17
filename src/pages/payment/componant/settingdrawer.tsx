@@ -22,7 +22,7 @@ const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave, languag
 
   return (
     <Drawer
-      anchor={language === 'ARABIC' ? 'right' : 'left'}
+      anchor={language === 'ARABIC' ? 'left' : 'right'}
       open={open}
       onClose={onClose}
       PaperProps={{ 

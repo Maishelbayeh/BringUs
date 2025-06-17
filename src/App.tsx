@@ -24,9 +24,9 @@ function App() {
   return (
     <BrowserRouter>
       <div className={
-          `flex min-h-screen bg-main ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
+          `flex min-h-screen bg-main_bg_w    ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
         }>
-        {/* Render sidebar only when open */}
+          <div className='h-full'>
         {isSidebarOpen && (
           <Sidebar
             menu={getMenuItems()}
@@ -36,6 +36,7 @@ function App() {
             onItemClick={handleItemClick}
           />
         )}
+</div>
 
         {/* Main area takes full width when sidebar closed */}
         <div className="flex-1 flex flex-col">

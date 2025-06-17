@@ -34,7 +34,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
         </button>
         <div className={`flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
           <img src={logo} alt="logo" className="h-7 w-7" />
-          <span className="text-xl font-bold text-primary tracking-wide">bring us</span>
+          <span className="hidden sm:inline sm:text-2xl font-bold text-primary tracking-wide">bring us</span>
         </div>
       </div>
         {/* Language icon only on mobile, full switcher on desktop */}
@@ -45,14 +45,14 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
             onClick={onLanguageToggle}
             className="flex items-center text-gray-700 hover:text-primary transition-colors duration-300"
           >
-            <ArrowCircleDownIcon className="h-6 w-6 sm:hidden" />
-            <div className="flex flex-row bg-gray-100  font-semibold rounded-md text-sm gap-2 px-2 py-1">
+            <ArrowCircleDownIcon className="h-5 w-5 text-primary hover:text-primary-light 
+            text-align-center " />
+            <div className="hidden sm:inline flex flex-row bg-gray-100  font-semibold rounded-md text-sm gap-2 px-2 py-1">
             <span className="hidden sm:inline ">
               {t('general.language')}: {language}
             
             </span>
-            <ArrowCircleDownIcon className="h-5 w-5 text-primary hover:text-primary-light 
-            text-align-center" />
+          
             </div>
           </button>
           {/* User avatar and name, smaller on mobile, no last login */}
