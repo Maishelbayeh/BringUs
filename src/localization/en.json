@@ -189,7 +189,9 @@
     "clearSort": "Clear Sort",
     "close": "Close",
     "apply": "Apply",
-    "clear": "Clear"
+    "clear": "Clear",
+    "downloadExcel": "Download table as Excel",
+    "downloadCSV": "Download table as CSV"
   },
   "orders": {
     "title": "Orders",
@@ -207,7 +209,30 @@
     "results": "results",
     "mobile" :"mobile",
     "tablet":"tablet",
-    "desktop":"desktop"
+    "desktop":"desktop",
+    "orderDetails":"Order Details",
+    "orderNumber":"Order Number",
+    "deliveryPrice":"Delivery Price",
+    "finalTotal":"Final Total",
+    "orderPrice":"Order Price",
+    "ordersPhone":"Orders Phone",
+    "product":"Product",
+    "quantity":"Quantity",
+    "unit":"Unit",
+    "unitPrice":"Unit Price",
+    "productsTotal":"Products Total",
+    "discountTotal":"Discount Total",
+    "taxTotal":"Tax Total",
+    "storeInfo":"Store Info",
+    "storeName":"Store Name",
+    "storeId":"Store ID",
+    "visitStore":"Visit Store",
+    "customerInfo":"Customer Info",
+    "orderInfo":"Order Info",
+    "storePhone":"Store Phone",
+    "color":"Color",
+    "print":"Print",
+    "orderItems":"Order Items"
   
     
 
@@ -229,6 +254,13 @@
     "manage": "Edit Store Video",
     "addButton": "Add Store Video",
     "searchPlaceholder": "Search store videos..."
+  },
+  "stockPreview": {
+    "title": "Stock Preview",
+    "description": "Configure stock preview, products, categories and subcategories.",
+    "add": "Add Stock Preview",
+    "edit": "Edit Stock Preview",
+    "manage": "Edit Stock Preview"
   }
 
 }

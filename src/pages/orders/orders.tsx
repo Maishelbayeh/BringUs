@@ -51,7 +51,15 @@ const OrdersPage: React.FC = () => {
     <div className="p-4 w-full">
       <h1 className={`text-2xl font-bold mb-6 text-primary ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>{t('orders.title')}</h1>
       <div className="overflow-x-auto ">
-        <CustomTable columns={columns} data={tableData} onFilteredDataChange={setVisibleTableData} />
+        <CustomTable 
+          columns={columns} 
+          data={tableData} 
+          onFilteredDataChange={setVisibleTableData}
+          linkConfig={[{
+            column: 'id',
+            getPath: (row) => `/orders/${row.id}`
+          }]}
+        />
       </div>
       {/* شريط مجموع السعر لكل عملة */}
       {(() => {

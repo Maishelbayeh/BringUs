@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XIcon } from '@heroicons/react/outline';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import CustomSelect from '../../components/common/CustomSelect';
 import CustomInput from '../../components/common/CustomInput';
 import CustomNumberInput from '../../components/common/CustomNumberInput';
@@ -64,7 +64,7 @@ const PaymentVariantsDrawer: React.FC<PaymentVariantsDrawerProps> = ({
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-500"
               >
-                <XIcon className="h-6 w-6" />
+                <XMarkIcon className="h-6 w-6" />
               </button>
             </div>
           </div>

@@ -9,6 +9,7 @@ import ProductVariants from "../pages/productVariant/PaymentVariants";
 import CustomersPage from "../pages/customers/customers";
 import OrdersPage from "../pages/orders/orders";
 import StockTable from '../pages/stockPreview/StockTable';
+import OrderDetailPage from '../pages/orders/OrderDetailPage';
 
 import StoreSliderPage from "../pages/StoreSlider/storeSlider";
 import StorePreview from "../pages/StoreSlider/StorePreview";
@@ -28,6 +29,7 @@ export default function Routers() {
       <Route path="/product-variants" element={<ProductVariants />} />  
       <Route path="/customers" element={<CustomersPage />} />
       <Route path="/orders" element={<OrdersPage />} />
+      <Route path="/orders/:id" element={<OrderDetailPage />} />
       <Route path="/stock-preview" element={<StockTable />} />
       <Route path="/store-slider" element={<StoreSliderPage />} />
       <Route path="/store-preview" element={<StorePreview />} />

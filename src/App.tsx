@@ -28,7 +28,7 @@ function App() {
         }>
           <div className='h-full'>
         {isSidebarOpen && (
-          <Sidebar
+          <Sidebar 
             menu={getMenuItems()}
             isOpen={isSidebarOpen}
             toggleSidebar={toggleSidebar}

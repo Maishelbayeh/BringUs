@@ -8,7 +8,7 @@ import Delieverydrawer from './componant/Delieverydrawer';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '../../components/common/CustomButton';
 import useLanguage from '../../hooks/useLanguage';
-import { ChevronRightIcon } from '@heroicons/react/solid';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useNavigate } from 'react-router-dom';
 
 // dummy initial data

@@ -3,8 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import SubcategoriesNav from './SubcategoriesNav';
 import SubcategoriesDrawer from './SubcategoriesDrawer';
-import SubcategoriesForm from './SubcategoriesForm';
-import { ChevronRightIcon } from '@heroicons/react/solid';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 
 const initialCategories = [
   { id: 1, name: 'Electronics' },

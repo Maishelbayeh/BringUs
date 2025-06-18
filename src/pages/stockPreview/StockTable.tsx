@@ -25,7 +25,7 @@ const mockProducts = [
   { name: 'خزانة ملابس', category: 'أثاث', subcategory: 'غرفة نوم', stock: 35, visibility: true },
 ];
 const StockTable: React.FC = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const columns = [
     { key: 'name', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text', align: 'center' },
     { key: 'category', label: { ar: 'التصنيف', en: 'Category' }, type: 'text', align: 'center' },
@@ -45,9 +45,9 @@ const StockTable: React.FC = () => {
 
   return (
     <div className="p-4 w-full">
-      <h1 className={`text-2xl font-bold mb-6 text-primary ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>جدول الستوك</h1>
+      <h1 className={`text-2xl font-bold mb-6 text-primary ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>{t('stockPreview.title')}</h1>
       <div className="overflow-x-auto ">
-        <CustomTable columns={columns} data={tableData} />
+        <CustomTable columns={columns as any} data={tableData} />
       </div>
     </div>
   );

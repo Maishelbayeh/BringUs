@@ -179,7 +179,9 @@
     "clearSort": "مسح الترتيب",
     "close": "إغلاق",
     "apply": "تطبيق",
-    "clear": "مسح"
+      "clear": "مسح",
+    "downloadExcel": "تنزيل الجدول كملف Excel",
+    "downloadCSV": "تنزيل الجدول كملف CSV"
   },
   "orders": {
     "title": "الطلبات",
@@ -188,7 +190,7 @@
     "date": "تاريخ الطلب",
     "customer": "العميل",
     "deliveryArea": "المنطقة",
-    "affiliate": "التسويق",
+    "affiliate": "المسوق",
     "status": "الحالة",
     "paid": "مدفوع",
     "unpaid": "غير مدفوع",
@@ -197,7 +199,30 @@
     "results": "نتيجة",
     "mobile" :"موبايل",
     "tablet":"تابلت",
-    "desktop":"كمبيوتر"
+    "desktop":"كمبيوتر",
+    "orderDetails":"تفاصيل الطلب",
+    "orderNumber":"رقم الطلب",
+    "deliveryPrice":"سعر التوصيل",
+    "finalTotal":"الإجمالي النهائي",
+    "orderPrice":"سعر الطلب",
+    "ordersPhone":"رقم العميل",
+    "product":"المنتج",
+    "quantity":"الكمية",
+    "unit":"الوحدة",
+    "unitPrice":"سعر الوحدة",
+    "productsTotal":"إجمالي المنتجات",
+    "discountTotal":"إجمالي الخصم",
+    "taxTotal":"إجمالي الضريبة",
+    "storeInfo":"تفاصيل المتجر",
+    "storeName":"اسم المتجر",
+    "storeId":"رقم المتجر",
+    "visitStore":"زيارة المتجر",
+    "customerInfo":"تفاصيل العميل",
+    "orderInfo":"تفاصيل الطلب",
+    "storePhone":"رقم المتجر",
+    "color":"اللون",
+    "print":"طباعة",
+    "orderItems":"محتويات الطلب"
   },
   "storeSlider": {
     "title": "شريط المتجر",
@@ -216,5 +241,12 @@
     "manage": "تعديل فيديو المتجر",
     "addButton": "إضافة فيديو متجر",
     "searchPlaceholder": "ابحث عن فيديوهات المتجر..."
+  },
+  "stockPreview": {
+    "title": "معاينة المخزون",
+    "description": "إعدادات معاينة المخزون, المنتجات, الفئات, الفئات الفرعية.",
+    "add": "إضافة معاينة مخزون",
+    "edit": "تعديل معاينة المخزون",
+    "manage": "تعديل معاينة المخزون"
   }
 } 

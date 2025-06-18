@@ -1,6 +1,6 @@
 // src/components/common/navigation/Sidebar.tsx
 import React, { useRef, useState } from 'react';
-import { ChevronRightIcon } from '@heroicons/react/outline';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -58,6 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       className={`
+        no-print
        w-80 max-w-xs p-4 bg-primary-light flex flex-col transition-all duration-300 ease-in-out
         ${isOpen ? (isRTL ? 'translate-x-0' : 'translate-x-0') : isRTL ? 'translate-x-full' : '-translate-x-full'}
         overflow-y-auto custom-scrollbar-hide

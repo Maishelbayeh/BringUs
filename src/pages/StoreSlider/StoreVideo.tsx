@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { ChevronRightIcon } from '@heroicons/react/solid';
-import { CogIcon } from '@heroicons/react/outline';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import { CogIcon } from '@heroicons/react/24/outline';
 import CustomNav from '../../components/common/CustomNav';
 import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';

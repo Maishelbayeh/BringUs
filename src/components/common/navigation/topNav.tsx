@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ArrowCircleDownIcon } from '@heroicons/react/outline';
-import { MenuIcon } from '@heroicons/react/outline';
+import { ArrowDownIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon } from '@heroicons/react/24/outline';
 
 import logo from '../../../assets/bringus.svg';
 type TopNavbarProps = {
@@ -30,7 +30,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
           onClick={onMenuToggle}
           className="text-gray-800 hover:text-gray-500 focus:outline-none text-primary"
         >
-          <MenuIcon className="h-6 w-6" />
+          <Bars3Icon className="h-6 w-6" />
         </button>
         <div className={`flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
           <img src={logo} alt="logo" className="h-7 w-7" />
@@ -45,7 +45,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
             onClick={onLanguageToggle}
             className="flex items-center text-gray-700 hover:text-primary transition-colors duration-300"
           >
-            <ArrowCircleDownIcon className="h-5 w-5 text-primary hover:text-primary-light 
+            <ArrowDownIcon className="h-5 w-5 text-primary hover:text-primary-light 
             text-align-center " />
             <div className="hidden sm:inline flex flex-row bg-gray-100  font-semibold rounded-md text-sm gap-2 px-2 py-1">
             <span className="hidden sm:inline ">

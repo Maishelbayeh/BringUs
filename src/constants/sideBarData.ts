@@ -2,19 +2,19 @@
 import { MenuItem } from '../Types';
 import {
   ShoppingCartIcon,
-  ViewListIcon,
-  TemplateIcon,
+  ViewColumnsIcon,
+  DocumentDuplicateIcon,
   UsersIcon,
-  AdjustmentsIcon,
+  AdjustmentsHorizontalIcon,
   DocumentTextIcon,
   VideoCameraIcon,
   CreditCardIcon,
   TruckIcon,
   EyeIcon,
-  UserAddIcon,
+  UserPlusIcon,
   ChartBarIcon,
-  CollectionIcon
-} from '@heroicons/react/outline';
+  Squares2X2Icon
+} from '@heroicons/react/24/outline';
 
 export const getMenuAsText = (): MenuItem[] => [
   {
@@ -45,7 +45,7 @@ export const getMenuAsText = (): MenuItem[] => [
   {
     id: 2,
     title: 'sideBar.categories',
-    icon: ViewListIcon,
+    icon: ViewColumnsIcon,
     path: '/categories',
     children: [
     
@@ -53,7 +53,7 @@ export const getMenuAsText = (): MenuItem[] => [
       {
         id: 21,
         title: 'sideBar.subcategories',
-        icon: CollectionIcon,
+        icon: Squares2X2Icon,
         path: '/subcategories',
        
 
@@ -63,13 +63,13 @@ export const getMenuAsText = (): MenuItem[] => [
   {
     id: 3,
     title: 'sideBar.products',
-    icon: TemplateIcon,
+    icon: DocumentDuplicateIcon,
     path: '/products',
     children: [
       {
         id: 31,
         title: 'sideBar.productVariants',
-        icon: CollectionIcon,
+        icon: Squares2X2Icon,
         path: '/product-variants',
       }
     ]
@@ -89,13 +89,13 @@ export const getMenuAsText = (): MenuItem[] => [
   {
     id: 6,
     title: 'sideBar.store',
-    icon: AdjustmentsIcon,
+    icon: AdjustmentsHorizontalIcon,
    
     children: [
       {
         id: 61,
         title: 'sideBar.storeSlider',
-        icon: AdjustmentsIcon,
+        icon: AdjustmentsHorizontalIcon,
         path: '/store-slider',
       },
       {
@@ -131,7 +131,7 @@ export const getMenuAsText = (): MenuItem[] => [
   {
     id: 11,
     title: 'sideBar.affiliateTeamRegistration',
-    icon: UserAddIcon,
+    icon: UserPlusIcon,
     path: '/affiliate-team-registration',
   },
   {

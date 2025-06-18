@@ -12,23 +12,31 @@ export const customersData = [
 ];
 
 export const ordersData = [
-  { id: 101, customerId: 1, date: '2025-06-01', price: 200,currencyId: 1, paid: true,deliveryAreaId: 1,affiliateId: 1 },
-  { id: 95, customerId: 1, date: '2025-05-20', price: 150,currencyId: 1, paid: false,deliveryAreaId: 2,affiliateId: 1 },
-  { id: 99, customerId: 2, date: '2025-05-29', price: 250,currencyId: 2, paid: true,deliveryAreaId: 2,affiliateId: 2 },
-  { id: 90, customerId: 2, date: '2025-05-10', price: 150,currencyId: 5, paid: true,deliveryAreaId: 3,affiliateId: 3 },
-  { id: 88, customerId: 3, date: '2025-05-15', price: 120,currencyId: 3, paid: true,deliveryAreaId: 1,affiliateId: 4 },
-  { id: 77, customerId: 4, date: '2025-05-10', price: 100,currencyId: 2, paid: false ,deliveryAreaId: 4,affiliateId: 5},
-  { id: 70, customerId: 4, date: '2025-04-30', price: 200,currencyId: 5, paid: true ,deliveryAreaId: 5,affiliateId: 5},
-  { id: 110, customerId: 5, date: '2025-06-03', price: 300,currencyId: 1, paid: true ,deliveryAreaId: 6,affiliateId: 2},
-  { id: 111, customerId: 5, date: '2025-06-04', price: 180,currencyId: 2, paid: false ,deliveryAreaId: 7,affiliateId: 1},
-  { id: 112, customerId: 5, date: '2025-06-05', price: 220,currencyId: 1, paid: true ,deliveryAreaId: 8,affiliateId: 1},
-  { id: 120, customerId: 6, date: '2025-05-30', price: 90,currencyId: 1, paid: false ,deliveryAreaId: 8,affiliateId: 1},
-  { id: 121, customerId: 6, date: '2025-06-01', price: 400,currencyId: 3, paid: true ,deliveryAreaId: 10,affiliateId: 3},
-  { id: 130, customerId: 7, date: '2025-06-02', price: 500,currencyId: 3, paid: true ,deliveryAreaId: 10,affiliateId: 1},
-  { id: 140, customerId: 8, date: '2025-05-25', price: 210,currencyId: 4, paid: false ,deliveryAreaId: 1,affiliateId: 2},
-  { id: 160, customerId: 10, date: '2025-05-29', price: 250,currencyId: 1, paid: true ,deliveryAreaId: 2,affiliateId: 3},
-  { id: 161, customerId: 10, date: '2025-06-02', price: 175,currencyId: 4, paid: true ,deliveryAreaId: 3,affiliateId: 4},
-]; 
+  { id: 101, customerId: 1, date: '2025-06-01', price: 200, currencyId: 1, paid: true, deliveryAreaId: 1, affiliateId: 1, products: [ { productId: 1, quantity: 2 }, { productId: 2, quantity: 1 } ], discountTotal: 10, taxTotal: 15, deliveryPrice: 20, storeId: 1, storeName: 'متجر الإلكترونيات', storeUrl: 'https://store1.example.com', storePhone: '0590000001' },
+  { id: 95, customerId: 1, date: '2025-05-20', price: 150, currencyId: 1, paid: false, deliveryAreaId: 2, affiliateId: 1, products: [ { productId: 2, quantity: 3 } ], discountTotal: 5, taxTotal: 10, deliveryPrice: 15, storeId: 2, storeName: 'متجر الجوالات', storeUrl: 'https://store2.example.com', storePhone: '0590000002' },
+  { id: 99, customerId: 2, date: '2025-05-29', price: 250, currencyId: 2, paid: true, deliveryAreaId: 2, affiliateId: 2, products: [ { productId: 3, quantity: 1 }, { productId: 1, quantity: 1 } ], discountTotal: 0, taxTotal: 20, deliveryPrice: 10, storeId: 3, storeName: 'متجر الساعات', storeUrl: 'https://store3.example.com', storePhone: '0590000003' },
+  { id: 90, customerId: 2, date: '2025-05-10', price: 150, currencyId: 5, paid: true, deliveryAreaId: 3, affiliateId: 3, products: [ { productId: 4, quantity: 2 } ], discountTotal: 8, taxTotal: 12, deliveryPrice: 12, storeId: 4, storeName: 'متجر الإكسسوارات', storeUrl: 'https://store4.example.com', storePhone: '0590000004' },
+  { id: 88, customerId: 3, date: '2025-05-15', price: 120, currencyId: 3, paid: true, deliveryAreaId: 1, affiliateId: 4, products: [ { productId: 2, quantity: 2 }, { productId: 5, quantity: 1 } ], discountTotal: 6, taxTotal: 9, deliveryPrice: 10, storeId: 5, storeName: 'متجر التقنية', storeUrl: 'https://store5.example.com', storePhone: '0590000005' },
+  { id: 77, customerId: 4, date: '2025-05-10', price: 100, currencyId: 2, paid: false, deliveryAreaId: 4, affiliateId: 5, products: [ { productId: 3, quantity: 1 } ], discountTotal: 3, taxTotal: 5, deliveryPrice: 8, storeId: 6, storeName: 'متجر الأجهزة', storeUrl: 'https://store6.example.com', storePhone: '0590000006' },
+  { id: 70, customerId: 4, date: '2025-04-30', price: 200, currencyId: 5, paid: true, deliveryAreaId: 5, affiliateId: 5, products: [ { productId: 4, quantity: 2 }, { productId: 5, quantity: 2 } ], discountTotal: 12, taxTotal: 18, deliveryPrice: 14, storeId: 7, storeName: 'متجر المنزل', storeUrl: 'https://store7.example.com', storePhone: '0590000007' },
+  { id: 110, customerId: 5, date: '2025-06-03', price: 300, currencyId: 1, paid: true, deliveryAreaId: 6, affiliateId: 2, products: [ { productId: 1, quantity: 4 } ], discountTotal: 15, taxTotal: 22, deliveryPrice: 18, storeId: 8, storeName: 'متجر الكمبيوتر', storeUrl: 'https://store8.example.com', storePhone: '0590000008' },
+  { id: 111, customerId: 5, date: '2025-06-04', price: 180, currencyId: 2, paid: false, deliveryAreaId: 7, affiliateId: 1, products: [ { productId: 2, quantity: 2 }, { productId: 3, quantity: 1 } ], discountTotal: 7, taxTotal: 11, deliveryPrice: 13, storeId: 9, storeName: 'متجر الألعاب', storeUrl: 'https://store9.example.com', storePhone: '0590000009' },
+  { id: 112, customerId: 5, date: '2025-06-05', price: 220, currencyId: 1, paid: true, deliveryAreaId: 8, affiliateId: 1, products: [ { productId: 5, quantity: 2 } ], discountTotal: 9, taxTotal: 14, deliveryPrice: 16, storeId: 10, storeName: 'متجر الهدايا', storeUrl: 'https://store10.example.com', storePhone: '0590000010' },
+  { id: 120, customerId: 6, date: '2025-05-30', price: 90, currencyId: 1, paid: false, deliveryAreaId: 8, affiliateId: 1, products: [ { productId: 4, quantity: 1 } ], discountTotal: 2, taxTotal: 4, deliveryPrice: 6, storeId: 11, storeName: 'متجر الكتب', storeUrl: 'https://store11.example.com', storePhone: '0590000011' },
+  { id: 121, customerId: 6, date: '2025-06-01', price: 400, currencyId: 3, paid: true, deliveryAreaId: 10, affiliateId: 3, products: [ { productId: 1, quantity: 2 }, { productId: 3, quantity: 2 } ], discountTotal: 20, taxTotal: 30, deliveryPrice: 25, storeId: 12, storeName: 'متجر البرمجيات', storeUrl: 'https://store12.example.com', storePhone: '0590000012' },
+  { id: 130, customerId: 7, date: '2025-06-02', price: 500, currencyId: 3, paid: true, deliveryAreaId: 10, affiliateId: 1, products: [ { productId: 2, quantity: 5 } ], discountTotal: 25, taxTotal: 35, deliveryPrice: 28, storeId: 13, storeName: 'متجر السيارات', storeUrl: 'https://store13.example.com', storePhone: '0590000013' },
+  { id: 140, customerId: 8, date: '2025-05-25', price: 210, currencyId: 4, paid: false, deliveryAreaId: 1, affiliateId: 2, products: [ { productId: 5, quantity: 3 } ], discountTotal: 11, taxTotal: 16, deliveryPrice: 12, storeId: 14, storeName: 'متجر الهوايات', storeUrl: 'https://store14.example.com', storePhone: '0590000014' },
+  { id: 160, customerId: 10, date: '2025-05-29', price: 250, currencyId: 1, paid: true, deliveryAreaId: 2, affiliateId: 3, products: [ { productId: 1, quantity: 1 }, { productId: 4, quantity: 1 } ], discountTotal: 13, taxTotal: 19, deliveryPrice: 15, storeId: 15, storeName: 'متجر الرياضة', storeUrl: 'https://store15.example.com', storePhone: '0590000015' },
+  { id: 161, customerId: 10, date: '2025-06-02', price: 175, currencyId: 4, paid: true, deliveryAreaId: 3, affiliateId: 4, products: [ { productId: 3, quantity: 2 } ], discountTotal: 6, taxTotal: 9, deliveryPrice: 10, storeId: 16, storeName: 'متجر الصحة', storeUrl: 'https://store16.example.com', storePhone: '0590000016' },
+];
+
+export const productsData = [
+  { id: 1, nameAr: 'هاتف ذكي', nameEn: 'Smartphone', unitId: 22, pricePerUnit: 100, color: '#FF5733', image: '/bag.png' },
+  { id: 2, nameAr: 'سماعات لاسلكية', nameEn: 'Wireless Headphones', unitId: 22, pricePerUnit: 50, color: ['#4287f5', '#f542dd'], image: '/user.jpg' },
+  { id: 3, nameAr: 'شاحن سريع', nameEn: 'Fast Charger', unitId: 22, pricePerUnit: 25, color: '#2ecc40', image: '/salary.png' },
+  { id: 4, nameAr: 'حافظة هاتف', nameEn: 'Phone Case', unitId: 22, pricePerUnit: 20, color: ['#FFD700', '#8B4513'], image: '/bulkofmoney.png' },
+  { id: 5, nameAr: 'ساعة ذكية', nameEn: 'Smartwatch', unitId: 22, pricePerUnit: 120, color: '#000000', image: '/logo.png' },
+];
 
 export const units = [
   { id: 1, labelAr: 'Bundle', labelEn: 'Bundle' },
@@ -67,11 +75,11 @@ export const units = [
 ];
 
 export const currencies = [
-  { id: 1, labelAr: 'شيكل (₪)', labelEn: 'Shekel (₪)' },
-  { id: 2, labelAr: 'دولار ($)', labelEn: 'Dollar ($)' },
-  { id: 3, labelAr: 'دينار أردني (JD)', labelEn: 'Jordanian Dinar (JD)' },
-  { id: 4, labelAr: 'يورو (€)', labelEn: 'Euro (€)' },
-  { id: 5, labelAr: 'ريال سعودي (SAR)', labelEn: 'Saudi Riyal (SAR)' },
+  { id: 1, labelAr: 'شيكل (₪)', labelEn: ' (₪)' },
+  { id: 2, labelAr: 'دولار ($)', labelEn: ' ($)' },
+  { id: 3, labelAr: 'دينار أردني (JD)', labelEn: '(JD)' },
+  { id: 4, labelAr: 'يورو (€)', labelEn: ' (€)' },
+  { id: 5, labelAr: 'ريال سعودي (SAR)', labelEn: '(SAR)' },
 ];
 
 export const deliveryAreas = [

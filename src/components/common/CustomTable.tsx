@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SearchIcon } from '@heroicons/react/outline';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
+
+import * as XLSX from 'xlsx';
+import 'jspdf-autotable';
+
+import Papa from 'papaparse';
 
 interface Column {
   key: string;
@@ -8,8 +14,13 @@ interface Column {
     en: string;
     ar: string;
   };
-  type?: 'text' | 'number' | 'date';
-  align?: 'left' | 'center' | 'right';
+  type?: 'text' | 'number' | 'date' | 'image' | 'color';
+  
+}
+
+interface LinkConfig {
+  column: string;
+  getPath: (row: any) => string;
 }
 
 interface CustomTableProps {
@@ -18,6 +29,7 @@ interface CustomTableProps {
   onEdit?: (item: any) => void;
   onDelete?: (item: any) => void;
   onFilteredDataChange?: (filtered: any[]) => void;
+  linkConfig?: LinkConfig[];
 }
 
 const CustomTable: React.FC<CustomTableProps> = ({
@@ -26,6 +38,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   onEdit,
   onDelete,
   onFilteredDataChange,
+  linkConfig = [],
 }) => {
   const { t, i18n } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,6 +53,9 @@ const CustomTable: React.FC<CustomTableProps> = ({
   const lastSent = useRef<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   // دالة استخراج القيم الفريدة من أي مصدر بيانات
   const getUniqueColumnValuesFromData = (source: any[], colKey: string): string[] => {
@@ -47,6 +63,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
     return Array.from(new Set(values)).map(String);
   };
 
+  
   const filteredData: any[] = data.filter((item: any) => {
     const matchesSearch = Object.values(item).some((value: any) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
@@ -195,6 +212,25 @@ const CustomTable: React.FC<CustomTableProps> = ({
     setCurrentPage(1);
   }, [searchTerm, JSON.stringify(filters)]);
 
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target as Node)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
+
   // SVGs للأسهم
   const ArrowRight = (
     <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
@@ -205,19 +241,83 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
   return (
     <div className="w-full">
-      {/* Search and Filter Bar */}
+      {/* Search and Filter Bar + Actions */}
       <div className="mb-4 flex flex-wrap gap-4 items-center">
-        <div className="flex-1">
-          <div className="relative">
+        <div className={`flex-1 flex items-center gap-2 ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
+          <div className="relative w-full">
             <input
               type="text"
               dir={i18n.language === 'ARABIC' ? 'rtl' : 'ltr'}
               placeholder={t('common.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full  py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary ${i18n.language === 'ARABIC' ? 'text-right pr-10 pl-4' : 'text-left pl-10 pr-4'}`}
+              className={`w-full py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary ${i18n.language === 'ARABIC' ? 'text-right pr-10 pl-4' : 'text-left pl-10 pr-4'}`}
             />
-            <SearchIcon className={`h-5 w-5 text-gray-400 absolute ${i18n.language === 'ARABIC' ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2`} />
+            <MagnifyingGlassIcon className={`h-5 w-5 text-gray-400 absolute ${i18n.language === 'ARABIC' ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2`} />
+          </div>
+          {/* Table Actions Menu Button */}
+          <div className="relative">
+            <button
+              ref={menuButtonRef}
+              onClick={() => setMenuOpen((v) => !v)}
+              className="p-2 rounded-full hover:bg-primary/10 focus:outline-none border border-gray-200"
+              aria-label="Table actions"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+            </button>
+            {menuOpen && (
+              <div
+                ref={menuRef}
+                className={`absolute z-20 min-w-[220px] bg-white border border-gray-200 rounded-lg shadow-lg py-2 mt-2 ${i18n.language === 'ARABIC' ? '' : 'left-[-200px]'}`}
+              >
+                {/* Excel Download */}
+                <button
+                  onClick={() => {
+                    const exportData = sortedData.map((row: any) => {
+                      const obj: any = {};
+                      columns.forEach(col => {
+                        obj[i18n.language === 'ARABIC' ? col.label.ar : col.label.en] = row[col.key];
+                      });
+                      return obj;
+                    });
+                    const worksheet = XLSX.utils.json_to_sheet(exportData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, 'Table');
+                    XLSX.writeFile(workbook, `table_export.xlsx`);
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-primary/10 text-primary"
+                >
+                    {t('common.downloadExcel')}
+                </button>
+                {/* CSV Download */}
+                <button
+                  onClick={() => {
+                    const exportData = sortedData.map((row: any) => {
+                      const obj: any = {};
+                      columns.forEach(col => {
+                        obj[i18n.language === 'ARABIC' ? col.label.ar : col.label.en] = row[col.key];
+                      });
+                      return obj;
+                    });
+                    let csv = Papa.unparse(exportData);
+                    // Add UTF-8 BOM for Excel Arabic support
+                    csv = '\uFEFF' + csv;
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.setAttribute('download', 'table_export.csv');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-primary/10 text-primary"
+                >
+                 {t('common.downloadCSV')}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -250,46 +350,48 @@ const CustomTable: React.FC<CustomTableProps> = ({
       )}
 
       {/* Table */}
-      <div className="relative overflow-x-auto">
-        <div className="w-full bg-primary/5 p-2 rounded-xl">
+      <div className="relative overflow-x-auto w-full bg-primary/5 rounded-xl">
+        <div className="w-full  p-2">
           <table
-            className="min-w-full"
+            className="w-full"
             dir={i18n.language === 'ARABIC' || i18n.language === 'ar' ? 'rtl' : 'ltr'}
           >
-            <thead className=" rounded-t-lg">
+            <thead className="rounded-t-lg">
               <tr>
                 {columns.map(column => (
                   <th
                     key={column.key}
                     ref={el => (headerRefs.current[column.key] = el)}
                     scope="col"
-                    className={` px-6 py-3 text-${column.align || 'left'} text-xs font-medium uppercase tracking-wider transition relative ${((filters[column.key] && filters[column.key] !== '') || (sortConfig?.key === column.key)) ? 'text-primary' : 'text-gray-500'}`}
+                    className={`px-6 py-3 text-center text-xs font-medium uppercase tracking-wider transition relative whitespace-nowrap`}
                   >
-                    <span className={`inline-block select-none ${(filters[column.key] && filters[column.key] !== '') || (sortConfig?.key === column.key) ? 'text-primary' : ''}`}>
-                      {i18n.language === 'ARABIC' ? column.label.ar : column.label.en}
-                    </span>
-                    {/* أيقونة سهم الترتيب */}
-                    <span
-                      className={`inline-block ml-1 cursor-pointer select-none ${(sortConfig?.key === column.key) ? 'text-primary' : ''}`}
-                      onClick={e => { e.stopPropagation(); handleHeaderSort(column.key); }}
-                    >
-                      {sortConfig?.key === column.key ? (
-                        sortConfig.direction === 'asc' ? (
-                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                    <div className="flex items-center gap-1 whitespace-nowrap justify-center">
+                      <span className={`select-none ${(filters[column.key] && filters[column.key] !== '') || (sortConfig?.key === column.key) ? 'text-primary' : ''}`}>
+                        {i18n.language === 'ARABIC' ? column.label.ar : column.label.en}
+                      </span>
+                      {/* أيقونة سهم الترتيب */}
+                      <span
+                        className={`ml-1 cursor-pointer select-none ${(sortConfig?.key === column.key) ? 'text-primary' : ''}`}
+                        onClick={e => { e.stopPropagation(); handleHeaderSort(column.key); }}
+                      >
+                        {sortConfig?.key === column.key ? (
+                          sortConfig.direction === 'asc' ? (
+                            <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                          ) : (
+                            <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                          )
                         ) : (
-                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                        )
-                      ) : (
-                        <svg className="w-4 h-4 text-gray-400 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 11l5-5 5 5M7 13l5 5 5-5" /></svg>
-                      )}
-                    </span>
-                    {/* أيقونة فلتر البوب أب */}
-                    <span
-                      className={`inline-block ml-1 cursor-pointer select-none ${(filters[column.key] && filters[column.key] !== '') ? 'text-primary' : ''}`}
-                      onClick={e => { e.stopPropagation(); handleHeaderClick(column.key); }}
-                    >
-                      <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M3 12h18M3 18h18" /></svg>
-                    </span>
+                          <svg className="w-4 h-4 text-gray-400 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 11l5-5 5 5M7 13l5 5 5-5" /></svg>
+                        )}
+                      </span>
+                      {/* أيقونة فلتر البوب أب */}
+                      <span
+                        className={`ml-1 cursor-pointer select-none ${(filters[column.key] && filters[column.key] !== '') ? 'text-primary' : ''}`}
+                        onClick={e => { e.stopPropagation(); handleHeaderClick(column.key); }}
+                      >
+                        <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M3 12h18M3 18h18" /></svg>
+                      </span>
+                    </div>
                   </th>
                 ))}
                 {(onEdit || onDelete) && (
@@ -305,47 +407,87 @@ const CustomTable: React.FC<CustomTableProps> = ({
                   {columns.map(column => (
                     <td
                       key={column.key}
-                      className={`px-6 py-6 text-${column.align || 'left'} text-sm text-gray-900`}
+                      className="px-6 py-3 text-sm text-gray-900 text-center"
                     >
-                      {column.key === 'status' ? (
-                        <span
-                          className={
-                            item[column.key] === 'مدفوع' || item[column.key] === 'Paid'
-                              ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
-                              : 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
-                          }
-                        >
-                          {item[column.key]}
-                        </span>
-                      ) : column.key === 'stock' ? (
-                        <span
-                          className={
-                            Number(item[column.key]) < 10
-                              ? 'bg-red-100 text-red-700 px-6 py-1 rounded-full'
-                              : Number(item[column.key]) <= 50
-                                ? 'bg-orange-100 text-orange-700 px-6 py-1 rounded-full'
-                                : 'bg-green-100 text-green-700 px-6 py-1 rounded-full'
-                          }
-                        >
-                          {item[column.key]}
-                        </span>
-                      ) : column.key === 'visibility' ? (
-                        <span
-                          className={
-                            item[column.key] === 'ظاهر' || item[column.key] === 'Visible'
-                              ? 'bg-primary/10 text-primary px-3 py-1 rounded-full font-bold'
-                              : 'bg-gray-100 text-gray-300 px-3 py-1 rounded-full font-bold'
-                          }
-                        >
-                          {item[column.key]}
-                        </span>
-                      ) : (
-                        item[column.key]
-                      )}
+                      {column.key === 'color' ? (() => {
+                        const value = item[column.key];
+                        if (!value || value === '-') return '-';
+                        if (typeof value === 'string') {
+                          return (
+                            <span className="flex items-center gap-2 justify-center">
+                              <span style={{ background: value, width: 22, height: 22, borderRadius: '50%', display: 'inline-block', border: '1px solid #ddd' }} />
+                            </span>
+                          );
+                        } else if (Array.isArray(value) && value.length === 2) {
+                          return (
+                            <span className="flex items-center gap-2 justify-center">
+                              <span style={{ background: `linear-gradient(90deg, ${value[0]} 50%, ${value[1]} 50%)`, width: 22, height: 22, borderRadius: '50%', display: 'inline-block', border: '1px solid #ddd' }} />
+                            </span>
+                          );
+                        }
+                        return '-';
+                      })() :
+                      column.type === 'image' ? (
+                        item[column.key] ? (
+                          <img src={item[column.key]} alt="product" style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 8 }} />
+                        ) : '-'
+                      ) :
+                      (() => {
+                        const link = linkConfig.find(lc => lc.column === column.key);
+                        if (link) {
+                          return (
+                            <Link to={link.getPath(item)} className="text-primary underline hover:text-primary-dark">
+                              {item[column.key]}
+                            </Link>
+                          );
+                        }
+                        // منطق الحالات الخاصة (status, stock, visibility)
+                        if (column.key === 'status') {
+                          return (
+                            <span
+                              className={
+                                item[column.key] === 'مدفوع' || item[column.key] === 'Paid'
+                                  ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
+                                  : 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
+                              }
+                            >
+                              {item[column.key]}
+                            </span>
+                          );
+                        } else if (column.key === 'stock') {
+                          return (
+                            <span
+                              className={
+                                Number(item[column.key]) < 10
+                                  ? 'bg-red-100 text-red-700 px-6 py-1 rounded-full'
+                                  : Number(item[column.key]) <= 50
+                                    ? 'bg-orange-100 text-orange-700 px-6 py-1 rounded-full'
+                                    : 'bg-green-100 text-green-700 px-6 py-1 rounded-full'
+                              }
+                            >
+                              {item[column.key]}
+                            </span>
+                          );
+                        } else if (column.key === 'visibility') {
+                          return (
+                            <span
+                              className={
+                                item[column.key] === 'ظاهر' || item[column.key] === 'Visible'
+                                  ? 'bg-primary/10 text-primary px-3 py-1 rounded-full font-bold'
+                                  : 'bg-gray-100 text-gray-300 px-3 py-1 rounded-full font-bold'
+                              }
+                            >
+                              {item[column.key]}
+                            </span>
+                          );
+                        } else {
+                          return item[column.key];
+                        }
+                      })()}
                     </td>
                   ))}
                   {(onEdit || onDelete) && (
-                    <td className="px-6 py-6 whitespace-nowrap text-center text-sm font-medium">
+                    <td className="px-6 py-3 whitespace-nowrap text-center text-sm font-medium">
                       <div className="flex justify-center space-x-2">
                         {onEdit && (
                           <button

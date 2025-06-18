@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronRightIcon } from '@heroicons/react/solid';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import CategoriesDrawer from './components/CategoriesDrawer';
 import CategoriesNav from './components/CategoriesNav';
 import useLanguage from '../../hooks/useLanguage';

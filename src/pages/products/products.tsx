@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductsNav from './ProductsNav';
 import ProductsDrawer from './ProductsDrawer';
-import { ChevronRightIcon } from '@heroicons/react/solid';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 
 // Add ColorVariant type for form
 interface ColorVariant {
