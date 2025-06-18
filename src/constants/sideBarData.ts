@@ -139,12 +139,17 @@ export const getMenuAsText = (): MenuItem[] => [
     path: '/stock-preview',
   },
   {
-    id: 11,
-    title: 'sideBar.paymentMethods',
-    icon: CreditCardIcon,
-    path: '/payment-methods',
+    id: 12,
+    title: 'sideBar.advertisement',
+    icon: DocumentTextIcon,
+    path: '/advertisement',
   },
- 
+  {
+    id: 13,
+    title: 'sideBar.termsConditions',
+    icon: DocumentTextIcon,
+    path: '/terms-conditions',
+  },
 ];
 
 export class MenuModel {

@@ -8,7 +8,8 @@
     "delete":"delete",
     "add":"Add",
       "language": "Language",
-    "lastSignIn": "Last sign in on {{date}}"
+    "lastSignIn": "Last sign in on {{date}}",
+    "termsConditions": "Terms & Conditions"
 },
  
   "dashboard": {
@@ -35,7 +36,8 @@
       "deliverySettings": "Delivery Settings",
       "dashboard": "Dashboard",
       "store": "Store",
-      "productVariants": "Product Variants"
+      "productVariants": "Product Variants",
+      "advertisement": "Advertisement"
    },
  
     
@@ -261,5 +263,13 @@
     "active": "Active",
     "inactive": "Inactive",
     "actions": "Actions"
+  },
+  "advertisement": {
+    "inputLabel": "Paste your HTML below",
+    "preview": "Preview"
+  },
+  "termsConditions": {
+    "edit": "Edit Terms & Conditions",
+    "htmlPreview": "HTML Preview"
   }
 }

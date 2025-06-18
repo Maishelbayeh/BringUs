@@ -8,7 +8,8 @@
     "delete":"حذف",
     "add":"إضافة",
     "language": "اللغة",
-    "lastSignIn": "آخر تسجيل دخول في {{date}}"
+    "lastSignIn": "آخر تسجيل دخول في {{date}}",
+    "advertisement": "الإعلانات"
   },
   "auth":{
     "since_2024":"منذ 2024",
@@ -53,7 +54,9 @@
        "deliverySettings": "إعدادات التوصيل",
        "dashboard": "الرئيسية",
        "store": "المتجر",
-       "productVariants": "أنواع المنتجات"
+       "productVariants": "أنواع المنتجات",
+       "advertisement": "الإعلانات",
+       "termsConditions": "الشروط والأحكام"
    },
   "chart": {
     "salesByProductType": "المبيعات حسب نوع المنتج",
@@ -249,5 +252,13 @@
     "active": "نشط",
     "inactive": "غير نشط",
     "actions": "العمليات"
+  },
+  "advertisement": {
+    "inputLabel": "الصق كود HTML هنا",
+    "preview": "المعاينة"
+  },
+  "termsConditions": {
+    "edit": "تعديل الشروط والأحكام",
+    "htmlPreview": "معاينة الكود HTML"
   }
 } 

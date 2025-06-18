@@ -94,7 +94,7 @@ const AffiliationPage = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <CustomNav
         isRTL={isRTL}
         onAdd={handleDrawerOpen}

@@ -43,7 +43,7 @@ const CustomNav: React.FC<CustomNavProps> = ({
   addButtonText,
   searchPlaceholder,
 }) => (
-  <div className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 px-2 py-3 rounded-2xl shadow bg-primary-light w-full mx-auto`} style={{ minHeight: '56px' }}>
+  <div className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 px-2 py-3 rounded-2xl shadow bg-primary-light w-full mx-auto ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} style={{ minHeight: '56px' }}>
     <div className={`flex gap-2 items-center`}>
       <h2 className="text-xl font-bold text-primary">{title}</h2>
       {showCategory && setSelectedCategoryId && (
