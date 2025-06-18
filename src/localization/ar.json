@@ -8,7 +8,8 @@
     "delete":"حذف",
     "add":"إضافة",
     "language": "اللغة",
-    "lastSignIn": "آخر تسجيل دخول في {{date}}"
+    "lastSignIn": "آخر تسجيل دخول في {{date}}",
+    "advertisement": "الإعلانات"
   },
   "auth":{
     "since_2024":"منذ 2024",
@@ -43,16 +44,19 @@
        "storeSlider": "شريط المتجر",
        "storePreview": "معاينة المتجر",
        "storeVideos": "فيديوهات المتجر",
+       "wholesalers": "تجار الجملة",
        "wholesalersRegistration": "تسجيل تجار الجملة",
-       "wholesalersDetails": "تفاصيل تجار الجملة",
        "affiliateTeamRegistration": "تسجيل فريق التسويق",
+       "affiliate": "المسوقون",
        "affiliateDetails": "تفاصيل التسويق",
        "stockPreview": "معاينة المخزون",
        "paymentsSettings": "إعدادات الدفع",
        "deliverySettings": "إعدادات التوصيل",
        "dashboard": "الرئيسية",
        "store": "المتجر",
-       "productVariants": "أنواع المنتجات"
+       "productVariants": "أنواع المنتجات",
+       "advertisement": "الإعلانات",
+       "termsConditions": "الشروط والأحكام"
    },
   "chart": {
     "salesByProductType": "المبيعات حسب نوع المنتج",
@@ -241,6 +245,46 @@
     "manage": "تعديل فيديو المتجر",
     "addButton": "إضافة فيديو متجر",
     "searchPlaceholder": "ابحث عن فيديوهات المتجر..."
+  },
+  "wholesalers": {
+    "title": "تجار الجملة",
+    "add": "إضافة تاجر جملة",
+    "edit": "تعديل تاجر جملة",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "mobile": "الجوال",
+    "discount": "نسبة خصم التاجر %",
+    "status": "الحالة",
+    "address": "العنوان",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "actions": "العمليات"
+  },
+  "affiliation": {
+    "title": "المسوقون",
+    "add": "إضافة مسوق",
+    "edit": "تعديل مسوق",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "mobile": "الجوال",
+    "percent": "نسبة المسوق %",
+    "status": "الحالة",
+    "address": "العنوان",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "actions": "العمليات"
+  },
+  "advertisement": {
+    "inputLabel": "الصق كود HTML هنا",
+    "preview": "المعاينة"
+  },
+  "termsConditions": {
+    "edit": "تعديل الشروط والأحكام",
+    "htmlPreview": "معاينة الكود HTML"
   },
   "stockPreview": {
     "title": "معاينة المخزون",

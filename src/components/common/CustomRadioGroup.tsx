@@ -19,7 +19,7 @@ interface CustomRadioGroupProps {
 const CustomRadioGroup: React.FC<CustomRadioGroupProps> = ({ label, name, value, options, onChange, labelAlign = 'left', isRTL }) => {
   return (
     <FormControl component="fieldset" sx={{ width: '100%' }}>
-      <FormLabel component="legend" sx={{ textAlign: isRTL || labelAlign === 'right' ? 'right' : 'left', fontWeight: 600, color: '#634C9F' }}>{label}</FormLabel>
+      <FormLabel component="legend" sx={{ textAlign: isRTL || labelAlign === 'right' ? 'right' : 'left', fontWeight: 600, }}className='text-primary'>{label}</FormLabel>
       <RadioGroup
         row
         name={name}

@@ -1,8 +1,8 @@
 import React from 'react';
-import SallersForm from './SallersForm';
+import AffiliationForm from './AffiliationForm';
 import CustomButton from '../../../components/common/CustomButton';
 
-interface SallersDrawerProps {
+interface AffiliationDrawerProps {
   open: boolean;
   onClose: () => void;
   isRTL: boolean;
@@ -12,7 +12,7 @@ interface SallersDrawerProps {
   onSubmit?: (e: React.FormEvent) => void;
 }
 
-const SallersDrawer: React.FC<SallersDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onSubmit }) => {
+const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onSubmit }) => {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50">
@@ -31,7 +31,7 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({ open, onClose, isRTL, tit
           </button>
         </div>
         <form onSubmit={onSubmit} className="flex-1 overflow-y-auto">
-          {form && onFormChange && <SallersForm form={form} onFormChange={onFormChange} isRTL={isRTL} />}
+          {form && onFormChange && <AffiliationForm form={form} onFormChange={onFormChange} isRTL={isRTL} />}
         </form>
         <div className="sticky bottom-0 left-0 right-0 bg-white py-4 flex justify-end gap-2 border-t mt-4">
           <CustomButton text="Cancel" color="secondary" onClick={onClose} />
@@ -42,4 +42,4 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({ open, onClose, isRTL, tit
   );
 };
 
-export default SallersDrawer;
+export default AffiliationDrawer;

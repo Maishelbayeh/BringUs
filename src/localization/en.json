@@ -8,7 +8,8 @@
     "delete":"delete",
     "add":"Add",
       "language": "Language",
-    "lastSignIn": "Last sign in on {{date}}"
+    "lastSignIn": "Last sign in on {{date}}",
+    "termsConditions": "Terms & Conditions"
 },
  
   "dashboard": {
@@ -26,16 +27,17 @@
       "storeSlider": "Store Slider",
       "storePreview": "Store Preview",
       "storeVideos": "Store Videos",
+      "wholesalers": "Wholesalers",
       "wholesalersRegistration": "Wholesalers Registration",
-      "wholesalersDetails": "Wholesalers Details",
       "affiliateTeamRegistration": "Affiliate Team Registration",
-      "affiliateDetails": "Affiliate Details",
+      "affiliate": "Affiliates",
       "stockPreview": "Stock Preview",
       "paymentsSettings": "Payments Settings",
       "deliverySettings": "Delivery Settings",
       "dashboard": "Dashboard",
       "store": "Store",
-      "productVariants": "Product Variants"
+      "productVariants": "Product Variants",
+      "advertisement": "Advertisement"
    },
  
     
@@ -263,4 +265,45 @@
     "manage": "Edit Stock Preview"
   }
 
+  },
+  "wholesalers": {
+    "title": "Wholesalers",
+    "add": "Add Wholesaler",
+    "edit": "Edit Wholesaler",
+    "email": "Email",
+    "password": "Password",
+    "firstName": "First Name",
+    "lastName": "Family Name",
+    "mobile": "Mobile",
+    "discount": "Wholesaler Discount %",
+    "status": "Status",
+    "address": "Address",
+    "active": "Active",
+    "inactive": "Inactive",
+    "actions": "Actions"
+  },
+  "affiliation": {
+    "title": "Affiliates",
+    "add": "Add Affiliate",
+    "edit": "Edit Affiliate",
+    "email": "Email",
+    "password": "Password",
+    "firstName": "First Name",
+    "lastName": "Family Name",
+    "mobile": "Mobile",
+    "percent": "Affiliate %",
+    "status": "Status",
+    "address": "Address",
+    "active": "Active",
+    "inactive": "Inactive",
+    "actions": "Actions"
+  },
+  "advertisement": {
+    "inputLabel": "Paste your HTML below",
+    "preview": "Preview"
+  },
+  "termsConditions": {
+    "edit": "Edit Terms & Conditions",
+    "htmlPreview": "HTML Preview"
+  }
 }
