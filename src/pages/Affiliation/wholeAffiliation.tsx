@@ -1,33 +1,31 @@
 import React, { useState } from 'react';
 import CustomNav from '../../components/common/CustomNav';
 import CustomTable from '../../components/common/CustomTable';
-import CustomButton from '../../components/common/CustomButton';
 import { useTranslation } from 'react-i18next';
-import SallersDrawer from './componnent/sallersDrawer';
+import AffiliationDrawer from './component/AffiliationDrawer';
 
-// Mock data for wholesalers
-const mockWholesalers = [
+const mockAffiliates = [
   {
     id: 1,
-    email: 'wholesale1@email.com',
+    email: 'affiliate1@email.com',
     password: '******',
-    firstName: 'Ahmad',
-    lastName: 'Saleh',
-    mobile: '0599999999',
-    discount: 10,
+    firstName: 'Omar',
+    lastName: 'Khaled',
+    mobile: '0598888888',
+    percent: 8,
     status: 'Active',
-    address: 'Ramallah, Palestine',
+    address: 'Hebron, Palestine',
   },
   {
     id: 2,
-    email: 'wholesale2@email.com',
+    email: 'affiliate2@email.com',
     password: '******',
-    firstName: 'Sara',
-    lastName: 'Ali',
-    mobile: '0566666666',
-    discount: 15,
+    firstName: 'Lina',
+    lastName: 'Samir',
+    mobile: '0567777777',
+    percent: 12,
     status: 'Inactive',
-    address: 'Nablus, Palestine',
+    address: 'Jenin, Palestine',
   },
 ];
 
@@ -37,38 +35,38 @@ const initialForm = {
   firstName: '',
   lastName: '',
   mobile: '',
-  discount: '',
-  status: 'A',
+  percent: '',
+  status: 'Active',
   address: '',
 };
 
-const WholesallersPage = () => {
+const AffiliationPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   const [search, setSearch] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [data, setData] = useState(mockWholesalers);
+  const [data, setData] = useState(mockAffiliates);
   const [form, setForm] = useState(initialForm);
 
   const columns = [
-    { key: 'email', label: { en: 'Email', ar: 'البريد الإلكتروني' } },
-    { key: 'firstName', label: { en: 'First Name', ar: 'الاسم الأول' } },
-    { key: 'lastName', label: { en: 'Family Name', ar: 'اسم العائلة' } },
-    { key: 'mobile', label: { en: 'Mobile', ar: 'الجوال' } },
-    { key: 'discount', label: { en: 'Wholesaler Discount %', ar: 'نسبة خصم التاجر %' } },
+    { key: 'email', label: { en: t('affiliation.email'), ar: t('affiliation.email') } },
+    { key: 'firstName', label: { en: t('affiliation.firstName'), ar: t('affiliation.firstName') } },
+    { key: 'lastName', label: { en: t('affiliation.lastName'), ar: t('affiliation.lastName') } },
+    { key: 'mobile', label: { en: t('affiliation.mobile'), ar: t('affiliation.mobile') } },
+    { key: 'percent', label: { en: t('affiliation.percent'), ar: t('affiliation.percent') } },
     {
       key: 'status',
-      label: { en: 'Status', ar: 'الحالة' },
-      render: (value: string, row: any) => {
-        const isActive = value === 'Active' || value === t('wholesalers.active');
+      label: { en: t('affiliation.status'), ar: t('affiliation.status') },
+      render: (value: string) => {
+        const isActive = value === 'Active' || value === t('affiliation.active');
         return (
           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
-            {value === 'Active' ? t('wholesalers.active') : value === 'Inactive' ? t('wholesalers.inactive') : value}
+            {value === 'Active' ? t('affiliation.active') : value === 'Inactive' ? t('affiliation.inactive') : value}
           </span>
         );
       }
     },
-    { key: 'address', label: { en: 'Address', ar: 'العنوان' } },
+    { key: 'address', label: { en: t('affiliation.address'), ar: t('affiliation.address') } },
   ];
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -88,8 +86,8 @@ const WholesallersPage = () => {
       {
         ...form,
         id: prev.length + 1,
-        discount: Number(form.discount),
-        status: form.status === 'A' ? 'Active' : 'Inactive',
+        percent: Number(form.percent),
+        status: form.status === 'Active' || form.status === t('affiliation.active') ? 'Active' : 'Inactive',
       }
     ]);
     setDrawerOpen(false);
@@ -103,21 +101,21 @@ const WholesallersPage = () => {
         search={search}
         setSearch={setSearch}
         t={t}
-        title={t('wholesalers.title')}
+        title={t('affiliation.title')}
         showCategory={false}
         showSubcategory={false}
-        addButtonText={t('wholesalers.add')}
+        addButtonText={t('affiliation.add')}
         searchPlaceholder={t('common.search')}
       />
       <CustomTable
         columns={columns}
         data={data}
       />
-      <SallersDrawer
+      <AffiliationDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         isRTL={isRTL}
-        title={t('wholesalers.add')}
+        title={t('affiliation.add')}
         form={form}
         onFormChange={handleFormChange}
         onSubmit={handleSubmit}
@@ -126,4 +124,4 @@ const WholesallersPage = () => {
   );
 };
 
-export default WholesallersPage;
+export default AffiliationPage;

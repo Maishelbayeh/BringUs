@@ -10,6 +10,7 @@ interface Column {
   };
   type?: 'text' | 'number' | 'date';
   align?: 'left' | 'center' | 'right';
+  render?: (value: any, item: any) => React.ReactNode;
 }
 
 interface CustomTableProps {
@@ -305,43 +306,45 @@ const CustomTable: React.FC<CustomTableProps> = ({
                   {columns.map(column => (
                     <td
                       key={column.key}
-                      className={`px-6 py-6 text-${column.align || 'left'} text-sm text-gray-900`}
+                      className={`px-6 py-6 text-${column.align || 'center'} text-sm text-gray-900`}
                     >
-                      {column.key === 'status' ? (
-                        <span
-                          className={
-                            item[column.key] === 'مدفوع' || item[column.key] === 'Paid'
-                              ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
-                              : 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
-                          }
-                        >
-                          {item[column.key]}
-                        </span>
-                      ) : column.key === 'stock' ? (
-                        <span
-                          className={
-                            Number(item[column.key]) < 10
-                              ? 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
-                              : Number(item[column.key]) <= 50
-                                ? 'bg-orange-100 text-orange-700 px-3 py-1 rounded-full'
-                                : 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
-                          }
-                        >
-                          {item[column.key]}
-                        </span>
-                      ) : column.key === 'visibility' ? (
-                        <span
-                          className={
-                            item[column.key] === 'ظاهر' || item[column.key] === 'Visible'
-                              ? 'bg-primary/10 text-primary px-3 py-1 rounded-full font-bold'
-                              : 'bg-gray-100 text-gray-300 px-3 py-1 rounded-full font-bold'
-                          }
-                        >
-                          {item[column.key]}
-                        </span>
-                      ) : (
-                        item[column.key]
-                      )}
+                      {column.render
+                        ? column.render(item[column.key], item)
+                        : column.key === 'status' ? (
+                          <span
+                            className={
+                              item[column.key] === 'مدفوع' || item[column.key] === 'Paid'
+                                ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
+                                : 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
+                            }
+                          >
+                            {item[column.key]}
+                          </span>
+                        ) : column.key === 'stock' ? (
+                          <span
+                            className={
+                              Number(item[column.key]) < 10
+                                ? 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
+                                : Number(item[column.key]) <= 50
+                                  ? 'bg-orange-100 text-orange-700 px-3 py-1 rounded-full'
+                                  : 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
+                            }
+                          >
+                            {item[column.key]}
+                          </span>
+                        ) : column.key === 'visibility' ? (
+                          <span
+                            className={
+                              item[column.key] === 'ظاهر' || item[column.key] === 'Visible'
+                                ? 'bg-primary/10 text-primary px-3 py-1 rounded-full font-bold'
+                                : 'bg-gray-100 text-gray-300 px-3 py-1 rounded-full font-bold'
+                            }
+                          >
+                            {item[column.key]}
+                          </span>
+                        ) : (
+                          item[column.key]
+                        )}
                     </td>
                   ))}
                   {(onEdit || onDelete) && (

@@ -3,18 +3,18 @@ import CustomInput from '../../../components/common/CustomInput';
 import CustomRadioGroup from '../../../components/common/CustomRadioGroup';
 import { useTranslation } from 'react-i18next';
 
-interface SallersFormProps {
+interface AffiliationFormProps {
   form: any;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   isRTL: boolean;
 }
 
-const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) => {
+const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, isRTL }) => {
   const { t } = useTranslation();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <CustomInput
-        label={t('wholesalers.email')}
+        label={t('affiliation.email')}
         name="email"
         type="email"
         value={form.email}
@@ -23,7 +23,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         labelAlign={isRTL ? 'right' : 'left'}
       />
       <CustomInput
-        label={t('wholesalers.password')}
+        label={t('affiliation.password')}
         name="password"
         type="password"
         value={form.password}
@@ -32,7 +32,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         labelAlign={isRTL ? 'right' : 'left'}
       />
       <CustomInput
-        label={t('wholesalers.firstName')}
+        label={t('affiliation.firstName')}
         name="firstName"
         value={form.firstName}
         onChange={onFormChange}
@@ -40,7 +40,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         labelAlign={isRTL ? 'right' : 'left'}
       />
       <CustomInput
-        label={t('wholesalers.lastName')}
+        label={t('affiliation.lastName')}
         name="lastName"
         value={form.lastName}
         onChange={onFormChange}
@@ -48,7 +48,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         labelAlign={isRTL ? 'right' : 'left'}
       />
       <CustomInput
-        label={t('wholesalers.mobile')}
+        label={t('affiliation.mobile')}
         name="mobile"
         value={form.mobile}
         onChange={onFormChange}
@@ -56,28 +56,28 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         labelAlign={isRTL ? 'right' : 'left'}
       />
       <CustomInput
-        label={t('wholesalers.discount')}
-        name="discount"
+        label={t('affiliation.percent')}
+        name="percent"
         type="number"
-        value={form.discount}
+        value={form.percent}
         onChange={onFormChange}
         required
         labelAlign={isRTL ? 'right' : 'left'}
       />
       <CustomRadioGroup
-        label={t('wholesalers.status')}
+        label={t('affiliation.status')}
         name="status"
         value={form.status}
         onChange={onFormChange}
         options={[
-          { value: 'A', label: t('wholesalers.active') },
-          { value: 'I', label: t('wholesalers.inactive') },
+          { value: 'Active', label: t('affiliation.active') },
+          { value: 'Inactive', label: t('affiliation.inactive') },
         ]}
         labelAlign={isRTL ? 'right' : 'left'}
         isRTL={isRTL}
       />
       <CustomInput
-        label={t('wholesalers.address')}
+        label={t('affiliation.address')}
         name="address"
         value={form.address}
         onChange={onFormChange}
@@ -87,4 +87,4 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
   );
 };
 
-export default SallersForm;
+export default AffiliationForm;

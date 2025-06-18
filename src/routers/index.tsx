@@ -13,6 +13,8 @@ import StockTable from '../pages/stockPreview/StockTable';
 import StoreSliderPage from "../pages/StoreSlider/storeSlider";
 import StorePreview from "../pages/StoreSlider/StorePreview";
 import StoreVideoPage from "../pages/StoreSlider/StoreVideo";
+import WholesallersPage from "@/pages/wholeSallers/wholesallers";
+import AffiliationPage from "@/pages/Affiliation/wholeAffiliation";
 export default function Routers() {
   return (
     <Routes>
@@ -32,6 +34,8 @@ export default function Routers() {
       <Route path="/store-slider" element={<StoreSliderPage />} />
       <Route path="/store-preview" element={<StorePreview />} />
       <Route path="/store-videos" element={<StoreVideoPage />} />
+      <Route path="/wholesalers" element={<WholesallersPage />} />
+      <Route path="/affiliate" element={<AffiliationPage />} />
     </Routes>
   );
 }

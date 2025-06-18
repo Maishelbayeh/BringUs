@@ -114,40 +114,32 @@ export const getMenuAsText = (): MenuItem[] => [
     ],
 
   },
+  {
+    id: 7,
+    title: 'sideBar.wholesalers',
+    icon: AdjustmentsIcon,
+    path: '/wholesalers',
  
-  
+  },
+
+
+
   {
     id: 9,
-    title: 'sideBar.wholesalersRegistration',
+    title: 'sideBar.affiliate',
     icon: DocumentTextIcon,
-    path: '/wholesalers-registration',
+    path: '/affiliate',
+  
   },
+
   {
-    id: 10,
-    title: 'sideBar.wholesalersDetails',
-    icon: DocumentTextIcon,
-    path: '/wholesalers-details',
-  },
-  {
-    id: 11,
-    title: 'sideBar.affiliateTeamRegistration',
-    icon: UserAddIcon,
-    path: '/affiliate-team-registration',
-  },
-  {
-    id: 12,
-    title: 'sideBar.affiliateDetails',
-    icon: DocumentTextIcon,
-    path: '/affiliate-details',
-  },
-  {
-    id: 13,
+      id: 10,
     title: 'sideBar.stockPreview',
     icon: ChartBarIcon,
     path: '/stock-preview',
   },
   {
-    id: 14,
+    id: 11,
     title: 'sideBar.paymentMethods',
     icon: CreditCardIcon,
     path: '/payment-methods',
