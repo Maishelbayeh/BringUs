@@ -37,7 +37,8 @@
       "dashboard": "Dashboard",
       "store": "Store",
       "productVariants": "Product Variants",
-      "advertisement": "Advertisement"
+      "advertisement": "Advertisement",
+      "productSpecifications": "Product Specifications"
    },
  
     
@@ -130,7 +131,12 @@
     "add": "Add Product",
     "search": "Search products...",
     "allCategories": "All Categories",
-    "allSubcategories": "All Subcategories"
+    "allSubcategories": "All Subcategories",
+    "productSpecifications": "Product Specifications",
+    "addSpec": "Add Specification",
+    "editSpec": "Edit Specification",
+    "specDescription": "Specification Description",
+    "specDescriptionPlaceholder": "Specification Description"
     },
   "subcategories": {
     "title": "Subcategories",

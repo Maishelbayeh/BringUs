@@ -11,9 +11,9 @@ import {
   CreditCardIcon,
   TruckIcon,
   EyeIcon,
-  UserPlusIcon,
   ChartBarIcon,
-  Squares2X2Icon
+  Squares2X2Icon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 export const getMenuAsText = (): MenuItem[] => [
@@ -71,7 +71,14 @@ export const getMenuAsText = (): MenuItem[] => [
         title: 'sideBar.productVariants',
         icon: Squares2X2Icon,
         path: '/product-variants',
-      }
+      },
+      {
+        id: 32,
+        title: 'sideBar.productSpecifications',
+        icon: DocumentTextIcon,
+        path: '/products/specifications',
+        
+      },
     ]
   },
   {
@@ -117,7 +124,7 @@ export const getMenuAsText = (): MenuItem[] => [
   {
     id: 7,
     title: 'sideBar.wholesalers',
-    icon: AdjustmentsIcon,
+    icon: AdjustmentsHorizontalIcon,
     path: '/wholesalers',
  
   },
@@ -149,6 +156,12 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.termsConditions',
     icon: DocumentTextIcon,
     path: '/terms-conditions',
+  },
+  {
+    id: 1001,
+    title: 'sideBar.testimonials',
+    icon: ChatBubbleLeftRightIcon,
+    path: '/testimonials',
   },
 ];
 

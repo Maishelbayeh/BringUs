@@ -56,7 +56,8 @@
        "store": "المتجر",
        "productVariants": "أنواع المنتجات",
        "advertisement": "الإعلانات",
-       "termsConditions": "الشروط والأحكام"
+       "termsConditions": "الشروط والأحكام",
+       "productSpecifications": "الصفات"
    },
   "chart": {
     "salesByProductType": "المبيعات حسب نوع المنتج",
@@ -124,7 +125,12 @@
     "title": "المنتجات",
     "add": "إضافة منتج",
     "search": "ابحث عن منتجات...",
-    "allCategories": "جميع الفئات"
+    "allCategories": "جميع الفئات",
+    "productSpecifications": "الصفات",
+    "addSpec": "إضافة صفة",
+    "editSpec": "تعديل الصفة",
+    "specDescription": "وصف الصفة",
+    "specDescriptionPlaceholder": "وصف الصفة"
   },
   "subcategories": {
     "title": "الفئات الفرعية",

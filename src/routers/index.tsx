@@ -18,6 +18,8 @@ import WholesallersPage from "@/pages/wholeSallers/wholesallers";
 import AffiliationPage from "@/pages/Affiliation/wholeAffiliation";
 import AdvertisementPage from "@/pages/Advertisement/advertisement";
 import TermsConditionsPage from "@/pages/TermsConditions/termsConditions";
+import ProductSpecifications from '../pages/products/ProductSpecifications';
+
 
 export default function Routers() {
   return (
@@ -43,6 +45,8 @@ export default function Routers() {
       <Route path="/affiliate" element={<AffiliationPage />} />
       <Route path="/advertisement" element={<AdvertisementPage />} />
       <Route path="/terms-conditions" element={<TermsConditionsPage />} />
+      <Route path="/products/specifications" element={<ProductSpecifications />} />
+      {/* <Route path="/testimonials" element={<Testimonial />} /> */}
     </Routes>
   );
 }
