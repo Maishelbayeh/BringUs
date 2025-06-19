@@ -18,12 +18,33 @@ const AdvertisementPage = () => {
   const [formStatus, setFormStatus] = useState<'Active' | 'Inactive'>('Active');
   const [search, setSearch] = useState('');
 
+  // Function to safely render HTML
+  const renderHtml = (html: string) => {
+    try {
+      return { __html: html };
+    } catch (error) {
+      console.error('Error rendering HTML:', error);
+      return { __html: '<p style="color: red;">Error rendering HTML</p>' };
+    }
+  };
+
   const columns = [
     {
       key: 'html',
       label: { en: t('advertisement.preview'), ar: t('advertisement.preview') },
       render: (value: string) => (
-        <div className="border rounded-lg p-2 bg-gray-50 min-h-[40px] max-w-xs overflow-x-auto" dangerouslySetInnerHTML={{ __html: value }} />
+        <div className="border rounded-lg p-4 bg-white min-h-[60px] max-w-md overflow-x-auto shadow-sm">
+          <div 
+            className="max-w-none"
+            style={{ 
+              fontSize: '14px',
+              lineHeight: '1.5',
+              color: '#333',
+              wordBreak: 'break-word'
+            }}
+            dangerouslySetInnerHTML={renderHtml(value)} 
+          />
+        </div>
       ),
       align: 'center' as const,
     },
@@ -91,14 +112,38 @@ const AdvertisementPage = () => {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-              <label className="block mb-2 font-semibold text-gray-700">{t('advertisement.inputLabel')}</label>
-              <textarea
-                className="w-full min-h-[120px] border border-gray-300 rounded-lg p-2 mb-4 focus:ring-primary focus:border-primary"
-                value={formHtml}
-                onChange={e => setFormHtml(e.target.value)}
-                placeholder="<h1>My Ad</h1>"
-                required
-              />
+              <div className="mb-4">
+                <label className="block mb-2 font-semibold text-gray-700">{t('advertisement.inputLabel')}</label>
+                <textarea
+                  className="w-full min-h-[120px] border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary font-mono text-sm"
+                  value={formHtml}
+                  onChange={e => setFormHtml(e.target.value)}
+                  placeholder="<h1>My Ad</h1>"
+                  required
+                />
+              </div>
+              
+              {/* HTML Preview */}
+              <div className="mb-4">
+                <label className="block mb-2 font-semibold text-gray-700">{t('advertisement.preview', 'Preview')}</label>
+                <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[100px]">
+                  {formHtml ? (
+                    <div 
+                      className="max-w-none"
+                      style={{ 
+                        fontSize: '14px',
+                        lineHeight: '1.5',
+                        color: '#333',
+                        wordBreak: 'break-word'
+                      }}
+                      dangerouslySetInnerHTML={renderHtml(formHtml)} 
+                    />
+                  ) : (
+                    <p className="text-gray-400 italic">{t('advertisement.noPreview', 'No preview available')}</p>
+                  )}
+                </div>
+              </div>
+
               <CustomRadioGroup
                 label={t('advertisement.status', 'Status')}
                 name="status"

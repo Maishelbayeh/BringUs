@@ -286,7 +286,12 @@
   },
   "advertisement": {
     "inputLabel": "الصق كود HTML هنا",
-    "preview": "المعاينة"
+    "preview": "المعاينة",
+    "status": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "add": "إضافة HTML",
+    "noPreview": "لا توجد معاينة متاحة"
   },
   "termsConditions": {
     "edit": "تعديل الشروط والأحكام",

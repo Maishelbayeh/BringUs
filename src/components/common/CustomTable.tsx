@@ -15,7 +15,8 @@ interface Column {
     ar: string;
   };
   type?: 'text' | 'number' | 'date' | 'image' | 'color';
-  
+  render?: (value: any, item: any) => React.ReactNode;
+  align?: 'left' | 'center' | 'right';
 }
 
 interface LinkConfig {
@@ -407,9 +408,11 @@ const CustomTable: React.FC<CustomTableProps> = ({
                   {columns.map(column => (
                     <td
                       key={column.key}
-                      className="px-6 py-3 text-sm text-gray-900 text-center"
+                      className={`px-6 py-3 text-sm text-gray-900 ${column.align === 'left' ? 'text-left' : column.align === 'right' ? 'text-right' : 'text-center'}`}
                     >
-                      {column.key === 'color' ? (() => {
+                      {column.render ? (
+                        column.render(item[column.key], item)
+                      ) : column.key === 'color' ? (() => {
                         const value = item[column.key];
                         if (!value || value === '-') return '-';
                         if (typeof value === 'string') {
