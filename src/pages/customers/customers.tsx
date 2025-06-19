@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import useLanguage from '../../hooks/useLanguage';
 import { customersData, ordersData } from '../../api/mockCustomers';
 import * as XLSX from 'xlsx';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import HeaderWithAction from '@/components/common/HeaderWithAction';
 
 type Customer = {
   id: number;
@@ -82,46 +84,33 @@ const CustomersPage: React.FC = () => {
     XLSX.writeFile(workbook, 'customers.xlsx');
   };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  const sortOptions = [
+    { value: 'name', label: isRTL ? 'الترتيب حسب الاسم' : 'Sort by Name' },
+    { value: 'lastOrderDesc', label: isRTL ? 'الطلبات من الأحدث إلى الأقدم' : 'Orders: Newest to Oldest' },
+    { value: 'lastOrderAsc', label: isRTL ? 'الطلبات من الأقدم إلى الأحدث' : 'Orders: Oldest to Newest' },
+  ];
+////////////////////////////////////////////////////////////////////////////////////////////////////
   return (
-    <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* شريط البحث والترتيب */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 px-2 py-3 rounded-2xl shadow bg-primary-light w-full mx-auto">
-        <div className="flex items-center gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true" className="w-7 h-7 text-primary mx-auto">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-          <h1 className="text-xl font-bold text-primary">{t('customers.title')}</h1>
-          <span className="bg-primary text-white rounded-full px-3 py-1 text-sm font-bold">{filteredCustomers.length}</span>
-          {/* زر التنزيل */}
-          <button
-            onClick={handleDownloadExcel}
-            className="flex items-center gap-1 bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition text-sm font-semibold shadow"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
-            {isRTL ? 'تنزيل' : 'Download'}
-          </button>
-        </div>
-        <div className="flex-1 flex justify-end gap-3">
-        <input
-          type="text"
-          placeholder={isRTL ? 'ابحث باسم العميل أو رقم الهاتف...' : 'Search by customer name or phone...'}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="rounded-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-64"
-          style={isRTL ? { direction: 'rtl' } : {}}
-        />
-        <select
-          value={sort}
-          onChange={e => setSort(e.target.value as 'name' | 'lastOrderDesc' | 'lastOrderAsc')}
-          className="rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-40"
-          style={isRTL ? { direction: 'rtl' } : {}}
-        >
-          <option value="name">{isRTL ? 'الترتيب حسب الاسم' : 'Sort by Name'}</option>
-          <option value="lastOrderDesc">{isRTL ? 'الطلبات من الأحدث إلى الأقدم' : 'Orders: Newest to Oldest'}</option>
-          <option value="lastOrderAsc">{isRTL ? 'الطلبات من الأقدم إلى الأحدث' : 'Orders: Oldest to Newest'}</option>
-        </select>
-        </div>
-      </div>
+    <div className="p-4 w-full" >
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('customers.title') || 'Customers', href: '/customers' }
+      ]} isRtl={isRTL} />
+      <HeaderWithAction
+        title={t('customers.title')}
+        addLabel=""
+        onAdd={() => {}}
+        isRtl={isRTL}
+        showSearch={true}
+        searchValue={search}
+        onSearchChange={e => setSearch(e.target.value)}
+        searchPlaceholder={isRTL ? 'ابحث باسم العميل أو رقم الهاتف...' : 'Search by customer name or phone...'}
+        showSort={true}
+        sortValue={sort}
+        onSortChange={e => setSort(e.target.value as 'name' | 'lastOrderDesc' | 'lastOrderAsc')}
+        sortOptions={sortOptions}
+        onDownload={handleDownloadExcel}
+      />
       {/* شبكة العملاء */}
      
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">

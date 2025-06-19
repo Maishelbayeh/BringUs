@@ -1,37 +1,108 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { Divider } from '@mui/material';
+import CustomSelect from './CustomSelect';
+
 interface HeaderWithActionProps {
   title: string;
   addLabel: string;
-  onAdd: () => void;
+  onAdd?: () => void;
   isRtl?: boolean;
   className?: string;
+  showSearch?: boolean;
+  searchValue?: string;
+  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  searchPlaceholder?: string;
+  showSort?: boolean;
+  sortValue?: string;
+  onSortChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  sortOptions?: { value: string; label: string }[];
+  onDownload?: () => void;
 }
 
-const HeaderWithAction: React.FC<HeaderWithActionProps> = ({ title, addLabel, onAdd, isRtl, className = '' }) => {
-  return (
-   <> <div className={`flex items-center justify-between mb-4 ${isRtl ? 'flex-row-reverse' : 'flex-row'} ${className}`}>
-      <h1 className="text-2xl font-bold text-primary">{title}</h1>
-      <button
-        onClick={onAdd}
-        className={`flex items-center gap-2 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}
-      >
-        {isRtl ? (
-          <>
-            <span>{addLabel}</span>
-            <PlusIcon className="h-5 w-5" />
-          </>
-        ) : (
-          <>
-            <PlusIcon className="h-5 w-5" />
-            <span>{addLabel}</span>
-          </>
-        )}
-      </button>
+const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
+  title,
+  addLabel,
+  onAdd,
+  isRtl,
+  className = '',
+  showSearch = false,
+  searchValue = '',
+  onSearchChange,
+  searchPlaceholder = '',
+  showSort = false,
+  sortValue = '',
+  onSortChange,
+  sortOptions = [],
+  onDownload,
+}) => {
+  const [isSortOpen, setIsSortOpen] = useState(false);
 
-    
-    </div>  <Divider sx={{ mb: { xs: 2, sm: 3 } }} /></>
+  return (
+    <>
+      <div className={`flex items-center justify-between mb-4 gap-4 ${isRtl ? 'flex-row-reverse' : 'flex-row'} ${className}`}>
+        <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
+          <h1 className="text-2xl font-bold text-primary">{title}</h1>
+          {onDownload && (
+            <button
+              type="button"
+              onClick={onDownload}
+              className="flex items-center justify-center rounded-full p-1 text-primary hover:bg-primary/10 hover:scale-110 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary"
+              title={isRtl ? 'تنزيل' : 'Download'}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
+            </button>
+          )}
+        </div>
+        <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
+          {showSearch && (
+            <input
+              type="text"
+              value={searchValue}
+              onChange={onSearchChange}
+              onBlur={onSearchChange}
+              placeholder={searchPlaceholder}
+              className={`w-80 appearance-none bg-gray-50 border  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block  p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary transition-all duration-200`}
+              style={isRtl ? { direction: 'rtl' } : {}}
+            />
+          )}
+          {showSort && sortOptions && (
+            <div className="w-44">
+              <CustomSelect
+                value={sortValue || ''}
+                onChange={onSortChange || (() => {})}
+                options={sortOptions}
+                className="mb-0"
+                icon={
+                  isSortOpen ? (
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 15l-7-7-7 7" /></svg>
+                  ) : (
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  )
+                }
+              />
+            </div>
+          )}
+          {onAdd && <button
+            onClick={onAdd}
+            className={`flex items-center gap-2 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}
+          >
+            {isRtl ? (
+              <>
+                <span>{addLabel}</span>
+                <PlusIcon className="h-5 w-5" />
+              </>
+            ) : (
+              <>
+                <PlusIcon className="h-5 w-5" />
+                <span>{addLabel}</span>
+              </>
+            )}
+          </button>}
+        </div>
+      </div>
+      <Divider sx={{ mb: { xs: 2, sm: 3 } }} />
+    </>
   );
 };
 

@@ -130,7 +130,13 @@
     "addSpec": "إضافة صفة",
     "editSpec": "تعديل الصفة",
     "specDescription": "وصف الصفة",
-    "specDescriptionPlaceholder": "وصف الصفة"
+    "specDescriptionPlaceholder": "وصف الصفة",
+    "sort": {
+      "default": "الافتراضي",
+      "alpha": "الأبجدي",
+      "newest": "الأحدث",
+      "oldest": "الأقدم"
+    }
   },
   "subcategories": {
     "title": "الفئات الفرعية",

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import CustomNav from '../../components/common/CustomNav';
+
 import CustomButton from '../../components/common/CustomButton';
+import HeaderWithAction from '@/components/common/HeaderWithAction';
 
 const initialHtml = `<h2>Terms & Conditions</h2><ul><li>All users must be 18+ years old.</li><li>Respect privacy and data policies.</li></ul>`;
 
@@ -13,14 +14,13 @@ const TermsConditionsPage = () => {
   const [html, setHtml] = useState(initialHtml);
   const [search, setSearch] = useState('');
 
-  // Handlers for buttons
-  const handleCancel = () => setHtml(initialHtml);
+
   const handleSave = () => alert(t('termsConditions.saved', 'Changes saved!'));
 
   return (
-    <div className=" p-4" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className=" p-4" >
       {/* CustomNav as header */}
-      <CustomNav
+      {/* <CustomNav
         isRTL={isRTL}
         onAdd={() => {}}
         search={search}
@@ -29,8 +29,16 @@ const TermsConditionsPage = () => {
         title={t('sideBar.termsConditions')}
         showAddButton={false}
         searchPlaceholder={t('termsConditions.search', 'Search Terms')}
-      />
-
+      /> */}
+<HeaderWithAction
+title={t('sideBar.termsConditions')}
+addLabel=""
+isRtl={isRTL}
+showSearch={true}
+searchValue={search}
+onSearchChange={e => setSearch(e.target.value)}
+searchPlaceholder={t('termsConditions.search', 'Search Terms')}
+/>
       {/* Card/Region */}
       <div className="bg-white rounded-lg  border-2 border-gray-200 mb-6 flex-1 flex flex-col">
         {/* Editor */}

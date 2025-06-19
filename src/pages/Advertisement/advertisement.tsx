@@ -4,6 +4,8 @@ import CustomNav from '../../components/common/CustomNav';
 import CustomTable from '../../components/common/CustomTable';
 import CustomButton from '../../components/common/CustomButton';
 import AdvertisementForm from './AdvertisementForm';
+import HeaderWithAction from '@/components/common/HeaderWithAction';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
 const initialHtml = [
   { id: 1, html: '<h2 style="color:green">Welcome to Advertisement!</h2>', status: 'Active' },
@@ -16,7 +18,7 @@ const AdvertisementPage = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [formHtml, setFormHtml] = useState('');
   const [formStatus, setFormStatus] = useState<'Active' | 'Inactive'>('Active');
-  const [search, setSearch] = useState('');
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
   // Function to safely render HTML
   const renderHtml = (html: string) => {
@@ -99,17 +101,15 @@ const AdvertisementPage = () => {
 
   return (
     <div className="p-4" >
-      <CustomNav
-        isRTL={isRTL}
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('sideBar.advertisement') || 'Advertisement', href: '/advertisement' }
+      ]} isRtl={isRTL} />
+      <HeaderWithAction
+        title={t('sideBar.advertisement') || 'Advertisement'}
+        addLabel={t('common.add') || 'Add'}
         onAdd={handleAdd}
-        search={search}
-        setSearch={setSearch}
-        t={t}
-        title={t('sideBar.advertisement')}
-        showCategory={false}
-        showSubcategory={false}
-        addButtonText={t('common.add')}
-        searchPlaceholder={t('advertisement.inputLabel')}
+        isRtl={i18n.language === 'ARABIC'}
       />
       <CustomTable columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
       {drawerOpen && (
@@ -121,56 +121,35 @@ const AdvertisementPage = () => {
               <span className="text-xl font-bold text-primary">{t('advertisement.add', 'Add HTML')}</span>
               <button onClick={() => setDrawerOpen(false)} className="text-primary hover:text-red-500 text-2xl">×</button>
             </div>
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-              <div className="mb-4">
-                <label className="block mb-2 font-semibold text-gray-700">{t('advertisement.inputLabel')}</label>
-                <textarea
-                  className="w-full min-h-[120px] border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary font-mono text-sm"
-                  value={formHtml}
-                  onChange={e => setFormHtml(e.target.value)}
-                  placeholder="<h1>My Ad</h1>"
-                  required
-                />
-              </div>
-              
-              {/* HTML Preview */}
-              <div className="mb-4">
-                <label className="block mb-2 font-semibold text-gray-700">{t('advertisement.preview', 'Preview')}</label>
-                <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[100px]">
-                  {formHtml ? (
-                    <div 
-                      className="max-w-none"
-                      style={{ 
-                        fontSize: '14px',
-                        lineHeight: '1.5',
-                        color: '#333',
-                        wordBreak: 'break-word'
-                      }}
-                      dangerouslySetInnerHTML={renderHtml(formHtml)} 
-                    />
-                  ) : (
-                    <p className="text-gray-400 italic">{t('advertisement.noPreview', 'No preview available')}</p>
-                  )}
-                </div>
-              </div>
+            {/* Form */}
+            <AdvertisementForm
+              formHtml={formHtml}
+              setFormHtml={setFormHtml}
+              formStatus={formStatus}
+              setFormStatus={setFormStatus}
+              isRTL={isRTL}
+              t={t}
+              handleSubmit={handleSubmit}
+              renderHtml={renderHtml}
+            />
 
-              <CustomRadioGroup
-                label={t('advertisement.status', 'Status')}
-                name="status"
-                value={formStatus}
-                onChange={e => setFormStatus(e.target.value as 'Active' | 'Inactive')}
-                options={[
-                  { value: 'Active', label: t('advertisement.active', 'Active') },
-                  { value: 'Inactive', label: t('advertisement.inactive', 'Inactive') },
-                ]}
-                labelAlign={isRTL ? 'right' : 'left'}
-                isRTL={isRTL}
-              />
-            </form>
-            <div className="sticky bottom-0 left-0 right-0 bg-white py-4 flex justify-end gap-2 border-t mt-4">
-              <CustomButton text={t('common.cancel')} color="secondary" onClick={() => setDrawerOpen(false)} />
-              <CustomButton text={t('common.add')} color="primary" textColor="white" type="submit" onClick={handleSubmit} />
-            </div>
+            {/* Footer */}
+        <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl `}>
+          <CustomButton
+            color="primary"
+            textColor="white"
+            text={editIndex ? t("deliveryDetails.updateArea") : t("deliveryDetails.createArea")}
+              action={() => {}}
+            type="submit"
+          />
+          <CustomButton
+            color="white"
+            textColor="primary"
+            text={t("deliveryDetails.cancel")}
+            action={() => setDrawerOpen(false)}
+          />
+        </div>
+      
           </div>
         </div>
       )}

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+
 import CategoriesDrawer from './components/CategoriesDrawer';
 import CategoriesNav from './components/CategoriesNav';
 import useLanguage from '../../hooks/useLanguage';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
 // Types
 interface Node {
@@ -147,18 +148,10 @@ const CategoriesPage: React.FC = () => {
 
   return (
     <div className={`p-4 w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}> 
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
-        <span className="text-primary font-bold cursor-pointer" onClick={() => setCurrentNodeId(null)}>{t('sideBar.dashboard') || 'Dashboard'}</span>
-        <ChevronRightIcon className={`h-4 w-4 mx-2 ${isRTL ? 'rotate-180' : ''}`} />
-        <span className="text-gray-700 font-semibold cursor-pointer" onClick={() => setCurrentNodeId(null)}>{t('sideBar.categories') || 'Categories'}</span>
-        {breadcrumb.map((node, idx) => (
-          <React.Fragment key={node.id}>
-            <ChevronRightIcon className={`h-4 w-4 mx-2 ${isRTL ? 'rotate-180' : ''}`} />
-            <span className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`} onClick={() => setCurrentNodeId(node.id)}>{node.name}</span>
-          </React.Fragment>
-        ))}
-      </nav>
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('sideBar.categories') || 'Categories', href: '/categories' }
+      ]} isRtl={isRTL} />
       {parentId !== null && parentId !== undefined && (
         <button className="mb-4 px-4 py-2 bg-primary text-white rounded-full" onClick={() => setCurrentNodeId(parentId)}>{isRTL ? 'رجوع' : 'Back'}</button>
       )}

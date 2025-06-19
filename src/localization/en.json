@@ -136,7 +136,13 @@
     "addSpec": "Add Specification",
     "editSpec": "Edit Specification",
     "specDescription": "Specification Description",
-    "specDescriptionPlaceholder": "Specification Description"
+    "specDescriptionPlaceholder": "Specification Description",
+    "sort": {
+      "default": "Default",
+      "alpha": "Alpha",
+      "newest": "Newest",
+      "oldest": "Oldest"
+    }
     },
   "subcategories": {
     "title": "Subcategories",

@@ -3,6 +3,8 @@ import CustomNav from '../../components/common/CustomNav';
 import CustomTable from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import AffiliationDrawer from './component/AffiliationDrawer';
+import HeaderWithAction from '@/components/common/HeaderWithAction';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
 const mockAffiliates = [
   {
@@ -43,7 +45,6 @@ const initialForm = {
 const AffiliationPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
-  const [search, setSearch] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [data, setData] = useState(mockAffiliates);
   const [form, setForm] = useState(initialForm);
@@ -112,17 +113,15 @@ const AffiliationPage = () => {
 
   return (
     <div className="p-4" >
-      <CustomNav
-        isRTL={isRTL}
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('affiliation.title') || 'Affiliation', href: '/affiliation' }
+      ]} isRtl={isRTL} />
+      <HeaderWithAction
+        title={t('affiliation.title') || 'Affiliation'}
+        addLabel={t('common.add') || 'Add'}
         onAdd={handleDrawerOpen}
-        search={search}
-        setSearch={setSearch}
-        t={t}
-        title={t('affiliation.title')}
-        showCategory={false}
-        showSubcategory={false}
-        addButtonText={t('affiliation.add')}
-        searchPlaceholder={t('common.search')}
+        isRtl={i18n.language === 'ARABIC'}
       />
       <CustomTable
         columns={columns}

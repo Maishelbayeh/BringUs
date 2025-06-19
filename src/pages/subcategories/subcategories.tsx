@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import SubcategoriesNav from './SubcategoriesNav';
 import SubcategoriesDrawer from './SubcategoriesDrawer';
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
 const initialCategories = [
   { id: 1, name: 'Electronics' },
@@ -66,15 +67,10 @@ const SubcategoriesPage: React.FC = () => {
 
   return (
     <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
-        {breadcrumb.map((item, idx) => (
-          <React.Fragment key={item.id}>
-            <span className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`} onClick={() => navigate(item.path)}>{item.name}</span>
-            {idx < breadcrumb.length - 1 && <ChevronRightIcon className={`h-4 w-4 mx-2 ${isRTL ? 'rotate-180' : ''}`} />}
-          </React.Fragment>
-        ))}
-      </nav>
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('sideBar.subcategories') || 'Subcategories', href: '/subcategories' }
+      ]} isRtl={isRTL} />
       <SubcategoriesNav
         isRTL={isRTL}
         t={t}

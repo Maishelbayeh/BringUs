@@ -27,10 +27,7 @@ const DeliveryMethods: React.FC = () => {
   const [current, setCurrent] = useState<DelieveryMethod | null>(null);
   const isEditMode = current !== null;
 
-  const breadcrumb = [
-    { name: t('sideBar.dashboard') || 'Dashboard', id: null, path: '/' },
-    { name: t('deliveryDetails.title') || 'Delivery Methods', id: 1, path: '/delivery-settings' }
-  ];
+ 
 
   // Open drawer for add
   const openDrawer = () => {
@@ -62,8 +59,11 @@ const DeliveryMethods: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 4 }, minHeight: '100vh' }} className='bg-white'>
-      <CustomBreadcrumb items={breadcrumb} isRtl={language === 'ARABIC'} />
+    <div className='bg-white p-4'>
+        <CustomBreadcrumb items={[
+          { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+          { name: t('deliveryDetails.title') || 'Delivery Methods', href: '/delivery-methods' }
+        ]} isRtl={language === 'ARABIC'} />
       <HeaderWithAction
         title={t('deliveryDetails.title')}
         addLabel={t('deliveryDetails.addNewDeliveryArea')}
@@ -81,7 +81,7 @@ const DeliveryMethods: React.FC = () => {
 
       
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 2 } }}>
+      <div className='flex flex-col gap-2'>
         {areas.map(area => (
           <DlieveryCard
             key={area.id}
@@ -93,7 +93,7 @@ const DeliveryMethods: React.FC = () => {
             language={language}
           />
         ))}
-      </Box>
+      </div>
 
       <Delieverydrawer
         open={drawerOpen}
@@ -103,7 +103,7 @@ const DeliveryMethods: React.FC = () => {
         language={language}
         isEditMode={isEditMode}
       />
-    </Box>
+    </div>
   );
 };
 

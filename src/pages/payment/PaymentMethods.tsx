@@ -1,12 +1,10 @@
 // src/components/PaymentMethods/PaymentMethods.tsx
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
 import { PaymentMethod } from '../../Types';
 import PaymentCard from './componant/paymentcard';
 import PaymentDrawer from './componant/settingdrawer';
 import { useTranslation } from 'react-i18next';
 import useLanguage from '../../hooks/useLanguage';
-import { useNavigate } from 'react-router-dom';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
@@ -23,10 +21,7 @@ const PaymentMethods: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [current, setCurrent] = useState<PaymentMethod | null>(null);
 
-  const breadcrumb = [
-    { name: t('sideBar.dashboard') || 'Dashboard', id: null, path: '/' },
-    { name: t('paymentMethods.title') || 'Payment Methods', id: 1, path: '/payment-methods' }
-  ];
+ 
 
   // Open drawer for add
   const openDrawer = () => {
@@ -65,8 +60,11 @@ const PaymentMethods: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 4 ,mt:10 }, minHeight: '100vh' }} className='bg-white'>
-      <CustomBreadcrumb items={breadcrumb} isRtl={language === 'ARABIC'} />
+    <div className='bg-white p-4'>
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('paymentMethods.title') || 'Payment Methods', href: '/payment-methods' }
+      ]} isRtl={language === 'ARABIC'} /> 
       <HeaderWithAction
         title={t('paymentMethods.title')}
         addLabel={t('paymentMethods.addPaymentMethod')}
@@ -83,7 +81,7 @@ const PaymentMethods: React.FC = () => {
       </Typography> */}
      
      
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 2 } }}>
+      <div className='flex flex-col gap-2'>
         {methods.map(m => (
           <PaymentCard
             key={m.id}
@@ -95,7 +93,7 @@ const PaymentMethods: React.FC = () => {
             language={language}
           />
         ))}
-      </Box>
+      </div>
 
      
 
@@ -107,7 +105,7 @@ const PaymentMethods: React.FC = () => {
         language={language}
         isEditMode={current !== null}
       />
-    </Box>
+    </div>
   );
 };
 

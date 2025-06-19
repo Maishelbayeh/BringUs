@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import ProductsNav from './ProductsNav';
 import ProductsDrawer from './ProductsDrawer';
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import HeaderWithAction from '@/components/common/HeaderWithAction';
+import * as XLSX from 'xlsx';
 
 // Add ColorVariant type for form
 interface ColorVariant {
@@ -85,6 +86,7 @@ const ProductsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('default');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('');
   const location = useLocation();
@@ -92,9 +94,11 @@ const ProductsPage: React.FC = () => {
   const categoryIdParam = params.get('categoryId');
   const subcategoryIdParam = params.get('subcategoryId');
 
-  const breadcrumb = [
-    { name: t('sideBar.dashboard') || 'Dashboard', id: null },
-    { name: t('products.title') || 'Products', id: 1 }
+  const sortOptions = [
+    { value: 'default', label: t('products.sort.default') || 'Default' },
+    { value: 'alpha', label: t('products.sort.alpha') || 'A-Z' },
+    { value: 'newest', label: t('products.sort.newest') || 'Newest' },
+    { value: 'oldest', label: t('products.sort.oldest') || 'Oldest' },
   ];
 
   useEffect(() => {
@@ -102,11 +106,18 @@ const ProductsPage: React.FC = () => {
     if (subcategoryIdParam) setSelectedSubcategoryId(subcategoryIdParam);
   }, [categoryIdParam, subcategoryIdParam]);
 
-  const filteredProducts = products.filter(product =>
+  let filteredProducts = products.filter(product =>
     (selectedCategoryId ? product.categoryId === Number(selectedCategoryId) : true) &&
     (selectedSubcategoryId ? product.subcategoryId === Number(selectedSubcategoryId) : true) &&
     product.name.toLowerCase().includes(search.toLowerCase())
   );
+  if (sort === 'alpha') {
+    filteredProducts = [...filteredProducts].sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sort === 'newest') {
+    filteredProducts = [...filteredProducts].sort((a, b) => b.id - a.id);
+  } else if (sort === 'oldest') {
+    filteredProducts = [...filteredProducts].sort((a, b) => a.id - b.id);
+  }
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -126,29 +137,42 @@ const ProductsPage: React.FC = () => {
     setShowDrawer(false);
   };
 
+  const handleDownloadExcel = () => {
+    const rows: any[] = [];
+    filteredProducts.forEach((product) => {
+      rows.push({
+        [isRTL ? 'اسم المنتج' : 'Product Name']: product.name,
+        [isRTL ? 'الفئة' : 'Category']: categories.find(c => c.id === product.categoryId)?.name || '',
+        [isRTL ? 'الفئة الفرعية' : 'Subcategory']: subcategories.find(s => s.id === product.subcategoryId)?.name || '',
+        [isRTL ? 'الوصف' : 'Description']: product.description,
+      });
+    });
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
+    XLSX.writeFile(workbook, 'products.xlsx');
+  };
+
   return (
-    <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
-        {breadcrumb.map((item, idx) => (
-          <React.Fragment key={item.id}>
-            <span className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`} onClick={() => setSelectedCategoryId('')}>{item.name}</span>
-            {idx < breadcrumb.length - 1 && <ChevronRightIcon className={`h-4 w-4 mx-2 ${isRTL ? 'rotate-180' : ''}`} />}
-          </React.Fragment>
-        ))}
-      </nav>
-      <ProductsNav
-        isRTL={isRTL}
-        t={t}
+    <div className="p-4 w-full" >
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('sideBar.products') || 'Products', href: '/products' }
+      ]} isRtl={isRTL} />
+      <HeaderWithAction
+        title={t('sideBar.products') || 'Products'}
+        addLabel={t('products.add') || 'Add'}
         onAdd={() => setShowDrawer(true)}
-        search={search}
-        setSearch={setSearch}
-        categories={categories}
-        subcategories={subcategories}
-        selectedCategoryId={selectedCategoryId}
-        setSelectedCategoryId={setSelectedCategoryId}
-        selectedSubcategoryId={selectedSubcategoryId}
-        setSelectedSubcategoryId={setSelectedSubcategoryId}
+        isRtl={isRTL}
+        showSearch={true}
+        searchValue={search}
+        onSearchChange={e => setSearch(e.target.value)}
+        searchPlaceholder={t('products.search') || 'Search products...'}
+        showSort={true}
+        sortValue={sort}
+        onSortChange={e => setSort(e.target.value)}
+        sortOptions={sortOptions}
+        onDownload={handleDownloadExcel}
       />
       <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
         {filteredProducts.map((product) => (

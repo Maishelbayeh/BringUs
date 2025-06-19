@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import CustomNav from '../../components/common/CustomNav';
 import CustomTable from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import SallersDrawer from './componnent/sallersDrawer';
+import HeaderWithAction from '@/components/common/HeaderWithAction';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
 // Mock data for wholesalers
 const mockWholesalers = [
@@ -44,7 +45,6 @@ const initialForm = {
 const WholesallersPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
-  const [search, setSearch] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [data, setData] = useState(mockWholesalers);
   const [form, setForm] = useState(initialForm);
@@ -108,17 +108,15 @@ const WholesallersPage = () => {
 
   return (
     <div className="p-4">
-      <CustomNav
-        isRTL={isRTL}
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('sideBar.wholesalers') || 'Wholesalers', href: '/wholesalers' }
+      ]} isRtl={isRTL} />
+      <HeaderWithAction
+        title={t('wholesalers.title') || 'Wholesalers'}
+        addLabel={t('common.add') || 'Add'}
         onAdd={handleDrawerOpen}
-        search={search}
-        setSearch={setSearch}
-        t={t}
-        title={t('wholesalers.title')}
-        showCategory={false}
-        showSubcategory={false}
-        addButtonText={t('wholesalers.add')}
-        searchPlaceholder={t('common.search')}
+        isRtl={i18n.language === 'ARABIC'}
       />
       <CustomTable
         columns={columns}

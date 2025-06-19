@@ -5,6 +5,8 @@ import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import CustomNav from '../../components/common/CustomNav';
 import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import HeaderWithAction from '@/components/common/HeaderWithAction';
 
 
 
@@ -74,24 +76,19 @@ const StoreSliderPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
-        {breadcrumb.map((item, idx) => (
-          <React.Fragment key={item.id}>
-            <span className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`} onClick={() => setSelectedCategoryId('')}>{item.name}</span>
-            {idx < breadcrumb.length - 1 && <ChevronRightIcon className={`h-4 w-4 mx-2 ${isRTL ? 'rotate-180' : ''}`} />}
-          </React.Fragment>
-        ))}
-      </nav>
-      <CustomNav
-        isRTL={isRTL}
-        t={t}
-        onAdd={() => setShowDrawer(true)}
-        search={search}
-        setSearch={setSearch}
+    <div className="p-4 w-full" >
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('sideBar.storeSlider') || 'Store Slider', href: '/store-slider' }
+      ]} isRtl={isRTL} />
+      <HeaderWithAction
         title={t('sideBar.storeSlider') || 'Store Slider'}
-        addButtonText={t('storeSlider.addButton') || t('products.add')}
+        addLabel={t('storeSlider.addButton') || t('products.add')}
+        onAdd={() => setShowDrawer(true)}
+        isRtl={isRTL}
+        showSearch={true}
+        searchValue={search}
+        onSearchChange={e => setSearch(e.target.value)}
         searchPlaceholder={t('storeSlider.searchPlaceholder') || t('products.search')}
       />
       <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">

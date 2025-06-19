@@ -3,7 +3,6 @@ import React from 'react';
 import { PencilSquareIcon, TrashIcon, StarIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
-import CustomButton from '../../../components/common/CustomButton';
 
 interface Props {
   method: PaymentMethod;
