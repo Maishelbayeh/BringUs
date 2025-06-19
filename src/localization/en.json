@@ -306,7 +306,12 @@
   },
   "advertisement": {
     "inputLabel": "Paste your HTML below",
-    "preview": "Preview"
+    "preview": "Preview",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "add": "Add HTML",
+    "noPreview": "No preview available"
   },
   "termsConditions": {
     "edit": "Edit Terms & Conditions",

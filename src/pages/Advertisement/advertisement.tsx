@@ -17,14 +17,34 @@ const AdvertisementPage = () => {
   const [formHtml, setFormHtml] = useState('');
   const [formStatus, setFormStatus] = useState<'Active' | 'Inactive'>('Active');
   const [search, setSearch] = useState('');
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+
+  // Function to safely render HTML
+  const renderHtml = (html: string) => {
+    try {
+      return { __html: html };
+    } catch (error) {
+      console.error('Error rendering HTML:', error);
+      return { __html: '<p style="color: red;">Error rendering HTML</p>' };
+    }
+  };
 
   const columns = [
     {
       key: 'html',
       label: { en: t('advertisement.preview'), ar: t('advertisement.preview') },
       render: (value: string) => (
-        <div className="border rounded-lg p-2 bg-gray-50 min-h-[40px] max-w-xs overflow-x-auto" dangerouslySetInnerHTML={{ __html: value }} />
+        <div className="border rounded-lg p-4 bg-white min-h-[60px] max-w-md overflow-x-auto shadow-sm">
+          <div 
+            className="max-w-none"
+            style={{ 
+              fontSize: '14px',
+              lineHeight: '1.5',
+              color: '#333',
+              wordBreak: 'break-word'
+            }}
+            dangerouslySetInnerHTML={renderHtml(value)} 
+          />
+        </div>
       ),
       align: 'center' as const,
     },
@@ -101,20 +121,55 @@ const AdvertisementPage = () => {
               <span className="text-xl font-bold text-primary">{t('advertisement.add', 'Add HTML')}</span>
               <button onClick={() => setDrawerOpen(false)} className="text-primary hover:text-red-500 text-2xl">×</button>
             </div>
-            {/* Form */}
-            <AdvertisementForm
-              formHtml={formHtml}
-              setFormHtml={setFormHtml}
-              formStatus={formStatus}
-              setFormStatus={setFormStatus}
-              isRTL={isRTL}
-              t={t}
-              handleSubmit={handleSubmit}
-            />
-            {/* Footer */}
-            <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">
-              <CustomButton text={t('common.cancel')} color="white" textColor="primary" bordercolor="primary" action={() => setDrawerOpen(false)} />
-              <CustomButton text={editIndex !== null ? t('common.save') : t('common.add')} color="primary" textColor="white" type="submit" onClick={handleSubmit} />
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+              <div className="mb-4">
+                <label className="block mb-2 font-semibold text-gray-700">{t('advertisement.inputLabel')}</label>
+                <textarea
+                  className="w-full min-h-[120px] border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary font-mono text-sm"
+                  value={formHtml}
+                  onChange={e => setFormHtml(e.target.value)}
+                  placeholder="<h1>My Ad</h1>"
+                  required
+                />
+              </div>
+              
+              {/* HTML Preview */}
+              <div className="mb-4">
+                <label className="block mb-2 font-semibold text-gray-700">{t('advertisement.preview', 'Preview')}</label>
+                <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[100px]">
+                  {formHtml ? (
+                    <div 
+                      className="max-w-none"
+                      style={{ 
+                        fontSize: '14px',
+                        lineHeight: '1.5',
+                        color: '#333',
+                        wordBreak: 'break-word'
+                      }}
+                      dangerouslySetInnerHTML={renderHtml(formHtml)} 
+                    />
+                  ) : (
+                    <p className="text-gray-400 italic">{t('advertisement.noPreview', 'No preview available')}</p>
+                  )}
+                </div>
+              </div>
+
+              <CustomRadioGroup
+                label={t('advertisement.status', 'Status')}
+                name="status"
+                value={formStatus}
+                onChange={e => setFormStatus(e.target.value as 'Active' | 'Inactive')}
+                options={[
+                  { value: 'Active', label: t('advertisement.active', 'Active') },
+                  { value: 'Inactive', label: t('advertisement.inactive', 'Inactive') },
+                ]}
+                labelAlign={isRTL ? 'right' : 'left'}
+                isRTL={isRTL}
+              />
+            </form>
+            <div className="sticky bottom-0 left-0 right-0 bg-white py-4 flex justify-end gap-2 border-t mt-4">
+              <CustomButton text={t('common.cancel')} color="secondary" onClick={() => setDrawerOpen(false)} />
+              <CustomButton text={t('common.add')} color="primary" textColor="white" type="submit" onClick={handleSubmit} />
             </div>
           </div>
         </div>
