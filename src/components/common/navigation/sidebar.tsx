@@ -1,6 +1,6 @@
 // src/components/common/navigation/Sidebar.tsx
 import React, { useRef, useState } from 'react';
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -127,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               {/* Submenu */}
               {isOpen && hasChildren && isExpanded && (
                 <div className="ml-8 mt-1 flex flex-col gap-1">
-                  {item.children?.map((child) => {
+                  {item.children?.map((child, cidx) => {
                     const ChildIcon = child.icon;
                     const isChildActive = child.path === currentPath;
                     return (
