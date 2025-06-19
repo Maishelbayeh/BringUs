@@ -20,3 +20,8 @@ declare module "*.png" {
 
 declare module 'papaparse';
 declare module 'jspdf-autotable';
+
+declare module '@mui/icons-material/Settings';
+declare module '@mui/icons-material/Room';
+declare module '@mui/icons-material/LocalShipping';
+declare module '@mui/icons-material/Payment';

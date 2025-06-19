@@ -10,7 +10,7 @@ import CustomersPage from "../pages/customers/customers";
 import OrdersPage from "../pages/orders/orders";
 import StockTable from '../pages/stockPreview/StockTable';
 import OrderDetailPage from '../pages/orders/OrderDetailPage';
-
+import Testimonial from "../pages/Testimonial";
 import StoreSliderPage from "../pages/StoreSlider/storeSlider";
 import StorePreview from "../pages/StoreSlider/StorePreview";
 import StoreVideoPage from "../pages/StoreSlider/StoreVideo";
@@ -46,7 +46,7 @@ export default function Routers() {
       <Route path="/advertisement" element={<AdvertisementPage />} />
       <Route path="/terms-conditions" element={<TermsConditionsPage />} />
       <Route path="/products/specifications" element={<ProductSpecifications />} />
-      {/* <Route path="/testimonials" element={<Testimonial />} /> */}
+       <Route path="/testimonials" element={<Testimonial />} /> 
     </Routes>
   );
 }

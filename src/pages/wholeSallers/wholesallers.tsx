@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import CustomNav from '../../components/common/CustomNav';
 import CustomTable from '../../components/common/CustomTable';
-import CustomButton from '../../components/common/CustomButton';
 import { useTranslation } from 'react-i18next';
 import SallersDrawer from './componnent/sallersDrawer';
 
@@ -49,6 +48,7 @@ const WholesallersPage = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [data, setData] = useState(mockWholesalers);
   const [form, setForm] = useState(initialForm);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
   const columns = [
     { key: 'email', label: { en: 'Email', ar: 'البريد الإلكتروني' } },
@@ -58,17 +58,10 @@ const WholesallersPage = () => {
     { key: 'discount', label: { en: 'Wholesaler Discount %', ar: 'نسبة خصم التاجر %' } },
     {
       key: 'status',
-      label: { en: 'Status', ar: 'الحالة' },
-      render: (value: string, row: any) => {
-        const isActive = value === 'Active' || value === t('wholesalers.active');
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
-            {value === 'Active' ? t('wholesalers.active') : value === 'Inactive' ? t('wholesalers.inactive') : value}
-          </span>
-        );
-      }
+      label: { en: 'Status', ar: 'الحالة' }
+    
     },
-    { key: 'address', label: { en: 'Address', ar: 'العنوان' } },
+    { key: 'address', label: { en: 'Address', ar: 'العنوان' } }
   ];
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -81,17 +74,35 @@ const WholesallersPage = () => {
     setDrawerOpen(true);
   };
 
+  const handleEdit = (item: any) => {
+    setForm({
+      ...item,
+      status: item.status === 'Active' ? 'A' : item.status === 'Inactive' ? 'I' : item.status
+    });
+    setEditIndex(data.findIndex((d) => d.id === item.id));
+    setDrawerOpen(true);
+  };
+
+  const handleDelete = (item: any) => {
+    setData(prev => prev.filter(d => d.id !== item.id));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setData(prev => [
-      ...prev,
-      {
-        ...form,
-        id: prev.length + 1,
-        discount: Number(form.discount),
-        status: form.status === 'A' ? 'Active' : 'Inactive',
-      }
-    ]);
+    if (editIndex !== null) {
+      setData(prev => prev.map((d, idx) => idx === editIndex ? { ...form, id: d.id, discount: Number(form.discount), status: form.status === 'A' ? 'Active' : 'Inactive' } : d));
+      setEditIndex(null);
+    } else {
+      setData(prev => [
+        ...prev,
+        {
+          ...form,
+          id: prev.length + 1,
+          discount: Number(form.discount),
+          status: form.status === 'A' ? 'Active' : 'Inactive',
+        }
+      ]);
+    }
     setDrawerOpen(false);
   };
 
@@ -112,6 +123,8 @@ const WholesallersPage = () => {
       <CustomTable
         columns={columns}
         data={data}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
       <SallersDrawer
         open={drawerOpen}

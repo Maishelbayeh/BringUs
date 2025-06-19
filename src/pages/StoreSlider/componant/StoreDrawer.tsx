@@ -1,7 +1,5 @@
 // src/components/DeliveryAreas/DeliveryAreaDrawer.tsx
 import React from 'react';
-import { Drawer, Box, IconButton, Typography, useTheme } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import StoreSliderForm from './StoreSliderForm';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '@/components/common/CustomButton';
@@ -21,75 +19,35 @@ interface StoreSliderDrawerProps {
 
 const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, onSave, form, onFormChange, onImageChange, isRTL, mode = 'slider', categories = [], subcategories = [] }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(form);
   };
 
-  return (
-    <Drawer
-      anchor={isRTL ? 'left' : 'right'}
-      open={open}
-      onClose={onClose}
-      PaperProps={{ 
-        sx: { 
-          width: { xs: '100%', sm: 450 },
-          p: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          borderLeft: '1.5px solid #1976d233',
-          height: '100vh',
-        } 
-      }}
-    >
-      <Box
-        className='border-b-2 border-primary'
-        sx={{
-          display: 'flex',
-          flexDirection: isRTL ? 'row-reverse' : 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          p: 3,
-          pb: 2,
-        }}
-      >
-        <Typography
-          className='text-primary'
-          variant="h5"
-          sx={{
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            textAlign: isRTL ? 'right' : 'left',
-          }}
-        >
-          {t('sideBar.storeSlider')}
-        </Typography>
-        <IconButton
-          className='text-primary hover:text-primary'
-          onClick={onClose}
-        >
-          <CloseIcon />
-        </IconButton>
-      </Box>
+  if (!open) return null;
 
-      <form 
-        onSubmit={handleSubmit}
-        className="flex-1 overflow-y-auto p-6"
-      >
-        <StoreSliderForm 
-          form={form}
-          onFormChange={onFormChange}
-          onImageChange={onImageChange}
-          isRTL={isRTL}
-          mode={mode}
-        />
-      </form>
-      <div className="bg-white border-t border-gray-200 p-4">
-        <div className="flex justify-end space-x-3">
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className={`bg-white rounded-2xl shadow-xl w-full max-w-md mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
+        dir={isRTL ? 'rtl' : 'ltr'}>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
+          <span className="text-xl font-bold text-primary">{t('sideBar.storeSlider')}</span>
+          <button onClick={onClose} className="text-primary hover:text-red-500 text-2xl">×</button>
+        </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-4 flex-1 flex flex-col">
+          <StoreSliderForm
+            form={form}
+            onFormChange={onFormChange}
+            onImageChange={onImageChange}
+            isRTL={isRTL}
+            mode={mode}
+          />
+        </form>
+        {/* Footer */}
+        <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">
           <CustomButton
             color="white"
             textColor="primary"
@@ -102,11 +60,11 @@ const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, on
             textColor="white"
             text={t('common.save')}
             type="submit"
-            form="store-slider-form"
+            onClick={handleSubmit}
           />
         </div>
       </div>
-    </Drawer>
+    </div>
   );
 };
 

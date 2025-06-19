@@ -47,6 +47,7 @@ const AffiliationPage = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [data, setData] = useState(mockAffiliates);
   const [form, setForm] = useState(initialForm);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
   const columns = [
     { key: 'email', label: { en: t('affiliation.email'), ar: t('affiliation.email') } },
@@ -67,6 +68,7 @@ const AffiliationPage = () => {
       }
     },
     { key: 'address', label: { en: t('affiliation.address'), ar: t('affiliation.address') } },
+   
   ];
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -79,22 +81,37 @@ const AffiliationPage = () => {
     setDrawerOpen(true);
   };
 
+  const handleEdit = (item: any) => {
+    setForm(item);
+    setEditIndex(data.findIndex((d) => d.id === item.id));
+    setDrawerOpen(true);
+  };
+
+  const handleDelete = (item: any) => {
+    setData(prev => prev.filter(d => d.id !== item.id));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setData(prev => [
-      ...prev,
-      {
-        ...form,
-        id: prev.length + 1,
-        percent: Number(form.percent),
-        status: form.status === 'Active' || form.status === t('affiliation.active') ? 'Active' : 'Inactive',
-      }
-    ]);
+    if (editIndex !== null) {
+      setData(prev => prev.map((d, idx) => idx === editIndex ? { ...form, id: d.id, percent: Number(form.percent), status: form.status === 'Active' || form.status === t('affiliation.active') ? 'Active' : 'Inactive' } : d));
+      setEditIndex(null);
+    } else {
+      setData(prev => [
+        ...prev,
+        {
+          ...form,
+          id: prev.length + 1,
+          percent: Number(form.percent),
+          status: form.status === 'Active' || form.status === t('affiliation.active') ? 'Active' : 'Inactive',
+        }
+      ]);
+    }
     setDrawerOpen(false);
   };
 
   return (
-    <div className="p-4" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="p-4" >
       <CustomNav
         isRTL={isRTL}
         onAdd={handleDrawerOpen}
@@ -110,6 +127,8 @@ const AffiliationPage = () => {
       <CustomTable
         columns={columns}
         data={data}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
       <AffiliationDrawer
         open={drawerOpen}

@@ -311,5 +311,21 @@
   "termsConditions": {
     "edit": "Edit Terms & Conditions",
     "htmlPreview": "HTML Preview"
+  },
+  "testimonials": {
+    "title": "Testimonials",
+    "add": "Add Testimonial",
+    "edit": "Edit Testimonial",
+    "manage": "Edit Testimonial",
+    "addEdit": "Add/Edit Testimonial",
+    "picture": "Picture",
+    "socialIcon": "Social Icon",
+    "reviewBy": "Review By",
+    "reviewPosition": "Review Position",
+    "review": "Review",
+    "active": "Active",
+    "inactive": "Inactive",
+    "dragDrop": "Drag and Drop",
+    "selectOrDrop": "Select a file or drop one here."
   }
 }

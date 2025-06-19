@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ProductSpecificationsDrawer from './ProductSpecificationsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import HeaderWithAction from '../../components/common/HeaderWithAction';
 
 const initialSpecs = [
   { id: 1, description: 'طويل' },
@@ -63,26 +64,12 @@ const ProductSpecifications: React.FC = () => {
     <div className="p-6 w-full">
       {/* Breadcrumb */}
       <CustomBreadcrumb items={breadcrumb} isRtl={i18n.language === 'ARABIC'} />
-      {/* Header */}
-      <div className={`flex items-center justify-between mb-6 ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
-        <h1 className="text-2xl font-bold text-primary">{t('products.productSpecifications') || 'Product Specifications'}</h1>
-        <button
-          onClick={handleAdd}
-          className={`flex items-center gap-2 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}
-        >
-          {i18n.language === 'ARABIC' ? (
-            <>
-              <span>{t('common.add') || 'Add'}</span>
-              <PlusIcon className="h-5 w-5" />
-            </>
-          ) : (
-            <>
-              <PlusIcon className="h-5 w-5" />
-              <span>{t('common.add') || 'Add'}</span>
-            </>
-          )}
-        </button>
-      </div>
+      <HeaderWithAction
+        title={t('products.productSpecifications') || 'Product Specifications'}
+        addLabel={t('common.add') || 'Add'}
+        onAdd={handleAdd}
+        isRtl={i18n.language === 'ARABIC'}
+      />
       <div className="overflow-x-auto">
         <CustomTable columns={columns as any} data={specs} onEdit={handleEdit} onDelete={handleDelete} />
       </div>

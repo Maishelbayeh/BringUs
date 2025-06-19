@@ -1,6 +1,7 @@
 import React from 'react';
 import CustomInput from '../../../components/common/CustomInput';
 import CustomFileInput from '../../../components/common/CustomFileInput';
+import CustomTextArea from '../../../components/common/CustomTextArea';
 
 interface CategoriesFormProps {
   form: any;
@@ -34,13 +35,13 @@ const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onI
       onChange={onFormChange}
       required
     />
-    <CustomInput
+    <CustomTextArea
       label={isRTL ? 'الوصف' : 'Description'}
-      name="description"
       value={form.description}
-      onChange={onFormChange}
-      required
+      onChange={e => onFormChange(e as any)}
+      
       labelAlign={isRTL ? 'right' : 'left'}
+    
      
     />
     <CustomFileInput

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import CustomNav from '../../components/common/CustomNav';
 import CustomTable from '../../components/common/CustomTable';
 import CustomButton from '../../components/common/CustomButton';
-import CustomRadioGroup from '../../components/common/CustomRadioGroup';
+import AdvertisementForm from './AdvertisementForm';
 
 const initialHtml = [
   { id: 1, html: '<h2 style="color:green">Welcome to Advertisement!</h2>', status: 'Active' },
@@ -17,6 +17,7 @@ const AdvertisementPage = () => {
   const [formHtml, setFormHtml] = useState('');
   const [formStatus, setFormStatus] = useState<'Active' | 'Inactive'>('Active');
   const [search, setSearch] = useState('');
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
   const columns = [
     {
@@ -40,6 +41,7 @@ const AdvertisementPage = () => {
       },
       align: 'center' as const,
     },
+    
   ];
 
   const handleAdd = () => {
@@ -48,19 +50,35 @@ const AdvertisementPage = () => {
     setDrawerOpen(true);
   };
 
+  const handleEdit = (item: any) => {
+    setFormHtml(item.html);
+    setFormStatus(item.status);
+    setEditIndex(data.findIndex((d) => d.id === item.id));
+    setDrawerOpen(true);
+  };
+
+  const handleDelete = (item: any) => {
+    setData(prev => prev.filter(d => d.id !== item.id));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formHtml.trim()) {
-      setData(prev => [
-        ...prev,
-        { id: prev.length + 1, html: formHtml, status: formStatus }
-      ]);
+      if (editIndex !== null) {
+        setData(prev => prev.map((d, idx) => idx === editIndex ? { ...d, html: formHtml, status: formStatus } : d));
+        setEditIndex(null);
+      } else {
+        setData(prev => [
+          ...prev,
+          { id: prev.length + 1, html: formHtml, status: formStatus }
+        ]);
+      }
     }
     setDrawerOpen(false);
   };
 
   return (
-    <div className="p-4" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="p-4" >
       <CustomNav
         isRTL={isRTL}
         onAdd={handleAdd}
@@ -73,48 +91,30 @@ const AdvertisementPage = () => {
         addButtonText={t('common.add')}
         searchPlaceholder={t('advertisement.inputLabel')}
       />
-      <CustomTable columns={columns} data={data} />
+      <CustomTable columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
       {drawerOpen && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
-          <div
-            className={`fixed top-0 ${isRTL ? 'left-0' : 'right-0'} h-full w-full max-w-2xl bg-white shadow-2xl p-6 flex flex-col transition-transform duration-300`}
-            style={{ [isRTL ? 'left' : 'right']: 0 }}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          >
-            <div className="flex items-center justify-between border-b pb-4 mb-4">
-              <h2 className="text-2xl font-bold text-primary">{t('advertisement.add', 'Add HTML')}</h2>
-              <button type="button" onClick={() => setDrawerOpen(false)} className="text-gray-500 hover:text-gray-700 transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
+            dir={isRTL ? 'rtl' : 'ltr'}>
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
+              <span className="text-xl font-bold text-primary">{t('advertisement.add', 'Add HTML')}</span>
+              <button onClick={() => setDrawerOpen(false)} className="text-primary hover:text-red-500 text-2xl">×</button>
             </div>
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-              <label className="block mb-2 font-semibold text-gray-700">{t('advertisement.inputLabel')}</label>
-              <textarea
-                className="w-full min-h-[120px] border border-gray-300 rounded-lg p-2 mb-4 focus:ring-primary focus:border-primary"
-                value={formHtml}
-                onChange={e => setFormHtml(e.target.value)}
-                placeholder="<h1>My Ad</h1>"
-                required
-              />
-              <CustomRadioGroup
-                label={t('advertisement.status', 'Status')}
-                name="status"
-                value={formStatus}
-                onChange={e => setFormStatus(e.target.value as 'Active' | 'Inactive')}
-                options={[
-                  { value: 'Active', label: t('advertisement.active', 'Active') },
-                  { value: 'Inactive', label: t('advertisement.inactive', 'Inactive') },
-                ]}
-                labelAlign={isRTL ? 'right' : 'left'}
-                isRTL={isRTL}
-              />
-            </form>
-            <div className="sticky bottom-0 left-0 right-0 bg-white py-4 flex justify-end gap-2 border-t mt-4">
-              <CustomButton text={t('common.cancel')} color="secondary" onClick={() => setDrawerOpen(false)} />
-              <CustomButton text={t('common.add')} color="primary" textColor="white" type="submit" onClick={handleSubmit} />
+            {/* Form */}
+            <AdvertisementForm
+              formHtml={formHtml}
+              setFormHtml={setFormHtml}
+              formStatus={formStatus}
+              setFormStatus={setFormStatus}
+              isRTL={isRTL}
+              t={t}
+              handleSubmit={handleSubmit}
+            />
+            {/* Footer */}
+            <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">
+              <CustomButton text={t('common.cancel')} color="white" textColor="primary" bordercolor="primary" action={() => setDrawerOpen(false)} />
+              <CustomButton text={editIndex !== null ? t('common.save') : t('common.add')} color="primary" textColor="white" type="submit" onClick={handleSubmit} />
             </div>
           </div>
         </div>

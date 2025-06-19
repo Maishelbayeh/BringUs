@@ -135,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <button
                         key={child.id}
                         onClick={() => child.path && handleItemClick(child.path)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded transition-colors duration-200 text-sm
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors duration-200 text-sm
                           ${isChildActive ? 'bg-primary text-white' : 'text-black hover:bg-primary/10'}
                           ${isRTL ? 'text-right' : 'text-left'}`}
                         style={{ justifyContent: isRTL ? 'flex-end' : 'flex-start' }}

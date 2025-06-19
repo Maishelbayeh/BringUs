@@ -1,10 +1,9 @@
 // src/components/DeliveryAreas/DeliveryAreaForm.tsx
 import React, { useState, useEffect } from 'react';
-import { Box, useTheme } from '@mui/material';
+import { Box} from '@mui/material';
 import { DeliveryArea } from '../../../Types';
 
 import CustomInput from '../../../components/common/CustomInput';
-import CustomButton from '../../../components/common/CustomButton';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
@@ -40,28 +39,9 @@ const DeliveryAreaForm: React.FC<Props> = ({ area, onSubmit, onCancel, language 
   };
 
   return (
-    // <Paper 
-    //   elevation={3}
-    //   sx={{ 
-    //     p: 4,
-    //     borderRadius: 4,
-    //     background: theme.palette.mode === 'dark' 
-    //       ? 'linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%)' 
-    //       : 'linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%)',
-    //     // boxShadow: theme.shadows[10],
-    //   }}
-    // >
-      <Box 
-        component="form" 
-        onSubmit={handleSubmit} 
-        sx={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: 3,
-          p: 3,
-          borderRadius: 3,
-        }}
-      >
+   
+      <form onSubmit={handleSubmit} className="flex flex-col  p-4">
+      
    
         
         <CustomInput
@@ -110,20 +90,9 @@ const DeliveryAreaForm: React.FC<Props> = ({ area, onSubmit, onCancel, language 
           labelAlign={language === 'ARABIC' ? 'right' : 'left'}
         />
 
-        <Box 
-          sx={{ 
-            display: 'flex',
-            flexDirection: language === 'ARABIC' ? 'row-reverse' : 'row',
-            justifyContent:  'flex-start',
-            gap: 2,
-            mt: 4,
-          }}
-        >
-         
-        
-        </Box>
-      </Box>
-    // </Paper>
+       
+        </form>
+   
   );
 };
 

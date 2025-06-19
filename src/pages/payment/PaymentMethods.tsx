@@ -1,15 +1,14 @@
 // src/components/PaymentMethods/PaymentMethods.tsx
 import React, { useState } from 'react';
-import { Box, Typography, Divider } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Box } from '@mui/material';
 import { PaymentMethod } from '../../Types';
 import PaymentCard from './componant/paymentcard';
 import PaymentDrawer from './componant/settingdrawer';
 import { useTranslation } from 'react-i18next';
-import CustomButton from '../../components/common/CustomButton';
 import useLanguage from '../../hooks/useLanguage';
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useNavigate } from 'react-router-dom';
+import HeaderWithAction from '../../components/common/HeaderWithAction';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
 const initial: PaymentMethod[] = [
   { id: 1, title: 'Cash on Delivery', titleAr: 'الدفع عند الاستلام', titleEn: 'Cash on Delivery', isDefault: true },
@@ -20,7 +19,6 @@ const initial: PaymentMethod[] = [
 const PaymentMethods: React.FC = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const navigate = useNavigate();
   const [methods, setMethods] = useState<PaymentMethod[]>(initial);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [current, setCurrent] = useState<PaymentMethod | null>(null);
@@ -68,53 +66,22 @@ const PaymentMethods: React.FC = () => {
 
   return (
     <Box sx={{ p: { xs: 1, sm: 2, md: 4 ,mt:10 }, minHeight: '100vh' }} className='bg-white'>
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
-        {breadcrumb.map((item, idx) => (
-          <React.Fragment key={item.id}>
-            <span className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`} onClick={() => navigate(item.path)}>{item.name}</span>
-            {idx < breadcrumb.length - 1 && <ChevronRightIcon className={`h-4 w-4 mx-2 ${language === 'ARABIC' ? 'rotate-180' : ''}`} />}
-          </React.Fragment>
-        ))}
-      </nav>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: language === 'ARABIC' ? { xs: 'column', sm: 'row-reverse' } : { xs: 'column', sm: 'row' },
-          justifyContent: { xs: 'center', sm: 'space-between' },
-          alignItems: { xs: 'stretch', sm: 'center' },
-          mb: { xs: 2, sm: 3 },
-          gap: { xs: 2, sm: 0 },
-        }}
+      <CustomBreadcrumb items={breadcrumb} isRtl={language === 'ARABIC'} />
+      <HeaderWithAction
+        title={t('paymentMethods.title')}
+        addLabel={t('paymentMethods.addPaymentMethod')}
+        onAdd={openDrawer}
+        isRtl={language === 'ARABIC'}
+      />
+      {/* <Typography
+        variant="body2"
+        className='text-body'
+        paragraph
+        sx={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
       >
-        <Box >
-          <Typography
-            variant="h4"
-            gutterBottom
-            sx={{ fontWeight: 'bold', textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-            className='text-primary'
-          >
-            {t('paymentMethods.title')}
-          </Typography>
-          <Typography
-            variant="body2"
-            className='text-body'
-            paragraph
-            sx={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-          >
-            {t('paymentMethods.description')}
-          </Typography>
-        </Box>
-        <CustomButton
-          color="primary"
-          text={ t('paymentMethods.addPaymentMethod')}
-          alignment={language === 'ARABIC' ? 'right' : 'left'}
-          action={openDrawer}
-          icon={<AddIcon />}
-          textColor="white"
-        />
-      </Box>
-      <Divider sx={{ mb: { xs: 2, sm: 3 } }} />
+        {t('paymentMethods.description')}
+      </Typography> */}
+     
      
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 2 } }}>
         {methods.map(m => (

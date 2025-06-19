@@ -86,7 +86,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
         {label}
       </label>
       <div
-        className={`flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-primary text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary w-full p-6 cursor-pointer transition-all duration-200 hover:bg-primary/10 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${error ? 'border-red-500' : ''}`}
+        className={`flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary w-full p-2.5 cursor-pointer transition-all duration-200 hover:bg-primary/10 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${error ? 'border-red-500' : ''}`}
         onClick={handleClick}
       >
         <input

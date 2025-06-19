@@ -443,15 +443,27 @@ const CustomTable: React.FC<CustomTableProps> = ({
                         }
                         // منطق الحالات الخاصة (status, stock, visibility)
                         if (column.key === 'status') {
+                          // دعم القيم A/I أو Active/Inactive أو Paid/Unpaid
+                          let statusValue = item[column.key];
+                          let colorClass = 'bg-gray-200 text-gray-500';
+                          if (statusValue === 'A' || statusValue === 'Active' || statusValue === 'نشط') {
+                            statusValue = i18n.language === 'ARABIC' ? 'نشط' : 'Active';
+                            colorClass = 'bg-green-100 text-green-700';
+                          } else if (statusValue === 'I' || statusValue === 'Inactive' || statusValue === 'غير نشط') {
+                            statusValue = i18n.language === 'ARABIC' ? 'غير نشط' : 'Inactive';
+                            colorClass = 'bg-gray-200 text-gray-500';
+                          } else if (statusValue === 'Paid' || statusValue === 'مدفوع') {
+                            statusValue = i18n.language === 'ARABIC' ? 'مدفوع' : 'Paid';
+                            colorClass = 'bg-green-100 text-green-700';
+                          } else if (statusValue === 'Unpaid' || statusValue === 'غير مدفوع') {
+                            statusValue = i18n.language === 'ARABIC' ? 'غير مدفوع' : 'Unpaid';
+                            colorClass = 'bg-red-100 text-red-700';
+                          }
                           return (
                             <span
-                              className={
-                                item[column.key] === 'مدفوع' || item[column.key] === 'Paid'
-                                  ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full'
-                                  : 'bg-red-100 text-red-700 px-3 py-1 rounded-full'
-                              }
+                              className={`px-2 py-1 rounded-full text-xs font-semibold ${colorClass}`}
                             >
-                              {item[column.key]}
+                              {statusValue}
                             </span>
                           );
                         } else if (column.key === 'stock') {

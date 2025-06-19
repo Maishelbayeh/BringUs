@@ -19,9 +19,9 @@ interface CustomSelectProps {
 const CustomSelect: React.FC<CustomSelectProps> = ({ label, value, onChange, options, id, icon, className = '' }) => {
   const { i18n } = useTranslation()
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full mb-4 ${className}`}>
     
-        {label && <label htmlFor={id} className={`block mb-1 text-sm font-medium text-gray-900 dark:text-white ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+        {label && <label htmlFor={id} className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
         {label}
       </label>}
       <div className="relative">
@@ -29,7 +29,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ label, value, onChange, opt
           id={id}
           value={value}
           onChange={onChange}
-          className={`appearance-none bg-gray-50 border border-primary text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full py-2.5 pr-10 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary transition-all duration-200`}
+          className={`appearance-none bg-gray-50 border  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full py-2.5 pr-10 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary transition-all duration-200`}
           style={{ direction: i18n.language === 'ARABIC' ? 'rtl' : 'ltr' }}
         >
           {options.map(opt => (

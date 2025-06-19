@@ -2,6 +2,7 @@ import React from 'react';
 import CustomInput from '../../../components/common/CustomInput';
 import CustomRadioGroup from '../../../components/common/CustomRadioGroup';
 import { useTranslation } from 'react-i18next';
+import CustomTextArea from '@/components/common/CustomTextArea';
 
 interface AffiliationFormProps {
   form: any;
@@ -76,12 +77,13 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         labelAlign={isRTL ? 'right' : 'left'}
         isRTL={isRTL}
       />
-      <CustomInput
+      <CustomTextArea
         label={t('affiliation.address')}
         name="address"
         value={form.address}
         onChange={onFormChange}
         labelAlign={isRTL ? 'right' : 'left'}
+        dir={isRTL ? 'rtl' : 'ltr'}
       />
     </div>
   );

@@ -1,6 +1,5 @@
 // src/components/PaymentMethods/componant/PaymentDrawer.tsx
 import React from 'react';
-import { Drawer, Box, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PaymentForm from './paymentForm';
 import { PaymentMethod } from '../../../Types';
@@ -17,63 +16,30 @@ interface Props {
   isEditMode: boolean;
 }
 
-const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave, language, isEditMode }) => {
+const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language, isEditMode }) => {
   const { t } = useTranslation();
-
+  if (!open) return null;
+  const isRTL = language === 'ARABIC';
   return (
-    <Drawer
-      anchor={language === 'ARABIC' ? 'left' : 'right'}
-      open={open}
-      onClose={onClose}
-      PaperProps={{ 
-        sx: { 
-          width: { xs: '100%', sm: 400 }, 
-          borderRadius: 0,
-          p: 0,
-          display: 'flex',
-          flexDirection: 'column'
-        } 
-      }}
-    >
-      <Box
-        className='border-b-2 border-primary'
-        sx={{
-          display: 'flex',
-          flexDirection: language === 'ARABIC' ? 'row-reverse' : 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          p: 3,
-          pb: 2,
-        }}
-      >
-        <Typography
-          className='text-primary'
-          variant="h5"
-          sx={{
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            textAlign: language === 'ARABIC' ? 'right' : 'left',
-          }}
-        >
-          {isEditMode ? t('paymentMethods.editPaymentMethod') : t('paymentMethods.addPaymentMethod')}
-          <PaymentIcon fontSize="large" />
-        </Typography>
-        <IconButton
-          className='text-primary hover:text-primary'
-          onClick={onClose}
-        >
-          <CloseIcon />
-        </IconButton>
-      </Box>
-
-      <div className="flex-1 overflow-y-auto p-6">
-        <PaymentForm method={method} onSubmit={onSave} onCancel={onClose} language={language} isEditMode={isEditMode} />
-      </div>
-
-      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-        <div className="flex justify-end space-x-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className={`bg-white rounded-2xl shadow-xl w-full max-w-md mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
+        dir={isRTL ? 'rtl' : 'ltr'}>
+        {/* Header */}
+        <div className={`flex items-center justify-between border-b border-primary/20 px-6 py-4`}>
+          <div className="flex items-center gap-2">
+            <PaymentIcon fontSize="large" className="text-primary" />
+            <span className="text-xl font-bold text-primary">
+              {isEditMode ? t('paymentMethods.editPaymentMethod') : t('paymentMethods.addPaymentMethod')}
+            </span>
+          </div>
+          <button onClick={onClose} className="text-primary hover:text-red-500 text-2xl"><CloseIcon fontSize="inherit" /></button>
+        </div>
+        {/* Form */}
+        <div className="">
+          <PaymentForm method={method} onSubmit={onSave} onCancel={onClose} language={language} isEditMode={isEditMode} />
+        </div>
+        {/* Footer */}
+        <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl `}>
           <CustomButton
             color="white"
             textColor="primary"
@@ -88,8 +54,8 @@ const PaymentDrawer: React.FC<Props> = ({ open, onClose, method, onSave, languag
           />
         </div>
       </div>
-    </Drawer>
+    </div>
   );
 };
 
-export default PaymentDrawer;
+export default PaymentModal;

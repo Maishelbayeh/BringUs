@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XMarkIcon } from '@heroicons/react/24/outline';
 import CustomSelect from '../../components/common/CustomSelect';
 import CustomInput from '../../components/common/CustomInput';
 import CustomNumberInput from '../../components/common/CustomNumberInput';
+import CustomButton from '../../components/common/CustomButton';
 
 interface PaymentVariant {
   id: number;
@@ -49,77 +49,59 @@ const PaymentVariantsDrawer: React.FC<PaymentVariantsDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
-      
-      <div className={`fixed inset-y-0 ${isRTL ? 'left-0' : 'right-0'} w-full max-w-md bg-white shadow-xl`}>
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium text-gray-900">
-                {initialData ? t('productVariant.editProductVariant') : t('productVariant.addProductVariant')}
-              </h2>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-
-          {/* Content */}
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-6">
-              <CustomSelect
-                label={t('productVariant.product')}
-                value={formData.productId.toString()}
-                onChange={(e) => setFormData(prev => ({ ...prev, productId: Number(e.target.value) }))}
-                options={[
-                  { value: '', label: t('productVariant.selectProduct') },
-                  ...products.map(product => ({
-                    value: product.id.toString(),
-                    label: product.name[i18n.language as 'en' | 'ar']
-                  }))
-                ]}
-              />
-
-              <CustomInput
-                label={t('productVariant.name')}
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                labelAlign={isRTL ? 'right' : 'left'}
-              />
-
-              <CustomNumberInput
-                label={t('productVariant.price')}
-                value={formData.price}
-                onChange={(value: number) => setFormData(prev => ({ ...prev, price: value }))}
-                labelAlign={isRTL ? 'right' : 'left'}
-              />
-            </div>
-          </form>
-
-          {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-200">
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-dark"
-              >
-                {t('common.save')}
-              </button>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className={`bg-white rounded-2xl shadow-xl w-full max-w-md mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
+        dir={isRTL ? 'rtl' : 'ltr'}>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
+          <span className="text-xl font-bold text-primary">
+            {initialData ? t('productVariant.editProductVariant') : t('productVariant.addProductVariant')}
+          </span>
+          <button onClick={onClose} className="text-primary hover:text-red-500 text-2xl">×</button>
+        </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col p-4">
+          <CustomSelect
+            label={t('productVariant.product')}
+            value={formData.productId.toString()}
+            onChange={(e) => setFormData(prev => ({ ...prev, productId: Number(e.target.value) }))}
+            options={[
+              { value: '', label: t('productVariant.selectProduct') },
+              ...products.map(product => ({
+                value: product.id.toString(),
+                label: product.name[i18n.language as 'en' | 'ar']
+              }))
+            ]}
+          />
+          <CustomInput
+            label={t('productVariant.name')}
+            value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            labelAlign={isRTL ? 'right' : 'left'}
+          />
+          <CustomNumberInput
+            label={t('productVariant.price')}
+            value={formData.price}
+            onChange={(value: number) => setFormData(prev => ({ ...prev, price: value }))}
+            labelAlign={isRTL ? 'right' : 'left'}
+          />
+        </form>
+        {/* Footer */}
+        <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">
+          <CustomButton
+            color="white"
+            textColor="primary"
+            text={t('common.cancel')}
+            action={onClose}
+            bordercolor="primary"
+          />
+          <CustomButton
+            color="primary"
+            textColor="white"
+            text={t('common.save')}
+            type="submit"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </div>

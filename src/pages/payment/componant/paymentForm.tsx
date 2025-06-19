@@ -57,12 +57,8 @@ const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language, is
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      className="flex flex-col h-full"
-    >
-      <div className="flex-1 overflow-y-auto p-6">
+    <form onSubmit={handleSubmit} className="flex flex-col  p-4">
+      <div className="flex-1 overflow-y-auto ">
         <div className="space-y-6">
           <CustomSelect
             label={t('paymentMethods.paymentMethod')}
@@ -98,7 +94,7 @@ const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language, is
           />
         </div>
       </div> */}
-    </Box>
+    </form>
   );
 };
 

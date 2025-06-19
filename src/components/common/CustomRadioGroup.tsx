@@ -1,5 +1,4 @@
 import React from 'react';
-import { Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material';
 
 interface Option {
   value: string;
@@ -18,41 +17,30 @@ interface CustomRadioGroupProps {
 
 const CustomRadioGroup: React.FC<CustomRadioGroupProps> = ({ label, name, value, options, onChange, labelAlign = 'left', isRTL }) => {
   return (
-    <FormControl component="fieldset" sx={{ width: '100%' }}>
-      <FormLabel component="legend" sx={{ textAlign: isRTL || labelAlign === 'right' ? 'right' : 'left', fontWeight: 600, }}className='text-primary'>{label}</FormLabel>
-      <RadioGroup
-        row
-        name={name}
-        value={value}
-        onChange={onChange}
-        sx={{ flexDirection: isRTL || labelAlign === 'right' ? 'row-reverse' : 'row' }}
-      >
+    <div className="w-full mb-4">
+     {label && (
+        <label className={`block mb-1 text-sm font-medium text-gray-900 dark:text-white ${labelAlign === 'right' ? 'text-right' : 'text-left'}`}>{label}</label>
+      )}
+      <div className={`flex  gap-4`}>
         {options.map(opt => (
-          <FormControlLabel
+          <label
             key={opt.value}
-            value={opt.value}
-            control={
-              <Radio 
-                sx={{
-                  color: '#ede8f7',
-                  '&.Mui-checked': {
-                    color: '#634C9F',
-                  },
-                }}
-              />
-            }
-            label={opt.label}
-            labelPlacement={isRTL || labelAlign === 'right' ? 'start' : 'end'}
-            sx={{ 
-              mx: 1,
-              '& .MuiFormControlLabel-label': {
-                color: '#634C9F'
-              }
-            }}
-          />
+            className={`flex items-center cursor-pointer gap-2 text-primary font-medium`}
+            dir={isRTL ? 'rtl' : 'ltr'}
+          >
+            <input
+              type="radio"
+              name={name}
+              value={opt.value}
+              checked={value === opt.value}
+              onChange={onChange}
+              className="accent-primary w-4 h-4 border-2 border-primary focus:ring-primary focus:ring-2 transition-all"
+            />
+            <span className="text-sm select-none">{opt.label}</span>
+          </label>
         ))}
-      </RadioGroup>
-    </FormControl>
+      </div>
+    </div>
   );
 };
 

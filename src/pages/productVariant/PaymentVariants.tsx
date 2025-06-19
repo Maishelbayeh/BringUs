@@ -4,6 +4,7 @@ import { PlusIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import CustomTable from '../../components/common/CustomTable';
 import PaymentVariantsDrawer from './PaymentVariantsDrawer';
 import { useNavigate } from 'react-router-dom';
+import HeaderWithAction from '../../components/common/HeaderWithAction';
 
 interface PaymentVariant {
   id: number;
@@ -133,18 +134,12 @@ const PaymentVariants: React.FC = () => {
           </React.Fragment>
         ))}
       </nav>
-      <div className={`flex justify-between items-center mb-6 ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {t('productVariant.title')}
-        </h1>
-        <button
-          onClick={() => setIsDrawerOpen(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-        >
-          <PlusIcon className="h-5 w-5 mr-2" />
-          {t('productVariant.addProductVariant')}
-        </button>
-      </div>
+      <HeaderWithAction
+        title={t('productVariant.title')}
+        addLabel={t('productVariant.addProductVariant')}
+        onAdd={() => setIsDrawerOpen(true)}
+        isRtl={i18n.language === 'ARABIC'}
+      />
 
       <CustomTable
         columns={columns}

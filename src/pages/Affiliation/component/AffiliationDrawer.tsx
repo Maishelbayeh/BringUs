@@ -1,6 +1,7 @@
 import React from 'react';
 import AffiliationForm from './AffiliationForm';
 import CustomButton from '../../../components/common/CustomButton';
+import { useTranslation } from 'react-i18next';
 
 interface AffiliationDrawerProps {
   open: boolean;
@@ -13,29 +14,37 @@ interface AffiliationDrawerProps {
 }
 
 const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onSubmit }) => {
+  const { t } = useTranslation();
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={onClose} />
-      <div
-        className={`fixed top-0 ${isRTL ? 'left-0' : 'right-0'} h-full w-full max-w-2xl bg-white shadow-2xl p-6 flex flex-col transition-transform duration-300`}
-        style={{ [isRTL ? 'left' : 'right']: 0 }}
-        dir={isRTL ? 'rtl' : 'ltr'}
-      >
-        <div className="flex items-center justify-between border-b pb-4 mb-4">
-          <h2 className="text-2xl font-bold text-primary">{title}</h2>
-          <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
+        dir={isRTL ? 'rtl' : 'ltr'}>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
+          <span className="text-xl font-bold text-primary">{title}</span>
+          <button onClick={onClose} className="text-primary hover:text-red-500 text-2xl">×</button>
         </div>
-        <form onSubmit={onSubmit} className="flex-1 overflow-y-auto">
+        {/* Form */}
+        <form onSubmit={onSubmit} className="p-6 pb-0 flex-1">
           {form && onFormChange && <AffiliationForm form={form} onFormChange={onFormChange} isRTL={isRTL} />}
         </form>
-        <div className="sticky bottom-0 left-0 right-0 bg-white py-4 flex justify-end gap-2 border-t mt-4">
-          <CustomButton text="Cancel" color="secondary" onClick={onClose} />
-          <CustomButton text="Save" color="primary" textColor="white" type="submit" onClick={onSubmit} />
+        {/* Footer */}
+        <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">
+          <CustomButton
+            color="white"
+            textColor="primary"
+            text={t('common.cancel') || 'Cancel'}
+            action={onClose}
+            bordercolor="primary"
+          />
+          <CustomButton
+            color="primary"
+            textColor="white"
+            text={t('common.save') || 'Save'}
+            type="submit"
+            onClick={onSubmit}
+          />
         </div>
       </div>
     </div>

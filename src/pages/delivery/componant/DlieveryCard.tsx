@@ -1,10 +1,10 @@
 // src/components/DeliveryAreas/DeliveryAreaCard.tsx
 import React from 'react';
-import { Card, CardContent, Typography,  Box } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
+import RoomIcon from '@mui/icons-material/Room';
 import { DeliveryArea } from '../../../Types';
 import CustomButton from '../../../components/common/CustomButton';
-import { useTranslation } from 'react-i18next';
+
 
 interface Props {
   area: DeliveryArea;
@@ -16,58 +16,41 @@ interface Props {
 }
 
 const DeliveryAreaCard: React.FC<Props> = ({ area, onManage, language }) => {
-  const { t } = useTranslation();
+  const isRTL = language === 'ARABIC';
+
   return (
-  <Card
-    className='border-primary border-2'
-    sx={{
-      mb: 2,
-      borderRadius: 3,
-   
-      background: '#fff',
-      transition: 'transform 0.2s ease-in-out',
-      '&:hover': {
-        boxShadow: '0 4px 16px rgba(25, 118, 210, 0.13)',
-        transform: 'scale(1.02)',
-      },
-    }}
-  >
-    <CardContent
-      className='bg-primary-light'
-      sx={{
-        display: 'flex',
-        flexDirection: language === 'ARABIC' ? { xs: 'column', sm: 'row-reverse' } : { xs: 'column', sm: 'row' },
-        justifyContent: { xs: 'center', sm: 'space-between' },
-        alignItems: { xs: 'stretch', sm: 'center' },
-        gap: { xs: 2, sm: 0 },
-        px: 3,
-        py: 2,
-      }}
+    <div
+      className={`flex items-center justify-between bg-primary/5 shadow-md rounded-xl px-4 py-3  gap-4 ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}
+      style={{ minHeight: 60 }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'center', sm: 'flex-start' }, mb: { xs: 2, sm: 0 } }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }} className='text-primary' >
-          {language === 'ARABIC' ? (area.locationAr || area.location) : (area.locationEn || area.location)}
-        </Typography>
-        <Typography variant="body2" className='text-body' >
-          {area.whatsappNumber}
-        </Typography>
-      </Box>
-      <Typography variant="h5" sx={{ fontWeight: 'bold', textAlign: { xs: 'center', sm: 'right' }, mb: { xs: 2, sm: 0 } }} className='text-primary'>
-        {area.price} ILS
-      </Typography>
-      <Box sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-end' } }}>
+      {/* بيانات المنطقة: أيقونة + اسم + هاتف */}
+      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+        <span className="inline-flex items-center justify-center bg-primary/90 text-white rounded-full w-7 h-7">
+          <RoomIcon style={{ fontSize: 16 }} />
+        </span>
+        <div className="flex flex-col">
+          <span className="font-bold text-primary text-base leading-tight">{isRTL ? (area.locationAr || area.location) : (area.locationEn || area.location)}</span>
+          <span className="text-gray-500 text-xs mt-0.5">{area.whatsappNumber}</span>
+        </div>
+      </div>
+      {/* السعر وزر الإعدادات */}
+      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+        <span className="inline-block bg-primary-light border border-primary text-primary font-bold px-3 py-1 rounded-full text-xs min-w-[54px] text-center">
+          {area.price} <span className="text-[10px] font-medium text-gray-500">ILS</span>
+        </span>
         <CustomButton
           color="primary"
-          text={t('deliveryDetails.manage')}
-          alignment="center"
+          text={''}
           action={() => onManage(area)}
-          icon={<SettingsIcon />}
+          icon={<SettingsIcon style={{ fontSize: 20 }} />}
           textColor="white"
+          style={{ borderRadius: '50%', minWidth: 32, minHeight: 32, width: 32, height: 32, padding: 0 }}
+          className="shadow-sm hover:shadow"
         />
-      </Box>
-    </CardContent>
-  </Card>
-)};
+      </div>
+    </div>
+  );
+};
 
 export default DeliveryAreaCard;
 
