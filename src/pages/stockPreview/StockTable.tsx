@@ -1,6 +1,8 @@
 import React from 'react';
 import CustomTable from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
+import HeaderWithAction from '../../components/common/HeaderWithAction';
+import CustomBreadcrumb from '@/components/common/CustomBreadcrumb';
 
 const mockProducts = [
   { name: 'آيفون 15 برو', category: 'الكترونيات', subcategory: 'هواتف', stock: 3, visibility: true },
@@ -45,7 +47,14 @@ const StockTable: React.FC = () => {
 
   return (
     <div className="p-4 w-full">
-      <h1 className={`text-2xl font-bold mb-6 text-primary ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>{t('stockPreview.title')}</h1>
+      <CustomBreadcrumb items={[
+        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+        { name: t('sideBar.stockPreview') || 'Stock Preview', href: '/stock-preview' }
+      ]} isRtl={i18n.language === 'ARABIC'} />
+      <HeaderWithAction
+        title={t('stockPreview.title')}
+        isRtl={i18n.language === 'ARABIC'}
+      />
       <div className="overflow-x-auto ">
         <CustomTable columns={columns as any} data={tableData} />
       </div>

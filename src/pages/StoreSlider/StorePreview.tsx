@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import CustomButton from '../../components/common/CustomButton';
+import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
 const StorePreview: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -15,38 +16,28 @@ const StorePreview: React.FC = () => {
     ];
     return (
         <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
-            <nav className="flex items-center text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
-                {breadcrumb.map((item, idx) => (
-                    <React.Fragment key={item.name}>
-                        <span
-                            className={`text-primary font-semibold cursor-pointer ${idx === breadcrumb.length - 1 ? 'underline' : ''}`}
-                            onClick={() => item.path && navigate(item.path)}
-                            style={{ pointerEvents: item.path ? 'auto' : 'none', opacity: item.path ? 1 : 0.7 }}
-                        >
-                            {item.name}
-                        </span>
-                        {idx < breadcrumb.length - 1 && <span className="mx-2">/</span>}
-                    </React.Fragment>
-                ))}
-            </nav>
+            <CustomBreadcrumb items={[
+              { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+              { name: t('sideBar.storePreview') || 'Store Preview', href: undefined }
+            ]} isRtl={isRTL} />
             {/* Device Switcher */}
             <div className="flex flex-col sm:flex-row justify-center sm:gap-4 gap-2 mb-6 w-full sm:w-auto">
                 <CustomButton
-                    text={t('common.mobile') || 'Mobile'}
+                    text={t('common.mobile', 'Mobile')}
                     color={device === 'mobile' ? 'primary' : 'gray-200'}
                     textColor={device === 'mobile' ? 'white' : 'black'}
                     className="w-full sm:w-auto"
                     onClick={() => setDevice('mobile')}
                 />
                 <CustomButton
-                    text={t('common.tablet') || 'Tablet'}
+                    text={t('common.tablet', 'Tablet')}
                     color={device === 'tablet' ? 'primary' : 'gray-200'}
                     textColor={device === 'tablet' ? 'white' : 'black'}
                     className="w-full sm:w-auto"
                     onClick={() => setDevice('tablet')}
                 />
                 <CustomButton
-                    text={t('common.desktop') || 'Desktop'}
+                    text={t('common.desktop', 'Desktop')}
                     color={device === 'desktop' ? 'primary' : 'gray-200'}
                     textColor={device === 'desktop' ? 'white' : 'black'}
                     className="w-full sm:w-auto"

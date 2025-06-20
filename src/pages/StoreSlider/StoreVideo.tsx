@@ -89,7 +89,6 @@ const StoreVideoPage: React.FC = () => {
     <div className="p-4 w-full" >
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
-        { name: t('sideBar.storeSlider') || 'Store Slider', href: '/store-slider' },
         { name: t('sideBar.storeVideos') || 'Store Videos', href: '/store-videos' }
       ]} isRtl={isRTL} />
       <HeaderWithAction
@@ -102,7 +101,7 @@ const StoreVideoPage: React.FC = () => {
         onSearchChange={e => setSearch(e.target.value)}
         searchPlaceholder={t('storeVideos.searchPlaceholder') || t('products.search')}
       />
-      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
+      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6" dir={isRTL ? 'rtl' : 'ltr'}>
         {filteredProducts.map((product) => {
           // Extract YouTube video ID for link
           let videoUrl = product.image;

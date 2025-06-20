@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { Divider } from '@mui/material';
 import CustomSelect from './CustomSelect';
 
 interface HeaderWithActionProps {
   title: string;
-  addLabel: string;
+  addLabel?: string;
   onAdd?: () => void;
   isRtl?: boolean;
   className?: string;
@@ -40,8 +39,8 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
 
   return (
     <>
-      <div className={`flex items-center justify-between mb-4 gap-4 ${isRtl ? 'flex-row-reverse' : 'flex-row'} ${className}`}>
-        <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
+      <div className={`mb-4 rounded-lg px-3 pt-4 flex items-center justify-between bg-primary/10 gap-4 ${isRtl ? 'flex-row-reverse' : 'flex-row'} ${className}`}>
+        <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'} mb-4`}>
           <h1 className="text-2xl font-bold text-primary">{title}</h1>
           {onDownload && (
             <button
@@ -62,17 +61,17 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
               onChange={onSearchChange}
               onBlur={onSearchChange}
               placeholder={searchPlaceholder}
-              className={`w-80 appearance-none bg-gray-50 border  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block  p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary transition-all duration-200`}
+              className={`w-80 appearance-none bg-gray-50 border  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block  p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary transition-all duration-200 mb-4`}
               style={isRtl ? { direction: 'rtl' } : {}}
             />
           )}
           {showSort && sortOptions && (
-            <div className="w-44">
+            <div className="w-44 ">
               <CustomSelect
                 value={sortValue || ''}
                 onChange={onSortChange || (() => {})}
                 options={sortOptions}
-                className="mb-0"
+                className=""
                 icon={
                   isSortOpen ? (
                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 15l-7-7-7 7" /></svg>
@@ -85,7 +84,7 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
           )}
           {onAdd && <button
             onClick={onAdd}
-            className={`flex items-center gap-2 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}
+            className={`flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition ${isRtl ? 'flex-row-reverse' : 'flex-row'} mb-4`}
           >
             {isRtl ? (
               <>
@@ -101,7 +100,7 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
           </button>}
         </div>
       </div>
-      <Divider sx={{ mb: { xs: 2, sm: 3 } }} />
+      {/* <Divider sx={{ mb: { xs: 2, sm: 3 } }} /> */}
     </>
   );
 };

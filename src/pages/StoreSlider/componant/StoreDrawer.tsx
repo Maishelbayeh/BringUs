@@ -15,9 +15,10 @@ interface StoreSliderDrawerProps {
   mode?: 'slider' | 'video';
   categories?: { id: number; name: string }[];
   subcategories?: { id: number; name: string }[];
+  renderFooter?: React.ReactNode;
 }
 
-const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, onSave, form, onFormChange, onImageChange, isRTL, mode = 'slider', categories = [], subcategories = [] }) => {
+const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, onSave, form, onFormChange, onImageChange, isRTL, mode = 'slider', categories = [], subcategories = [], renderFooter }) => {
   const { t } = useTranslation();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -47,22 +48,24 @@ const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, on
           />
         </form>
         {/* Footer */}
-        <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">
-          <CustomButton
-            color="white"
-            textColor="primary"
-            text={t('common.cancel')}
-            action={onClose}
-            bordercolor="primary"
-          />
-          <CustomButton
-            color="primary"
-            textColor="white"
-            text={t('common.save')}
-            type="submit"
-            onClick={handleSubmit}
-          />
-        </div>
+        {renderFooter ? renderFooter : (
+          <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">
+            <CustomButton
+              color="white"
+              textColor="primary"
+              text={t('common.cancel')}
+              action={onClose}
+              bordercolor="primary"
+            />
+            <CustomButton
+              color="primary"
+              textColor="white"
+              text={t('common.save')}
+              type="submit"
+              onClick={handleSubmit}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

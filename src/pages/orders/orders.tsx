@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ordersData as ordersDataRaw, customersData, deliveryAreas, affiliates, currencies } from '../../api/mockCustomers';
 import CustomTable from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
+import HeaderWithAction from '../../components/common/HeaderWithAction';
 
 
 type Column = {
@@ -49,7 +50,11 @@ const OrdersPage: React.FC = () => {
 
   return (
     <div className="p-4 w-full">
-      <h1 className={`text-2xl font-bold mb-6 text-primary ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>{t('orders.title')}</h1>
+     <HeaderWithAction
+      title={t('orders.title')}
+    
+      isRtl={i18n.language === 'ARABIC'}
+     />
       <div className="overflow-x-auto ">
         <CustomTable 
           columns={columns} 

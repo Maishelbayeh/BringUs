@@ -35,3 +35,25 @@ body {
     font-family: 'Tajawal', sans-serif;
   }
 }
+
+@media (max-width: 768px) {
+  .custom-table-scroll {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .custom-table-scroll::-webkit-scrollbar {
+    height: 4px;
+    background: #ede8f7;
+    border-radius: 4px;
+  }
+  .custom-table-scroll::-webkit-scrollbar-thumb {
+    background: #c1b6e3;
+    border-radius: 4px;
+  }
+}
+
+/* RTL support for Quill editor */
+.quill-rtl .ql-editor {
+  direction: rtl;
+  text-align: right;
+}

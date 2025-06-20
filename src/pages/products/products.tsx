@@ -178,15 +178,26 @@ const ProductsPage: React.FC = () => {
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="p-4 flex flex-col items-center gap-2 ring-1 ring-primary/20 hover:ring-primary transition"
+            className="bg-white rounded-2xl shadow-md hover:shadow-xl transition p-4 flex flex-col group"
           >
-            <img
-              src={product.image || 'https://via.placeholder.com/150'}
-              alt={product.name}
-              className="h-40 w-40 object-cover rounded-full"
-            />
-            <h2 className="text-lg font-semibold text-primary">{product.name}</h2>
-            {product.description && <p className="text-gray-500 text-sm">{product.description}</p>}
+            <div className="relative">
+              <img
+                src={product.image || 'https://via.placeholder.com/150'}
+                alt={product.name}
+                className="h-40 w-full object-cover rounded-xl"
+              />
+              <span className="absolute top-2 left-2 bg-primary text-white text-xs px-3 py-1 rounded-full shadow">
+                {categories.find(c => c.id === product.categoryId)?.name}
+              </span>
+            </div>
+            <h2 className="text-xl font-bold text-primary mt-3">{product.name}</h2>
+            <p className="line-clamp-2 text-gray-500 text-sm mb-2">{product.description}</p>
+            <div className="flex items-center justify-between mt-auto">
+              <span className="text-lg font-bold text-green-600">$99.99</span>
+              <button className="bg-primary text-white px-4 py-1 rounded-lg text-sm hover:bg-primary-dark transition">
+                Details
+              </button>
+            </div>
           </div>
         ))}
       </div>

@@ -38,7 +38,10 @@
       "store": "Store",
       "productVariants": "Product Variants",
       "advertisement": "Advertisement",
-      "productSpecifications": "Product Specifications"
+      "productSpecifications": "Product Specifications",
+      "termsConditions": "Terms & Conditions",
+      "testimonials": "Testimonials",
+      "subcategories": "Subcategories"
    },
  
     
@@ -205,7 +208,13 @@
     "apply": "Apply",
     "clear": "Clear",
     "downloadExcel": "Download table as Excel",
-    "downloadCSV": "Download table as CSV"
+    "downloadCSV": "Download table as CSV",
+    "mobile": "Mobile",
+    "tablet": "Tablet",
+    "desktop": "Desktop",
+    "active": "Active",
+    "inactive": "Inactive",
+    "details": "Details"
   },
   "orders": {
     "title": "Orders",

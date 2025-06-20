@@ -32,25 +32,25 @@ const TermsConditionsPage = () => {
       /> */}
 <HeaderWithAction
 title={t('sideBar.termsConditions')}
-addLabel=""
-isRtl={isRTL}
-showSearch={true}
-searchValue={search}
-onSearchChange={e => setSearch(e.target.value)}
-searchPlaceholder={t('termsConditions.search', 'Search Terms')}
+// addLabel=""
+ isRtl={isRTL}
+// showSearch={true}
+// searchValue={search}
+// onSearchChange={e => setSearch(e.target.value)}
+// searchPlaceholder={t('termsConditions.search', 'Search Terms')}
 />
       {/* Card/Region */}
       <div className="bg-white rounded-lg  border-2 border-gray-200 mb-6 flex-1 flex flex-col">
         {/* Editor */}
-        <div className="flex-1 p-6">
+        <div className={`flex-1 p-6 ${isRTL ? 'text-right' : 'text-left'}`}>
           <label className="block mb-2 font-semibold text-gray-700">{t('termsConditions.edit', 'Edit Terms & Conditions')}</label>
           <ReactQuill
-            theme="snow"
-            value={html}
-            onChange={setHtml}
-            className="bg-white"
-            style={{ minHeight: 180 }}
-          />
+  theme="snow"
+  value={html}
+  onChange={setHtml}
+  className={`bg-white ${isRTL ? 'quill-rtl' : ''}`}
+  style={{ minHeight: 180 }}
+/>
           {/* HTML Preview */}
           <div className="mt-6">
             <div className="mb-2 font-semibold text-gray-700">{t('termsConditions.htmlPreview', 'HTML Preview')}</div>

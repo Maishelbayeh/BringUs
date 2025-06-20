@@ -15,12 +15,12 @@ interface Props {
   language: 'ENGLISH' | 'ARABIC';
 }
 
-const DeliveryAreaCard: React.FC<Props> = ({ area, onManage, language }) => {
+const DeliveryAreaCard: React.FC<Props> = ({ area, onManage, language, onEdit }) => {
   const isRTL = language === 'ARABIC';
 
   return (
-    <div
-      className={`flex items-center justify-between bg-primary/5 shadow-md rounded-xl px-4 py-3  gap-4 ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}
+    <div onClick={onEdit}
+      className={`w-full cursor-pointer flex items-center justify-between border shadow-md rounded-xl px-4 py-6  gap-4 ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}
       style={{ minHeight: 60 }}
     >
       {/* بيانات المنطقة: أيقونة + اسم + هاتف */}

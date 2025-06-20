@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import CustomInput from '../components/common/CustomInput';
 import CustomSelect from '../components/common/CustomSelect';
+import CustomFileInput from '../components/common/CustomFileInput';
+import CustomTextArea from '../components/common/CustomTextArea';
+import CustomButton from '../components/common/CustomButton';
+import CustomRadioGroup from '../components/common/CustomRadioGroup';
 
 interface TestimonialDrawerProps {
   open: boolean;
@@ -13,24 +17,27 @@ interface TestimonialDrawerProps {
 }
 
 const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, onSave, onDelete, testimonial, isRtl, t }) => {
-  const [image, setImage] = useState(testimonial?.image || '');
-  const [social, setSocial] = useState(testimonial?.social || 'FACEBOOK');
-  const [name, setName] = useState(testimonial?.name || '');
-  const [position, setPosition] = useState(testimonial?.position || '');
-  const [review, setReview] = useState(testimonial?.review || '');
-  const [active, setActive] = useState(testimonial?.active ?? true);
+  const [image, setImage] = useState<string>(testimonial?.image || '');
+  const [social, setSocial] = useState<string>(testimonial?.social || 'FACEBOOK');
+  const [name, setName] = useState<string>(testimonial?.name || '');
+  const [position, setPosition] = useState<string>(testimonial?.position || '');
+  const [review, setReview] = useState<string>(testimonial?.review || '');
+  const [active, setActive] = useState<boolean>(testimonial?.active ?? true);
 
-  // رفع صورة وهمي (بدون رفع فعلي)
-  const handleImageChange = (e: any) => {
-    const file = e.target.files[0];
-    if (file) {
+  const handleImageChange = (file: File | File[] | null) => {
+    if (file && !Array.isArray(file)) {
       const reader = new FileReader();
       reader.onload = (ev: any) => setImage(ev.target.result);
       reader.readAsDataURL(file);
+    } else if (Array.isArray(file) && file.length > 0) {
+      const reader = new FileReader();
+      reader.onload = (ev: any) => setImage(ev.target.result);
+      reader.readAsDataURL(file[0]);
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     onSave({
       id: testimonial?.id,
       image,
@@ -45,63 +52,95 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative">
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-primary text-xl">×</button>
-        <h2 className="text-2xl font-bold text-center mb-4">{t('testimonials.addEdit') || 'Add/Edit Testimonial'}</h2>
-        <div className="mb-4">
-          <label className="block font-semibold mb-1">{t('testimonials.picture') || 'Picture'}</label>
-          <div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition mb-2">
-            <input type="file" accept="image/*" className="hidden" id="testimonial-image-upload" onChange={handleImageChange} />
-            <label htmlFor="testimonial-image-upload" className="block cursor-pointer">
-              {image ? <img src={image} alt="preview" className="w-24 h-24 object-cover rounded mx-auto" /> : <span className="text-gray-400">{t('testimonials.dragDrop') || 'Drag and Drop'}<br />{t('testimonials.selectOrDrop') || 'Select a file or drop one here.'}</span>}
-            </label>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-2 relative flex flex-col ${isRtl ? 'text-right' : 'text-left'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
+          <span className="text-xl font-bold text-primary">{t('testimonials.addEdit') || 'Add/Edit Testimonial'}</span>
+          <button onClick={onClose} className="text-primary hover:text-red-500 text-2xl">×</button>
+        </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-4 flex-1 flex flex-col gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col ">
+              <CustomSelect
+                label={t('testimonials.socialIcon') || 'Social Icon'}
+                value={social}
+                onChange={e => setSocial(e.target.value)}
+                options={[
+                  { value: 'FACEBOOK', label: 'Facebook' },
+                  { value: 'INSTAGRAM', label: 'Instagram' },
+                  { value: 'TWITTER', label: 'Twitter' },
+                ]}
+              />
+              <CustomInput
+                label={t('testimonials.reviewBy') || 'Review By'}
+                value={name}
+                onChange={e => setName(e.target.value)}
+                labelAlign={isRtl ? 'right' : 'left'}
+              />
+              <CustomInput
+                label={t('testimonials.reviewPosition') || 'Review Position'}
+                value={position}
+                onChange={e => setPosition(e.target.value)}
+                labelAlign={isRtl ? 'right' : 'left'}
+              />
+            </div>
+            <div className="flex flex-col ">
+              <CustomRadioGroup
+                label={t('testimonials.active') || 'Active'}
+                name="active"
+                value={active ? 'true' : 'false'}
+                options={[
+                  { value: 'true', label: t('common.active') || 'Active' },
+                  { value: 'false', label: t('common.inactive') || 'Inactive' },
+                ]}
+                onChange={e => setActive(e.target.value === 'true')}
+                labelAlign={isRtl ? 'right' : 'left'}
+                isRTL={isRtl}
+              />
+              <CustomFileInput
+                label={t('testimonials.picture') || 'Picture'}
+                onChange={handleImageChange}
+                labelAlign={isRtl ? 'right' : 'left'}
+                isRTL={isRtl}
+                // placeholder={t('testimonials.selectOrDrop') || 'Select a file or drop one here.'}
+              />
+            </div>
           </div>
-        </div>
-        <div className="mb-3">
-          <CustomSelect
-            label={t('testimonials.socialIcon') || 'Social Icon'}
-            value={social}
-            onChange={e => setSocial(e.target.value)}
-            options={[
-              { value: 'FACEBOOK', label: 'Facebook' },
-              { value: 'INSTAGRAM', label: 'Instagram' },
-              { value: 'TWITTER', label: 'Twitter' },
-            ]}
-          />
-        </div>
-        <div className="mb-3">
-          <CustomInput
-            label={t('testimonials.reviewBy') || 'Review By'}
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
-        </div>
-        <div className="mb-3">
-          <CustomInput
-            label={t('testimonials.reviewPosition') || 'Review Position'}
-            value={position}
-            onChange={e => setPosition(e.target.value)}
-          />
-        </div>
-        <div className="mb-3">
-          <CustomInput
+          <CustomTextArea
             label={t('testimonials.review') || 'Review'}
             value={review}
             onChange={e => setReview(e.target.value)}
+            labelAlign={isRtl ? 'right' : 'left'}
+            dir={isRtl ? 'rtl' : 'ltr'}
           />
-        </div>
-        <div className="mb-3">
-          <label className={`block font-semibold mb-1 ${isRtl ? 'text-right' : 'text-left'}`}>{t('testimonials.active') || 'Active'}</label>
-          <div className={`flex gap-4 mt-1 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
-            <button type="button" className={`px-4 py-1 rounded ${!active ? 'bg-gray-300 text-gray-700' : 'bg-gray-100 text-gray-500'}`} onClick={() => setActive(false)}>{t('common.no') || 'No'}</button>
-            <button type="button" className={`px-4 py-1 rounded ${active ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500'}`} onClick={() => setActive(true)}>{t('common.yes') || 'Yes'}</button>
+        </form>
+        {/* Footer */}
+        <div className={`flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl `}>
+          <CustomButton
+            color="white"
+            textColor="primary"
+            text={t('common.cancel') || 'Cancel'}
+            action={onClose}
+            bordercolor="primary"
+          />
+          <div className={`flex gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+            <CustomButton
+              color="red-100"
+              textColor="red-700"
+              text={t('common.delete') || 'Delete'}
+              action={testimonial?.id ? () => onDelete(testimonial.id) : undefined}
+              disabled={!testimonial?.id}
+            />
+            <CustomButton
+              color="primary"
+              textColor="white"
+              text={t('common.save') || 'Save'}
+              type="submit"
+              onClick={handleSubmit}
+            />
           </div>
-        </div>
-        <div className={`flex justify-between mt-6 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
-          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200">{t('common.cancel') || 'Cancel'}</button>
-          {testimonial?.id && <button onClick={() => onDelete(testimonial.id)} className="px-4 py-2 rounded bg-red-100 text-red-700 hover:bg-red-200">{t('common.delete') || 'Delete'}</button>}
-          <button onClick={handleSubmit} className="px-4 py-2 rounded bg-primary text-white hover:bg-primary-dark">{t('common.applyChanges') || 'Apply Changes'}</button>
         </div>
       </div>
     </div>

@@ -57,7 +57,9 @@
        "productVariants": "أنواع المنتجات",
        "advertisement": "الإعلانات",
        "termsConditions": "الشروط والأحكام",
-       "productSpecifications": "الصفات"
+       "productSpecifications": "الصفات",
+       "testimonials": "التعليقات",
+       "subcategories": "الفئات الفرعية"
    },
   "chart": {
     "salesByProductType": "المبيعات حسب نوع المنتج",
@@ -197,7 +199,13 @@
     "apply": "تطبيق",
       "clear": "مسح",
     "downloadExcel": "تنزيل الجدول كملف Excel",
-    "downloadCSV": "تنزيل الجدول كملف CSV"
+    "downloadCSV": "تنزيل الجدول كملف CSV",
+    "mobile": "موبايل",
+    "tablet": "تابلت",
+    "desktop": "كمبيوتر" ,
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "details": "التفاصيل"
   },
   "orders": {
     "title": "الطلبات",

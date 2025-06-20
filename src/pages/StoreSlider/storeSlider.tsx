@@ -7,6 +7,7 @@ import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
+import CustomButton from '@/components/common/CustomButton';
 
 
 
@@ -38,6 +39,8 @@ const StoreSliderPage: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
   const subcategoryIdParam = params.get('subcategoryId');
+  const [editProduct, setEditProduct] = useState<any | null>(null);
+  const [drawerMode, setDrawerMode] = useState<'add' | 'edit'>('add');
 
   const breadcrumb = [
     { name: t('sideBar.dashboard') || 'Dashboard', id: null },
@@ -69,9 +72,34 @@ const StoreSliderPage: React.FC = () => {
     const imageUrl = URL.createObjectURL(file);
     setForm({ ...form, image: imageUrl });
   };
+  const handleEdit = (product: any) => {
+    setForm(product);
+    setEditProduct(product);
+    setDrawerMode('edit');
+    setShowDrawer(true);
+  };
+  const handleAdd = () => {
+    setForm(initialForm);
+    setEditProduct(null);
+    setDrawerMode('add');
+    setShowDrawer(true);
+  };
+  const handleDelete = () => {
+    if (editProduct) {
+      setProducts(products.filter(p => p.id !== editProduct.id));
+      setShowDrawer(false);
+      setEditProduct(null);
+      setForm(initialForm);
+    }
+  };
   const handleSave = (formData: any) => {
-    setProducts([...products, { ...formData, id: Date.now() }]);
+    if (drawerMode === 'edit' && editProduct) {
+      setProducts(products.map(p => p.id === editProduct.id ? { ...editProduct, ...formData } : p));
+    } else {
+      setProducts([...products, { ...formData, id: Date.now() }]);
+    }
     setShowDrawer(false);
+    setEditProduct(null);
     setForm(initialForm);
   };
 
@@ -84,37 +112,74 @@ const StoreSliderPage: React.FC = () => {
       <HeaderWithAction
         title={t('sideBar.storeSlider') || 'Store Slider'}
         addLabel={t('storeSlider.addButton') || t('products.add')}
-        onAdd={() => setShowDrawer(true)}
+        onAdd={handleAdd}
         isRtl={isRTL}
         showSearch={true}
         searchValue={search}
         onSearchChange={e => setSearch(e.target.value)}
         searchPlaceholder={t('storeSlider.searchPlaceholder') || t('products.search')}
       />
-      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
+      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="p-4 flex flex-col items-center gap-2 ring-1 ring-primary/20 hover:ring-primary transition"
+            className="group cursor-pointer bg-gradient-to-br from-primary/5 via-white to-gray-100 rounded-2xl shadow-lg border border-primary/10 hover:shadow-2xl transition flex flex-col items-stretch min-h-[320px]"
+            onClick={() => handleEdit(product)}
+            dir={isRTL ? 'rtl' : 'ltr'}
           >
-            <img
-              src={product.image || 'https://via.placeholder.com/150'}
-              alt={product.name}
-              className="h-40 w-40 object-cover rounded-full"
-            />
-            <h2 className="text-lg font-semibold text-primary">{product.name}</h2>
-            {/* {product.description && <p className="text-gray-500 text-sm">{product.description}</p>} */}
+            <div className="relative w-full h-48 rounded-t-2xl overflow-hidden flex items-center justify-center bg-gray-100">
+              <img
+                src={product.image || 'https://via.placeholder.com/150'}
+                alt={product.name}
+                className="w-full h-full object-cover transition group-hover:scale-105 duration-300"
+              />
+            </div>
+            <div className="flex-1 flex flex-col gap-2 p-4">
+              <h2 className="text-lg font-bold text-primary truncate">{product.name}</h2>
+              <p className="text-gray-500 text-sm line-clamp-2">{product.description}</p>
+            </div>
           </div>
         ))}
       </div>
       <StoreSliderDrawer
         open={showDrawer}
-        onClose={() => setShowDrawer(false)}
+        onClose={() => { setShowDrawer(false); setEditProduct(null); setForm(initialForm); }}
         onSave={handleSave}
         form={form}
         onFormChange={handleFormChange}
         onImageChange={handleImageChange}
         isRTL={isRTL}
+        mode="slider"
+        renderFooter={(
+          <div className={`flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl`}>
+            <CustomButton
+              color="white"
+              textColor="primary"
+              text={t('common.cancel')}
+              action={() => { setShowDrawer(false); setEditProduct(null); setForm(initialForm); }}
+              bordercolor="primary"
+            />
+            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {drawerMode === 'edit' && (
+                <CustomButton
+                  color="red-100"
+                  textColor="red-700"
+                  text={t('common.delete', 'Delete')}
+                  action={handleDelete}
+                  className="min-w-[100px]"
+                />
+              )}
+              <CustomButton
+                color="primary"
+                textColor="white"
+                text={t('common.save')}
+                type="submit"
+                onClick={() => handleSave(form)}
+                className="min-w-[100px]"
+              />
+            </div>
+          </div>
+        )}
       />
     </div>
   );

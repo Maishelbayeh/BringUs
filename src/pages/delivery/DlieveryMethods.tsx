@@ -81,7 +81,7 @@ const DeliveryMethods: React.FC = () => {
 
       
 
-      <div className='flex flex-col gap-2'>
+      <div className='flex  gap-2'>
         {areas.map(area => (
           <DlieveryCard
             key={area.id}

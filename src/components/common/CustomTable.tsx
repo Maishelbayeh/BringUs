@@ -351,8 +351,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
       )}
 
       {/* Table */}
-      <div className="relative overflow-x-auto w-full bg-primary/5 rounded-xl">
-        <div className="w-full  p-2">
+      <div className="relative overflow-x-auto w-full bg-primary/5 rounded-xl custom-table-scroll">
+        <div className="min-w-[600px] w-full p-2">
           <table
             className="w-full"
             dir={i18n.language === 'ARABIC' || i18n.language === 'ar' ? 'rtl' : 'ltr'}

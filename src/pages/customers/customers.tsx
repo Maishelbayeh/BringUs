@@ -98,8 +98,7 @@ const CustomersPage: React.FC = () => {
       ]} isRtl={isRTL} />
       <HeaderWithAction
         title={t('customers.title')}
-        addLabel=""
-        onAdd={() => {}}
+       
         isRtl={isRTL}
         showSearch={true}
         searchValue={search}
@@ -113,20 +112,53 @@ const CustomersPage: React.FC = () => {
       />
       {/* شبكة العملاء */}
      
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {filteredCustomers.map((customer) => {
-       
+          const orderCount = ordersData.filter(order => order.customerId === customer.id).length;
           return (
             <div
               key={customer.id}
-              className="p-4 flex flex-col items-center gap-2 ring-1 ring-primary/20 hover:ring-primary transition rounded-xl cursor-pointer bg-white"
+              className={`border bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 flex items-center gap-6 group relative cursor-pointer ${language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}
               onClick={() => setSelectedCustomer(customer)}
             >
-              <div className="h-20 w-20 flex items-center justify-center rounded-full bg-primary/10 text-primary text-xl font-bold">
-                {language === 'ARABIC' ? customer.nameAr[0] : customer.nameEn[0]}
+              <div className="relative">
+                {(() => {
+                  const colors = [
+                    'bg-primary/10 text-primary',
+                    'bg-blue-100 text-blue-700',
+                    'bg-green-100 text-green-700',
+                    'bg-yellow-100 text-yellow-700',
+                    'bg-pink-100 text-pink-700',
+                    'bg-indigo-100 text-indigo-700',
+                    'bg-purple-100 text-purple-700',
+                    'bg-orange-100 text-orange-700',
+                  ];
+                  const colorIdx = customer.id % colors.length;
+                  return (
+                    <div className={`h-20 w-20 flex items-center justify-center rounded-full text-3xl font-bold shadow ${colors[colorIdx]}`}>
+                      {language === 'ARABIC' ? customer.nameAr[0] : customer.nameEn[0]}
+                    </div>
+                  );
+                })()}
+                <span className={`absolute -top-2 ${language === 'ARABIC' ? '-right-2' : '-left-2'} bg-purple-100 text-purple-800 w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold shadow-md border-2 border-white`}>
+                  <svg className="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14l-1.68 9.39A2 2 0 0 1 15.34 19H8.66a2 2 0 0 1-1.98-1.61L5 8zm2-3a3 3 0 0 1 6 0" />
+                  </svg>
+                  {orderCount}
+                </span>
               </div>
-              <h2 className="text-lg font-semibold text-primary">{language === 'ARABIC' ? customer.nameAr : customer.nameEn}</h2>
-              <p className="text-gray-500 text-sm">{customer.phone}</p>
+              <div className="flex-1 min-w-0">
+                <div className={`flex items-center gap-2 mb-1 ${language === 'ARABIC' ? 'justify-end' : ''}`}> 
+                  <h2 className={`text-xl font-bold text-primary truncate ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>{language === 'ARABIC' ? customer.nameAr : customer.nameEn}</h2>
+                </div>
+                <p className={`text-gray-500 text-sm truncate ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>{customer.phone}</p>
+              </div>
+              <button
+                className="opacity-0 group-hover:opacity-100 transition bg-primary text-white px-4 py-1 rounded-lg text-sm"
+                onClick={e => { e.stopPropagation(); setSelectedCustomer(customer); }}
+              >
+                {t('common.details') || 'Details'}
+              </button>
             </div>
           );
         })}
@@ -142,21 +174,46 @@ const CustomersPage: React.FC = () => {
               &times;
             </button>
             {/* بيانات العميل */}
-            <div className="flex flex-col items-center gap-2 mb-6 border-b-2 border-primary/20 pb-4">
-              <div className="h-20 w-20 flex items-center justify-center rounded-full bg-primary/10 text-primary text-3xl font-bold shadow">
-                {(isRTL ? selectedCustomer.nameAr : selectedCustomer.nameEn)[0]}
-              </div>
-              <h2 className="text-xl font-bold text-primary mt-2">{isRTL ? selectedCustomer.nameAr : selectedCustomer.nameEn}</h2>
-              <div className="flex flex-wrap gap-3 justify-center mt-2">
-                <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.phone')}: <span className="font-semibold">{selectedCustomer.phone}</span></span>
-                <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.lastOrder')}: <span className="font-semibold">{getLastOrderDate(ordersData.filter(order => order.customerId === selectedCustomer.id))}</span></span>
-                <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.totalSpent')}: <span className="font-semibold">{getTotalSpent(ordersData.filter(order => order.customerId === selectedCustomer.id))}</span></span>
-                <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.averageOrderValue')}: <span className="font-semibold">{getAverageOrderValue(ordersData.filter(order => order.customerId === selectedCustomer.id))}</span></span>
+            <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} items-center gap-6 mb-6 border-b-2 border-primary/20 pb-4`}>
+              {(() => {
+                const colors = [
+                  'bg-primary/10 text-primary',
+                  'bg-blue-100 text-blue-700',
+                  'bg-green-100 text-green-700',
+                  'bg-yellow-100 text-yellow-700',
+                  'bg-pink-100 text-pink-700',
+                  'bg-indigo-100 text-indigo-700',
+                  'bg-purple-100 text-purple-700',
+                  'bg-orange-100 text-orange-700',
+                ];
+                const colorIdx = selectedCustomer.id % colors.length;
+                return (
+                  <div className={`h-20 w-20 flex items-center justify-center rounded-full text-3xl font-bold shadow ${colors[colorIdx]}`}>{(isRTL ? selectedCustomer.nameAr : selectedCustomer.nameEn)[0]}</div>
+                );
+              })()}
+              <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}> 
+                <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse ' : ''}`}>
+                  <h2 className="text-xl font-bold text-primary">{isRTL ? selectedCustomer.nameAr : selectedCustomer.nameEn}</h2>
+                  <span className={`bg-purple-100 text-purple-800 rounded-full px-3 py-1 text-xs font-bold flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <svg className="w-4 h-4 mr-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14l-1.68 9.39A2 2 0 0 1 15.34 19H8.66a2 2 0 0 1-1.98-1.61L5 8zm2-3a3 3 0 0 1 6 0" />
+                    </svg>
+                    {ordersData.filter(order => order.customerId === selectedCustomer.id).length} {t('customers.orders')}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.phone')}: <span className="font-semibold">{selectedCustomer.phone}</span></span>
+                </div>
+                <div className="flex flex-wrap gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.lastOrder')}: <span className="font-semibold">{getLastOrderDate(ordersData.filter(order => order.customerId === selectedCustomer.id))}</span></span>
+                  <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.totalSpent')}: <span className="font-semibold">{getTotalSpent(ordersData.filter(order => order.customerId === selectedCustomer.id))}</span></span>
+                  <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.averageOrderValue')}: <span className="font-semibold">{getAverageOrderValue(ordersData.filter(order => order.customerId === selectedCustomer.id))}</span></span>
+                </div>
               </div>
             </div>
             {/* جدول الطلبات */}
-            <h3 className="mt-2 mb-2 font-bold text-lg text-primary/90">{t('customers.orders')}:</h3>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <h3 className={`mt-2 mb-2 font-bold text-lg text-primary/90 ${isRTL ? 'text-right' : 'text-left'}`}>{t('customers.orders')}:</h3>
+            <div className="overflow-x-auto rounded-lg border border-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="bg-primary/10 text-primary">

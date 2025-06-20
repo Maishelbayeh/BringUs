@@ -18,7 +18,10 @@ const PaymentCard: React.FC<Props> = ({ method, onEdit, onDelete, onSetDefault, 
   const isRTL = language === 'ARABIC';
   return (
     <div
-      className={`flex items-center justify-between bg-primary/5  shadow-md rounded-xl px-5 py-3  gap-4  hover:shadow-md transition-all duration-200 cursor-pointer ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}
+      className={`w-full cursor-pointer flex items-center justify-between border shadow-md rounded-xl px-4 py-6 gap-4
+        ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}
+        ${method.isDefault ? 'bg-green-50' : 'bg-white'}
+      `}
       style={{ minHeight: 64 }}
       onClick={() => onClick(method)}
     >

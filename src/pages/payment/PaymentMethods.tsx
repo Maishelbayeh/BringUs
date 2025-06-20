@@ -81,7 +81,7 @@ const PaymentMethods: React.FC = () => {
       </Typography> */}
      
      
-      <div className='flex flex-col gap-2'>
+      <div className='flex  gap-2'>
         {methods.map(m => (
           <PaymentCard
             key={m.id}
