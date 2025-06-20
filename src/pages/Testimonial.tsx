@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusIcon } from '@heroicons/react/24/outline';
+
 import { useTranslation } from 'react-i18next';
 import TestimonialDrawer from './TestimonialDrawer';
 import HeaderWithAction from '../components/common/HeaderWithAction';

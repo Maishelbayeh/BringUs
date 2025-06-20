@@ -24,39 +24,16 @@ export const getMenuAsText = (): MenuItem[] => [
     path: '/',
   },
   {
-    id: 1,
-    title: 'sideBar.xstore',
-    icon: ShoppingCartIcon,
-    children: [
-      {
-        id: 11,
-        title: 'sideBar.paymentsSettings',
-        icon: CreditCardIcon,
-        path: '/payment-methods',
-      },
-      {
-        id: 12,
-        title: 'sideBar.deliverySettings',
-        icon: TruckIcon,
-        path: '/delivery-settings',
-      },
-    ],
-  },
-  {
     id: 2,
     title: 'sideBar.categories',
     icon: ViewColumnsIcon,
     path: '/categories',
     children: [
-    
-
       {
         id: 21,
         title: 'sideBar.subcategories',
         icon: Squares2X2Icon,
         path: '/subcategories',
-       
-
       }
     ]
   },

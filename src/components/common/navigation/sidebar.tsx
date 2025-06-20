@@ -10,8 +10,10 @@ import {
   DialogActions,
 } from '@mui/material';
 import { MenuItem } from '../../../Types';
+import logo from '../../../assets/bringus.svg';
 
 interface SidebarProps {
+  userName: string;
   menu: MenuItem[];
   onItemClick: (path: string) => void;
   isOpen: boolean;
@@ -21,6 +23,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({
   menu,
+  userName,
   onItemClick,
   isOpen,
   toggleSidebar,
@@ -65,13 +68,29 @@ const Sidebar: React.FC<SidebarProps> = ({
       `}
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      {/* Logo */}
-      <div className={`mb-8 mt-2 text-center w-full ${isRTL ? 'text-right' : 'text-left'}`}>
-        {isOpen ? (
-          <span className="text-2xl font-bold text-primary">Dashboard</span>
-        ) : (
-          <span className="text-2xl font-bold text-primary">BU</span>
-        )}
+      {/* Logo & Store Name */}
+      <div className={`mb-6 mt-2 w-full flex flex-col items-center justify-center`}>
+        <div className="flex items-center gap-2">
+          <img src={logo} alt="logo" className="h-10 w-10" />
+          <span className="text-2xl font-bold text-gray-900">BringUs</span>
+          <span className="text-xs text-gray-500 self-start mt-2">.com</span>
+        </div>
+      </div>
+      {/* User Card */}
+      <div className="w-full flex flex-col items-center mb-8">
+        <div className="bg-white rounded-xl shadow p-4 flex items-center gap-4 w-full">
+          <div className="flex-shrink-0">
+            <img
+              src={'../../../public/user.jpg'}
+              alt="User"
+              className="rounded-full border-2 border-gray-300 h-12 w-12 object-cover bg-gray-100"
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-primary text-base">{userName}</span>
+            <span className="text-gray-400 text-sm">Sales Manager</span>
+          </div>
+        </div>
       </div>
 
       <nav className="flex flex-col gap-2 w-full">
@@ -127,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               {/* Submenu */}
               {isOpen && hasChildren && isExpanded && (
                 <div className="ml-8 mt-1 flex flex-col gap-1">
-                  {item.children?.map((child, cidx) => {
+                  {item.children?.map((child) => {
                     const ChildIcon = child.icon;
                     const isChildActive = child.path === currentPath;
                     return (

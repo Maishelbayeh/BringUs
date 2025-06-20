@@ -16,7 +16,7 @@ function App() {
   const getMenuItems = (): MenuItem[] =>
     activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();
 
-  const handleItemClick = (path: string) => {
+  const handleItemClick = () => {
     // No sidebar means full width content
     if (isSidebarOpen) toggleSidebar();
   };
@@ -30,6 +30,7 @@ function App() {
         {isSidebarOpen && (
           <Sidebar 
             menu={getMenuItems()}
+            userName="Mai Shalabi"
             isOpen={isSidebarOpen}
             toggleSidebar={toggleSidebar}
             isRTL={language === 'ARABIC'}
@@ -41,7 +42,7 @@ function App() {
         {/* Main area takes full width when sidebar closed */}
         <div className="flex-1 flex flex-col">
           <TopNavbar
-            userName="Mai Shalabi"
+            // userName="Mai Shalabi"
             userPosition="Last sign in on {date}"
             language={language}
             onLanguageToggle={toggleLanguage}

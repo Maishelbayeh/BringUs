@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+
 import CustomButton from '../../components/common/CustomButton';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
 const StorePreview: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const navigate = useNavigate();
+  
     const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
     const [device, setDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
-    const breadcrumb = [
-        { name: t('sideBar.dashboard') || 'Dashboard', path: '/' },
-        { name: t('sideBar.store') || 'Store', path: '/store-slider' },
-        { name: t('sideBar.storePreview') || 'Store Preview', path: null },
-    ];
+   
     return (
         <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
             <CustomBreadcrumb items={[
