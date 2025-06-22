@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import CustomNav from '../../components/common/CustomNav';
 import CustomTable from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import AffiliationDrawer from './component/AffiliationDrawer';

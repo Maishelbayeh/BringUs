@@ -5,7 +5,7 @@ import ProductsDrawer from './ProductsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import * as XLSX from 'xlsx';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+ 
 import ProductCard from './ProductCard';
 
 // Add ColorVariant type for form

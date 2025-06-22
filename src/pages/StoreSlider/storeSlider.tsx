@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
-import CustomNav from '../../components/common/CustomNav';
+ 
 import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
@@ -42,11 +41,7 @@ const StoreSliderPage: React.FC = () => {
   const [editProduct, setEditProduct] = useState<any | null>(null);
   const [drawerMode, setDrawerMode] = useState<'add' | 'edit'>('add');
 
-  const breadcrumb = [
-    { name: t('sideBar.dashboard') || 'Dashboard', id: null },
-    { name: t('sideBar.store') || 'Store', id: 1 },
-    { name: t('sideBar.storeSlider') || 'Store Slider', id: 2 }
-  ];
+ 
 
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);

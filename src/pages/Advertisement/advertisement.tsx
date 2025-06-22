@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import CustomNav from '../../components/common/CustomNav';
 import CustomTable from '../../components/common/CustomTable';
 import CustomButton from '../../components/common/CustomButton';
 import AdvertisementForm from './AdvertisementForm';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PlusIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import CustomTable from '../../components/common/CustomTable';
 import PaymentVariantsDrawer from './PaymentVariantsDrawer';
 import { useNavigate } from 'react-router-dom';

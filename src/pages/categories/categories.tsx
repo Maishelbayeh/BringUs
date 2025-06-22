@@ -53,15 +53,7 @@ function getProducts(nodeId: number | null): Product[] {
   if (nodeId === null) return [];
   return products.filter(p => p.parentId === nodeId);
 }
-function getBreadcrumb(nodeId: number | null): Node[] {
-  const path: Node[] = [];
-  let current = getNodeById(nodeId);
-  while (current) {
-    path.unshift(current);
-    current = current.parentId !== null ? getNodeById(current.parentId) : undefined;
-  }
-  return path;
-}
+
 
 // const categoryNames: { [key: number]: { en: string; ar: string } } = {
 //   1: { en: 'Electronics', ar: 'إلكترونيات' },
@@ -127,7 +119,6 @@ const CategoriesPage: React.FC = () => {
 
   const currentChildren = getChildren(currentNodeId);
   const currentProducts = getProducts(currentNodeId);
-  const breadcrumb = currentNodeId !== null ? getBreadcrumb(currentNodeId) : [];
   const parentId = currentNodeId !== null ? getNodeById(currentNodeId)?.parentId ?? null : null;
   const categoriesCount = currentChildren.filter(child => child.type === 'category').length;
   const subCategoriesCount = currentChildren.filter(child => child.type === 'subcategory').length;

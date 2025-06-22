@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import SubcategoriesNav from './SubcategoriesNav';
 import SubcategoriesDrawer from './SubcategoriesDrawer';
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+ 
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 
 const initialCategories = [
@@ -37,10 +37,7 @@ const SubcategoriesPage: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
 
-  const breadcrumb = [
-    { name: t('sideBar.dashboard') || 'Dashboard', id: null, path: '/' },
-    { name: t('subcategories.title') || 'Subcategories', id: 1, path: '/subcategories' }
-  ];
+ 
 
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);

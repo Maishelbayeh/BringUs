@@ -35,7 +35,7 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
   sortOptions = [],
   onDownload,
 }) => {
-  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isSortOpen,   ] = useState(false);
 
   return (
     <>

@@ -63,7 +63,7 @@ const NestedRadialChart: React.FC = () => {
             }}
             labelLine={false}
           >
-            {salesData.map((entry, index) => (
+            {salesData.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>

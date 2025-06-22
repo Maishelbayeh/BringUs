@@ -1,10 +1,9 @@
 // src/components/PaymentMethods/componant/PaymentForm.tsx
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
-import { PaymentMethod } from '../../../Types';
+import React, { useState, useEffect } from 'react';
+  import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
-import CustomInput from '../../../components/common/CustomInput';
-import CustomButton from '../../../components/common/CustomButton';
+
+
 import CustomFileInput from '../../../components/common/CustomFileInput';
 import CustomSelect from '../../../components/common/CustomSelect';
 
@@ -16,7 +15,7 @@ interface Props {
   isEditMode?: boolean;
 }
 
-const PaymentForm: React.FC<Props> = ({ method, onSubmit, onCancel, language, isEditMode }) => {
+const PaymentForm: React.FC<Props> = ({ method, onSubmit, language }) => {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<string>(method?.title || '');
   const [file, setFile] = useState<File | null>(null);

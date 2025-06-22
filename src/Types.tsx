@@ -1,4 +1,3 @@
-import { ElementType } from 'react';
 
 
 export interface LogoDimensions {

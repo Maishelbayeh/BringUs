@@ -8,8 +8,7 @@ import {
   AdjustmentsHorizontalIcon,
   DocumentTextIcon,
   VideoCameraIcon,
-  CreditCardIcon,
-  TruckIcon,
+
   EyeIcon,
   ChartBarIcon,
   Squares2X2Icon,

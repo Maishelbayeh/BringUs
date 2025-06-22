@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+ 
 import { CogIcon } from '@heroicons/react/24/outline';
-import CustomNav from '../../components/common/CustomNav';
 import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
@@ -37,13 +36,9 @@ const StoreVideoPage: React.FC = () => {
   const categoryIdParam = params.get('categoryId');
   const subcategoryIdParam = params.get('subcategoryId');
   const [drawerMode, setDrawerMode] = useState<'slider' | 'video'>('video');
-  const [editProduct, setEditProduct] = useState<any | null>(null);
+  const [, setEditProduct] = useState<any | null>(null);
 
-  const breadcrumb = [
-    { name: t('sideBar.dashboard') || 'Dashboard', id: null },
-    { name: t('sideBar.store') || 'Store', id: 1 },
-    { name: t('sideBar.storeVideos') || 'Store Videos', id: 2 }
-  ];
+
 
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);
