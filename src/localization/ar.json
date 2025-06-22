@@ -133,11 +133,23 @@
     "editSpec": "تعديل الصفة",
     "specDescription": "وصف الصفة",
     "specDescriptionPlaceholder": "وصف الصفة",
+    "price": "السعر",
+    "category": "الفئة",
+    "productOrder": "الترتيب",
+    "productLabel": "التصنيف",
+    "available": "متوفر",
+    "notAvailable": "غير متوفر",
     "sort": {
       "default": "الافتراضي",
       "alpha": "الأبجدي",
       "newest": "الأحدث",
       "oldest": "الأقدم"
+    },
+    "label": {
+      "regular": "عادي",
+      "offer": "عرض",
+      "featured": "مميز",
+      "new": "جديد"
     }
   },
   "subcategories": {

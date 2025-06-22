@@ -140,12 +140,24 @@
     "editSpec": "Edit Specification",
     "specDescription": "Specification Description",
     "specDescriptionPlaceholder": "Specification Description",
+    "price": "Price",
+    "category": "Category",
+    "productOrder": "Order",
+    "productLabel": "Label",
     "sort": {
       "default": "Default",
       "alpha": "Alpha",
       "newest": "Newest",
       "oldest": "Oldest"
-    }
+    },
+    "label": {
+      "regular": "Regular",
+      "offer": "Offer",
+      "featured": "Featured",
+      "new": "New"
+      },
+      "available": "Available",
+      "notAvailable": "Not Available"
     },
   "subcategories": {
     "title": "Subcategories",

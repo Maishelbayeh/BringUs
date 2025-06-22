@@ -29,7 +29,7 @@ interface ProductsDrawerProps {
     price: string;
     originalPrice: string;
     wholesalePrice: string;
-    productLabel: string;
+    productLabel: number;
     productOrder: string;
     maintainStock: string;
     availableQuantity: string;
@@ -43,8 +43,8 @@ interface ProductsDrawerProps {
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onImageChange: (files: File | File[] | null) => void;
   onSubmit: (e: React.FormEvent) => void;
-  categories?: { id: number; name: string }[];
-  subcategories?: { id: number; name: string }[];
+  categories?: { id: number; nameAr: string; nameEn: string }[];
+  subcategories?: { id: number; nameAr: string; nameEn: string; categoryId: number }[];
 }
 
 const unitOptions = [
@@ -56,10 +56,10 @@ const unitOptions = [
 ].map(u => ({ value: u, label: u }));
 
 const labelOptions = [
-  { value: '', label: 'Regular' },
-  { value: 'Offer', label: 'Offer' },
-  { value: 'Featured', label: 'Featured' },
-  { value: 'New', label: 'New' },
+  { id: 1, nameAr: 'عادي', nameEn: 'Regular' },
+  { id: 2, nameAr: 'عرض', nameEn: 'Offer' },
+  { id: 3, nameAr: 'مميز', nameEn: 'Featured' },
+  { id: 4, nameAr: 'جديد', nameEn: 'New' },
 ];
 
 const specOptions = [
@@ -144,19 +144,34 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
                 labelAlign={isRTL ? 'right' : 'left'}
               />
             </div>
+            <div className="col-span-full">
+              <CustomTextArea
+                label={isRTL ? 'الوصف' : 'Description'}
+                name="description"
+                value={form.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                labelAlign={isRTL ? 'right' : 'left'}
+              />
+            </div>
+           
             <CustomSelect
               label={isRTL ? 'الفئة' : 'Category'}
               value={form.categoryId}
               onChange={(e) => handleSelectChange('categoryId', e.target.value)}
-              options={[{ value: '', label: isRTL ? 'اختر الفئة' : 'Select Category' }, ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))]}
-              
+              options={[
+                { value: '', label: isRTL ? 'اختر الفئة' : 'Select Category' },
+                ...categories.map(cat => ({ value: String(cat.id), label: isRTL ? cat.nameAr : cat.nameEn }))
+              ]}
             />
             <div >
               <CustomSelect
                 label={isRTL ? 'الفئة الفرعية' : 'Subcategory'}
                 value={form.subcategoryId}
                 onChange={(e) => handleSelectChange('subcategoryId', e.target.value)}
-                options={[{ value: '', label: isRTL ? 'اختر الفئة الفرعية (اختياري)' : 'Select Subcategory (optional)' }, ...subcategories.map(sub => ({ value: String(sub.id), label: sub.name }))]}
+                options={[
+                  { value: '', label: isRTL ? 'اختر الفئة الفرعية (اختياري)' : 'Select Subcategory (optional)' },
+                  ...subcategories.map(sub => ({ value: String(sub.id), label: isRTL ? sub.nameAr : sub.nameEn }))
+                ]}
                 disabled={!form.categoryId}
               />
             </div>
@@ -202,17 +217,19 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               type="number"
               labelAlign={isRTL ? 'right' : 'left'}
             />
-             <CustomRadioGroup
-                label={isRTL ? 'تصنيف المنتج' : 'Product Label'}
-                name="productLabel"
-                value={form.productLabel}
-                options={labelOptions}
-                onChange={onFormChange}
-                labelAlign={isRTL ? 'right' : 'left'}
-                isRTL={isRTL}
-              />
-
-             <CustomSwitch
+             <CustomSelect
+              label={isRTL ? 'تصنيف المنتج' : 'Product Label'}
+              value={form.productLabel.toString()}
+              onChange={(e) => handleSelectChange('productLabel', e.target.value)}
+              options={[
+                { value: '', label: isRTL ? 'اختر التصنيف' : 'Select Label' },
+                ...labelOptions.map(opt => ({
+                  value: String(opt.id),
+                  label: isRTL ? opt.nameAr : opt.nameEn
+                }))
+              ]}
+            />
+            <CustomSwitch
               label={isRTL ? 'مرئي' : 'Visibility'}
               name="visibility"
               checked={form.visibility === 'Y'}
@@ -246,15 +263,6 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               labelAlign={isRTL ? 'right' : 'left'}
               disabled={form.maintainStock !== 'Y'}
             />
-            <div className="col-span-full">
-              <CustomTextArea
-                label={isRTL ? 'الوصف' : 'Description'}
-                name="description"
-                value={form.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                labelAlign={isRTL ? 'right' : 'left'}
-              />
-            </div>
            
             <div className="col-span-full">
               <CustomShuttle
@@ -263,7 +271,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
                 value={form.productSpecifications || []}
                 options={specOptions}
                 onChange={handleShuttleChange}
-                
+                isRTL={isRTL}
               />
             </div>
             <div className="col-span-full">
@@ -297,7 +305,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
           </div>
         </form>
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl sticky bottom-0">
+        <div className="flex justify-between gap-3 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl sticky bottom-0">
           <CustomButton
             color="white"
             textColor="primary"
@@ -305,6 +313,9 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
             action={onClose}
             bordercolor="primary"
           />
+          <div>
+            
+          </div>
           <CustomButton
             color="primary"
             textColor="white"
@@ -318,4 +329,4 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
   );
 };
 
-export default ProductsDrawer; 
+export default ProductsDrawer;

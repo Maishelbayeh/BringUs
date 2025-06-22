@@ -1,0 +1,96 @@
+import React from 'react';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+
+interface ProductCardProps {
+  product: any;
+  isRTL: boolean;
+  onClick: (product: any) => void;
+  getCategoryName: (catId: number) => string;
+  getLabelName: (label: number | string) => string;
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({ product, isRTL, onClick, getCategoryName, getLabelName }) => {
+  const isDisabled = product.visibility !== 'Y';
+  return (
+    <div
+      className={`rounded-2xl shadow-md hover:shadow-xl transition p-4 flex flex-col group cursor-pointer border-2 ${isDisabled ? 'bg-gray-100 text-gray-400 border-gray-200 opacity-60 pointer-events-auto' : 'bg-white text-primary border-white'}`}
+      onClick={() => onClick(product)}
+      style={isDisabled ? { filter: 'grayscale(1)', pointerEvents: 'auto' } : {}}
+    >
+      <div className="relative">
+        {/* Badge for Product Label */}
+        <span
+          className={`
+            absolute top-10 ${isRTL ? 'right-2' : 'left-2'}
+            px-3 py-1 rounded-full text-xs font-bold shadow
+            ${product.productLabel == 2 ? 'bg-pink-500 text-white' :
+              product.productLabel == 3 ? 'bg-yellow-500 text-white' :
+              product.productLabel == 4 ? 'bg-green-600 text-white' :
+              'bg-gray-300 text-gray-700'}
+          `}
+          style={{ zIndex: 2 }}
+        >
+          {getLabelName(product.productLabel)}
+        </span>
+        <img
+          src={product.image || 'https://via.placeholder.com/150'}
+          alt={product.name}
+          className="h-40 w-full object-cover rounded-xl"
+        />
+        <span className={`absolute top-2 ${isRTL ? 'right-2' : 'left-2'} bg-primary text-white text-xs px-3 py-1 rounded-full shadow`}>
+          {getCategoryName(product.categoryId)}
+        </span>
+      </div>
+      <h2 className="text-xl font-bold mt-3">{isRTL ? product.nameAr : product.nameEn}</h2>
+      {Array.isArray(product.colors) && product.colors.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2 mb-1">
+          {product.colors.map((colorArr: string[], idx: number) => {
+            let style = {};
+            if (Array.isArray(colorArr) && colorArr.length > 1) {
+              const step = 100 / colorArr.length;
+              const segments = colorArr.map((color, i) => {
+                const start = step * i;
+                const end = step * (i + 1);
+                return `${color} ${start}% ${end}%`;
+              }).join(', ');
+              style = { background: `conic-gradient(${segments})` };
+            } else {
+              style = { background: colorArr[0] };
+            }
+            return (
+              <span
+                key={colorArr.join('-') + idx}
+                className="inline-block w-5 h-5 rounded-full border border-gray-300"
+                style={style}
+                title={colorArr.join(', ')}
+              />
+            );
+          })}
+        </div>
+      )}
+      <div className="flex items-center justify-between mt-2 mb-2">
+        <span className="text-lg font-bold text-green-600 flex items-center gap-1">
+          {product.price ? product.price : '-'}
+          <span className="text-xs text-gray-500">ILS</span>
+        </span>
+        <span className="bg-primary text-white text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full shadow">
+          {product.productOrder}
+        </span>
+      </div>
+      <div className="flex items-center gap-2 mt-1">
+        <span className={`px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1
+          ${Number(product.availableQuantity) > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}
+        >
+          {Number(product.availableQuantity) > 0 ? (
+            <CheckCircleIcon className="w-4 h-4 text-green-500" />
+          ) : (
+            <XCircleIcon className="w-4 h-4 text-gray-400" />
+          )}
+          {Number(product.availableQuantity) > 0 ? `${product.availableQuantity} متوفر` : 'غير متوفر'}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default ProductCard; 

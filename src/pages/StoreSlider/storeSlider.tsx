@@ -96,7 +96,7 @@ const StoreSliderPage: React.FC = () => {
     if (drawerMode === 'edit' && editProduct) {
       setProducts(products.map(p => p.id === editProduct.id ? { ...editProduct, ...formData } : p));
     } else {
-      setProducts([...products, { ...formData, id: Date.now() }]);
+    setProducts([...products, { ...formData, id: Date.now() }]);
     }
     setShowDrawer(false);
     setEditProduct(null);
@@ -128,9 +128,9 @@ const StoreSliderPage: React.FC = () => {
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             <div className="relative w-full h-48 rounded-t-2xl overflow-hidden flex items-center justify-center bg-gray-100">
-              <img
-                src={product.image || 'https://via.placeholder.com/150'}
-                alt={product.name}
+            <img
+              src={product.image || 'https://via.placeholder.com/150'}
+              alt={product.name}
                 className="w-full h-full object-cover transition group-hover:scale-105 duration-300"
               />
             </div>

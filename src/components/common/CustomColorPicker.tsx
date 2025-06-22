@@ -16,7 +16,7 @@ interface CustomColorPickerProps {
 }
 
 const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, value = [], onChange, isRTL }) => {
-  console.log(isRTL);
+  
   const [currentColors, setCurrentColors] = useState<string[]>([]);
   const [showPicker, setShowPicker] = useState(false);
 
