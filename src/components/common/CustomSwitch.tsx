@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, FormControlLabel } from '@mui/material';
+import { Switch } from '@mui/material';
 
 interface CustomSwitchProps {
   label: string;
@@ -24,8 +24,15 @@ const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onCha
   };
 
   return (
-    <FormControlLabel
-      control={
+    <div className="w-full mb-4">
+      <label className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${isRTL || labelAlign === 'right' ? 'text-right' : 'text-left'}`}>{label}</label>
+      <div
+        className={`flex items-center  transition-all duration-200
+        
+          
+        `}
+        tabIndex={-1}
+      >
         <Switch
           checked={checked}
           onChange={handleChange}
@@ -43,20 +50,8 @@ const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onCha
             },
           }}
         />
-      }
-      label={label}
-      labelPlacement={isRTL || labelAlign === 'right' ? 'start' : 'end'}
-      sx={{
-        flexDirection: isRTL || labelAlign === 'right' ? 'row-reverse' : 'row',
-        justifyContent: isRTL || labelAlign === 'right' ? 'flex-end' : 'flex-start',
-        width: '100%',
-        margin: 0,
-        '& .MuiFormControlLabel-label': {
-          fontSize: '0.875rem',
-          color: 'text.secondary' 
-        }
-      }}
-    />
+      </div>
+    </div>
   );
 };
 

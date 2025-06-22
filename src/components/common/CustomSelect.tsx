@@ -13,10 +13,10 @@ interface CustomSelectProps {
   id?: string;
   icon?: React.ReactNode;
   className?: string;
-  
+  disabled?: boolean;
 }
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ label, value, onChange, options, id, icon, className = '' }) => {
+const CustomSelect: React.FC<CustomSelectProps> = ({ label, value, onChange, options, id, icon, className = '', disabled }) => {
   const { i18n } = useTranslation()
   return (
     <div className={`w-full mb-4 ${className}`}>
@@ -29,8 +29,12 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ label, value, onChange, opt
           id={id}
           value={value}
           onChange={onChange}
-          className={`appearance-none bg-gray-50 border  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full py-2.5 pr-10 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary transition-all duration-200`}
+          className={`appearance-none border text-sm rounded-lg block w-full py-2.5 pr-10 pl-10 transition-all duration-200
+            ${disabled ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-900 border-gray-300 focus:ring-primary focus:border-primary'}
+            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary`
+          }
           style={{ direction: i18n.language === 'ARABIC' ? 'rtl' : 'ltr' }}
+          disabled={disabled}
         >
           {options.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>

@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper, IconButton } from '@mui/material';
 import { SketchPicker, ColorResult } from 'react-color';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import CustomButton from './CustomButton';
+
 
 interface ColorVariant {
   id: string;
@@ -19,6 +16,7 @@ interface CustomColorPickerProps {
 }
 
 const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, value = [], onChange, isRTL }) => {
+  console.log(isRTL);
   const [currentColors, setCurrentColors] = useState<string[]>([]);
   const [showPicker, setShowPicker] = useState(false);
 
@@ -68,155 +66,85 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, valu
   };
 
   return (
-    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-      <Typography 
-        fontWeight={600} 
-        textAlign={isRTL ? 'right' : 'left'} 
-        mb={2}
-        color="text.secondary"
-        variant="subtitle2"
-      >
-        {label}
-      </Typography>
-
-      <Box display="flex" flexDirection="column" gap={3}>
-        {!showPicker ? (
-          <CustomButton
-            icon={<AddIcon sx={{ color: '#634C9F' }} />}
-            onClick={() => setShowPicker(true)}
-            text={isRTL ? 'إضافة لون جديد' : 'Add New Color'}
-            color="primary-light"
-            textColor="primary"
-            bordercolor="primary"
-            style={{ alignSelf: 'flex-start' }}
-          />
-        ) : (
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Box sx={{ 
-              '& .sketch-picker': {
-                boxShadow: 'none !important',
-                border: '1px solid #e0e0e0',
-                borderRadius: 2,
-              }
-            }}>
-              <SketchPicker color="#000" onChangeComplete={handleColorAdd} />
-            </Box>
-
-            <Box display="flex" flexWrap="wrap" gap={2} alignItems="center">
-              {currentColors.map((color, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    position: 'relative',
-                    '&:hover .delete-button': {
-                      opacity: 1,
-                    }
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: '50%',
-                      background: color,
-                      border: '1px solid #e0e0e0',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    }}
-                  />
-                  <IconButton
-                    className="delete-button"
-                    size="small"
-                    onClick={() => handleColorRemove(index)}
-                    sx={{
-                      position: 'absolute',
-                      top: -8,
-                      right: -8,
-                      backgroundColor: 'white',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      opacity: 0,
-                      transition: 'opacity 0.2s',
-                      '&:hover': {
-                        backgroundColor: 'white',
-                      }
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" sx={{ color: '#634C9F' }} />
-                  </IconButton>
-                </Box>
-              ))}
-            </Box>
-
-            <Box display="flex" gap={2}>
-              <CustomButton
-                onClick={handleVariantAdd}
-                text={isRTL ? 'إضافة' : 'Add'}
-                color="primary"
-                textColor="white"
-                disabled={currentColors.length === 0}
-              />
-              <CustomButton
-                onClick={() => {
-                  setShowPicker(false);
-                  setCurrentColors([]);
-                }}
-                text={isRTL ? 'إلغاء' : 'Cancel'}
-                color="primary-light"
-                textColor="primary"
-                bordercolor="primary"
-              />
-            </Box>
-          </Box>
-        )}
-
-        <Box display="flex" flexWrap="wrap" gap={2} alignItems="center">
+    <div className="w-full mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="bg-white  flex flex-col ">
+        <label className={`block mb-2 text-sm font-medium text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
+          {label}
+        </label>
+        <div className={`flex flex-wrap gap-4 mb-2 `}>
           {value.map((variant) => (
-            <Box
-              key={variant.id}
-              sx={{
-                position: 'relative',
-                '&:hover .delete-button': {
-                  opacity: 1,
-                }
-              }}
-            >
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: '50%',
-                  ...getCircleDivisionStyle(variant.colors),
-                  border: '1px solid #e0e0e0',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.05)'
-                  }
-                }}
+            <div key={variant.id} className="relative group">
+              <div
+                className="w-12 h-12 rounded-full border-4 border-white shadow transition-transform duration-200 group-hover:scale-110"
+                style={{ background: getCircleDivisionStyle(variant.colors).background }}
               />
-              <IconButton
-                className="delete-button"
-                size="small"
+              <button
+                type="button"
                 onClick={() => handleVariantRemove(variant.id)}
-                sx={{
-                  position: 'absolute',
-                  top: -8,
-                  right: -8,
-                  backgroundColor: 'white',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  opacity: 0,
-                  transition: 'opacity 0.2s',
-                  '&:hover': {
-                    backgroundColor: 'white',
-                  }
-                }}
+                className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} bg-white border border-gray-300 rounded-full p-1 opacity-0 group-hover:opacity-100 transition`}
+                title={isRTL ? 'حذف' : 'Delete'}
               >
-                <DeleteIcon fontSize="small" sx={{ color: '#634C9F' }} />
-              </IconButton>
-            </Box>
+                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           ))}
-        </Box>
-      </Box>
-    </Paper>
+          <button
+            type="button"
+            onClick={() => setShowPicker(true)}
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-primary/20 hover:bg-primary transition text-white text-2xl shadow-lg"
+            title={isRTL ? 'إضافة لون جديد' : 'Add New Color'}
+          >
+            +
+          </button>
+        </div>
+        {showPicker && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="absolute inset-0 bg-black/30" onClick={() => setShowPicker(false)} />
+            <div className="bg-white rounded-2xl shadow-2xl p-6 z-10 flex flex-col gap-4">
+              <div className="flex flex-wrap gap-2 mb-2">
+                {currentColors.map((color, idx) => (
+                  <div key={idx} className="relative group">
+                    <div className="w-8 h-8 rounded-full border border-gray-300" style={{ background: color }} />
+                    <button
+                      type="button"
+                      onClick={() => handleColorRemove(idx)}
+                      className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} bg-white border border-gray-300 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition`}
+                      title={isRTL ? 'حذف' : 'Delete'}
+                    >
+                      <svg className="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="mb-2">
+                <SketchPicker color="#000" onChangeComplete={handleColorAdd} />
+              </div>
+              <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <button
+                  type="button"
+                  onClick={handleVariantAdd}
+                  className="px-4 py-1 rounded bg-primary text-white font-semibold disabled:opacity-50"
+                  disabled={currentColors.length === 0}
+                >
+                  {isRTL ? 'إضافة' : 'Add'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowPicker(false); setCurrentColors([]); }}
+                  className="px-4 py-1 rounded bg-gray-200 text-primary font-semibold"
+                >
+                  {isRTL ? 'إلغاء' : 'Cancel'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

@@ -47,7 +47,9 @@ const CustomInput: React.FC<CustomInputProps> = ({ label, error, errorColor = 't
         <input
           id={id}
           type={type}
-          className={`appearance-none bg-gray-50 border  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary transition-all duration-200`}
+          className={`appearance-none border text-sm rounded-lg block w-full p-2.5 transition-all duration-200
+              ${props.disabled ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-900 border-gray-300 focus:ring-primary focus:border-primary'}
+              dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary`}
           {...props}
         />
       )}

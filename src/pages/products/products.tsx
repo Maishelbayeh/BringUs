@@ -159,6 +159,8 @@ const ProductsPage: React.FC = () => {
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.products') || 'Products', href: '/products' }
       ]} isRtl={isRTL} />
+
+      
       <HeaderWithAction
         title={t('sideBar.products') || 'Products'}
         addLabel={t('products.add') || 'Add'}

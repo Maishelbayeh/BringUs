@@ -7,7 +7,7 @@ import CustomSwitch from '../../components/common/CustomSwitch';
 import CustomRadioGroup from '../../components/common/CustomRadioGroup';
 import CustomShuttle from '../../components/common/CustomShuttle';
 import CustomColorPicker from '../../components/common/CustomColorPicker';
-
+import CustomTextArea from '../../components/common/CustomTextArea';
 
 
 interface ColorVariant {
@@ -111,27 +111,29 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
   };
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className={`fixed top-0 ${isRTL ? 'left-0' : 'right-0'} h-full w-full max-w-4xl bg-white shadow-2xl p-8 flex flex-col gap-6 transition-transform duration-300 transform`}
-        style={{ [isRTL ? 'left' : 'right']: 0 }}
+        className={`relative w-full max-w-3xl bg-white shadow-2xl rounded-2xl flex flex-col gap-6 transition-all duration-300 p-0 ${isRTL ? 'text-right' : 'text-left'}`}
         dir={isRTL ? 'rtl' : 'ltr'}
       >
-        <div className="flex items-center justify-between border-b pb-4">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4 rounded-t-2xl">
           <h2 className="text-2xl font-bold text-primary">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="rounded-full p-2 bg-gray-100 hover:bg-primary/10 transition text-xl"
+            style={{ marginLeft: isRTL ? 0 : 8, marginRight: isRTL ? 8 : 0 }}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <form onSubmit={onSubmit} className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Form */}
+        <form onSubmit={onSubmit} className="flex-1 overflow-y-auto px-6 py-4 max-h-[70vh]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-4">
             <div className="col-span-full">
               <CustomInput
                 label={isRTL ? 'اسم المنتج' : 'Product Name'}
@@ -149,26 +151,30 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               options={[{ value: '', label: isRTL ? 'اختر الفئة' : 'Select Category' }, ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))]}
               
             />
-            <div style={{ display: form.categoryId ? undefined : 'none' }}>
+            <div >
               <CustomSelect
                 label={isRTL ? 'الفئة الفرعية' : 'Subcategory'}
                 value={form.subcategoryId}
                 onChange={(e) => handleSelectChange('subcategoryId', e.target.value)}
                 options={[{ value: '', label: isRTL ? 'اختر الفئة الفرعية (اختياري)' : 'Select Subcategory (optional)' }, ...subcategories.map(sub => ({ value: String(sub.id), label: sub.name }))]}
-                
+                disabled={!form.categoryId}
               />
             </div>
-            <CustomSwitch
-              label={isRTL ? 'مرئي' : 'Visibility'}
-              name="visibility"
-              checked={form.visibility === 'Y'}
-              onChange={onFormChange}
-            />
+           
             <CustomSelect
               label={isRTL ? 'الوحدة' : 'Unit'}
               value={form.unit}
               onChange={(e) => handleSelectChange('unit', e.target.value)}
               options={[{ value: '', label: isRTL ? 'اختر وحدة' : 'Select Unit' }, ...unitOptions]}
+              
+            />
+               <CustomInput
+              label={isRTL ? 'ترتيب المنتج' : 'Product Order'}
+              name="productOrder"
+              value={form.productOrder}
+              onChange={(e) => handleInputChange('productOrder', e.target.value)}
+              type="number"
+              labelAlign={isRTL ? 'right' : 'left'}
               
             />
             <CustomInput
@@ -196,29 +202,40 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               type="number"
               labelAlign={isRTL ? 'right' : 'left'}
             />
-            <div className="col-span-full">
-              <CustomRadioGroup
+             <CustomRadioGroup
                 label={isRTL ? 'تصنيف المنتج' : 'Product Label'}
                 name="productLabel"
                 value={form.productLabel}
                 options={labelOptions}
                 onChange={onFormChange}
                 labelAlign={isRTL ? 'right' : 'left'}
+                isRTL={isRTL}
               />
-            </div>
+
+             <CustomSwitch
+              label={isRTL ? 'مرئي' : 'Visibility'}
+              name="visibility"
+              checked={form.visibility === 'Y'}
+              onChange={onFormChange}
+              isRTL={isRTL}
+            />
+           
             <CustomInput
-              label={isRTL ? 'ترتيب المنتج' : 'Product Order'}
-              name="productOrder"
-              value={form.productOrder}
-              onChange={(e) => handleInputChange('productOrder', e.target.value)}
-              type="number"
+              label={isRTL ? 'الباركود' : 'Parcode'}
+              name="parcode"
+              value={form.parcode}
+              onChange={(e) => handleInputChange('parcode', e.target.value)}
               labelAlign={isRTL ? 'right' : 'left'}
             />
+             
+            
+         
             <CustomSwitch
               label={isRTL ? 'إدارة المخزون' : 'Maintain Stock'}
               name="maintainStock"
               checked={form.maintainStock === 'Y'}
               onChange={onFormChange}
+              isRTL={isRTL}
             />
             <CustomInput
               label={isRTL ? 'الكمية المتوفرة' : 'Available Quantity'}
@@ -227,10 +244,10 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
               type="number"
               labelAlign={isRTL ? 'right' : 'left'}
-              style={{ display: form.maintainStock === 'Y' ? undefined : 'none' }}
+              disabled={form.maintainStock !== 'Y'}
             />
             <div className="col-span-full">
-              <CustomInput
+              <CustomTextArea
                 label={isRTL ? 'الوصف' : 'Description'}
                 name="description"
                 value={form.description}
@@ -238,13 +255,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
                 labelAlign={isRTL ? 'right' : 'left'}
               />
             </div>
-            <CustomInput
-              label={isRTL ? 'الباركود' : 'Parcode'}
-              name="parcode"
-              value={form.parcode}
-              onChange={(e) => handleInputChange('parcode', e.target.value)}
-              labelAlign={isRTL ? 'right' : 'left'}
-            />
+           
             <div className="col-span-full">
               <CustomShuttle
                 label={isRTL ? 'مواصفات المنتج' : 'Product Specifications'}
@@ -261,7 +272,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
                 name="colors"
                 value={form.colors || []}
                 onChange={handleColorChange}
-                
+                isRTL={isRTL}
               />
             </div>
             <div className="col-span-full">
@@ -285,23 +296,22 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
             </div>
           </div>
         </form>
-        <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 mt-4">
-          <div className="flex justify-end space-x-3">
-            <CustomButton
-              color="white"
-              textColor="primary"
-              text={isRTL ? 'إلغاء' : 'Cancel'}
-              action={onClose}
-              bordercolor="primary"
-            />
-            <CustomButton
-              color="primary"
-              textColor="white"
-              text={isRTL ? 'حفظ' : 'Save'}
-              type="submit"
-              form="product-form"
-            />
-          </div>
+        {/* Footer */}
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl sticky bottom-0">
+          <CustomButton
+            color="white"
+            textColor="primary"
+            text={isRTL ? 'إلغاء' : 'Cancel'}
+            action={onClose}
+            bordercolor="primary"
+          />
+          <CustomButton
+            color="primary"
+            textColor="white"
+            text={isRTL ? 'حفظ' : 'Save'}
+            type="submit"
+            form="product-form"
+          />
         </div>
       </div>
     </div>

@@ -27,7 +27,7 @@ const CustomersPage: React.FC = () => {
   const isRTL = language === 'ARABIC';
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<'name' | 'lastOrderDesc' | 'lastOrderAsc'>('name');
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   const getTotalSpent = (orders: Order[]) =>
     orders.reduce((sum, order) => sum + (order.paid ? order.price : 0), 0);
@@ -50,22 +50,7 @@ const CustomersPage: React.FC = () => {
         customer.phone.includes(search)
       );
     })
-    .sort((a, b) => {
-      const aOrders = ordersData.filter(order => order.customerId === a.id);
-      const bOrders = ordersData.filter(order => order.customerId === b.id);
-      if (sort === 'name') {
-        const nameA = (language === 'ARABIC' ? a.nameAr : a.nameEn).toLowerCase();
-        const nameB = (language === 'ARABIC' ? b.nameAr : b.nameEn).toLowerCase();
-        return nameA.localeCompare(nameB);
-      }
-      if (sort === 'lastOrderDesc') {
-        return new Date(getLastOrderDate(bOrders)).getTime() - new Date(getLastOrderDate(aOrders)).getTime();
-      }
-      if (sort === 'lastOrderAsc') {
-        return new Date(getLastOrderDate(aOrders)).getTime() - new Date(getLastOrderDate(bOrders)).getTime();
-      }
-      return 0;
-    });
+   
 ////////////////////////////////////////////////////////////////////////////////////////////////////
  
   const handleDownloadExcel = () => {
@@ -84,11 +69,11 @@ const CustomersPage: React.FC = () => {
     XLSX.writeFile(workbook, 'customers.xlsx');
   };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  const sortOptions = [
-    { value: 'name', label: isRTL ? 'الترتيب حسب الاسم' : 'Sort by Name' },
-    { value: 'lastOrderDesc', label: isRTL ? 'الطلبات من الأحدث إلى الأقدم' : 'Orders: Newest to Oldest' },
-    { value: 'lastOrderAsc', label: isRTL ? 'الطلبات من الأقدم إلى الأحدث' : 'Orders: Oldest to Newest' },
-  ];
+  // const sortOptions = [
+  //   { value: 'name', label: isRTL ? 'الترتيب حسب الاسم' : 'Sort by Name' },
+  //   { value: 'lastOrderDesc', label: isRTL ? 'الطلبات من الأحدث إلى الأقدم' : 'Orders: Newest to Oldest' },
+  //   { value: 'lastOrderAsc', label: isRTL ? 'الطلبات من الأقدم إلى الأحدث' : 'Orders: Oldest to Newest' },
+  // ];
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   return (
     <div className="p-4 w-full" >
@@ -104,10 +89,6 @@ const CustomersPage: React.FC = () => {
         searchValue={search}
         onSearchChange={e => setSearch(e.target.value)}
         searchPlaceholder={isRTL ? 'ابحث باسم العميل أو رقم الهاتف...' : 'Search by customer name or phone...'}
-        showSort={true}
-        sortValue={sort}
-        onSortChange={e => setSort(e.target.value as 'name' | 'lastOrderDesc' | 'lastOrderAsc')}
-        sortOptions={sortOptions}
         onDownload={handleDownloadExcel}
       />
       {/* شبكة العملاء */}
