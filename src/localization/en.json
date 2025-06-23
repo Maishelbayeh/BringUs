@@ -157,7 +157,10 @@
       "new": "New"
       },
       "available": "Available",
-      "notAvailable": "Not Available"
+      "notAvailable": "Not Available",
+      "maintainStock": "Maintain Stock",
+      "availableQuantity": "Available Quantity",
+     "edit":"Edit Product"
     },
   "subcategories": {
     "title": "Subcategories",

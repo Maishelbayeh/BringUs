@@ -4,7 +4,6 @@ import CustomInput from '../../components/common/CustomInput';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomSelect from '../../components/common/CustomSelect';
 import CustomSwitch from '../../components/common/CustomSwitch';
-import CustomRadioGroup from '../../components/common/CustomRadioGroup';
 import CustomShuttle from '../../components/common/CustomShuttle';
 import CustomColorPicker from '../../components/common/CustomColorPicker';
 import CustomTextArea from '../../components/common/CustomTextArea';
@@ -32,7 +31,7 @@ interface ProductsDrawerProps {
     productLabel: number;
     productOrder: string;
     maintainStock: string;
-    availableQuantity: string;
+    availableQuantity: number;
     description: string;
     parcode: string;
     productSpecifications: string[];
@@ -251,7 +250,13 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               label={isRTL ? 'إدارة المخزون' : 'Maintain Stock'}
               name="maintainStock"
               checked={form.maintainStock === 'Y'}
-              onChange={onFormChange}
+              onChange={e => {
+                onFormChange(e);
+                if (e.target.value === 'N') {
+                  // إذا تم إلغاء التفعيل، امسح الكمية المتوفرة
+                  handleInputChange('availableQuantity', '');
+                }
+              }}
               isRTL={isRTL}
             />
             <CustomInput

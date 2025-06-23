@@ -150,7 +150,10 @@
       "offer": "عرض",
       "featured": "مميز",
       "new": "جديد"
-    }
+    },
+    "maintainStock": "إدارة المخزون",
+    "availableQuantity": "الكمية المتوفرة",
+    "edit": "تعديل المنتج"
   },
   "subcategories": {
     "title": "الفئات الفرعية",
