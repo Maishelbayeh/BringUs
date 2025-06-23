@@ -10,7 +10,6 @@ interface CustomFileInputProps {
   placeholder?: string;
   id?: string;
   style?: React.CSSProperties;
-  labelAlign?: 'left' | 'right';
   multiple?: boolean;
   isRTL?: boolean;
 }
@@ -23,7 +22,6 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   placeholder, 
   id, 
   style, 
-  labelAlign,
   multiple = false,
   isRTL = false
 }) => {
@@ -33,7 +31,8 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { t } = useTranslation();
-
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language;
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) {
@@ -82,7 +81,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
 
   return (
     <div className="mb-4 w-full">
-      <label htmlFor={id} className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${labelAlign === 'right' ? 'text-right' : 'text-left'}`} style={style}>
+      <label htmlFor={id} className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${currentLanguage === 'ARABIC' ? 'text-right' : 'text-left'}`} style={style}>
         {label}
       </label>
       <div
@@ -143,7 +142,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
       <Typography variant="caption" color="text.secondary" style={style}>
         {t('paymentMethods.qrPictureDescription2')}
       </Typography>
-      {error && <span className={`mt-1 text-xs text-red-600 block ${labelAlign === 'right' ? 'text-right' : 'text-left'}`} style={style}>{error}</span>}
+      {error && <span className={`mt-1 text-xs text-red-600 block ${currentLanguage === 'ARABIC' ? 'text-right' : 'text-left'}`} style={style}>{error}</span>}
     </div>
   );
 };

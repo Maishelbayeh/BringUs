@@ -5,6 +5,7 @@ import { customersData, ordersData } from '../../api/mockCustomers';
 import * as XLSX from 'xlsx';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
+import CustomerDetailsPopup from './CustomerDetailsPopup';
 
 type Customer = {
   id: number;
@@ -93,7 +94,7 @@ const CustomersPage: React.FC = () => {
       />
       {/* شبكة العملاء */}
      
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredCustomers.map((customer) => {
           const orderCount = ordersData.filter(order => order.customerId === customer.id).length;
           return (
@@ -135,7 +136,7 @@ const CustomersPage: React.FC = () => {
                 <p className={`text-gray-500 text-sm truncate ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>{customer.phone}</p>
               </div>
               <button
-                className="opacity-0 group-hover:opacity-100 transition bg-primary text-white px-4 py-1 rounded-lg text-sm"
+                className="hidden lg:inline-flex opacity-0 group-hover:opacity-100 transition bg-primary text-white px-4 py-1 rounded-lg text-sm"
                 onClick={e => { e.stopPropagation(); setSelectedCustomer(customer); }}
               >
                 {t('common.details') || 'Details'}
@@ -145,91 +146,17 @@ const CustomersPage: React.FC = () => {
         })}
       </div>
       {selectedCustomer && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg relative shadow-xl border border-primary/20">
-            <button
-              className="absolute top-2 left-2 text-gray-400 hover:text-primary text-2xl"
-              onClick={() => setSelectedCustomer(null)}
-              aria-label={t('customers.close')}
-            >
-              &times;
-            </button>
-            {/* بيانات العميل */}
-            <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} items-center gap-6 mb-6 border-b-2 border-primary/20 pb-4`}>
-              {(() => {
-                const colors = [
-                  'bg-primary/10 text-primary',
-                  'bg-blue-100 text-blue-700',
-                  'bg-green-100 text-green-700',
-                  'bg-yellow-100 text-yellow-700',
-                  'bg-pink-100 text-pink-700',
-                  'bg-indigo-100 text-indigo-700',
-                  'bg-purple-100 text-purple-700',
-                  'bg-orange-100 text-orange-700',
-                ];
-                const colorIdx = selectedCustomer.id % colors.length;
-                return (
-                  <div className={`h-20 w-20 flex items-center justify-center rounded-full text-3xl font-bold shadow ${colors[colorIdx]}`}>{(isRTL ? selectedCustomer.nameAr : selectedCustomer.nameEn)[0]}</div>
-                );
-              })()}
-              <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}> 
-                <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse ' : ''}`}>
-                  <h2 className="text-xl font-bold text-primary">{isRTL ? selectedCustomer.nameAr : selectedCustomer.nameEn}</h2>
-                  <span className={`bg-purple-100 text-purple-800 rounded-full px-3 py-1 text-xs font-bold flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                    <svg className="w-4 h-4 mr-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14l-1.68 9.39A2 2 0 0 1 15.34 19H8.66a2 2 0 0 1-1.98-1.61L5 8zm2-3a3 3 0 0 1 6 0" />
-                    </svg>
-                    {ordersData.filter(order => order.customerId === selectedCustomer.id).length} {t('customers.orders')}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
-                  <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.phone')}: <span className="font-semibold">{selectedCustomer.phone}</span></span>
-                </div>
-                <div className="flex flex-wrap gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
-                  <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.lastOrder')}: <span className="font-semibold">{getLastOrderDate(ordersData.filter(order => order.customerId === selectedCustomer.id))}</span></span>
-                  <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.totalSpent')}: <span className="font-semibold">{getTotalSpent(ordersData.filter(order => order.customerId === selectedCustomer.id))}</span></span>
-                  <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.averageOrderValue')}: <span className="font-semibold">{getAverageOrderValue(ordersData.filter(order => order.customerId === selectedCustomer.id))}</span></span>
-                </div>
-              </div>
-            </div>
-            {/* جدول الطلبات */}
-            <h3 className={`mt-2 mb-2 font-bold text-lg text-primary/90 ${isRTL ? 'text-right' : 'text-left'}`}>{t('customers.orders')}:</h3>
-            <div className="overflow-x-auto rounded-lg border border-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="bg-primary/10 text-primary">
-                    <th className="py-2 px-3 border-b">{t('customers.orderNumber')}</th>
-                    <th className="py-2 px-3 border-b">{t('customers.orderDate')}</th>
-                    <th className="py-2 px-3 border-b">{t('customers.orderPrice')}</th>
-                    <th className="py-2 px-3 border-b">{t('customers.orderPaid')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ordersData.filter(order => order.customerId === selectedCustomer.id).map((order) => (
-                    <tr key={order.id} className={`text-center hover:bg-primary/5 transition ${order.paid ? 'bg-green-50' : 'bg-red-50'}`}>
-                      <td className="py-2 px-3 border-b font-semibold">{order.id}</td>
-                      <td className="py-2 px-3 border-b">{order.date}</td>
-                      <td className="py-2 px-3 border-b">{order.price} ₪</td>
-                      <td className="py-2 px-3 border-b">
-                        {order.paid ? (
-                          <span className="inline-flex items-center gap-1 text-green-700 font-semibold">
-                            <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            {t('customers.orderPaid')}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-red-600 font-semibold">
-                            <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            {t('customers.orderUnpaid')}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <CustomerDetailsPopup
+          open={!!selectedCustomer}
+          onClose={() => setSelectedCustomer(null)}
+          customer={selectedCustomer}
+          orders={ordersData}
+          isRTL={isRTL}
+          t={t}
+          getLastOrderDate={getLastOrderDate}
+          getTotalSpent={getTotalSpent}
+          getAverageOrderValue={getAverageOrderValue}
+        />
       )}
     </div>
   );

@@ -167,7 +167,14 @@
     "add": "Add Subcategory",
     "search": "Search subcategories...",
     "allSubcategories": "All Subcategories",
-    "allCategories": "All Categories"
+    "allCategories": "All Categories",
+    "searchPlaceholder": "Search by category or sub-category...",
+    "addSubcategory": "Add Subcategory",
+    "nameAr": "Subcategory Name (Arabic)",
+    "nameEn": "Subcategory Name (English)",
+    "descriptionAr": "Description (Arabic)",
+    "descriptionEn": "Description (English)",
+    "image": "Image"
   },
   "customers": {
     "title": "Customers",

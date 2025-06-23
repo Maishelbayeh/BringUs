@@ -27,7 +27,7 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
         {/* Header */}
         <div className={`flex items-center justify-between border-b border-primary/20 px-6 py-4`}>
           <div className="flex items-center gap-2">
-            <PaymentIcon fontSize="large" className="text-primary" />
+          
             <span className="text-xl font-bold text-primary">
               {isEditMode ? t('paymentMethods.editPaymentMethod') : t('paymentMethods.addPaymentMethod')}
             </span>

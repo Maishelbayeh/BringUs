@@ -24,23 +24,38 @@ function App() {
   return (
     <BrowserRouter>
       <div className={
-          `flex min-h-screen bg-main_bg_w    ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
+          `flex min-h-screen w-full bg-main_bg_w overflow-x-hidden ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
         }>
-          <div className='h-full'>
+        {/* Sidebar for all screens, but with different style for mobile */}
         {isSidebarOpen && (
-          <Sidebar 
-            menu={getMenuItems()}
-            userName="Mai Shalabi"
-            isOpen={isSidebarOpen}
-            toggleSidebar={toggleSidebar}
-            isRTL={language === 'ARABIC'}
-            onItemClick={handleItemClick}
-          />
+          <>
+            {/* Overlay for mobile only */}
+            <div
+              className="fixed inset-0 z-40 bg-black bg-opacity-40 md:hidden"
+              onClick={toggleSidebar}
+            />
+            <div
+              className={
+                `z-50 transition-all duration-300
+                fixed top-0 ${language === 'ARABIC' ? 'right-0' : 'left-0'} h-full  max-w-xs md:static md:block md:w-80 md:max-w-xs
+                ${language === 'ARABIC' ? 'md:right-0' : 'md:left-0'}
+                bg-primary-light shadow-xl md:shadow-none
+                md:relative md:z-auto`
+              }
+              style={{ minHeight: '100vh' }}
+            >
+              <Sidebar 
+                menu={getMenuItems()}
+                userName="Mai Shalabi"
+                isOpen={isSidebarOpen}
+                toggleSidebar={toggleSidebar}
+                isRTL={language === 'ARABIC'}
+                onItemClick={handleItemClick}
+              />
+            </div>
+          </>
         )}
-</div>
-
-        {/* Main area takes full width when sidebar closed */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 min-w-0 flex flex-col">
           <TopNavbar
             // userName="Mai Shalabi"
             userPosition="Last sign in on {date}"

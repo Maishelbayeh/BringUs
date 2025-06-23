@@ -159,7 +159,14 @@
     "title": "الفئات الفرعية",
     "add": "إضافة فئة فرعية",
     "search": "ابحث عن فئات فرعية...",
-    "allSubcategories": "جميع الفئات الفرعية"
+    "allSubcategories": "جميع الفئات الفرعية",
+    "searchPlaceholder": "ابحث باسم الفئة أو التصنيف...",
+    "addSubcategory": "إضافة فئة فرعية",
+    "nameAr": "اسم الفئة الفرعية (عربي)",
+    "nameEn": "اسم الفئة الفرعية (انجليزي)",
+    "descriptionAr": "الوصف (عربي)",
+    "descriptionEn": "الوصف (انجليزي)",
+    "image": "الصورة"
   },
   "customers": {
     "title": "العملاء",

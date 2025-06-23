@@ -114,7 +114,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className={`relative w-full max-w-3xl bg-white shadow-2xl rounded-2xl flex flex-col gap-6 transition-all duration-300 p-0 ${isRTL ? 'text-right' : 'text-left'}`}
+        className={`relative w-full max-w-3xl bg-white shadow-2xl rounded-2xl flex flex-col  transition-all duration-300 p-0 ${isRTL ? 'text-right' : 'text-left'}`}
         dir={isRTL ? 'rtl' : 'ltr'}
       >
         {/* Header */}
@@ -150,7 +150,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
                 name="description"
                 value={form.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                labelAlign={isRTL ? 'right' : 'left'}
+              
               />
             </div>
            
@@ -295,7 +295,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
                 id="images"
                 value={form.images}
                 onChange={files => onImageChange(files)}
-                labelAlign={isRTL ? 'right' : 'left'}
+               
                 multiple={true}
               />
             </div>

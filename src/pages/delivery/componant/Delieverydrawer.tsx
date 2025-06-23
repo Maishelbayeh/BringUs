@@ -27,7 +27,7 @@ const DeliveryAreaModal: React.FC<Props> = ({ open, onClose, area, onSave, langu
         {/* Header */}
         <div className={`flex items-center justify-between border-b border-primary/20 px-6 py-4 `}>
           <div className="flex items-center gap-2">
-            <LocalShippingIcon fontSize="large" className="text-primary" />
+           
             <span className="text-xl font-bold text-primary">
               {isEditMode ? t('deliveryDetails.editDeliveryArea') : t('deliveryDetails.addNewDeliveryArea')}
             </span>

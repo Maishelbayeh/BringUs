@@ -90,7 +90,7 @@ const Testimonial: React.FC = () => {
         onAdd={handleAdd}
         isRtl={isRtl}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {testimonials.map(item => (
           <div key={item.id} className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition group overflow-hidden relative" onClick={() => handleEdit(item)}>
             <div className="relative w-full h-44 overflow-hidden">

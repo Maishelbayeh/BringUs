@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { MenuItem } from '../../../Types';
 import logo from '../../../assets/bringus.svg';
+import { FaUserCircle } from 'react-icons/fa';
 
 interface SidebarProps {
   userName: string;
@@ -65,6 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         ${isOpen ? (isRTL ? 'translate-x-0' : 'translate-x-0') : isRTL ? 'translate-x-full' : '-translate-x-full'}
         overflow-y-auto custom-scrollbar-hide
         ${isRTL ? 'items-end' : 'items-start'}
+        h-screen
       `}
       dir={isRTL ? 'rtl' : 'ltr'}
     >
@@ -80,11 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="w-full flex flex-col items-center mb-8">
         <div className="bg-white rounded-xl shadow p-4 flex items-center gap-4 w-full">
           <div className="flex-shrink-0">
-            <img
-              src={'../../../public/user.jpg'}
-              alt="User"
-              className="rounded-full border-2 border-gray-300 h-12 w-12 object-cover bg-gray-100"
-            />
+            <FaUserCircle className="h-12 w-12 text-primary" />
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-primary text-base">{userName}</span>
