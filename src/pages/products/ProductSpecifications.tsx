@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CustomTable from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
-import { PlusIcon } from '@heroicons/react/24/outline';
+ 
 import ProductSpecificationsDrawer from './ProductSpecificationsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '../../components/common/HeaderWithAction';

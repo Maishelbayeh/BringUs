@@ -11,7 +11,7 @@ import TopNavbar from './components/common/navigation/topNav';
 function App() {
   const { language, toggleLanguage } = useLanguage();
   const { isSidebarOpen, toggleSidebar } = useSidebar();
-  const [activeMenu, setActiveMenu] = useState<'text' | 'model'>('text');
+  const [activeMenu, ] = useState<'text' | 'model'>('text');
 
   const getMenuItems = (): MenuItem[] =>
     activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();

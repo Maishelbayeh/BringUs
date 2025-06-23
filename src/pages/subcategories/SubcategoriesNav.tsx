@@ -21,7 +21,7 @@ const SubcategoriesNav: React.FC<SubcategoriesNavProps> = ({ isRTL, onAdd, searc
         value={selectedCategoryId}
         onChange={e => setSelectedCategoryId(e.target.value)}
         options={[{ value: '', label: t('subcategories.all') }, ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))]}
-        isRTL={isRTL}
+         
       />
     </div>
     <div className="flex-1 flex justify-end">

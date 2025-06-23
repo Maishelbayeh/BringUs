@@ -12,7 +12,7 @@ const TermsConditionsPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   const [html, setHtml] = useState(initialHtml);
-  const [search, setSearch] = useState('');
+ 
 
 
   const handleSave = () => alert(t('termsConditions.saved', 'Changes saved!'));

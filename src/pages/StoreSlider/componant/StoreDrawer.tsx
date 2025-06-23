@@ -18,7 +18,7 @@ interface StoreSliderDrawerProps {
   renderFooter?: React.ReactNode;
 }
 
-const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, onSave, form, onFormChange, onImageChange, isRTL, mode = 'slider', categories = [], subcategories = [], renderFooter }) => {
+const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, onSave, form, onFormChange, onImageChange, isRTL, mode = 'slider', renderFooter }) => {
   const { t } = useTranslation();
 
   const handleSubmit = (e: React.FormEvent) => {
