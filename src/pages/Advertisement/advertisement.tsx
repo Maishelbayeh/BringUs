@@ -109,6 +109,7 @@ const AdvertisementPage = () => {
         addLabel={t('common.add') || 'Add'}
         onAdd={handleAdd}
         isRtl={i18n.language === 'ARABIC'}
+        count={data.length}
       />
       <CustomTable columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
       {drawerOpen && (

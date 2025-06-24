@@ -99,7 +99,7 @@ const StoreSliderPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 w-full" >
+    <div className="sm:p-4 w-full" >
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.storeSlider') || 'Store Slider', href: '/store-slider' }
@@ -111,10 +111,11 @@ const StoreSliderPage: React.FC = () => {
         isRtl={isRTL}
         showSearch={true}
         searchValue={search}
+        count={filteredProducts.length}
         onSearchChange={e => setSearch(e.target.value)}
         searchPlaceholder={t('storeSlider.searchPlaceholder') || t('products.search')}
       />
-      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6  gap-6">
         {filteredProducts.map((product) => (
           <div
             key={product.id}

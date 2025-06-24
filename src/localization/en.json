@@ -127,7 +127,12 @@
     "editCategory": "Edit Category",
     "manage": "Edit Category",
     "allCategories": "All Categories",
-    "allSubcategories": "All Subcategories"
+    "allSubcategories": "All Subcategories",
+    "search": "Search categories...",
+    "searchPlaceholder": "Search by category or sub-category...",
+    "add": "Add Category",
+    "edit": "Edit Category",
+    "addButton": "Add Category"
   },
   "products": {
     "title": "Products",

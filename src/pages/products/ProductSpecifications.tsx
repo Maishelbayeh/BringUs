@@ -69,6 +69,7 @@ const ProductSpecifications: React.FC = () => {
         addLabel={t('common.add') || 'Add'}
         onAdd={handleAdd}
         isRtl={i18n.language === 'ARABIC'}
+        count={specs.length}
       />
       <div className="overflow-x-auto">
         <CustomTable columns={columns as any} data={specs} onEdit={handleEdit} onDelete={handleDelete} />

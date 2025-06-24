@@ -121,7 +121,12 @@
     "addCategory": "إضافة فئة",
     "editCategory": "تعديل الفئة",
     "manage": "تعديل الفئة",
-    "allCategories": "جميع الفئات"
+    "allCategories": "جميع الفئات",
+    "search": "ابحث عن فئات...",
+    "searchPlaceholder": "ابحث باسم الفئة أو التصنيف...",
+    "add": "إضافة فئة",
+    "edit": "تعديل الفئة",
+    "addButton": "إضافة فئة"
   },
   "products": {
     "title": "المنتجات",

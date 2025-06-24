@@ -69,7 +69,8 @@ const PaymentMethods: React.FC = () => {
         title={t('paymentMethods.title')}
         addLabel={t('paymentMethods.addPaymentMethod')}
         onAdd={openDrawer}
-        isRtl={language === 'ARABIC'}
+        isRtl={language === 'ARABIC'} 
+        count={methods.length}
       />
       {/* <Typography
         variant="body2"

@@ -11,7 +11,7 @@ const StorePreview: React.FC = () => {
     const [device, setDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
    
     return (
-        <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="sm:p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
             <CustomBreadcrumb items={[
               { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
               { name: t('sideBar.storePreview') || 'Store Preview', href: undefined }

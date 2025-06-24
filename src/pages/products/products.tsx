@@ -231,7 +231,7 @@ const ProductsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 w-full" >
+    <div className="sm:p-4 w-full" >
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.products') || 'Products', href: '/products' }
@@ -251,8 +251,9 @@ const ProductsPage: React.FC = () => {
         onSortChange={e => setSort(e.target.value)}
         sortOptions={sortOptions}
         onDownload={handleDownloadExcel}
+        count={filteredProducts.length}
       />
-      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-6">
         {filteredProducts.map((product) => (
           <ProductCard
             key={product.id}

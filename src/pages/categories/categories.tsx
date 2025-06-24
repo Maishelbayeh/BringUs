@@ -204,7 +204,7 @@ const CategoriesPage: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 w-full">
+    <div className="md:p-6 w-full ">
       <CustomBreadcrumb items={breadcrumb} isRtl={isRTL} />
       <HeaderWithAction
         title={t('sideBar.categories') || 'Categories'}
@@ -215,9 +215,10 @@ const CategoriesPage: React.FC = () => {
         searchValue={search}
         onSearchChange={e => setSearch(e.target.value)}
         searchPlaceholder={t('categories.search') || 'Search categories...'}
+        count={categories.length}
       />
       {/* شجرة الفئات */}
-      <div className="bg-white rounded-2xl shadow p-6">
+      <div className="">
         <CategoryTree
           categories={buildCategoryTree(categories, null)}
           isRTL={isRTL}

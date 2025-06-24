@@ -77,7 +77,7 @@ const CustomersPage: React.FC = () => {
   // ];
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   return (
-    <div className="p-4 w-full" >
+    <div className="sm:p-4 w-full" >
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('customers.title') || 'Customers', href: '/customers' }

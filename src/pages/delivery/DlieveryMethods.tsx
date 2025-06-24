@@ -68,6 +68,7 @@ const DeliveryMethods: React.FC = () => {
         addLabel={t('deliveryDetails.addNewDeliveryArea')}
         onAdd={openDrawer}
         isRtl={language === 'ARABIC'}
+        count={areas.length}
       />
       {/* <Typography
         variant="body2"

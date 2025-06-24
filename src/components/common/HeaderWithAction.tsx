@@ -21,6 +21,7 @@ interface HeaderWithActionProps {
   categories?: { id: number; name: string }[];
   selectedCategoryId?: string;
   onCategoryChange?: (id: string) => void;
+  count?: number;
 }
 
 const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
@@ -41,6 +42,7 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
   categories,
   selectedCategoryId,
   onCategoryChange,
+  count,
 }) => {
   const [isSortOpen,   ] = useState(false);
   const { i18n } = useTranslation();
@@ -49,7 +51,12 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
     <>
       <div className={`mb-4 rounded-lg px-3 pt-4 flex items-center justify-between bg-primary/10 gap-4 ${isRtl ? 'flex-row-reverse' : 'flex-row'} ${className} flex-wrap`}>
         <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'} mb-4`}>
-          <h1 className="text-2xl font-bold text-primary">{title}</h1>
+          <h1 className={`text-2xl font-bold text-primary flex items-center gap-2`} dir={isRtl ? 'rtl' : 'ltr'}>
+            {title}
+            {typeof count === 'number' && (
+              <span className="ml-2 px-2 py-0.5 rounded-full bg-primary text-white text-xs font-semibold shadow-sm">{count}</span>
+            )}
+          </h1>
           {onDownload && (
             <button
               type="button"

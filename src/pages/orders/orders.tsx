@@ -49,10 +49,10 @@ const OrdersPage: React.FC = () => {
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
 
   return (
-    <div className="p-4 w-full">
+    <div className="sm:p-4 w-full">
      <HeaderWithAction
       title={t('orders.title')}
-    
+      count={tableData.length}
       isRtl={i18n.language === 'ARABIC'}
      />
       <div className="overflow-x-auto ">
@@ -82,15 +82,15 @@ const OrdersPage: React.FC = () => {
         const totalEntries: [string, number][] = Object.entries(totals);
         if (totalEntries.length === 0) return null;
         return (
-          <div className="flex flex-wrap gap-0 mt-4 py-2 font-bold text-primary text-sm justify-center items-center bg-primary/10 rounded">
+          <div className="sm:flex-row flex-col flex flex-wrap gap-0 mt-4 py-2 font-bold text-primary text-sm justify-center items-center bg-primary/10 rounded">
             {totalEntries.map(([currencyLabel, total], idx) => (
               <React.Fragment key={currencyLabel}>
-                <div dir={i18n.language === 'ARABIC' ? 'rtl' : 'ltr'} className={`flex items-center gap-1 px-3 py-1`}>
+                <div dir={i18n.language === 'ARABIC' ? 'rtl' : 'ltr'} className={`flex items-center gap-1 px-3 py-3`}>
                   <span>{t('orders.total')}({currencyLabel}):</span>
                   <span className="text-primary">{total}</span>
                 </div>
                 {idx < totalEntries.length - 1 && (
-                  <div className="border-r border-primary/30 h-6 mx-2" />
+                  <div className="border-r border-primary/30 h-6 mx-2 hidden sm:block" />
                 )}
               </React.Fragment>
             ))}

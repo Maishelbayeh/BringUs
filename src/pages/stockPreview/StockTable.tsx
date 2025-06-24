@@ -46,7 +46,7 @@ const StockTable: React.FC = () => {
   }));
 
   return (
-    <div className="p-4 w-full">
+    <div className="sm:p-4 w-full">
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.stockPreview') || 'Stock Preview', href: '/stock-preview' }
@@ -54,6 +54,7 @@ const StockTable: React.FC = () => {
       <HeaderWithAction
         title={t('stockPreview.title')}
         isRtl={i18n.language === 'ARABIC'}
+        count={tableData.length}
       />
       <div className="overflow-x-auto ">
         <CustomTable columns={columns as any} data={tableData} />

@@ -139,6 +139,7 @@ const PaymentVariants: React.FC = () => {
         addLabel={t('productVariant.addProductVariant')}
         onAdd={() => setIsDrawerOpen(true)}
         isRtl={i18n.language === 'ARABIC'}
+        count={variants.length}
       />
 
       <CustomTable

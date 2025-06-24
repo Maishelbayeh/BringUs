@@ -103,7 +103,7 @@ const SubcategoriesPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 w-full" >
+    <div className="sm:p-4 w-full" >
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.subcategories') || 'Subcategories', href: '/subcategories' }
@@ -121,6 +121,7 @@ const SubcategoriesPage: React.FC = () => {
         categories={categories}
         selectedCategoryId={selectedCategoryId}
         onCategoryChange={setSelectedCategoryId}
+        count={filteredSubcategories.length}
       />
       <div className={`bg-white rounded-2xl flex flex-wrap gap-6 p-4 ${isRTL ? 'justify-end' : 'justify-start'}`}>
         {filteredSubcategories.map((sub) => (

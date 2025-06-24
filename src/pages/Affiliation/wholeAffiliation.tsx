@@ -121,6 +121,7 @@ const AffiliationPage = () => {
         addLabel={t('common.add') || 'Add'}
         onAdd={handleDrawerOpen}
         isRtl={i18n.language === 'ARABIC'}
+        count={data.length}
       />
       <CustomTable
         columns={columns}

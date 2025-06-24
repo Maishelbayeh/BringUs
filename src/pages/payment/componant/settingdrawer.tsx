@@ -1,10 +1,9 @@
-// src/components/PaymentMethods/componant/PaymentDrawer.tsx
+
 import React from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import PaymentForm from './paymentForm';
 import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
-
 import CustomButton from '@/components/common/CustomButton';
 
 interface Props {

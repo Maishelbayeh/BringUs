@@ -29,18 +29,18 @@ function App() {
         {/* Sidebar for all screens, but with different style for mobile */}
         {isSidebarOpen && (
           <>
-            {/* Overlay for mobile only */}
+            {/* Overlay for mobile and tablets only (less than lg) */}
             <div
-              className="fixed inset-0 z-40 bg-black bg-opacity-40 md:hidden"
+              className="fixed inset-0 z-40 bg-black bg-opacity-40 lg:hidden"
               onClick={toggleSidebar}
             />
             <div
               className={
                 `z-50 transition-all duration-300
-                fixed top-0 ${language === 'ARABIC' ? 'right-0' : 'left-0'} h-full  max-w-xs md:static md:block md:w-80 md:max-w-xs
-                ${language === 'ARABIC' ? 'md:right-0' : 'md:left-0'}
-                bg-primary-light shadow-xl md:shadow-none
-                md:relative md:z-auto`
+                fixed top-0 ${language === 'ARABIC' ? 'right-0' : 'left-0'} h-full  max-w-xs lg:static lg:block lg:w-80 lg:max-w-xs
+                ${language === 'ARABIC' ? 'lg:right-0' : 'lg:left-0'}
+                bg-primary-light shadow-xl lg:shadow-none
+                lg:relative lg:z-auto`
               }
               style={{ minHeight: '100vh' }}
             >
