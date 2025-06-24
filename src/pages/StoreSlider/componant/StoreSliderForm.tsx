@@ -24,7 +24,7 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
           placeholder={isRTL ? 'ادخل رابط الفيديو' : 'Enter YouTube video URL'}
           type="text"
           style={{ textAlign: isRTL ? 'right' : 'left' }}
-          labelAlign={isRTL ? 'right' : 'left'}
+         
           onChange={onFormChange}
         />
         <CustomInput
@@ -36,7 +36,7 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
           placeholder={isRTL ? 'ادخل الوصف' : 'Enter Description'}
           type="text"
           style={{ textAlign: isRTL ? 'right' : 'left' }}
-          labelAlign={isRTL ? 'right' : 'left'}
+         
           onChange={onFormChange}
         />
       </div>
@@ -54,7 +54,7 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
         placeholder={isRTL ? 'ادخل الوصف' : 'Enter Description'}
         type="text"
         style={{ textAlign: isRTL ? 'right' : 'left' }}
-        labelAlign={isRTL ? 'right' : 'left'}
+       
         onChange={onFormChange}
       />
       <CustomFileInput label={isRTL ? 'الصورة' : 'Image'} 

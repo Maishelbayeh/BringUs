@@ -141,7 +141,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
                 value={form.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 required
-                labelAlign={isRTL ? 'right' : 'left'}
+                
               />
             </div>
             <div className="col-span-full">
@@ -189,7 +189,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               value={form.productOrder}
               onChange={(e) => handleInputChange('productOrder', e.target.value)}
               type="number"
-              labelAlign={isRTL ? 'right' : 'left'}
+             
               
             />
             <CustomInput
@@ -199,7 +199,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               onChange={(e) => handleInputChange('price', e.target.value)}
               type="number"
               required
-              labelAlign={isRTL ? 'right' : 'left'}
+             
             />
             <CustomInput
               label={isRTL ? 'السعر الأصلي' : 'Original Price'}
@@ -207,7 +207,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               value={form.originalPrice}
               onChange={(e) => handleInputChange('originalPrice', e.target.value)}
               type="number"
-              labelAlign={isRTL ? 'right' : 'left'}
+             
             />
             <CustomInput
               label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
@@ -215,7 +215,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               value={form.wholesalePrice}
               onChange={(e) => handleInputChange('wholesalePrice', e.target.value)}
               type="number"
-              labelAlign={isRTL ? 'right' : 'left'}
+             
             />
              <CustomSelect
               label={isRTL ? 'تصنيف المنتج' : 'Product Label'}
@@ -242,7 +242,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               name="parcode"
               value={form.parcode}
               onChange={(e) => handleInputChange('parcode', e.target.value)}
-              labelAlign={isRTL ? 'right' : 'left'}
+             
             />
              
             
@@ -266,7 +266,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               value={form.availableQuantity}
               onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
               type="number"
-              labelAlign={isRTL ? 'right' : 'left'}
+             
               disabled={form.maintainStock !== 'Y'}
             />
            
@@ -305,7 +305,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
                 name="productVideo"
                 value={form.productVideo}
                 onChange={(e) => handleInputChange('productVideo', e.target.value)}
-                labelAlign={isRTL ? 'right' : 'left'}
+               
               />
             </div>
           </div>

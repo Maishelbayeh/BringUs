@@ -25,8 +25,8 @@ const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onImage
         <option key={sub.id} value={sub.id}>{sub.name}</option>
       ))}
     </select>
-    <CustomInput label={isRTL ? 'اسم المنتج' : 'Product Name'} name="name" value={form.name} onChange={onFormChange} required labelAlign={isRTL ? 'right' : 'left'} />
-    <CustomInput label={isRTL ? 'الوصف' : 'Description'} name="description" value={form.description} onChange={onFormChange} required labelAlign={isRTL ? 'right' : 'left'} />
+    <CustomInput label={isRTL ? 'اسم المنتج' : 'Product Name'} name="name" value={form.name} onChange={onFormChange} required  />
+    <CustomInput label={isRTL ? 'الوصف' : 'Description'} name="description" value={form.description} onChange={onFormChange} required  />
     <CustomFileInput label={isRTL ? 'الصورة' : 'Image'} id="image" value={form.image} onChange={file => onImageChange({ target: { files: file ? [file] : [] } } as any)} />
   </>
 );

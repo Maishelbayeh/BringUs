@@ -77,13 +77,13 @@ const PaymentVariantsDrawer: React.FC<PaymentVariantsDrawerProps> = ({
             label={t('productVariant.name')}
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            labelAlign={isRTL ? 'right' : 'left'}
+           
           />
           <CustomNumberInput
             label={t('productVariant.price')}
             value={formData.price}
             onChange={(value: number) => setFormData(prev => ({ ...prev, price: value }))}
-            labelAlign={isRTL ? 'right' : 'left'}
+              labelAlign={isRTL ? 'right' : 'left'}
           />
         </form>
         {/* Footer */}

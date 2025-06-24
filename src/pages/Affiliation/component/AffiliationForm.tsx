@@ -21,7 +21,7 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         value={form.email}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+       
       />
       <CustomInput
         label={t('affiliation.password')}
@@ -30,7 +30,7 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         value={form.password}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+       
       />
       <CustomInput
         label={t('affiliation.firstName')}
@@ -38,7 +38,7 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         value={form.firstName}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+       
       />
       <CustomInput
         label={t('affiliation.lastName')}
@@ -46,7 +46,7 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         value={form.lastName}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+       
       />
       <CustomInput
         label={t('affiliation.mobile')}
@@ -54,7 +54,7 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         value={form.mobile}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+       
       />
       <CustomInput
         label={t('affiliation.percent')}
@@ -63,7 +63,7 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         value={form.percent}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+       
       />
       <CustomRadioGroup
         label={t('affiliation.status')}

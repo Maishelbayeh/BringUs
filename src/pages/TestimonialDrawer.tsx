@@ -77,13 +77,13 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
                 label={t('testimonials.reviewBy') || 'Review By'}
                 value={name}
                 onChange={e => setName(e.target.value)}
-                labelAlign={isRtl ? 'right' : 'left'}
+
               />
               <CustomInput
                 label={t('testimonials.reviewPosition') || 'Review Position'}
                 value={position}
                 onChange={e => setPosition(e.target.value)}
-                labelAlign={isRtl ? 'right' : 'left'}
+              
               />
             </div>
             <div className="flex flex-col ">

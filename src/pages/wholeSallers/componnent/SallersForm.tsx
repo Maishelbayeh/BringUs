@@ -21,7 +21,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         value={form.email}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+        
       />
       <CustomInput
         label={t('wholesalers.password')}
@@ -30,7 +30,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         value={form.password}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+        
       />
       <CustomInput
         label={t('wholesalers.firstName')}
@@ -38,7 +38,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         value={form.firstName}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+        
       />
       <CustomInput
         label={t('wholesalers.lastName')}
@@ -46,7 +46,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         value={form.lastName}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+        
       />
       <CustomInput
         label={t('wholesalers.mobile')}
@@ -54,7 +54,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         value={form.mobile}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+       
       />
       <CustomInput
         label={t('wholesalers.discount')}
@@ -63,7 +63,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         value={form.discount}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+        
       />
       <CustomRadioGroup
         label={t('wholesalers.status')}

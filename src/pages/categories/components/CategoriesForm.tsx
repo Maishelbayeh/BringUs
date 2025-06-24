@@ -33,7 +33,7 @@ const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onI
         value={form.name}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+      
       />
       <CustomTextArea
         label={isRTL ? 'الوصف' : 'Description'}
@@ -56,7 +56,7 @@ const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onI
         value={form.order}
         onChange={onFormChange}
         required
-        labelAlign={isRTL ? 'right' : 'left'}
+       
       />
       <CustomInput
         type="checkbox"
@@ -65,7 +65,7 @@ const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onI
         checked={form.visible}
         onChange={onFormChange}
         label={isRTL ? 'مفعل' : 'Visible'}
-        labelAlign={isRTL ? 'right' : 'left'}
+       
         className="w-5 h-5 text-primary accent-primary"
       />
     </>

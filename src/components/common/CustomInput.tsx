@@ -5,13 +5,12 @@ interface CustomInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   errorColor?: string;
   id?: string;
-  labelAlign?: 'left' | 'right' | 'center';
   type?: string;
   options?: { value: string; label: string }[];
   
 }
 
-const CustomInput: React.FC<CustomInputProps> = ({ label, error, errorColor = 'text-red-600', id, labelAlign = 'left', type = 'text', options, ...props }) => {
+const CustomInput: React.FC<CustomInputProps> = ({ label, error, errorColor = 'text-red-600', id, type = 'text', options, ...props }) => {
   const { i18n } = useTranslation();
   // const labelAlignClass = labelAlign === 'right' ? 'text-right' : labelAlign === 'center' ? 'text-center' : 'text-left';
   return (

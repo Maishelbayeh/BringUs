@@ -52,7 +52,7 @@ const DeliveryAreaForm: React.FC<Props> = ({ area, onSubmit, language }) => {
           placeholder={t("deliveryDetails.locationArPlaceholder")}
           type="text"
           style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-          labelAlign={language === 'ARABIC' ? 'right' : 'left'}
+
         />
         <CustomInput
           label={t("deliveryDetails.locationEn")}
@@ -63,7 +63,7 @@ const DeliveryAreaForm: React.FC<Props> = ({ area, onSubmit, language }) => {
           placeholder={t("deliveryDetails.locationEnPlaceholder")}
           type="text"
           style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-          labelAlign={language === 'ARABIC' ? 'right' : 'left'}
+          
         />
         <CustomInput
           label={t("deliveryDetails.price")}
@@ -75,7 +75,7 @@ const DeliveryAreaForm: React.FC<Props> = ({ area, onSubmit, language }) => {
           type="number"
           min="0"
           style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-          labelAlign={language === 'ARABIC' ? 'right' : 'left'}
+          
         />
         <CustomInput
           label={t("deliveryDetails.whatsappNumber")}
@@ -86,7 +86,7 @@ const DeliveryAreaForm: React.FC<Props> = ({ area, onSubmit, language }) => {
           placeholder={t("deliveryDetails.whatsappNumberPlaceholder")}
           type="text"
           style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-          labelAlign={language === 'ARABIC' ? 'right' : 'left'}
+          
         />
 
        
