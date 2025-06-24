@@ -1,191 +1,255 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import CategoriesDrawer from './components/CategoriesDrawer';
-import CategoriesNav from './components/CategoriesNav';
-import useLanguage from '../../hooks/useLanguage';
+import { FiEdit, FiTrash2, FiPlus, FiFolder,} from 'react-icons/fi';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import HeaderWithAction from '@/components/common/HeaderWithAction';
+import CategoriesDrawer from './components/CategoriesDrawer';
 
-// Types
-interface Node {
+import CategoryTree from './CategoryTree';
+import { initialCategories } from './initialCategories';
+
+// تعريف نوع الفئة المتداخلة
+interface Category {
   id: number;
-  name: string;
+  nameAr: string;
+  nameEn: string;
+  image: string; // صورة مصغرة إلزامية
+  order: number; // ترتيب إلزامي
+  visible: boolean; // مفعّل إلزامي
   parentId: number | null;
-  type: 'category' | 'subcategory';
-  childrenIds: number[];
-  productsIds: number[];
-}
-interface Product {
-  id: number;
-  name: string;
-  parentId: number;
-  image: string;
+  descriptionAr: string;
+  descriptionEn: string;
 }
 
-// n-level nodes (categories & subcategories)
-const nodes: Node[] = [
-  { id: 1, name: 'Electronics', parentId: null, type: 'category', childrenIds: [2, 3], productsIds: [1, 2] },
-  { id: 2, name: 'Phones', parentId: 1, type: 'subcategory', childrenIds: [4], productsIds: [3] },
-  { id: 3, name: 'Laptops', parentId: 1, type: 'subcategory', childrenIds: [], productsIds: [4] },
-  { id: 4, name: 'Android Phones', parentId: 2, type: 'subcategory', childrenIds: [], productsIds: [5] },
-  { id: 5, name: 'Fashion', parentId: null, type: 'category', childrenIds: [6], productsIds: [] },
-  { id: 6, name: 'Men', parentId: 5, type: 'subcategory', childrenIds: [], productsIds: [6] },
-];
+// مكون بطاقات الفئات المتداخلة
+const CategoryCards: React.FC<{
+  categories: Category[];
+  isRTL: boolean;
+  onAdd: (parentId?: number | null) => void;
+  onEdit: (cat: Category) => void;
+  onDelete: (cat: Category) => void;
+  level?: number;
+}> = ({ categories, isRTL, onAdd, onEdit, onDelete, level = 0 }) => {
+  const { i18n } = useTranslation();
+  const lang = i18n.language;
+  return (
+    <div className={`flex flex-col gap-4`}> {/* مسافة بين البطاقات */}
+      {categories.map(cat => (
+        <div key={cat.id} className={`py-3 bg-white rounded-2xl shadow-md border border-primary/10 p-5 flex flex-col gap-2 relative`} style={{ [isRTL ? 'marginRight' : 'marginLeft']: level * 32 }}>
+          <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            {/* صورة الفئة */}
+            {cat.image ? (
+              <img src={cat.image} alt={cat.nameAr} className="w-14 h-14 rounded-xl object-cover border-2 border-primary/30 shadow" />
+            ) : (
+              <span className="flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40 text-primary rounded-xl w-14 h-14 shadow-lg"><FiFolder className="w-7 h-7" /></span>
+            )}
+            {/* اسم الفئة */}
+            <div className="flex flex-col flex-1 min-w-0">
+              <span
+                className={`truncate font-bold cursor-pointer hover:underline hover:text-blue-600 transition ${level === 0 ? 'text-lg text-primary' : 'text-base text-gray-700'}`}
+                onClick={e => {
+                  e.stopPropagation();
+                }}
+                title={lang === 'ar' || lang === 'ARABIC' ? cat.nameAr : cat.nameEn}
+              >
+                {lang === 'ar' || lang === 'ARABIC' ? cat.nameAr : cat.nameEn}
+              </span>
+              {(lang === 'ar' || lang === 'ARABIC' ? cat.descriptionAr : cat.descriptionEn) && (
+                <span className={`block w-full text-xs mt-0.5 ${level === 0 ? 'text-gray-600' : 'text-gray-400'}`}>
+                  {lang === 'ar' || lang === 'ARABIC' ? cat.descriptionAr : cat.descriptionEn}
+                </span>
+              )}
+            </div>
 
-const products: Product[] = [
-  { id: 1, name: 'iPhone 15', parentId: 1, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80' },
-  { id: 2, name: 'MacBook Pro', parentId: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80' },
-  { id: 3, name: 'Samsung S24', parentId: 2, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80' },
-  { id: 4, name: 'Dell XPS', parentId: 3, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80' },
-  { id: 5, name: 'Pixel 8', parentId: 4, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80' },
-  { id: 6, name: 'Men T-shirt', parentId: 6, image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80' },
-];
+            {/* حالة التفعيل */}
+            <span className={cat.visible ? 'text-green-500' : 'text-gray-400'}>{cat.visible ? <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg> : <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}</span>
+            {/* أزرار الإدارة */}
+            <div className="flex items-center gap-1">
+              <button onClick={() => onAdd(cat.id)} className="p-2 rounded-full hover:bg-primary/10 text-primary bg-white shadow" title="إضافة فرعية"><FiPlus /></button>
+              <button onClick={() => onEdit(cat)} className="p-2 rounded-full hover:bg-blue-100 text-blue-600 bg-white shadow" title="تعديل"><FiEdit /></button>
+              <button onClick={() => onDelete(cat)} className="p-2 rounded-full hover:bg-red-100 text-red-600 bg-white shadow" title="حذف"><FiTrash2 /></button>
+            </div>
+          </div>
+          {/* الفروع الفرعية كبطاقات أصغر */}
+          {'children' in cat && Array.isArray((cat as any).children) && (cat as any).children.length > 0 && (
+            <div className="mt-2">
+              <CategoryCards
+                categories={(cat as any).children}
+                isRTL={isRTL}
+                onAdd={onAdd}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                level={level + 1}
+              />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
-function getNodeById(id: number | null): Node | undefined {
-  if (id === null) return undefined;
-  return nodes.find(n => n.id === id);
+// دالة لتسطيح شجرة الفئات
+function flattenCategories(categories: Category[], isRTL: boolean): { id: number; name: string; parentId: number | null }[] {
+  let result: { id: number; name: string; parentId: number | null }[] = [];
+  for (const cat of categories) {
+    result.push({ id: cat.id, name: isRTL ? cat.nameAr : cat.nameEn, parentId: cat.parentId ?? null });
+    if ('children' in cat && Array.isArray((cat as any).children) && (cat as any).children.length > 0) {
+      result = result.concat(flattenCategories((cat as any).children, isRTL));
+    }
+  }
+  return result;
 }
-function getChildren(nodeId: number | null): Node[] {
-  if (nodeId === null) return nodes.filter(n => n.parentId === null);
-  return nodes.filter(n => n.parentId === nodeId);
-}
-function getProducts(nodeId: number | null): Product[] {
-  if (nodeId === null) return [];
-  return products.filter(p => p.parentId === nodeId);
-}
 
-
-// const categoryNames: { [key: number]: { en: string; ar: string } } = {
-//   1: { en: 'Electronics', ar: 'إلكترونيات' },
-//   2: { en: 'Fashion', ar: 'موضة' },
-//   3: { en: 'Groceries', ar: 'بقالة' },
-//   4: { en: 'Books', ar: 'كتب' },
-//   5: { en: 'Toys', ar: 'ألعاب' },
-//   6: { en: 'Beauty', ar: 'تجميل' },
-//   7: { en: 'Sports', ar: 'رياضة' },
-// };
-// const categoryDescriptions: { [key: number]: { en: string; ar: string } } = {
-//   1: { en: 'Devices and gadgets', ar: 'أجهزة وإلكترونيات' },
-//   2: { en: 'Clothes and accessories', ar: 'ملابس وإكسسوارات' },
-//   3: { en: 'Food and drinks', ar: 'أطعمة ومشروبات' },
-//   4: { en: 'Books and literature', ar: 'كتب وأدب' },
-//   5: { en: 'Toys and games', ar: 'ألعاب وهوايات' },
-//   6: { en: 'Beauty and personal care', ar: 'تجميل وعناية شخصية' },
-//   7: { en: 'Sports and outdoors', ar: 'رياضة وأنشطة خارجية' },
-// };
-// const subCategoryNames: { [key: number]: { en: string; ar: string } } = {
-//   1: { en: 'Smartphones', ar: 'هواتف ذكية' },
-//   2: { en: 'Laptops', ar: 'حاسبات محمولة' },
-//   3: { en: 'Men', ar: 'رجالي' },
-//   4: { en: 'Women', ar: 'نسائي' },
-//   5: { en: 'Fruits', ar: 'فواكه' },
-//   6: { en: 'Vegetables', ar: 'خضروات' },
-//   7: { en: 'Novels', ar: 'روايات' },
-//   8: { en: 'Comics', ar: 'قصص مصورة' },
-//   9: { en: 'Dolls', ar: 'دمى' },
-//   10: { en: 'Board Games', ar: 'ألعاب لوحية' },
-//   11: { en: 'Makeup', ar: 'مكياج' },
-//   12: { en: 'Skincare', ar: 'عناية بالبشرة' },
-//   13: { en: 'Football', ar: 'كرة قدم' },
-//   14: { en: 'Tennis', ar: 'تنس' },
-// };
-// const subCategoryDescriptions: { [key: number]: { en: string; ar: string } } = {
-//   1: { en: 'Mobile phones and smartphones', ar: 'هواتف محمولة وذكية' },
-//   2: { en: 'Laptops and notebooks', ar: 'حاسبات محمولة ودفاتر' },
-//   3: { en: 'Men clothing', ar: 'ملابس رجالية' },
-//   4: { en: 'Women clothing', ar: 'ملابس نسائية' },
-//   5: { en: 'Fresh fruits', ar: 'فواكه طازجة' },
-//   6: { en: 'Fresh vegetables', ar: 'خضروات طازجة' },
-//   7: { en: 'Fiction and novels', ar: 'روايات وقصص' },
-//   8: { en: 'Comics and graphic novels', ar: 'قصص مصورة وروايات مصورة' },
-//   9: { en: 'Dolls and plush toys', ar: 'دمى وألعاب قماشية' },
-//   10: { en: 'Board and family games', ar: 'ألعاب لوحية وعائلية' },
-//   11: { en: 'Makeup and cosmetics', ar: 'مكياج ومستحضرات تجميل' },
-//   12: { en: 'Skincare products', ar: 'منتجات العناية بالبشرة' },
-//   13: { en: 'Football and soccer', ar: 'كرة قدم' },
-//   14: { en: 'Tennis and rackets', ar: 'تنس ومضارب' },
-// };
+// أضف دالة buildCategoryTree(categories: Category[], parentId: number | null): Category[]
+function buildCategoryTree(categories: Category[], parentId: number | null): Category[] {
+  return categories
+    .filter(cat => cat.parentId === parentId)
+    .map(cat => {
+      const children = buildCategoryTree(categories, cat.id);
+      return children.length > 0 ? { ...(cat as any), children } : { ...(cat as any) };
+    });
+}
 
 const CategoriesPage: React.FC = () => {
-  // const navigate = useNavigate();
-  const { language } = useLanguage();
-  const isRTL = language === 'ARABIC';
-  const { t } = useTranslation();
-  const [currentNodeId, setCurrentNodeId] = useState<number | null>(null); // null = root
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
+  const [categories, setCategories] = useState(initialCategories);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState<{ nameAr: string; nameEn: string; parentId: number | null; image: string; order: number; visible: boolean; descriptionAr: string; descriptionEn: string }>(
+    { nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '' }
+  );
+  const [editId, setEditId] = useState<number | null>(null);
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'categories' | 'subcategories'>('categories');
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', image: '' });
-
-  const currentChildren = getChildren(currentNodeId);
-  const currentProducts = getProducts(currentNodeId);
-  const parentId = currentNodeId !== null ? getNodeById(currentNodeId)?.parentId ?? null : null;
-  const categoriesCount = currentChildren.filter(child => child.type === 'category').length;
-  const subCategoriesCount = currentChildren.filter(child => child.type === 'subcategory').length;
-
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+ 
+  // إدارة الإضافة والتعديل
+  const handleAdd = (parentId?: number | null) => {
+    setForm({ nameAr: '', nameEn: '', parentId: parentId !== undefined ? parentId : null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '' });
+    setEditId(null);
+    setShowForm(true);
   };
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setForm({ ...form, image: URL.createObjectURL(e.target.files[0]) });
-    }
+  const handleEdit = (cat: Category) => {
+    setForm({
+      nameAr: cat.nameAr,
+      nameEn: cat.nameEn,
+      parentId: cat.parentId !== undefined ? cat.parentId : null,
+      image: cat.image,
+      order: cat.order,
+      visible: cat.visible,
+      descriptionAr: cat.descriptionAr || '',
+      descriptionEn: cat.descriptionEn || '',
+    });
+    setEditId(cat.id);
+    setShowForm(true);
   };
-  const handleSubmit = (e: React.FormEvent) => {
+  // حذف فئة
+  const handleDelete = (cat: Category) => {
+    setCategories((prev: Category[]) => prev.filter(c => c.id !== cat.id && c.parentId !== cat.id));
+  };
+  // حفظ (إضافة أو تعديل)
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    // ... add logic to add category or subcategory ...
-    setShowDrawer(false);
+    if (!form.nameAr.trim() && !form.nameEn.trim()) return;
+    if (editId) {
+      // تعديل
+      setCategories((prev: Category[]) => prev.map(c =>
+        c.id === editId
+          ? { ...c, nameAr: form.nameAr, nameEn: form.nameEn, image: form.image || c.image || 'https://via.placeholder.com/40x40?text=C', order: form.order, visible: form.visible, parentId: form.parentId, descriptionAr: form.descriptionAr || '', descriptionEn: form.descriptionEn || '' }
+          : c
+      ));
+    } else {
+      // إضافة
+      const newCat: Category = {
+        id: Date.now(),
+        nameAr: form.nameAr,
+        nameEn: form.nameEn,
+        image: form.image || 'https://via.placeholder.com/40x40?text=N',
+        order: form.order,
+        visible: form.visible,
+        parentId: form.parentId,
+        descriptionAr: form.descriptionAr || '',
+        descriptionEn: form.descriptionEn || '',
+      };
+      setCategories((prev: Category[]) => [...prev, newCat]);
+    }
+    setShowForm(false);
+    setForm({ nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '' });
+    setEditId(null);
   };
+  // إغلاق الفورم
+  const handleCancel = () => {
+    setShowForm(false);
+    setForm({ nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '' });
+    setEditId(null);
+  };
+
+  // دالة لإيجاد اسم الفئة حسب id
+  // const getCategoryNameById = (id: number | null): string => {
+  //   if (!id) return '';
+  //   const search = (cats: Category[]): string | null => {
+  //     for (const cat of cats) {
+  //       if (cat.id === id) return isRTL ? cat.nameAr : cat.nameEn;
+  //       const found = search(cat.children ?? []);
+  //       if (found) return found;
+  //     }
+  //     return null;
+  //   };
+  //   return search(categories) || '';
+  // };
+
+  // Breadcrumb
+  const breadcrumb = [
+    { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
+    { name: t('sideBar.categories') || 'Categories', href: '/categories' },
+  ];
 
   return (
-    <div className={`p-4 w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}> 
-      <CustomBreadcrumb items={[
-        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
-        { name: t('sideBar.categories') || 'Categories', href: '/categories' }
-      ]} isRtl={isRTL} />
-      {parentId !== null && parentId !== undefined && (
-        <button className="mb-4 px-4 py-2 bg-primary text-white rounded-full" onClick={() => setCurrentNodeId(parentId)}>{isRTL ? 'رجوع' : 'Back'}</button>
-      )}
-      <CategoriesNav
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        isRTL={isRTL}
-        categoriesCount={categoriesCount}
-        subCategoriesCount={subCategoriesCount}
-        onAdd={() => setShowDrawer(true)}
-        search={search}
-        setSearch={setSearch}
+    <div className="p-6 w-full">
+      <CustomBreadcrumb items={breadcrumb} isRtl={isRTL} />
+      <HeaderWithAction
+        title={t('sideBar.categories') || 'Categories'}
+        addLabel={t('categories.add') || 'Add Category'}
+        onAdd={() => handleAdd()}
+        isRtl={isRTL}
+        showSearch={true}
+        searchValue={search}
+        onSearchChange={e => setSearch(e.target.value)}
+        searchPlaceholder={t('categories.search') || 'Search categories...'}
       />
-      <CategoriesDrawer
-        open={showDrawer}
-        onClose={() => setShowDrawer(false)}
-        isRTL={isRTL}
-        title={activeTab === 'categories' ? (isRTL ? 'إضافة فئة' : 'Add Category') : (isRTL ? 'إضافة فئة فرعية' : 'Add Subcategory')}
-        form={form}
-        onFormChange={handleFormChange}
-        onImageChange={handleImageChange}
-        onSubmit={handleSubmit}
-      />
-      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
-        {currentChildren.map(child => (
-          <div key={child.id} className="p-4 flex flex-col items-center gap-2 cursor-pointer hover:ring-2 hover:ring-primary rounded-xl" onClick={() => setCurrentNodeId(child.id)}>
-            <div className="h-40 w-40 flex items-center justify-center bg-primary/10 rounded-full text-primary text-3xl font-bold">{child.name[0]}</div>
-            <h2 className="text-lg font-semibold text-primary">{child.name}</h2>
-            <p className="text-gray-500 text-sm">{child.type === 'category' ? t('categories.category') : t('categories.subcategory')}</p>
-            <p className="text-xs text-gray-400">{child.childrenIds.length > 0 ? `${child.childrenIds.length} ${isRTL ? 'تصنيف فرعي' : 'Subcategories'}` : ''}</p>
-            <p className="text-xs text-gray-400">{child.productsIds.length > 0 ? `${child.productsIds.length} ${isRTL ? 'منتج' : 'Products'}` : ''}</p>
-          </div>
-        ))}
-        {currentProducts.map(product => (
-          <div key={product.id} className="p-4 flex flex-col items-center gap-2 ring-1 ring-primary/20 hover:ring-primary transition rounded-xl cursor-pointer" onClick={() => alert(product.name)}>
-            <img src={product.image} alt={product.name} className="h-40 w-40 object-cover rounded-full" />
-            <h2 className="text-lg font-semibold text-primary">{product.name}</h2>
-          </div>
-        ))}
-        {currentChildren.length === 0 && currentProducts.length === 0 && (
-          <div className="col-span-full text-center text-gray-400 py-8">{isRTL ? 'لا يوجد عناصر' : 'No items found.'}</div>
-        )}
+      {/* شجرة الفئات */}
+      <div className="bg-white rounded-2xl shadow p-6">
+        <CategoryTree
+          categories={buildCategoryTree(categories, null)}
+          isRTL={isRTL}
+          onAdd={handleAdd}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
+      <CategoriesDrawer
+        open={showForm}
+        onClose={handleCancel}
+        isRTL={isRTL}
+        title={editId ? t('categories.edit') || 'Edit Category' : t('categories.add') || 'Add Category'}
+        form={form}
+        onFormChange={e => {
+          const { name, value, type } = e.target;
+          setForm(f => ({
+            ...f,
+            [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+          }));
+        }}
+        onImageChange={e => {
+          const file = e.target.files && e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = ev => setForm(f => ({ ...f, image: ev.target?.result as string }));
+            reader.readAsDataURL(file);
+          }
+        }}
+        onSubmit={handleSave}
+        categories={flattenCategories(categories, isRTL)}
+      />
     </div>
   );
 };

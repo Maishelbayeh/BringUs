@@ -17,7 +17,7 @@ const initialCategories = [
   { id: 5, name: 'Toys' },
 ];
 
-const initialSubcategories: any[] = [
+export const initialSubcategories: any[] = [
   { id: 1, nameEn: 'Smartphones', nameAr: 'هواتف ذكية',descriptionEn: 'Smartphones are mobile devices that can make calls, send texts, and access the internet.',descriptionAr: 'هواتف ذكية هي أجهزة محمولة تستطيع الاتصال والإرسال والاستقبال والتصفح.', categoryId: 1, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80' },
   { id: 2, nameEn: 'Laptops', nameAr: 'لابتوبات',descriptionEn: 'Laptops are portable computers that can be used for various tasks.',descriptionAr: 'لابتوبات هي أجهزة محمولة تستطيع الاستخدام لمختلف المهام.', categoryId: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80' },
   { id: 3, nameEn: 'Men', nameAr: 'رجال',descriptionEn: 'Men are the male gender.',descriptionAr: 'الرجال هم الجنس الذكر.', categoryId: 2, image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80' },
