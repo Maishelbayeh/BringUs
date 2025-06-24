@@ -183,19 +183,7 @@ const CategoriesPage: React.FC = () => {
     setEditId(null);
   };
 
-  // دالة لإيجاد اسم الفئة حسب id
-  // const getCategoryNameById = (id: number | null): string => {
-  //   if (!id) return '';
-  //   const search = (cats: Category[]): string | null => {
-  //     for (const cat of cats) {
-  //       if (cat.id === id) return isRTL ? cat.nameAr : cat.nameEn;
-  //       const found = search(cat.children ?? []);
-  //       if (found) return found;
-  //     }
-  //     return null;
-  //   };
-  //   return search(categories) || '';
-  // };
+ 
 
   // Breadcrumb
   const breadcrumb = [

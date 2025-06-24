@@ -4,14 +4,18 @@ import { useTranslation } from 'react-i18next';
 import TestimonialDrawer from './TestimonialDrawer';
 import HeaderWithAction from '../components/common/HeaderWithAction';
 import CustomBreadcrumb from '@/components/common/CustomBreadcrumb';
-import { FaFacebookF, FaInstagram, FaTwitter } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTwitter, FaWhatsapp, FaYoutube, FaLinkedinIn, FaTiktok } from 'react-icons/fa';
 
-const socialIcons = {
+export const socialIcons = {
   FACEBOOK: <FaFacebookF className="w-7 h-7 text-[#1877F3] bg-white rounded-full p-1 shadow" />,
   INSTAGRAM: <FaInstagram className="w-7 h-7 text-[#E4405F] bg-white rounded-full p-1 shadow" />,
   TWITTER: <FaTwitter className="w-7 h-7 text-[#1DA1F2] bg-white rounded-full p-1 shadow" />,
+  WHATSAPP: <FaWhatsapp className="w-7 h-7 text-[#25D366] bg-white rounded-full p-1 shadow" />,
+  YOUTUBE: <FaYoutube className="w-7 h-7 text-[#FF0000] bg-white rounded-full p-1 shadow" />,
+  LINKEDIN: <FaLinkedinIn className="w-7 h-7 text-[#0077B5] bg-white rounded-full p-1 shadow" />,
+  TIKTOK: <FaTiktok className="w-7 h-7 text-[#000000] bg-white rounded-full p-1 shadow" />,
 };
-
+///////////////////////////////////////////////////////////////////////////////
 const initialTestimonials = [
   {
     id: 1,
@@ -50,50 +54,68 @@ const initialTestimonials = [
     active: true,
   },
 ];
-
+///////////////////////////////////////////////////////////////////////////////
 const Testimonial: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'ARABIC' || i18n.language === 'ar';
-  const [testimonials, setTestimonials] = useState(initialTestimonials);
+  const [testimonials] = useState(initialTestimonials);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [search, setSearch] = useState('');
+
   const handleAdd = () => {
     setEditing(null);
     setModalOpen(true);
   };
+  //------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (item: any) => {
     setEditing(item);
     setModalOpen(true);
   };
+  //------------------------------------------- handleDelete -------------------------------------------
   const handleDelete = (id: number) => {
-    setTestimonials(prev => prev.filter(t => t.id !== id));
+   console.log(id);
     setModalOpen(false);
   };
+  //------------------------------------------- handleSave -------------------------------------------
   const handleSave = (item: any) => {
-    if (item.id) {
-      setTestimonials(prev => prev.map(t => t.id === item.id ? item : t));
-    } else {
-      setTestimonials(prev => [...prev, { ...item, id: Date.now() }]);
-    }
+  console.log(item);
     setModalOpen(false);
   };
-
+  //------------------------------------------- filteredTestimonials -------------------------------------------
+  const filteredTestimonials = testimonials.filter((item: any) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      item.name.toLowerCase().includes(q) ||
+      item.position.toLowerCase().includes(q) ||
+      item.review.toLowerCase().includes(q)
+    );
+  });
+  //------------------------------------------- return -------------------------------------------
   return (
-    <div className="p-6 w-full">
+    <div className="sm:p-4 w-full">
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.testimonials') || 'Testimonials', href: '/testimonials' }
       ]} isRtl={isRtl} />
+{/* ------------------------------------------- HeaderWithAction ------------------------------------------- */}
       <HeaderWithAction
         title={t('testimonials.title') || 'Testimonials'}
         addLabel={t('common.add') || 'Add New'}
         onAdd={handleAdd}
         isRtl={isRtl}
-        count={testimonials.length}
+        showSearch={true}
+        searchValue={search}
+        onSearchChange={e => setSearch(e.target.value)}
+        searchPlaceholder={t('testimonials.search') || 'Search testimonials...'}
+        count={filteredTestimonials.length}
       />
+      {/* ------------------------------------------- Testimonials ------------------------------------------- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {testimonials.map(item => (
-          <div key={item.id} className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition group overflow-hidden relative" onClick={() => handleEdit(item)}>
+        {filteredTestimonials.map((item: any) => (
+          <div key={item.id} className="bg-white rounded-2xl shadow-lg flex flex-col cursor-pointer hover:shadow-2xl transition group overflow-hidden relative"
+           onClick={() => handleEdit(item)}>
             <div className="relative w-full h-44 overflow-hidden">
               <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               <div className={`absolute top-3 ${isRtl ? 'left-3' : 'right-3'}`}>{socialIcons[item.social as keyof typeof socialIcons]}</div>
@@ -111,6 +133,7 @@ const Testimonial: React.FC = () => {
           </div>
         ))}
       </div>
+      {/* ------------------------------------------- TestimonialDrawer ------------------------------------------- */}
       {modalOpen && (
         <TestimonialDrawer
           open={modalOpen}

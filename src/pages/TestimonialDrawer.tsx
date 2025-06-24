@@ -5,7 +5,8 @@ import CustomFileInput from '../components/common/CustomFileInput';
 import CustomTextArea from '../components/common/CustomTextArea';
 import CustomButton from '../components/common/CustomButton';
 import CustomRadioGroup from '../components/common/CustomRadioGroup';
-
+import { socialIcons } from './Testimonial';
+//------------------------------------------- interface -------------------------------------------
 interface TestimonialDrawerProps {
   open: boolean;
   onClose: () => void;
@@ -15,7 +16,7 @@ interface TestimonialDrawerProps {
   isRtl: boolean;
   t: any;
 }
-
+//------------------------------------------- TestimonialDrawer -------------------------------------------
 const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, onSave, onDelete, testimonial, isRtl, t }) => {
   const [image, setImage] = useState<string>(testimonial?.image || '');
   const [social, setSocial] = useState<string>(testimonial?.social || 'FACEBOOK');
@@ -35,7 +36,7 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
       reader.readAsDataURL(file[0]);
     }
   };
-
+//------------------------------------------- handleSubmit -------------------------------------------
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     onSave({
@@ -67,11 +68,10 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
                 label={t('testimonials.socialIcon') || 'Social Icon'}
                 value={social}
                 onChange={e => setSocial(e.target.value)}
-                options={[
-                  { value: 'FACEBOOK', label: 'Facebook' },
-                  { value: 'INSTAGRAM', label: 'Instagram' },
-                  { value: 'TWITTER', label: 'Twitter' },
-                ]}
+                options={Object.keys(socialIcons).map(key => ({ 
+                  value: key,
+                   label: key.charAt(0) + key.slice(1).toLowerCase() 
+                  }))}
               />
               <CustomInput
                 label={t('testimonials.reviewBy') || 'Review By'}

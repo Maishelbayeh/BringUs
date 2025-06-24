@@ -373,6 +373,7 @@
     "active": "Active",
     "inactive": "Inactive",
     "dragDrop": "Drag and Drop",
-    "selectOrDrop": "Select a file or drop one here."
+    "selectOrDrop": "Select a file or drop one here.",
+    "search": "Search testimonials..."
   }
 }

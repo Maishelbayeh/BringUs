@@ -359,6 +359,7 @@
     "active": "نشط",
     "inactive": "غير نشط",
     "dragDrop": "اسحب وأفلت هنا",
-    "selectOrDrop": "أو اختر ملف"
+    "selectOrDrop": "أو اختر ملف",
+    "search": "ابحث عن تعليقات..."
   }
 } 
