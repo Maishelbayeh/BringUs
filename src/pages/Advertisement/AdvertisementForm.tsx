@@ -30,7 +30,6 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({ formHtml, setForm
         value={formHtml}
         onChange={e => setFormHtml(e.target.value)}
         placeholder="<h1>My Ad</h1>"
-        labelAlign={isRTL ? 'right' : 'left'}
         dir={isRTL ? 'rtl' : 'ltr'}
         name="html"
       />

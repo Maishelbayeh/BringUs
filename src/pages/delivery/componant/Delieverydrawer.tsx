@@ -3,7 +3,7 @@ import React from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import DeliveryAreaForm from './DelieveryForm';
 import { DeliveryArea } from '../../../Types';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+
 import { useTranslation } from 'react-i18next';
 import CustomButton from '@/components/common/CustomButton';
 

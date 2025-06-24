@@ -4,7 +4,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import PaymentForm from './paymentForm';
 import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
-import PaymentIcon from '@mui/icons-material/Payment';
+
 import CustomButton from '@/components/common/CustomButton';
 
 interface Props {

@@ -45,7 +45,7 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({ open, onClose, onSave, s
             placeholder={t('products.specDescriptionPlaceholder')}
             rows={5}
             dir={isArabic ? 'rtl' : 'ltr'}
-            labelAlign={isArabic ? 'right' : 'left'}
+            
           />
         </form>
         {/* Footer */}

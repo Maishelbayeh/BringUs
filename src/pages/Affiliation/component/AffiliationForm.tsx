@@ -82,7 +82,7 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         name="address"
         value={form.address}
         onChange={onFormChange}
-        labelAlign={isRTL ? 'right' : 'left'}
+       
         dir={isRTL ? 'rtl' : 'ltr'}
       />
     </div>
