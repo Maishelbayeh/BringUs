@@ -82,7 +82,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         name="address"
         value={form.address}
         onChange={e => onFormChange(e as any)}
-        labelAlign={isRTL ? 'right' : 'left'}
+        
         dir={isRTL ? 'rtl' : 'ltr'}
       />
     </div>

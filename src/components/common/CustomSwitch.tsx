@@ -8,9 +8,10 @@ interface CustomSwitchProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   labelAlign?: 'left' | 'right';
   isRTL?: boolean;
+  disabled?: boolean;
 }
 
-const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onChange, labelAlign = 'left', isRTL }) => {
+const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onChange, labelAlign = 'left', isRTL, disabled }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newEvent = {
       ...event,
@@ -37,6 +38,7 @@ const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onCha
           checked={checked}
           onChange={handleChange}
           name={name}
+          disabled={disabled}
           sx={{
             '& .MuiSwitch-switchBase.Mui-checked': {
               color: '#634C9F',

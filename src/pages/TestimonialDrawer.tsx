@@ -102,7 +102,7 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
               <CustomFileInput
                 label={t('testimonials.picture') || 'Picture'}
                 onChange={handleImageChange}
-                labelAlign={isRtl ? 'right' : 'left'}
+                
                 isRTL={isRtl}
                 // placeholder={t('testimonials.selectOrDrop') || 'Select a file or drop one here.'}
               />
@@ -112,7 +112,7 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
             label={t('testimonials.review') || 'Review'}
             value={review}
             onChange={e => setReview(e.target.value)}
-            labelAlign={isRtl ? 'right' : 'left'}
+            
             dir={isRtl ? 'rtl' : 'ltr'}
           />
         </form>

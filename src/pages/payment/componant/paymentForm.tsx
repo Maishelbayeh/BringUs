@@ -71,7 +71,7 @@ const PaymentForm: React.FC<Props> = ({ method, onSubmit, language }) => {
             value={file ? file.name : ''}
             onChange={handleFileChange}
             placeholder={t('paymentMethods.chooseFile')}
-            labelAlign={isRTL ? 'right' : 'left'}
+         
             style={{ textAlign: isRTL ? 'right' : 'left' }}
           />
         </div>

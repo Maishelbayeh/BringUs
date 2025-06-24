@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import SubcategoriesNav from './SubcategoriesNav';
+
 import SubcategoriesDrawer from './SubcategoriesDrawer';
- 
+
+
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import HeaderWithAction from '@/components/common/HeaderWithAction';
+import SubcategoryCard from './components/SubcategoryCard';
 
 const initialCategories = [
   { id: 1, name: 'Electronics' },
@@ -14,20 +17,28 @@ const initialCategories = [
   { id: 5, name: 'Toys' },
 ];
 
-const initialSubcategories: any[] = [
-  { id: 1, name: 'Smartphones', categoryId: 1, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80' },
-  { id: 2, name: 'Laptops', categoryId: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80' },
-  { id: 3, name: 'Men', categoryId: 2, image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80' },
-  { id: 4, name: 'Women', categoryId: 2, image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80' },
-  { id: 7, name: 'Novels', categoryId: 4, image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80' },
-  { id: 13, name: 'Football', categoryId: 7, image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80' },
+export const initialSubcategories: any[] = [
+  { id: 1, nameEn: 'Smartphones', nameAr: 'هواتف ذكية',descriptionEn: 'Smartphones are mobile devices that can make calls, send texts, and access the internet.',descriptionAr: 'هواتف ذكية هي أجهزة محمولة تستطيع الاتصال والإرسال والاستقبال والتصفح.', categoryId: 1, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80' },
+  { id: 2, nameEn: 'Laptops', nameAr: 'لابتوبات',descriptionEn: 'Laptops are portable computers that can be used for various tasks.',descriptionAr: 'لابتوبات هي أجهزة محمولة تستطيع الاستخدام لمختلف المهام.', categoryId: 1, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80' },
+  { id: 3, nameEn: 'Men', nameAr: 'رجال',descriptionEn: 'Men are the male gender.',descriptionAr: 'الرجال هم الجنس الذكر.', categoryId: 2, image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80' },
+  { id: 4, nameEn: 'Women', nameAr: 'نساء',descriptionEn: 'Women are the   female gender.',descriptionAr: 'النساء هم الجنس الأنثى.', categoryId: 2, image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80' },
+  { id: 7, nameEn: 'Novels', nameAr: 'روايات',descriptionEn: 'Novels are books that tell stories.',descriptionAr: 'الروايات هي كتب تخبر القصص.', categoryId: 4, image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80' },
+  { id: 13, nameEn: 'Football', nameAr: 'كرة القدم',descriptionEn: 'Football is a sport that is played with a ball.',descriptionAr: 'كرة القدم هي رياضة يلعب بها الأشخاص بكرة.', categoryId: 7, image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80' },
 ];
 
 const SubcategoriesPage: React.FC = () => {
   const [categories] = useState(initialCategories);
   const [subcategories, setSubcategories] = useState<any[]>(initialSubcategories);
   const [showDrawer, setShowDrawer] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', image: '', categoryId: '' });
+  const [editingSubcategory, setEditingSubcategory] = useState<any>(null);
+  const [form, setForm] = useState({
+    nameEn: '',
+    nameAr: '',
+    descriptionEn: '',
+    descriptionAr: '',
+    image: '',
+    categoryId: ''
+  });
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
   const [search, setSearch] = useState('');
@@ -37,15 +48,13 @@ const SubcategoriesPage: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
 
- 
-
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);
   }, [categoryIdParam]);
 
   const filteredSubcategories = subcategories.filter(sub =>
     (selectedCategoryId ? sub.categoryId === Number(selectedCategoryId) : true) &&
-    sub.name.toLowerCase().includes(search.toLowerCase())
+    (i18n.language === 'ARABIC' ? sub.nameAr.toLowerCase().includes(search.toLowerCase()) : sub.nameEn.toLowerCase().includes(search.toLowerCase()))
   );
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -62,43 +71,74 @@ const SubcategoriesPage: React.FC = () => {
     setShowDrawer(false);
   };
 
+  const handleAdd = () => {
+    setEditingSubcategory(null);
+    setForm({
+      nameEn: '',
+      nameAr: '',
+      descriptionEn: '',
+      descriptionAr: '',
+      image: '',
+      categoryId: ''
+    });
+    setShowDrawer(true);
+  };
+
+  const handleEdit = (sub: any) => {
+    setEditingSubcategory(sub);
+    setForm({
+      nameEn: sub.nameEn || '',
+      nameAr: sub.nameAr || '',
+      descriptionEn: sub.descriptionEn || '',
+      descriptionAr: sub.descriptionAr || '',
+      image: sub.image || '',
+      categoryId: sub.categoryId || ''
+    });
+    setShowDrawer(true);
+  };
+
+  const handleDrawerClose = () => {
+    setShowDrawer(false);
+    setEditingSubcategory(null);
+  };
+
   return (
-    <div className="p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="p-4 w-full" >
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.subcategories') || 'Subcategories', href: '/subcategories' }
       ]} isRtl={isRTL} />
-      <SubcategoriesNav
-        isRTL={isRTL}
-        t={t}
-        onAdd={() => setShowDrawer(true)}
-        search={search}
-        setSearch={setSearch}
+     
+      <HeaderWithAction
+        title={t('subcategories.title')}
+        addLabel={t('subcategories.addSubcategory')}
+        onAdd={handleAdd}
+        isRtl={isRTL}
+        showSearch={true}
+        searchValue={search}
+        onSearchChange={e => setSearch(e.target.value)}
+        searchPlaceholder={isRTL ? 'ابحث باسم الفئة أو التصنيف...' : 'Search by category or sub-category...'}
         categories={categories}
         selectedCategoryId={selectedCategoryId}
-        setSelectedCategoryId={setSelectedCategoryId}
+        onCategoryChange={setSelectedCategoryId}
       />
-      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
+      <div className={`bg-white rounded-2xl flex flex-wrap gap-6 p-4 ${isRTL ? 'justify-end' : 'justify-start'}`}>
         {filteredSubcategories.map((sub) => (
-          <div
+          <SubcategoryCard
             key={sub.id}
-            className="p-4 flex flex-col items-center gap-2 cursor-pointer ring-1 ring-primary/20 hover:ring-primary transition"
+            sub={sub}
+            isRTL={isRTL}
+            onEdit={() => handleEdit(sub)}
+            onDelete={() => {/* TODO: handleDelete(sub) */}}
             onClick={() => navigate(`/products?subcategoryId=${sub.id}`)}
-          >
-            <img
-              src={sub.image}
-              alt={sub.name}
-              className="h-40 w-40 object-cover rounded-full"
-            />
-            <h2 className="text-lg font-semibold text-primary">{sub.name}</h2>
-          </div>
+          />
         ))}
       </div>
       <SubcategoriesDrawer
         open={showDrawer}
-        onClose={() => setShowDrawer(false)}
+        onClose={handleDrawerClose}
         isRTL={isRTL}
-        title={t('subcategories.add')}
+        title={editingSubcategory ? (isRTL ? 'تعديل تصنيف فرعي' : 'Edit Subcategory') : (isRTL ? 'إضافة تصنيف فرعي' : 'Add Subcategory')}
         form={form}
         onFormChange={handleFormChange}
         onImageChange={handleImageChange}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import CustomSelect from './CustomSelect';
+import { useTranslation } from 'react-i18next';
 
 interface HeaderWithActionProps {
   title: string;
@@ -17,6 +18,9 @@ interface HeaderWithActionProps {
   onSortChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   sortOptions?: { value: string; label: string }[];
   onDownload?: () => void;
+  categories?: { id: number; name: string }[];
+  selectedCategoryId?: string;
+  onCategoryChange?: (id: string) => void;
 }
 
 const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
@@ -34,12 +38,16 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
   onSortChange,
   sortOptions = [],
   onDownload,
+  categories,
+  selectedCategoryId,
+  onCategoryChange,
 }) => {
   const [isSortOpen,   ] = useState(false);
-
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language;
   return (
     <>
-      <div className={`mb-4 rounded-lg px-3 pt-4 flex items-center justify-between bg-primary/10 gap-4 ${isRtl ? 'flex-row-reverse' : 'flex-row'} ${className}`}>
+      <div className={`mb-4 rounded-lg px-3 pt-4 flex items-center justify-between bg-primary/10 gap-4 ${isRtl ? 'flex-row-reverse' : 'flex-row'} ${className} flex-wrap`}>
         <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'} mb-4`}>
           <h1 className="text-2xl font-bold text-primary">{title}</h1>
           {onDownload && (
@@ -53,7 +61,7 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
             </button>
           )}
         </div>
-        <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
+        <div className={`flex flex-wrap items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
           {showSearch && (
             <input
               type="text"
@@ -61,7 +69,7 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
               onChange={onSearchChange}
               onBlur={onSearchChange}
               placeholder={searchPlaceholder}
-              className={`w-80 appearance-none bg-gray-50 border  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block  p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary transition-all duration-200 mb-4`}
+              className={`lg:w-80 md:w-full appearance-none bg-gray-50 border  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block  p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary transition-all duration-200 mb-4`}
               style={isRtl ? { direction: 'rtl' } : {}}
             />
           )}
@@ -81,6 +89,14 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
                 }
               />
             </div>
+          )}
+          {categories && (
+           <div className="w-44 "> <CustomSelect
+           value={selectedCategoryId || ''}
+           onChange={e => onCategoryChange && onCategoryChange(e.target.value)}
+           options={[{ value: '', label: currentLanguage === 'ARABIC' ? 'الكل' : 'All' }, ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))]}
+            
+         /></div>
           )}
           {onAdd && <button
             onClick={onAdd}

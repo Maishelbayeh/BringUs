@@ -57,7 +57,10 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
         labelAlign={isRTL ? 'right' : 'left'}
         onChange={onFormChange}
       />
-      <CustomFileInput label={isRTL ? 'الصورة' : 'Image'} id="image" value={form.image} onChange={file => onImageChange({ target: { files: file ? [file] : [] } } as any)}  style={{ textAlign: isRTL ? 'right' : 'left' }} labelAlign={isRTL ? 'right' : 'left'} />
+      <CustomFileInput label={isRTL ? 'الصورة' : 'Image'} 
+      id="image" value={form.image} 
+      onChange={file => onImageChange({ target: { files: file ? [file] : [] } } as any)} 
+       style={{ textAlign: isRTL ? 'right' : 'left' }}  />
     </div>
   );
 };
