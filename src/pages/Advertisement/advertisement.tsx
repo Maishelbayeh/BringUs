@@ -99,7 +99,7 @@ const AdvertisementPage = () => {
   };
 
   return (
-    <div className="p-4" >
+    <div className="sm:p-4" >
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.advertisement') || 'Advertisement', href: '/advertisement' }

@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleItemClick = (path: string) => {
     onItemClick(path);
     navigate(path);
-    toggleSidebar();
+    if (window.innerWidth < 1024) toggleSidebar();
   };
 
   const toggleRegion = (id: number) =>
@@ -62,8 +62,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       className={`
-       w-80 max-w-xs p-4 bg-primary-light flex flex-col transition-all duration-300 ease-in-out
-        ${isOpen ? (isRTL ? 'translate-x-0' : 'translate-x-0') : isRTL ? 'translate-x-full' : '-translate-x-full'}
+        w-80 max-w-xs p-4 bg-primary-light flex flex-col
+        transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}
         overflow-y-auto custom-scrollbar-hide
         ${isRTL ? 'items-end' : 'items-start'}
         h-screen

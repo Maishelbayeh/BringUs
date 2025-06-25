@@ -192,7 +192,7 @@ const CategoriesPage: React.FC = () => {
   ];
 
   return (
-    <div className="md:p-6 w-full ">
+    <div className="sm:p-4 w-full ">
       <CustomBreadcrumb items={breadcrumb} isRtl={isRTL} />
       <HeaderWithAction
         title={t('sideBar.categories') || 'Categories'}

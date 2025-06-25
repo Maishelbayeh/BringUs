@@ -18,7 +18,7 @@ const TermsConditionsPage = () => {
   const handleSave = () => alert(t('termsConditions.saved', 'Changes saved!'));
 
   return (
-    <div className=" p-4" >
+    <div className="sm:p-4" >
       {/* CustomNav as header */}
       {/* <CustomNav
         isRTL={isRTL}

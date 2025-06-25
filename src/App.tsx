@@ -16,9 +16,8 @@ function App() {
   const getMenuItems = (): MenuItem[] =>
     activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();
 
-  const handleItemClick = () => {
-    // No sidebar means full width content
-    if (isSidebarOpen) toggleSidebar();
+  const handleItemClick = (path: string) => {
+    // لا تفعل شيئاً هنا، فقط مرر المسار للـ Sidebar
   };
 
   return (

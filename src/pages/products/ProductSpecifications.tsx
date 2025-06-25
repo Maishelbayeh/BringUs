@@ -44,6 +44,12 @@ const ProductSpecifications: React.FC = () => {
     { key: 'description', label: { ar: 'وصف الصفة', en: 'Specification Description' }, type: 'text', align: 'center' },
   ];
 
+  const lang = i18n.language;
+  const tableData = specs.map(spec => ({
+    ...spec,
+    description: lang === 'ar' || lang === 'ARABIC' ? spec.descriptionAr : spec.descriptionEn
+  }));
+
   // Breadcrumb
   const breadcrumb = [
     { name: t('sideBar.products') || 'Products', href: '/products' },
@@ -51,7 +57,7 @@ const ProductSpecifications: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 w-full">
+    <div className="sm:p-4 w-full">
       {/* Breadcrumb */}
       <CustomBreadcrumb items={breadcrumb} isRtl={i18n.language === 'ARABIC'} />
       <HeaderWithAction
@@ -62,7 +68,7 @@ const ProductSpecifications: React.FC = () => {
         count={specs.length}
       />
       <div className="overflow-x-auto">
-        <CustomTable columns={columns as any} data={specs} onEdit={handleEdit} onDelete={handleDelete} />
+        <CustomTable columns={columns as any} data={tableData} onEdit={handleEdit} onDelete={handleDelete} />
       </div>
       <ProductSpecificationsDrawer open={drawerOpen} onClose={handleDrawerClose} onSave={handleDrawerSave} spec={editingSpec} />
     </div>

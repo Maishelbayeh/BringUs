@@ -85,7 +85,7 @@ const CustomShuttle: React.FC<CustomShuttleProps> = ({ label, name, value, optio
       <div className="w-full mb-1">
         <label className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{label}</label>
       </div>
-      <div className={`flex gap-2 `}>
+      <div className={`flex gap-2 justify-between`}>
         {/* الأعمدة */}
         {columns.map((col, idx) => {
           if (col === 'controls') {

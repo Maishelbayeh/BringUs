@@ -7,7 +7,6 @@ interface CustomTextAreaProps {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   error?: string;
- 
   dir?: 'rtl' | 'ltr';
   rows?: number;
   className?: string;
@@ -21,7 +20,6 @@ const CustomTextArea: React.FC<CustomTextAreaProps> = ({
   onChange,
   placeholder,
   error,
- 
   dir,
   rows = 4,
   className = '',

@@ -102,8 +102,7 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
            value={selectedCategoryId || ''}
            onChange={e => onCategoryChange && onCategoryChange(e.target.value)}
            options={[{ value: '', label: currentLanguage === 'ARABIC' ? 'الكل' : 'All' }, ...categories.map(cat => ({ value: String(cat.id), label: cat.name }))]}
-            
-         /></div>
+            /></div>
           )}
           {onAdd && <button
             onClick={onAdd}
@@ -123,7 +122,6 @@ const HeaderWithAction: React.FC<HeaderWithActionProps> = ({
           </button>}
         </div>
       </div>
-      {/* <Divider sx={{ mb: { xs: 2, sm: 3 } }} /> */}
     </>
   );
 };

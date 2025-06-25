@@ -60,7 +60,7 @@ const PaymentMethods: React.FC = () => {
   };
 
   return (
-    <div className='bg-white p-4'>
+    <div className='bg-white sm:p-4'>
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('paymentMethods.title') || 'Payment Methods', href: '/payment-methods' }

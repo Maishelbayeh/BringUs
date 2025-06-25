@@ -124,7 +124,7 @@ const PaymentVariants: React.FC = () => {
   };
 
   return (
-    <div className="p-6 w-full">
+    <div className="sm:p-4 w-full">
       {/* Breadcrumb */}
       <nav className={`flex items-center text-gray-500 text-sm mb-4 ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`} aria-label="Breadcrumb">
         {breadcrumb.map((item, idx) => (
