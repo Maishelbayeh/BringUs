@@ -9,7 +9,11 @@
     "add":"إضافة",
     "language": "اللغة",
     "lastSignIn": "آخر تسجيل دخول في {{date}}",
-    "advertisement": "الإعلانات"
+    "advertisement": "الإعلانات",
+    "logout": "تسجيل الخروج",
+    "areYouSureLogout": "هل أنت متأكد من تسجيل الخروج؟",
+    "confirmLogout": "تأكيد تسجيل الخروج",
+    "cancel": "إلغاء"
   },
   "auth":{
     "since_2024":"منذ 2024",
@@ -158,7 +162,22 @@
     },
     "maintainStock": "إدارة المخزون",
     "availableQuantity": "الكمية المتوفرة",
-    "edit": "تعديل المنتج"
+    "edit": "تعديل المنتج",
+    "productName": "اسم المنتج",
+    "description": "الوصف",
+    "selectCategory": "اختر الفئة",
+    "subcategory": "الفئة الفرعية",
+    "selectSubcategory": "اختر الفئة الفرعية (اختياري)",
+    "unit": "الوحدة",
+    "selectUnit": "اختر الوحدة",
+    "originalPrice": "السعر الأصلي",
+    "wholesalePrice": "سعر الجملة",
+    "selectLabel": "اختر التصنيف",
+    "visibility": "الإظهار",
+    "parcode": "الباركود",
+    "colors": "الألوان",
+    "pictures": "الصور",
+    "productVideo": "رابط فيديو المنتج"
   },
   "subcategories": {
     "title": "الفئات الفرعية",
@@ -323,7 +342,15 @@
     "address": "العنوان",
     "active": "نشط",
     "inactive": "غير نشط",
-    "actions": "العمليات"
+    "actions": "العمليات",
+    "link": "الرابط",
+    "totalSale": "المبيعات الكلية",
+    "remaining": "المتبقي",
+    "paid": "المدفوع",
+    "paidDate": "تاريخ الدفع",
+    "balance": "الرصيد",
+    "paymentForm": "إدخال الدفع",
+    "paymentDetails": "تفاصيل الدفع"
   },
   "advertisement": {
     "inputLabel": "الصق كود HTML هنا",

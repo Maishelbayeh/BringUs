@@ -13,15 +13,14 @@ interface SallersFormProps {
 const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) => {
   const { t } = useTranslation();
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
       <CustomInput
         label={t('wholesalers.email')}
         name="email"
         type="email"
         value={form.email}
         onChange={onFormChange}
-        required
-        
+        required 
       />
       <CustomInput
         label={t('wholesalers.password')}
@@ -29,8 +28,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         type="password"
         value={form.password}
         onChange={onFormChange}
-        required
-        
+        required 
       />
       <CustomInput
         label={t('wholesalers.firstName')}
@@ -74,8 +72,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
           { value: 'A', label: t('wholesalers.active') },
           { value: 'I', label: t('wholesalers.inactive') },
         ]}
-        labelAlign={isRTL ? 'right' : 'left'}
-        isRTL={isRTL}
+       
       />
       <CustomTextArea
         label={t('wholesalers.address')}

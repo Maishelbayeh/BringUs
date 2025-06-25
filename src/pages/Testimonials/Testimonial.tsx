@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import TestimonialDrawer from './TestimonialDrawer';
-import HeaderWithAction from '../components/common/HeaderWithAction';
+import HeaderWithAction from '../../components/common/HeaderWithAction';
 import CustomBreadcrumb from '@/components/common/CustomBreadcrumb';
 import { FaFacebookF, FaInstagram, FaTwitter, FaWhatsapp, FaYoutube, FaLinkedinIn, FaTiktok } from 'react-icons/fa';
 

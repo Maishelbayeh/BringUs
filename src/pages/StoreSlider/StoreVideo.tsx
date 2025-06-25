@@ -5,15 +5,14 @@ import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
-
-// فيديوهات عامة للمتجر فقط
+//-------------------------------------------- initialVideos -------------------------------------------
 const initialVideos: any[] = [
   { id: 1, name: 'Store Tour', url: 'https://www.youtube.com/watch?v=ObXiEqzjx9U', description: 'Take a tour in our store!' },
   { id: 2, name: 'Promo Video', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', description: 'Our latest promo.' },
 ];
-
+//-------------------------------------------- initialForm -------------------------------------------
 const initialForm = { name: '', url: '', description: '' };
-
+//-------------------------------------------- StoreVideoPage -------------------------------------------
 const StoreVideoPage: React.FC = () => {
   const [videos, setVideos] = useState<any[]>(initialVideos);
   const [showDrawer, setShowDrawer] = useState(false);
@@ -23,8 +22,7 @@ const StoreVideoPage: React.FC = () => {
   const [openVideo, setOpenVideo] = useState<string | null>(null);
   const [drawerMode, setDrawerMode] = useState<'add' | 'edit'>('add');
   const [editId, setEditId] = useState<number | null>(null);
-
-  // إضافة أو تعديل فيديو
+//-------------------------------------------- handleSave -------------------------------------------
   const handleSave = (formData: any) => {
     if (drawerMode === 'edit' && editId) {
       setVideos(videos.map(v => v.id === editId ? { ...v, ...formData } : v));
@@ -36,13 +34,13 @@ const StoreVideoPage: React.FC = () => {
     setEditId(null);
     setDrawerMode('add');
   };
-  // فتح drawer للإضافة
+//-------------------------------------------- handleAddVideo -------------------------------------------
   const handleAddVideo = () => {
     setForm(initialForm);
     setDrawerMode('add');
     setShowDrawer(true);
   };
-  // فتح drawer للتعديل
+//-------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (video: any) => {
     setForm(video);
     setEditId(video.id);
@@ -56,6 +54,7 @@ const StoreVideoPage: React.FC = () => {
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.storeVideos') || 'Store Videos', href: '/store-videos' }
       ]} isRtl={isRTL} />
+      {/* ------------------------------------------- HeaderWithAction ------------------------------------------- */}
       <HeaderWithAction
         title={t('sideBar.storeVideos') || 'Store Videos'}
         addLabel={t('storeVideos.addButton')}
@@ -63,6 +62,7 @@ const StoreVideoPage: React.FC = () => {
         isRtl={isRTL}
         count={videos.length}
       />
+      {/* ------------------------------------------- videos ------------------------------------------- */}
       <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" dir={isRTL ? 'rtl' : 'ltr'}>
         {videos.map((video) => {
           let videoUrl = video.url;
@@ -80,7 +80,7 @@ const StoreVideoPage: React.FC = () => {
               key={video.id}
               className="relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition group flex flex-col overflow-hidden"
             >
-              {/* زر الإعدادات دائماً ظاهر */}
+              {/* ------------------------------------------- زر الإعدادات دائماً ظاهر ------------------------------------------- */}
               <button
                 className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 bg-primary/90 hover:bg-primary text-white rounded-full p-2 shadow`}
                 onClick={e => { e.stopPropagation(); handleEdit(video); }}
@@ -88,7 +88,7 @@ const StoreVideoPage: React.FC = () => {
               >
                 <CogIcon className="w-6 h-6" />
               </button>
-              {/* صورة الفيديو أو الفيديو نفسه */}
+              {/* ------------------------------------------- صورة الفيديو أو الفيديو نفسه ------------------------------------------- */}
               <div className="relative w-full aspect-video bg-black flex items-center justify-center cursor-pointer"
                 onClick={() => isYoutube && setOpenVideo(youtubeId)}
               >
@@ -117,7 +117,7 @@ const StoreVideoPage: React.FC = () => {
                   />
                 )}
               </div>
-              {/* اسم الفيديو والوصف */}
+              {/* ------------------------------------------- اسم الفيديو والوصف ------------------------------------------- */}
               <div className="p-3 flex flex-col gap-1">
                 <a
                   href={isYoutube ? `https://www.youtube.com/watch?v=${youtubeId}` : video.url}
@@ -135,7 +135,7 @@ const StoreVideoPage: React.FC = () => {
             </div>
           );
         })}
-        {/* Modal لعرض الفيديو عند الضغط */}
+        {/* ------------------------------------------- Modal ------------------------------------------- */}
         <Dialog open={!!openVideo} onClose={() => setOpenVideo(null)} maxWidth="md">
           <div className="bg-black">
             {openVideo && (
@@ -153,6 +153,7 @@ const StoreVideoPage: React.FC = () => {
           </div>
         </Dialog>
       </div>
+      {/* ------------------------------------------- StoreSliderDrawer ------------------------------------------- */}
       <StoreSliderDrawer
         open={showDrawer}
         onClose={() => { setShowDrawer(false); setEditId(null); setForm(initialForm); }}

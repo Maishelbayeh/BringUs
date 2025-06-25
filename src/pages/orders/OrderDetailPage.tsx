@@ -6,12 +6,12 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon, BuildingStorefrontIcon, UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import CustomTable from '../../components/common/CustomTable';
-
+//-------------------------------------------- OrderDetailPage -------------------------------------------
 const OrderDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
-
+//-------------------------------------------- order -------------------------------------------
   const order = ordersData.find(o => String(o.id) === String(id));
   if (!order) {
     return <div className="p-8 text-center text-red-600 font-bold">{t('orders.notFound') || 'Order not found'}</div>;
@@ -38,13 +38,13 @@ const OrderDetailPage: React.FC = () => {
   const taxTotal = order.taxTotal || 0;
   const deliveryPrice = order.deliveryPrice || 0;
   const finalTotal = productsTotal + taxTotal + deliveryPrice - discountTotal;
-
+//-------------------------------------------- isArabic -------------------------------------------
   const isArabic = i18n.language === 'ARABIC' || i18n.language === 'ar';
   const flexDir = isArabic ? 'md:flex-row-reverse' : 'md:flex-row';
   const textDir = isArabic ? 'text-right' : '';
-
+//-------------------------------------------- return -------------------------------------------
   return (
-    <div className="p-6 w-full">
+    <div className="sm:p-4 w-full">
       <div dir={isArabic ? 'rtl' : 'ltr'}>
         <button onClick={() => navigate(-1)} className="mb-4 text-primary underline flex items-center gap-2">
           <ArrowLeftIcon className={`h-4 w-4 text-primary ${isArabic ? 'rotate-180' : ''}`} />
@@ -69,7 +69,7 @@ const OrderDetailPage: React.FC = () => {
               </button>
             </div>
             <div id="print-section">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4">
                 <div className={`bg-primary/5 rounded-lg p-4 flex flex-col items-start shadow`} dir={isArabic ? 'rtl' : 'ltr'}>
                   <div className="flex items-center gap-2 mb-2">
                     <BuildingStorefrontIcon className="h-5 w-5 text-primary" />
@@ -107,7 +107,7 @@ const OrderDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="mb-2 flex-1 p-6">
+              <div className="mb-2 flex-1 p-4">
                 <h3 className="text-lg font-bold text-primary mb-2">{t('orders.orderItems')}</h3>
                 <CustomTable
                   columns={[

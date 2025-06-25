@@ -172,7 +172,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Logout */}
       <div
         onClick={handleLogoutClick}
-        className={`flex items-center mt-6 px-6 py-3 text-red-600 cursor-pointer hover:opacity-80 rounded-lg ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}
+        className={`w-full flex items-center mt-6 px-6 py-3 text-red-600 cursor-pointer hover:opacity-80 rounded-lg ${isRTL ? ' text-right' : ' text-left'}`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -188,7 +188,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
           />
         </svg>
-        {isOpen && <span className="font-medium">{t('home.logout')}</span>}
+        {isOpen && <span className="font-medium">{t('general.logout')}</span>}
       </div>
 
       {/* Confirm Logout Dialog */}
@@ -197,21 +197,21 @@ const Sidebar: React.FC<SidebarProps> = ({
         onClose={handleCloseDialog}
         PaperProps={{ sx: { borderRadius: 4, p: 2, direction: isRTL ? 'rtl' : 'ltr' } }}
       >
-        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem', textAlign: isRTL ? 'right' : 'left' }}>
+        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem', textAlign: isRTL ? 'right' : 'left', fontFamily: 'Tajawal, sans-serif' }}>
           {t('general.confirmLogout')}
         </DialogTitle>
         <DialogContent>
-          <p className={`text-body ${isRTL ? 'text-right' : 'text-left'}`}>{t('general.areYouSureLogout')}</p>
+          <p className={`text-body ${isRTL ? 'text-right' : 'text-left'}`} >{t('general.areYouSureLogout')}</p>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: isRTL ? 'flex-start' : 'flex-end' }}>
-          <button onClick={handleCloseDialog} className="px-4 py-2 border rounded-lg">
+        <DialogActions sx={{ justifyContent: 'space-between', gap: 2 }}>
+            <button onClick={handleCloseDialog} className="px-4 py-2 border rounded-lg w-full">
             {t('general.cancel')}
           </button>
           <button
             onClick={handleConfirmLogout}
-            className="px-4 py-2 bg-primary text-white rounded-lg"
+            className="px-4 py-2 bg-primary text-white rounded-lg w-full whitespace-nowrap"
           >
-            {t('home.logout')}
+            {t('general.logout')}
           </button>
         </DialogActions>
       </Dialog>

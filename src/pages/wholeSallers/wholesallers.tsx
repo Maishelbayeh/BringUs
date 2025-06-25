@@ -4,33 +4,9 @@ import { useTranslation } from 'react-i18next';
 import SallersDrawer from './componnent/sallersDrawer';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import { mockWholesalers } from '../../data/mockWholesalers';
 
-// Mock data for wholesalers
-const mockWholesalers = [
-  {
-    id: 1,
-    email: 'wholesale1@email.com',
-    password: '******',
-    firstName: 'Ahmad',
-    lastName: 'Saleh',
-    mobile: '0599999999',
-    discount: 10,
-    status: 'Active',
-    address: 'Ramallah, Palestine',
-  },
-  {
-    id: 2,
-    email: 'wholesale2@email.com',
-    password: '******',
-    firstName: 'Sara',
-    lastName: 'Ali',
-    mobile: '0566666666',
-    discount: 15,
-    status: 'Inactive',
-    address: 'Nablus, Palestine',
-  },
-];
-
+//-------------------------------------------- initialForm -------------------------------------------
 const initialForm = {
   email: '',
   password: '',
@@ -38,10 +14,10 @@ const initialForm = {
   lastName: '',
   mobile: '',
   discount: '',
-  status: 'A',
+  status: 'Active',
   address: '',
 };
-
+//-------------------------------------------- WholesallersPage -------------------------------------------
 const WholesallersPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
@@ -49,7 +25,7 @@ const WholesallersPage = () => {
   const [data, setData] = useState(mockWholesalers);
   const [form, setForm] = useState(initialForm);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-
+//-------------------------------------------- columns -------------------------------------------
   const columns = [
     { key: 'email', label: { en: 'Email', ar: 'البريد الإلكتروني' } },
     { key: 'firstName', label: { en: 'First Name', ar: 'الاسم الأول' } },
@@ -63,30 +39,30 @@ const WholesallersPage = () => {
     },
     { key: 'address', label: { en: 'Address', ar: 'العنوان' } }
   ];
-
+//-------------------------------------------- handleFormChange -------------------------------------------
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
-
+//-------------------------------------------- handleDrawerOpen -------------------------------------------
   const handleDrawerOpen = () => {
     setForm(initialForm);
     setDrawerOpen(true);
   };
-
+//-------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (item: any) => {
     setForm({
       ...item,
-      status: item.status === 'Active' ? 'A' : item.status === 'Inactive' ? 'I' : item.status
+      status: item.status === 'Active' ? 'Active' : 'Inactive'
     });
     setEditIndex(data.findIndex((d) => d.id === item.id));
     setDrawerOpen(true);
   };
-
+//-------------------------------------------- handleDelete -------------------------------------------
   const handleDelete = (item: any) => {
     setData(prev => prev.filter(d => d.id !== item.id));
   };
-
+//-------------------------------------------- handleSubmit -------------------------------------------
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editIndex !== null) {
@@ -105,13 +81,14 @@ const WholesallersPage = () => {
     }
     setDrawerOpen(false);
   };
-
+//-------------------------------------------- return -------------------------------------------
   return (
     <div className="p-4">
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.wholesalers') || 'Wholesalers', href: '/wholesalers' }
       ]} isRtl={isRTL} />
+      {/* ------------------------------------------- HeaderWithAction ------------------------------------------- */}
       <HeaderWithAction
         title={t('wholesalers.title') || 'Wholesalers'}
         addLabel={t('common.add') || 'Add'}
@@ -119,12 +96,14 @@ const WholesallersPage = () => {
         isRtl={i18n.language === 'ARABIC'}
         count={data.length}
       />
+      {/* ------------------------------------------- CustomTable ------------------------------------------- */}
       <CustomTable
         columns={columns}
         data={data}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
+      {/* ------------------------------------------- SallersDrawer ------------------------------------------- */}
       <SallersDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}

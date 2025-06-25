@@ -1,5 +1,5 @@
 import CustomFileInput from '@/components/common/CustomFileInput';
-import CustomInput from '@/components/common/CustomInput';
+import CustomTextArea from '@/components/common/CustomTextArea';
 import React from 'react';
 
 
@@ -15,27 +15,26 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
   if (mode === 'video') {
     return (
       <div className='flex flex-col gap-4'>
-        <CustomInput
+        <CustomTextArea
           label={isRTL ? 'رابط الفيديو' : 'Video URL'}
-          id="image"
-          name="image"
-          value={form.image}
-          required
+         
+          name="url"
+          value={form.url}
           placeholder={isRTL ? 'ادخل رابط الفيديو' : 'Enter YouTube video URL'}
-          type="text"
-          style={{ textAlign: isRTL ? 'right' : 'left' }}
+          rows={3}  
+         
          
           onChange={onFormChange}
         />
-        <CustomInput
+        <CustomTextArea
           label={isRTL ? 'الوصف' : 'Description'}
-          id="description"
+          
           name="description"
           value={form.description}
-          required
+
           placeholder={isRTL ? 'ادخل الوصف' : 'Enter Description'}
-          type="text"
-          style={{ textAlign: isRTL ? 'right' : 'left' }}
+          rows={3}
+         
          
           onChange={onFormChange}
         />
@@ -45,15 +44,13 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
   // Default: slider mode
   return (
     <div className='flex flex-col gap-4'>
-      <CustomInput
+      <CustomTextArea
         label={isRTL ? 'الوصف' : 'Description'}
-        id="description"
+
         name="description"
         value={form.description}
-        required
         placeholder={isRTL ? 'ادخل الوصف' : 'Enter Description'}
-        type="text"
-        style={{ textAlign: isRTL ? 'right' : 'left' }}
+       
        
         onChange={onFormChange}
       />

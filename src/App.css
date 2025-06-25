@@ -16,7 +16,9 @@
   .logo.react:hover {
     filter: drop-shadow(0 0 2em #61dafbaa);
   }
-  
+  .css-d7cuqb-MuiTypography-root-MuiDialogTitle-root{
+    font-family: 'Tajawal', sans-serif !important;
+  }
   @keyframes logo-spin {
     from {
       transform: rotate(0deg);

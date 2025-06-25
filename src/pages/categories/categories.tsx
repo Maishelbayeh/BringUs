@@ -6,7 +6,7 @@ import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CategoriesDrawer from './components/CategoriesDrawer';
 
 import CategoryTree from './CategoryTree';
-import { initialCategories } from './initialCategories';
+import { initialCategories } from '../../data/initialCategories';
 
 // تعريف نوع الفئة المتداخلة
 interface Category {

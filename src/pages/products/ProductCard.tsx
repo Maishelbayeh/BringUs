@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { t } from 'i18next';
-
+//-------------------------------------------- ProductCardProps -------------------------------------------
 interface ProductCardProps {
   product: any;
   isRTL: boolean;
@@ -9,9 +9,10 @@ interface ProductCardProps {
   getCategoryName: (catId: number) => string;
   getLabelName: (label: number | string) => string;
 }
-
+//-------------------------------------------- ProductCard -------------------------------------------
 const ProductCard: React.FC<ProductCardProps> = ({ product, isRTL, onClick, getCategoryName, getLabelName }) => {
-  const isDisabled = product.visibility !== 'Y';
+  const isDisabled = product.visibility !== true;
+  //-------------------------------------------- return -------------------------------------------
   return (
     <div
       className={`rounded-2xl shadow-md hover:shadow-xl transition p-4 flex flex-col group cursor-pointer border-2 ${isDisabled ? 'bg-gray-100 text-gray-400 border-gray-200 opacity-60 pointer-events-auto' : 'bg-white text-primary border-white'}`}
@@ -19,7 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isRTL, onClick, getC
       style={isDisabled ? { filter: 'grayscale(1)', pointerEvents: 'auto' } : {}}
     >
       <div className="relative">
-        {/* Badge for Product Label */}
+        {/* ------------------------------------------- Product Label ------------------------------------------- */}
         <span
           className={`
             absolute top-10 ${isRTL ? 'right-2' : 'left-2'}
@@ -33,16 +34,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isRTL, onClick, getC
         >
           {getLabelName(product.productLabel)}
         </span>
+        {/* ------------------------------------------- Product Image ------------------------------------------- */}
         <img
           src={product.image || 'https://via.placeholder.com/150'}
           alt={product.name}
           className="h-40 w-full object-cover rounded-xl"
         />
+        {/* ------------------------------------------- Product Category ------------------------------------------- */}
         <span className={`absolute top-2 ${isRTL ? 'right-2' : 'left-2'} bg-primary text-white text-xs px-3 py-1 rounded-full shadow`}>
           {getCategoryName(product.categoryId)}
         </span>
       </div>
-      {/* //////////////////////////////////////////////////////////////////////////////// */}
+      {/* ------------------------------------------- Product Name ------------------------------------------- */}
       <h2 className={`text-xl font-bold mt-3 ${isRTL ? 'text-right' : 'text-left'}`}>{isRTL ? product.nameAr : product.nameEn}</h2>
       {/* Description under product name */}
       <p className={` border-b pb-1 border-gray-200 text-xs text-gray-500 mt-1 mb-1 ${isRTL ? 'text-right' : 'text-left'}`} style={{
@@ -53,7 +56,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isRTL, onClick, getC
       }}>
         {isRTL ? product.descriptionAr : product.descriptionEn}
       </p>
-      {/* //////////////////////////////////////////////////////////////////////////////// */}
+      {/* ------------------------------------------- Colors ------------------------------------------- */}
       {Array.isArray(product.colors) && product.colors.length > 0 && (
         <div className={`flex flex-wrap gap-1 mt-2 mb-1 ${isRTL ? 'justify-end' : 'justify-start'}`}>
           {product.colors.map((colorArr: string[], idx: number) => {
@@ -80,13 +83,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isRTL, onClick, getC
           })}
         </div>
       )}
-      {/* //////////////////////////////////////////////////////////////////////////////// */}
-      <div className={`justify-between flex items-center gap-2 mt-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+      {/* ------------------------------------------- Price and Availability ------------------------------------------- */}
+      <div className={`justify-between flex  gap-2 mt-2 flex-col ${isRTL ? 'items-end' : 'items-start'} `}>
         <span className={`text-lg font-bold text-green-600 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
           {product.price ? product.price : '-'}
           <span className="text-xs text-gray-500">ILS</span>
         </span>
-        <span className={` ${isRTL ? 'flex-row-reverse' : 'flex-row'} px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1
+        <span className={`w-fit ${isRTL ? 'flex-row-reverse' : 'flex-row'} px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1
           ${Number(product.availableQuantity) > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}
         >
           {Number(product.availableQuantity) > 0 ? (

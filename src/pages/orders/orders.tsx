@@ -3,19 +3,17 @@ import { ordersData as ordersDataRaw, customersData, deliveryAreas, affiliates, 
 import CustomTable from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
-
-
+//-------------------------------------------- Column -------------------------------------------
 type Column = {
   key: string;
   label: { ar: string; en: string };
   type?: 'number' | 'text' | 'date';
   align?: 'left' | 'center' | 'right';
 };
-
+//-------------------------------------------- OrdersPage -------------------------------------------
 const OrdersPage: React.FC = () => {
   const { i18n, t } = useTranslation();
-
-  // تجهيز بيانات الجدول
+//-------------------------------------------- tableData -------------------------------------------
   const tableData = ordersDataRaw.map(order => {
     const customer = customersData.find(c => c.id === order.customerId);
     const area = deliveryAreas.find(a => a.id === order.deliveryAreaId);
@@ -33,21 +31,21 @@ const OrdersPage: React.FC = () => {
       status: order.paid ? t('orders.paid') : t('orders.unpaid'),
     };
   });
-
+//-------------------------------------------- columns -------------------------------------------
   const columns: Column[] = [
-    { key: 'id', label: { ar: 'رقم الطلب', en: 'Order Number' }, type: 'number', align: 'center' },
-    { key: 'customer', label: { ar: 'العميل', en: 'Customer' }, type: 'text', align: 'center' },
-    { key: 'phone', label: { ar: 'رقم الهاتف', en: 'Phone' }, type: 'text', align: 'center' },
-    { key: 'deliveryArea', label: { ar: 'منطقة التوصيل', en: 'Delivery Area' }, type: 'text', align: 'center' },
-    { key: 'affiliate', label: { ar: 'المسوق', en: 'Affiliate' }, type: 'text', align: 'center' },
-    { key: 'currency', label: { ar: 'العملة', en: 'Currency' }, type: 'text', align: 'center' },
-    { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number', align: 'center' },
-    { key: 'date', label: { ar: 'تاريخ الطلب', en: 'Order Date' }, type: 'date', align: 'center' },
-    { key: 'status', label: { ar: 'الحالة', en: 'Status' }, type: 'text', align: 'center' },
+    { key: 'id', label: { ar: 'رقم الطلب', en: 'Order Number' }, type: 'number'},
+    { key: 'customer', label: { ar: 'العميل', en: 'Customer' }, type: 'text'},
+    { key: 'phone', label: { ar: 'رقم الهاتف', en: 'Phone' }, type: 'text'},
+    { key: 'deliveryArea', label: { ar: 'منطقة التوصيل', en: 'Delivery Area' }, type: 'text'},
+    { key: 'affiliate', label: { ar: 'المسوق', en: 'Affiliate' }, type: 'text'},
+    { key: 'currency', label: { ar: 'العملة', en: 'Currency' }, type: 'text'},
+    { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number'},
+    { key: 'date', label: { ar: 'تاريخ الطلب', en: 'Order Date' }, type: 'date'},
+    { key: 'status', label: { ar: 'الحالة', en: 'Status' }, type: 'text'},
   ];
-
+//-------------------------------------------- visibleTableData -------------------------------------------     
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
-
+//-------------------------------------------- return -------------------------------------------
   return (
     <div className="sm:p-4 w-full">
      <HeaderWithAction
@@ -55,6 +53,7 @@ const OrdersPage: React.FC = () => {
       count={tableData.length}
       isRtl={i18n.language === 'ARABIC'}
      />
+     {/* ------------------------------------------- CustomTable ------------------------------------------- */}
       <div className="overflow-x-auto ">
         <CustomTable 
           columns={columns} 
@@ -66,7 +65,7 @@ const OrdersPage: React.FC = () => {
           }]}
         />
       </div>
-      {/* شريط مجموع السعر لكل عملة */}
+      {/* ------------------------------------------- Total Price ------------------------------------------- */}
       {(() => {
         const totals: { [currency: string]: number } = {};
         visibleTableData.forEach((row) => {

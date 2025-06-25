@@ -62,8 +62,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({ formHtml, setForm
           { value: 'Active', label: t('advertisement.active', 'Active') },
           { value: 'Inactive', label: t('advertisement.inactive', 'Inactive') },
         ]}
-        labelAlign={isRTL ? 'right' : 'left'}
-        isRTL={isRTL}
+      
       />
     </form>
   );

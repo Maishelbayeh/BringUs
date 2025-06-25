@@ -5,27 +5,18 @@ import ProductsDrawer from './ProductsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import * as XLSX from 'xlsx';
-import { initialCategories } from '../categories/initialCategories';
+import { initialCategories } from '../../data/initialCategories';
 import ProductCard from './ProductCard';
-import { initialProducts } from './initialProducts';
+import { initialProducts } from '../../data/initialProducts';
 import { initialSubcategories } from '../subcategories/subcategories';
-
-
-// Add ColorVariant type for form
+import { productLabelOptions } from '../../data/productLabelOptions';
+import { unitOptions } from '../../data/unitOptions';
+//-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
   colors: string[];
 }
-
-
-const productLabelOptions = [
-  { id: 1, nameAr: 'عادي', nameEn: 'Regular' },
-  { id: 2, nameAr: 'عرض', nameEn: 'Offer' },
-  { id: 3, nameAr: 'مميز', nameEn: 'Featured' },
-  { id: 4, nameAr: 'جديد', nameEn: 'New' },
-];
-
-
+//-------------------------------------------- initialForm -------------------------------------------
 const initialForm: {
   name: string;
   categoryId: string;
@@ -65,9 +56,7 @@ const initialForm: {
   images: [],
   productVideo: '',
 };
-
-
-
+//-------------------------------------------- ProductsPage -------------------------------------------
 const ProductsPage: React.FC = () => {
   const [categories] = useState(initialCategories);
   const [subcategories] = useState(initialSubcategories);
@@ -86,19 +75,19 @@ const ProductsPage: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
   const subcategoryIdParam = params.get('subcategoryId');
-
+  //-------------------------------------------- sortOptions -------------------------------------------
   const sortOptions = [
     { value: 'default', label: t('products.sort.default') || 'Default' },
     { value: 'alpha', label: t('products.sort.alpha') || 'A-Z' },
     { value: 'newest', label: t('products.sort.newest') || 'Newest' },
     { value: 'oldest', label: t('products.sort.oldest') || 'Oldest' },
   ];
-
+  //-------------------------------------------- useEffect -------------------------------------------
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);
     if (subcategoryIdParam) setSelectedSubcategoryId(subcategoryIdParam);
   }, [categoryIdParam, subcategoryIdParam]);
-
+  //-------------------------------------------- filteredProducts -------------------------------------------
   let filteredProducts = products.filter(product =>
     (selectedCategoryId ? product.categoryId === Number(selectedCategoryId) : true) &&
     (selectedSubcategoryId ? product.subcategoryId === Number(selectedSubcategoryId) : true) &&
@@ -111,10 +100,9 @@ const ProductsPage: React.FC = () => {
   } else if (sort === 'oldest') {
     filteredProducts = [...filteredProducts].sort((a, b) => a.id - b.id);
   }
-
+  //-------------------------------------------- handleFormChange -------------------------------------------
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (e.target.name === 'maintainStock') {
-      // إذا تم إلغاء التفعيل، امسح الكمية المتوفرة
       if (e.target.value === 'N') {
         setForm({ ...form, maintainStock: 'N', availableQuantity: 0 });
       } else {
@@ -132,15 +120,18 @@ const ProductsPage: React.FC = () => {
       setForm({ ...form, [e.target.name]: e.target.value });
     }
   };
+  //-------------------------------------------- handleImageChange -------------------------------------------
   const handleImageChange = (files: File | File[] | null) => {
     if (!files) {
       setForm({ ...form, images: [] });
       return;
     }
+    //-------------------------------------------- imageUrls -------------------------------------------
     const fileArray = Array.isArray(files) ? files : [files];
     const imageUrls = fileArray.map(file => URL.createObjectURL(file));
     setForm({ ...form, images: imageUrls });
   };
+  //-------------------------------------------- handleSubmit -------------------------------------------
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // تحويل الألوان إلى مصفوفة مصفوفات قبل الحفظ
@@ -157,13 +148,13 @@ const ProductsPage: React.FC = () => {
     setEditProduct(null);
     setDrawerMode('add');
     setForm(initialForm);
-    // طباعة جميع القيم في الكونسول بشكل منسق
+    //-------------------------------------------- console.log -------------------------------------------
     console.log("---- Form Values ----");
     Object.entries(productToSave).forEach(([key, value]) => {
       console.log(`${key}:`, value);
     });
   };
-
+  //-------------------------------------------- handleCardClick -------------------------------------------
   const handleCardClick = (product: any) => {
     // تحويل الألوان إلى الشكل المطلوب للفورم
     const formColors = Array.isArray(product.colors)
@@ -174,46 +165,54 @@ const ProductsPage: React.FC = () => {
       : [];
     // منطق تفعيل إدارة المخزون حسب الكمية المتوفرة
     const maintainStock = product.availableQuantity > 0 ? 'Y' : 'N';
+    // استخراج unitId من unitOptions إذا كان المنتج يحتوي على unit نص فقط
+    let unitId = product.unitId;
+    if (!unitId && product.unit) {
+      const found = unitOptions.find(u => u.nameAr === product.unit || u.nameEn === product.unit);
+      unitId = found ? found.id : '';
+    }
     setForm({
       ...product,
       colors: formColors,
       name: isRTL ? product.nameAr : product.nameEn,
       description: isRTL ? product.descriptionAr : product.descriptionEn,
       maintainStock,
+      unitId: unitId ? String(unitId) : '',
     });
     setEditProduct(product);
     setDrawerMode('edit');
     setShowDrawer(true);
   };
-
+  //-------------------------------------------- handleAddClick -------------------------------------------
   const handleAddClick = () => {
     setForm(initialForm);
     setEditProduct(null);
     setDrawerMode('add');
     setShowDrawer(true);
   };
-
+  //-------------------------------------------- handleDrawerClose -------------------------------------------
   const handleDrawerClose = () => {
     setShowDrawer(false);
     setEditProduct(null);
     setDrawerMode('add');
     setForm(initialForm);
   };
-
+  //-------------------------------------------- getCategoryName -------------------------------------------    
   const getCategoryName = (catId: number) => {
     const cat = categories.find(c => c.id === catId);
     return isRTL ? (cat?.nameAr || '') : (cat?.nameEn || '');
   };
+  //-------------------------------------------- getSubcategoryName -------------------------------------------
   const getSubcategoryName = (subId: number) => {
     const sub = subcategories.find(s => s.id === subId);
     return isRTL ? (sub?.nameAr || '') : (sub?.nameEn || '');
   };
-
+  //-------------------------------------------- getLabelName -------------------------------------------
   const getLabelName = (label: string | number) => {
     const found = productLabelOptions.find(l => String(l.id) === String(label));
     return found ? (isRTL ? found.nameAr : found.nameEn) : String(label);
   };
-
+  //-------------------------------------------- handleDownloadExcel -------------------------------------------
   const handleDownloadExcel = () => {
     const rows: any[] = [];
     filteredProducts.forEach((product) => {
@@ -229,14 +228,14 @@ const ProductsPage: React.FC = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
     XLSX.writeFile(workbook, 'products.xlsx');
   };
-
+  //-------------------------------------------- return -------------------------------------------   
   return (
     <div className="sm:p-4 w-full" >
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.products') || 'Products', href: '/products' }
       ]} isRtl={isRTL} />
-
+      {/* ------------------------------------------- HeaderWithAction ------------------------------------------- */}
       <HeaderWithAction
         title={t('sideBar.products') || 'Products'}
         addLabel={t('products.add') || 'Add'}
@@ -253,6 +252,7 @@ const ProductsPage: React.FC = () => {
         onDownload={handleDownloadExcel}
         count={filteredProducts.length}
       />
+      {/* ------------------------------------------- ProductCard ------------------------------------------- */}
       <div className="bg-white rounded-2xl p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-6">
         {filteredProducts.map((product) => (
           <ProductCard

@@ -13,8 +13,25 @@ interface AffiliationFormProps {
 const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, isRTL }) => {
   const { t } = useTranslation();
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+     
       <CustomInput
+        label={t('affiliation.firstName')}
+        name="firstName"
+        value={form.firstName}
+        onChange={onFormChange}
+        required
+       
+      />
+      <CustomInput
+        label={t('affiliation.lastName')}
+        name="lastName"
+        value={form.lastName}
+        onChange={onFormChange}
+        required
+       
+      />
+       <CustomInput
         label={t('affiliation.email')}
         name="email"
         type="email"
@@ -28,22 +45,6 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         name="password"
         type="password"
         value={form.password}
-        onChange={onFormChange}
-        required
-       
-      />
-      <CustomInput
-        label={t('affiliation.firstName')}
-        name="firstName"
-        value={form.firstName}
-        onChange={onFormChange}
-        required
-       
-      />
-      <CustomInput
-        label={t('affiliation.lastName')}
-        name="lastName"
-        value={form.lastName}
         onChange={onFormChange}
         required
        
@@ -74,8 +75,7 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
           { value: 'Active', label: t('affiliation.active') },
           { value: 'Inactive', label: t('affiliation.inactive') },
         ]}
-        labelAlign={isRTL ? 'right' : 'left'}
-        isRTL={isRTL}
+      
       />
       <CustomTextArea
         label={t('affiliation.address')}

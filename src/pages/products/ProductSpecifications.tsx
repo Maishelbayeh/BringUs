@@ -5,19 +5,9 @@ import { useTranslation } from 'react-i18next';
 import ProductSpecificationsDrawer from './ProductSpecificationsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
+import { initialProductSpecifications } from '../../data/initialProductSpecifications';
 
-const initialSpecs = [
-  { id: 1, description: 'طويل' },
-  { id: 2, description: 'قصير' },
-  { id: 3, description: 'كبير' },
-  { id: 4, description: 'وسط' },
-  { id: 5, description: 'صغير' },
-  { id: 6, description: 'نمرة 40' },
-  { id: 7, description: 'نمرة 42' },
-  { id: 8, description: 'نمرة 44' },
-  { id: 9, description: 'عريض' },
-  { id: 10, description: 'ضيق' },
-];
+const initialSpecs = initialProductSpecifications;
 
 const ProductSpecifications: React.FC = () => {
   const { t, i18n } = useTranslation();

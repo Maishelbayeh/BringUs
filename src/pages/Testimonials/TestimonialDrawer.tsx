@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import CustomInput from '../components/common/CustomInput';
-import CustomSelect from '../components/common/CustomSelect';
-import CustomFileInput from '../components/common/CustomFileInput';
-import CustomTextArea from '../components/common/CustomTextArea';
-import CustomButton from '../components/common/CustomButton';
-import CustomRadioGroup from '../components/common/CustomRadioGroup';
+import CustomInput from '../../components/common/CustomInput';
+import CustomSelect from '../../components/common/CustomSelect';
+import CustomFileInput from '../../components/common/CustomFileInput';
+import CustomTextArea from '../../components/common/CustomTextArea';
+import CustomButton from '../../components/common/CustomButton';
+import CustomRadioGroup from '../../components/common/CustomRadioGroup';
 import { socialIcons } from './Testimonial';
 //------------------------------------------- interface -------------------------------------------
 interface TestimonialDrawerProps {
@@ -24,7 +24,7 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
   const [position, setPosition] = useState<string>(testimonial?.position || '');
   const [review, setReview] = useState<string>(testimonial?.review || '');
   const [active, setActive] = useState<boolean>(testimonial?.active ?? true);
-
+//------------------------------------------- handleImageChange -------------------------------------------
   const handleImageChange = (file: File | File[] | null) => {
     if (file && !Array.isArray(file)) {
       const reader = new FileReader();
@@ -96,15 +96,12 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
                   { value: 'false', label: t('common.inactive') || 'Inactive' },
                 ]}
                 onChange={e => setActive(e.target.value === 'true')}
-                labelAlign={isRtl ? 'right' : 'left'}
-                isRTL={isRtl}
+               
               />
               <CustomFileInput
                 label={t('testimonials.picture') || 'Picture'}
-                onChange={handleImageChange}
-                
+                onChange={handleImageChange}  
                 isRTL={isRtl}
-                // placeholder={t('testimonials.selectOrDrop') || 'Select a file or drop one here.'}
               />
             </div>
           </div>

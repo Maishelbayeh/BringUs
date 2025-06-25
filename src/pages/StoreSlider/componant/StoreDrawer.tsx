@@ -34,7 +34,11 @@ const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, on
         dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
-          <span className="text-xl font-bold text-primary">{t('sideBar.storeSlider')}</span>
+          <span className="text-xl font-bold text-primary">
+            {mode === 'video'
+              ? t('storeSlider.addVideo', 'إضافة فيديو')
+              : t('storeSlider.addSlider', 'إضافة شريط ')}
+          </span>
           <button onClick={onClose} className="text-primary hover:text-red-500 text-2xl">×</button>
         </div>
         {/* Form */}

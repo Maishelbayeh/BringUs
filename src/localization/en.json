@@ -9,7 +9,11 @@
     "add":"Add",
       "language": "Language",
     "lastSignIn": "Last sign in on {{date}}",
-    "termsConditions": "Terms & Conditions"
+    "termsConditions": "Terms & Conditions",
+    "logout": "Logout",
+    "areYouSureLogout": "Are you sure you want to logout?",
+    "confirmLogout": "Confirm Logout",
+    "cancel": "Cancel"
 },
  
   "dashboard": {
@@ -165,7 +169,22 @@
       "notAvailable": "Not Available",
       "maintainStock": "Maintain Stock",
       "availableQuantity": "Available Quantity",
-     "edit":"Edit Product"
+     "edit":"Edit Product",
+     "productName": "Product Name",
+     "description": "Description",
+     "selectCategory": "Select Category",
+     "subcategory": "Subcategory",
+     "selectSubcategory": "Select Subcategory (optional)",
+     "unit": "Unit",
+     "selectUnit": "Select Unit",
+     "originalPrice": "Original Price",
+     "wholesalePrice": "Wholesale Price",
+     "selectLabel": "Select Label",
+     "visibility": "Visibility",
+      "parcode": "Parcode",
+      "colors": "Colors",
+      "pictures": "Pictures",
+      "productVideo": "Product Video"
     },
   "subcategories": {
     "title": "Subcategories",
@@ -344,7 +363,15 @@
     "address": "Address",
     "active": "Active",
     "inactive": "Inactive",
-    "actions": "Actions"
+    "actions": "Actions",
+    "link": "Link",
+    "totalSale": "Total Sale",
+    "remaining": "Remaining",
+    "paid": "Paid",
+    "paidDate": "Paid Date",
+    "balance": "Balance",
+    "paymentForm": "Payment Form",
+    "paymentDetails": "Payment Details"
   },
   "advertisement": {
     "inputLabel": "Paste your HTML below",

@@ -14,7 +14,7 @@ interface Column {
     en: string;
     ar: string;
   };
-  type?: 'text' | 'number' | 'date' | 'image' | 'color';
+  type?: 'text' | 'number' | 'date' | 'image' | 'color' | 'link' | 'status';
   render?: (value: any, item: any) => React.ReactNode;
   align?: 'left' | 'center' | 'right';
 }
@@ -432,7 +432,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                       })() :
                       column.type === 'image' ? (
                         item[column.key] ? (
-                          <img src={item[column.key]} alt="product" style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 8 }} />
+                          <img src={item[column.key]} alt="product" style={{ textAlign: 'center', width: 70, height: 70, objectFit: 'contain', borderRadius: '50%', display: 'block', margin: '0 auto' }} />
                         ) : '-'
                       ) :
                       (() => {
@@ -469,7 +469,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                               {statusValue}
                             </span>
                           );
-                        } else if (column.key === 'stock') {
+                        } else if (column.key === 'availableQuantity') {
                           return (
                             <span
                               className={

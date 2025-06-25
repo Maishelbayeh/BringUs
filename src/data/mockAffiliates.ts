@@ -1,0 +1,26 @@
+export const mockAffiliates = [
+  {
+    id: 1,
+    email: 'affiliate1@email.com',
+    password: '******',
+    firstName: 'Omar',
+    lastName: 'Khaled',
+    mobile: '0598888888',
+    percent: 8,
+    status: 'Active',
+    link: 'https://www.google.com',
+    address: 'Hebron, Palestine',
+  },
+  {
+    id: 2,
+    email: 'affiliate2@email.com',
+    password: '******',
+    firstName: 'Lina',
+    lastName: 'Samir',
+    mobile: '0567777777',
+    percent: 12,
+    status: 'Inactive',
+    link: 'https://www.google.com',
+    address: 'Jenin, Palestine',
+  },
+]; 
