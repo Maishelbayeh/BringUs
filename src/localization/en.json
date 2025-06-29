@@ -16,6 +16,36 @@
     "cancel": "Cancel"
 },
  
+  "login": {
+    "welcomeTitle": "Welcome to BringUs",
+    "welcomeSubtitle": "Your comprehensive e-commerce management platform. Manage orders, customers, products, and analytics all in one place.",
+    "signIn": "Sign In",
+    "signInSubtitle": "Enter your credentials to access your dashboard",
+    "email": "Email Address",
+    "emailPlaceholder": "Enter your email address",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "signingIn": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "features": {
+      "orders": "Order Management",
+      "ordersDesc": "Track and manage all your orders efficiently",
+      "analytics": "Analytics & Reports",
+      "analyticsDesc": "Get insights into your business performance",
+      "customers": "Customer Management",
+      "customersDesc": "Manage your customer database and relationships",
+      "reports": "Detailed Reports",
+      "reportsDesc": "Generate comprehensive business reports"
+    }
+  },
+ 
   "dashboard": {
     "greeting": "Hello, {{name}}! 👋"
  
@@ -402,5 +432,73 @@
     "dragDrop": "Drag and Drop",
     "selectOrDrop": "Select a file or drop one here.",
     "search": "Search testimonials..."
+  },
+  "signup": {
+    "welcomeTitle": "Join BringUs",
+    "welcomeSubtitle": "Create your account and start managing your e-commerce business with our comprehensive platform.",
+    "signUp": "Create Account",
+    "signUpSubtitle": "Fill in your details to create your account",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Enter your last name",
+    "email": "Email Address",
+    "emailPlaceholder": "Enter your email address",
+    "password": "Password",
+    "passwordPlaceholder": "Create a strong password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "phone": "Phone Number",
+    "phonePlaceholder": "Enter your phone number",
+    "agreeTerms": "I agree to the Terms & Conditions",
+    "creatingAccount": "Creating account...",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "confirmPasswordRequired": "Please confirm your password",
+    "passwordsNotMatch": "Passwords do not match",
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Please enter a valid phone number",
+    "termsRequired": "You must agree to the terms and conditions",
+    "features": {
+      "easySetup": "Easy Setup",
+      "easySetupDesc": "Get started in minutes with our simple setup process",
+      "securePlatform": "Secure Platform",
+      "securePlatformDesc": "Your data is protected with enterprise-grade security",
+      "24Support": "24/7 Support",
+      "24SupportDesc": "Get help whenever you need it with our support team",
+      "analytics": "Advanced Analytics",
+      "analyticsDesc": "Track your business performance with detailed insights"
+    }
+  },
+  "forgotPassword": {
+    "welcomeTitle": "Reset Your Password",
+    "welcomeSubtitle": "Don't worry! It happens to the best of us. Enter your email address and we'll send you a link to reset your password.",
+    "resetPassword": "Reset Password",
+    "resetPasswordSubtitle": "Enter your email to receive reset instructions",
+    "email": "Email Address",
+    "emailPlaceholder": "Enter your email address",
+    "sendResetLink": "Send Reset Link",
+    "sendingLink": "Sending...",
+    "backToLogin": "Back to Login",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "resetLinkSent": "Reset link sent successfully!",
+    "checkEmail": "Please check your email for further instructions.",
+    "features": {
+      "secureReset": "Secure Reset",
+      "secureResetDesc": "Your password reset is protected with industry-standard security",
+      "quickProcess": "Quick Process",
+      "quickProcessDesc": "Get back to your account in just a few minutes",
+      "emailSupport": "Email Support",
+      "emailSupportDesc": "Receive clear instructions via email",
+      "accountProtection": "Account Protection",
+      "accountProtectionDesc": "Your account remains secure throughout the process"
+    }
   }
 }

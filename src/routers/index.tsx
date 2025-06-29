@@ -19,14 +19,18 @@ import AffiliationPage from "@/pages/Affiliation/wholeAffiliation";
 import AdvertisementPage from "@/pages/Advertisement/advertisement";
 import TermsConditionsPage from "@/pages/TermsConditions/termsConditions";
 import ProductSpecifications from '../pages/products/ProductSpecifications';
+import Login from '../pages/Login/Login';
+import Signup from '../pages/Login/Signup';
+import ForgotPassword from '../pages/Login/ForgotPassword';
 
 
 export default function Routers() {
   return (
     <Routes>
       {/* Public Routes */}
-      {/* <Route path="/" element={<LogIn />} /> */}
-      {/* <Route path="/login" element={<LogIn />} /> */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/" element={<Homepage />} />
       <Route path="/payment-methods" element={<PaymentMethods />} />
       <Route path="/delivery-settings" element={<DeliveryMethods />} />

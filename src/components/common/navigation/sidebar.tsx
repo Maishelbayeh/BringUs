@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleConfirmLogout = () => {
     setDialogOpen(false);
     localStorage.clear();
-    navigate('/');
+    navigate('/login');
   };
 
   const handleItemClick = (path: string) => {
