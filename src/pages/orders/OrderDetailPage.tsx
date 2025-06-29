@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ordersData, customersData, deliveryAreas, affiliates, currencies, productsData, units } from '../../api/mockCustomers';
 import { useTranslation } from 'react-i18next';
@@ -6,11 +6,14 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon, BuildingStorefrontIcon, UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import CustomTable from '../../components/common/CustomTable';
+import PermissionModal from '../../components/common/PermissionModal';
 //-------------------------------------------- OrderDetailPage -------------------------------------------
 const OrderDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<any | null>(null);
 //-------------------------------------------- order -------------------------------------------
   const order = ordersData.find(o => String(o.id) === String(id));
   if (!order) {
@@ -38,6 +41,21 @@ const OrderDetailPage: React.FC = () => {
   const taxTotal = order.taxTotal || 0;
   const deliveryPrice = order.deliveryPrice || 0;
   const finalTotal = productsTotal + taxTotal + deliveryPrice - discountTotal;
+//-------------------------------------------- handleDelete -------------------------------------------
+  const handleDelete = (product: any) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+  
+//-------------------------------------------- handleDeleteConfirm -------------------------------------------
+  const handleDeleteConfirm = () => {
+    if (productToDelete) {
+      // في التطبيق الحقيقي، هنا سيتم إرسال طلب حذف للخادم
+      console.log('Deleting product from order:', productToDelete);
+      setProductToDelete(null);
+    }
+    setShowDeleteModal(false);
+  };
 //-------------------------------------------- isArabic -------------------------------------------
   const isArabic = i18n.language === 'ARABIC' || i18n.language === 'ar';
   const flexDir = isArabic ? 'md:flex-row-reverse' : 'md:flex-row';
@@ -120,6 +138,7 @@ const OrderDetailPage: React.FC = () => {
                     { key: 'color', label: { ar: 'اللون', en: 'Color' }, type: 'text' },
                   ]}
                   data={orderProducts}
+                  onDelete={handleDelete}
                 />
               </div>
             </div>
@@ -157,6 +176,17 @@ const OrderDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('orders.deleteConfirmTitle') || 'Confirm Delete Product from Order'}
+        message={t('orders.deleteConfirmMessage') || 'Are you sure you want to delete this product from the order?'}
+        itemName={productToDelete ? productToDelete.name : ''}
+        itemType={t('orders.product') || 'product'}
+        isRTL={isArabic}
+        severity="danger"
+      />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ProductsDrawer from './ProductsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
+import PermissionModal from '../../components/common/PermissionModal';
 import * as XLSX from 'xlsx';
 import { initialCategories } from '../../data/initialCategories';
 import ProductCard from './ProductCard';
@@ -71,6 +72,8 @@ const ProductsPage: React.FC = () => {
   const [sort, setSort] = useState('default');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
@@ -197,6 +200,19 @@ const ProductsPage: React.FC = () => {
     setDrawerMode('add');
     setForm(initialForm);
   };
+  //-------------------------------------------- handleDelete -------------------------------------------
+  const handleDelete = (product: any) => {
+    setSelectedProduct(product);
+    setShowDeleteModal(true);
+  };
+  //-------------------------------------------- handleDeleteConfirm -------------------------------------------
+  const handleDeleteConfirm = () => {
+    if (selectedProduct) {
+      setProducts(products.filter(p => p.id !== selectedProduct.id));
+      setSelectedProduct(null);
+    }
+    setShowDeleteModal(false);
+  };
   //-------------------------------------------- getCategoryName -------------------------------------------    
   const getCategoryName = (catId: number) => {
     const cat = categories.find(c => c.id === catId);
@@ -262,6 +278,7 @@ const ProductsPage: React.FC = () => {
             onClick={handleCardClick}
             getCategoryName={getCategoryName}
             getLabelName={getLabelName}
+            onDelete={handleDelete}
           />
         ))}
       </div>
@@ -276,6 +293,17 @@ const ProductsPage: React.FC = () => {
         onSubmit={handleSubmit}
         categories={categories as any}
         subcategories={subcategories as any}
+      />
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('products.deleteConfirmTitle') || 'Confirm Delete Product'}
+        message={t('products.deleteConfirmMessage') || 'Are you sure you want to delete this product?'}
+        itemName={selectedProduct ? (isRTL ? selectedProduct.nameAr : selectedProduct.nameEn) : ''}
+        itemType={t('products.product') || 'product'}
+        isRTL={isRTL}
+        severity="danger"
       />
     </div>
   );

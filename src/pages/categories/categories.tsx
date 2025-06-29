@@ -4,6 +4,7 @@ import { FiEdit, FiTrash2, FiPlus, FiFolder,} from 'react-icons/fi';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CategoriesDrawer from './components/CategoriesDrawer';
+import PermissionModal from '../../components/common/PermissionModal';
 
 import CategoryTree from './CategoryTree';
 import { initialCategories } from '../../data/initialCategories';
@@ -67,7 +68,7 @@ const CategoryCards: React.FC<{
             <div className="flex items-center gap-1">
               <button onClick={() => onAdd(cat.id)} className="p-2 rounded-full hover:bg-primary/10 text-primary bg-white shadow" title="إضافة فرعية"><FiPlus /></button>
               <button onClick={() => onEdit(cat)} className="p-2 rounded-full hover:bg-blue-100 text-blue-600 bg-white shadow" title="تعديل"><FiEdit /></button>
-              <button onClick={() => onDelete(cat)} className="p-2 rounded-full hover:bg-red-100 text-red-600 bg-white shadow" title="حذف"><FiTrash2 /></button>
+              <button onClick={() => onDelete(cat)} className="p-2 rounded-full hover:bg-red-100 text-red-600 bg-white " title="حذف"><FiTrash2 /></button>
             </div>
           </div>
           {/* الفروع الفرعية كبطاقات أصغر */}
@@ -121,6 +122,8 @@ const CategoriesPage: React.FC = () => {
   );
   const [editId, setEditId] = useState<number | null>(null);
   const [search, setSearch] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
  
   // إدارة الإضافة والتعديل
   const handleAdd = (parentId?: number | null) => {
@@ -144,7 +147,8 @@ const CategoriesPage: React.FC = () => {
   };
   // حذف فئة
   const handleDelete = (cat: Category) => {
-    setCategories((prev: Category[]) => prev.filter(c => c.id !== cat.id && c.parentId !== cat.id));
+    setSelectedCategory(cat);
+    setShowDeleteModal(true);
   };
   // حفظ (إضافة أو تعديل)
   const handleSave = (e: React.FormEvent) => {
@@ -183,7 +187,14 @@ const CategoriesPage: React.FC = () => {
     setEditId(null);
   };
 
- 
+  // إغلاق المودال الحذف
+  const handleDeleteConfirm = () => {
+    if (selectedCategory) {
+      setCategories((prev: Category[]) => prev.filter(c => c.id !== selectedCategory.id && c.parentId !== selectedCategory.id));
+      setSelectedCategory(null);
+    }
+    setShowDeleteModal(false);
+  };
 
   // Breadcrumb
   const breadcrumb = [
@@ -238,6 +249,17 @@ const CategoriesPage: React.FC = () => {
         }}
         onSubmit={handleSave}
         categories={flattenCategories(categories, isRTL)}
+      />
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('categories.deleteConfirmTitle') || 'Confirm Delete Category'}
+        message={t('categories.deleteConfirmMessage') || 'Are you sure you want to delete this category?'}
+        itemName={selectedCategory ? (isRTL ? selectedCategory.nameAr : selectedCategory.nameEn) : ''}
+        itemType={t('categories.category') || 'category'}
+        isRTL={isRTL}
+        severity="danger"
       />
     </div>
   );

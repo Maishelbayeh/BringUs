@@ -5,6 +5,7 @@ import CustomButton from '../../components/common/CustomButton';
 import AdvertisementForm from './AdvertisementForm';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import PermissionModal from '@/components/common/PermissionModal';
 
 const initialHtml = [
   { id: 1, html: '<h2 style="color:green">Welcome to Advertisement!</h2>', status: 'Active' },
@@ -18,6 +19,10 @@ const AdvertisementPage = () => {
   const [formHtml, setFormHtml] = useState('');
   const [formStatus, setFormStatus] = useState<'Active' | 'Inactive'>('Active');
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  
+  // Permission Modal State
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
 
   // Function to safely render HTML
   const renderHtml = (html: string) => {
@@ -79,7 +84,15 @@ const AdvertisementPage = () => {
   };
 
   const handleDelete = (item: any) => {
-    setData(prev => prev.filter(d => d.id !== item.id));
+    setItemToDelete(item);
+    setPermissionModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      setData(prev => prev.filter(d => d.id !== itemToDelete.id));
+      setItemToDelete(null);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -112,6 +125,22 @@ const AdvertisementPage = () => {
         count={data.length}
       />
       <CustomTable columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
+      
+      {/* Permission Modal */}
+      <PermissionModal
+        isOpen={permissionModalOpen}
+        onClose={() => {
+          setPermissionModalOpen(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        itemType={t('advertisement.advertisement', 'advertisement')}
+        itemName={itemToDelete?.html ? itemToDelete.html.substring(0, 50) + '...' : ''}
+        isRTL={isRTL}
+        severity="danger"
+        requirePermission={true}
+      />
+
       {drawerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}

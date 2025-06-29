@@ -25,7 +25,7 @@ const AppContent: React.FC = () => {
     activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();
 
   const handleItemClick = (path: string) => {
-    // لا تفعل شيئاً هنا، فقط مرر المسار للـ Sidebar
+    console.log('path', path);
   };
 
   // If on auth pages, render only the router without navigation

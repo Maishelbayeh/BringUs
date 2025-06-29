@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CustomTable from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
 import CustomBreadcrumb from '@/components/common/CustomBreadcrumb';
+import PermissionModal from '../../components/common/PermissionModal';
 import { initialProducts } from '@/data/initialProducts';
 import { initialCategories } from '@/data/initialCategories';
 import { productLabelOptions } from '../../data/productLabelOptions';
 
 const StockTable: React.FC = () => {
   const { i18n, t } = useTranslation();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<any | null>(null);
+  
   const columns = [
     { key: 'image', label: { ar: 'الصورة', en: 'Image' }, type: 'image' },
     { key: 'name', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' },
@@ -39,6 +43,23 @@ const StockTable: React.FC = () => {
       ? (i18n.language === 'ARABIC' ? 'ظاهر' : 'Visible')
       : (i18n.language === 'ARABIC' ? 'مخفي' : 'Hidden'),
   }));
+  
+  //-------------------------------------------- handleDelete -------------------------------------------
+  const handleDelete = (product: any) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+  
+  //-------------------------------------------- handleDeleteConfirm -------------------------------------------
+  const handleDeleteConfirm = () => {
+    if (productToDelete) {
+      // في التطبيق الحقيقي، هنا سيتم إرسال طلب حذف للخادم
+      console.log('Deleting product from stock:', productToDelete);
+      setProductToDelete(null);
+    }
+    setShowDeleteModal(false);
+  };
+
 //------------------------------------------- return -------------------------------------------
   return (
     <div className="sm:p-4 w-full">
@@ -54,8 +75,19 @@ const StockTable: React.FC = () => {
       />
       {/* ------------------------------------------- CustomTable ------------------------------------------- */}
       <div className="overflow-x-auto ">
-        <CustomTable columns={columns as any} data={tableData} />
+        <CustomTable columns={columns as any} data={tableData} onDelete={handleDelete} />
       </div>
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('stockPreview.deleteConfirmTitle') || 'Confirm Delete Product from Stock'}
+        message={t('stockPreview.deleteConfirmMessage') || 'Are you sure you want to delete this product from stock?'}
+        itemName={productToDelete ? productToDelete.name : ''}
+        itemType={t('stockPreview.product') || 'product'}
+        isRTL={i18n.language === 'ARABIC'}
+        severity="danger"
+      />
     </div>
   );
 };

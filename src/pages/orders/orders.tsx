@@ -3,6 +3,7 @@ import { ordersData as ordersDataRaw, customersData, deliveryAreas, affiliates, 
 import CustomTable from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
+import PermissionModal from '../../components/common/PermissionModal';
 //-------------------------------------------- Column -------------------------------------------
 type Column = {
   key: string;
@@ -13,6 +14,8 @@ type Column = {
 //-------------------------------------------- OrdersPage -------------------------------------------
 const OrdersPage: React.FC = () => {
   const { i18n, t } = useTranslation();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<any | null>(null);
 //-------------------------------------------- tableData -------------------------------------------
   const tableData = ordersDataRaw.map(order => {
     const customer = customersData.find(c => c.id === order.customerId);
@@ -45,6 +48,22 @@ const OrdersPage: React.FC = () => {
   ];
 //-------------------------------------------- visibleTableData -------------------------------------------     
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
+  
+  //-------------------------------------------- handleDelete -------------------------------------------
+  const handleDelete = (order: any) => {
+    setOrderToDelete(order);
+    setShowDeleteModal(true);
+  };
+  
+  //-------------------------------------------- handleDeleteConfirm -------------------------------------------
+  const handleDeleteConfirm = () => {
+    if (orderToDelete) {
+      // في التطبيق الحقيقي، هنا سيتم إرسال طلب حذف للخادم
+      console.log('Deleting order:', orderToDelete);
+      setOrderToDelete(null);
+    }
+    setShowDeleteModal(false);
+  };
 //-------------------------------------------- return -------------------------------------------
   return (
     <div className="sm:p-4 w-full">
@@ -59,6 +78,7 @@ const OrdersPage: React.FC = () => {
           columns={columns} 
           data={tableData} 
           onFilteredDataChange={setVisibleTableData}
+          onDelete={handleDelete}
           linkConfig={[{
             column: 'id',
             getPath: (row) => `/orders/${row.id}`
@@ -96,6 +116,17 @@ const OrdersPage: React.FC = () => {
           </div>
         );
       })()}
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('orders.deleteOrderConfirmTitle') || 'Confirm Delete Order'}
+        message={t('orders.deleteOrderConfirmMessage') || 'Are you sure you want to delete this order?'}
+        itemName={orderToDelete ? `Order #${orderToDelete.id}` : ''}
+        itemType={t('orders.order') || 'order'}
+        isRTL={i18n.language === 'ARABIC'}
+        severity="danger"
+      />
     </div>
   );
 };

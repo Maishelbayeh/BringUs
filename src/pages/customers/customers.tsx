@@ -6,6 +6,8 @@ import * as XLSX from 'xlsx';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomerDetailsPopup from './CustomerDetailsPopup';
+import PermissionModal from '../../components/common/PermissionModal';
+import { FiTrash2 } from 'react-icons/fi';
 
 type Customer = {
   id: number;
@@ -23,6 +25,8 @@ type Order = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const CustomersPage: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
@@ -41,6 +45,20 @@ const CustomersPage: React.FC = () => {
   const getLastOrderDate = (orders: Order[]) => {
     if (!orders.length) return '-';
     return orders.reduce((latest, order) => order.date > latest ? order.date : latest, orders[0].date);
+  };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  const handleDelete = (customer: Customer, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCustomerToDelete(customer);
+    setShowDeleteModal(true);
+  };
+  
+  const handleDeleteConfirm = () => {
+    if (customerToDelete) {
+      console.log('Deleting customer:', customerToDelete);
+      setCustomerToDelete(null);
+    }
+    setShowDeleteModal(false);
   };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   const filteredCustomers = customersData
@@ -141,6 +159,14 @@ const CustomersPage: React.FC = () => {
               >
                 {t('common.details') || 'Details'}
               </button>
+              {/* زر الحذف */}
+              <button
+                onClick={e => handleDelete(customer, e)}
+                className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 p-2 rounded-full hover:bg-red-100 text-red-600  opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
+                title={t('common.delete') || 'Delete'}
+              >
+                <FiTrash2 className="w-4 h-4" />
+              </button>
             </div>
           );
         })}
@@ -158,6 +184,17 @@ const CustomersPage: React.FC = () => {
           getAverageOrderValue={getAverageOrderValue}
         />
       )}
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('customers.deleteConfirmTitle') || 'Confirm Delete Customer'}
+        message={t('customers.deleteConfirmMessage') || 'Are you sure you want to delete this customer?'}
+        itemName={customerToDelete ? (isRTL ? customerToDelete.nameAr : customerToDelete.nameEn) : ''}
+        itemType={t('customers.customer') || 'customer'}
+        isRTL={isRTL}
+        severity="danger"
+      />
     </div>
   );
 };

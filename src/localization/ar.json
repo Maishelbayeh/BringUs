@@ -13,7 +13,13 @@
     "logout": "تسجيل الخروج",
     "areYouSureLogout": "هل أنت متأكد من تسجيل الخروج؟",
     "confirmLogout": "تأكيد تسجيل الخروج",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "confirmDelete": "تأكيد الحذف",
+    "deleteConfirmationMessage": "هل أنت متأكد من حذف هذا {{itemType}}؟",
+    "typeToConfirm": "اكتب \"DELETE\" للتأكيد",
+    "invalidPermission": "يرجى كتابة \"DELETE\" بالضبط",
+    "warning": "تحذير",
+    "deleteWarning": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف {{itemType}} نهائياً."
   },
   "auth":{
     "since_2024":"منذ 2024",
@@ -202,7 +208,10 @@
     "searchPlaceholder": "ابحث باسم الفئة أو التصنيف...",
     "add": "إضافة فئة",
     "edit": "تعديل الفئة",
-    "addButton": "إضافة فئة"
+    "addButton": "إضافة فئة",
+    "category": "فئة",
+    "deleteConfirmTitle": "تأكيد حذف الفئة",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذه الفئة؟"
   },
   "products": {
     "title": "المنتجات",
@@ -249,7 +258,10 @@
     "parcode": "الباركود",
     "colors": "الألوان",
     "pictures": "الصور",
-    "productVideo": "رابط فيديو المنتج"
+    "productVideo": "رابط فيديو المنتج",
+    "product": "منتج",
+    "deleteConfirmTitle": "تأكيد حذف المنتج",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج؟"
   },
   "subcategories": {
     "title": "الفئات الفرعية",
@@ -279,7 +291,10 @@
     "orderPaid": "مدفوع",
     "orderUnpaid": "غير مدفوع",
     "orderDelivered": "تم التوصيل",
-    "orderInProgress": "قيد التنفيذ"
+    "orderInProgress": "قيد التنفيذ",
+    "customer": "عميل",
+    "deleteConfirmTitle": "تأكيد حذف العميل",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا العميل؟"
   },
   "productVariant": {
     "title": "إعدادات المنتجات",
@@ -364,7 +379,12 @@
     "storePhone":"رقم المتجر",
     "color":"اللون",
     "print":"طباعة",
-    "orderItems":"محتويات الطلب"
+    "orderItems":"محتويات الطلب",
+    "deleteConfirmTitle": "تأكيد حذف المنتج من الطلب",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج من الطلب؟",
+    "order": "طلب",
+    "deleteOrderConfirmTitle": "تأكيد حذف الطلب",
+    "deleteOrderConfirmMessage": "هل أنت متأكد من حذف هذا الطلب؟"
   },
   "storeSlider": {
     "title": "شريط المتجر",
@@ -373,7 +393,10 @@
     "edit": "تعديل شريط المتجر",
     "manage": "تعديل شريط المتجر",
     "addButton": "إضافة شريط متجر",
-    "searchPlaceholder": "ابحث عن شريط المتجر..."
+    "searchPlaceholder": "ابحث عن شريط المتجر...",
+    "deleteConfirmTitle": "تأكيد حذف المنتج من الشريط",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج من الشريط؟",
+    "product": "المنتج"
   },
   "storeVideos": {
     "title": "فيديوهات المتجر",
@@ -442,7 +465,10 @@
     "description": "إعدادات معاينة المخزون, المنتجات, الفئات, الفئات الفرعية.",
     "add": "إضافة معاينة مخزون",
     "edit": "تعديل معاينة المخزون",
-    "manage": "تعديل معاينة المخزون"
+    "manage": "تعديل معاينة المخزون",
+    "deleteConfirmTitle": "تأكيد حذف المنتج من المخزون",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج من المخزون؟",
+    "product": "المنتج"
   },
   "testimonials": {
     "title": "التعليقات",

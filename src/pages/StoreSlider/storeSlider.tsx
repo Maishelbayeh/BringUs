@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
- 
 import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomButton from '@/components/common/CustomButton';
-
-
-
-
+import PermissionModal from '../../components/common/PermissionModal';
 
 const initialProducts: any[] = [
   { id: 1, name: 'iPhone 15', categoryId: 1, subcategoryId: 1, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80', description: 'Latest Apple smartphone' },
@@ -40,8 +36,8 @@ const StoreSliderPage: React.FC = () => {
   const subcategoryIdParam = params.get('subcategoryId');
   const [editProduct, setEditProduct] = useState<any | null>(null);
   const [drawerMode, setDrawerMode] = useState<'add' | 'edit'>('add');
-
- 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<any | null>(null);
 
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);
@@ -81,12 +77,21 @@ const StoreSliderPage: React.FC = () => {
   };
   const handleDelete = () => {
     if (editProduct) {
-      setProducts(products.filter(p => p.id !== editProduct.id));
+      setProductToDelete(editProduct);
       setShowDrawer(false);
-      setEditProduct(null);
-      setForm(initialForm);
+      setShowDeleteModal(true);
     }
   };
+  
+  //-------------------------------------------- handleDeleteConfirm -------------------------------------------
+  const handleDeleteConfirm = () => {
+    if (productToDelete) {
+      setProducts(products.filter(p => p.id !== productToDelete.id));
+      setProductToDelete(null);
+    }
+    setShowDeleteModal(false);
+  };
+
   const handleSave = (formData: any) => {
     if (drawerMode === 'edit' && editProduct) {
       setProducts(products.map(p => p.id === editProduct.id ? { ...editProduct, ...formData } : p));
@@ -176,6 +181,17 @@ const StoreSliderPage: React.FC = () => {
             </div>
           </div>
         )}
+      />
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('storeSlider.deleteConfirmTitle') || 'Confirm Delete Product from Slider'}
+        message={t('storeSlider.deleteConfirmMessage') || 'Are you sure you want to delete this product from the slider?'}
+        itemName={productToDelete ? productToDelete.name : ''}
+        itemType={t('storeSlider.product') || 'product'}
+        isRTL={isRTL}
+        severity="danger"
       />
     </div>
   );

@@ -1,24 +1,41 @@
 import React from 'react';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { FiTrash2 } from 'react-icons/fi';
 import { t } from 'i18next';
 //-------------------------------------------- ProductCardProps -------------------------------------------
 interface ProductCardProps {
   product: any;
   isRTL: boolean;
   onClick: (product: any) => void;
+  onDelete: (product: any) => void;
   getCategoryName: (catId: number) => string;
   getLabelName: (label: number | string) => string;
 }
 //-------------------------------------------- ProductCard -------------------------------------------
-const ProductCard: React.FC<ProductCardProps> = ({ product, isRTL, onClick, getCategoryName, getLabelName }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, isRTL, onClick, onDelete, getCategoryName, getLabelName }) => {
   const isDisabled = product.visibility !== true;
+  
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(product);
+  };
+  
   //-------------------------------------------- return -------------------------------------------
   return (
     <div
-      className={`rounded-2xl shadow-md hover:shadow-xl transition p-4 flex flex-col group cursor-pointer border-2 ${isDisabled ? 'bg-gray-100 text-gray-400 border-gray-200 opacity-60 pointer-events-auto' : 'bg-white text-primary border-white'}`}
+      className={`rounded-2xl shadow-md hover:shadow-xl transition p-4 flex flex-col group cursor-pointer border-2 relative ${isDisabled ? 'bg-gray-100 text-gray-400 border-gray-200 opacity-60 pointer-events-auto' : 'bg-white text-primary border-white'}`}
       onClick={() => onClick(product)}
       style={isDisabled ? { filter: 'grayscale(1)', pointerEvents: 'auto' } : {}}
     >
+      {/* Delete Button */}
+      <button 
+        onClick={handleDeleteClick}
+        className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 p-2 rounded-full hover:bg-red-100 text-red-600 bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
+        title={t('general.delete') || 'Delete'}
+      >
+        <FiTrash2 className="w-4 h-4" />
+      </button>
+      
       <div className="relative">
         {/* ------------------------------------------- Product Label ------------------------------------------- */}
         <span
