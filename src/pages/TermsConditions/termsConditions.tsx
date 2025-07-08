@@ -1,21 +1,77 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 import CustomButton from '../../components/common/CustomButton';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
+import { useTermsConditions } from '../../hooks/useTermsConditions';
+
+// Mock store ID - replace with actual store ID from context
+const STORE_ID = '686a719956a82bfcc93a2e2d';
 
 const initialHtml = `<h2>Terms & Conditions</h2><ul><li>All users must be 18+ years old.</li><li>Respect privacy and data policies.</li></ul>`;
 
 const TermsConditionsPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  
+  const {
+    terms,
+    loading,
+    getTermsByStore,
+    createTerms,
+    updateTerms,
+  } = useTermsConditions(STORE_ID);
+
   const [html, setHtml] = useState(initialHtml);
- 
+  const [saving, setSaving] = useState(false);
 
+  // Load active terms on component mount
+  useEffect(() => {
+    loadActiveTerms();
+  }, []);
 
-  const handleSave = () => alert(t('termsConditions.saved', 'Changes saved!'));
+  const loadActiveTerms = async () => {
+    try {
+      const activeTerms = await getTermsByStore(false); // لا تظهر toast عند التحميل
+      if (activeTerms) {
+        setHtml(activeTerms.htmlContent);
+      }
+    } catch (error) {
+      console.error('Failed to load terms:', error);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      // Check if we have existing terms to update
+      if (terms) {
+        // Update existing terms
+        await updateTerms(terms._id, {
+          title: 'Terms & Conditions',
+          htmlContent: html,
+        }, true); // تظهر toast للنجاح
+      } else {
+        // Create new terms
+        await createTerms({
+          title: 'Terms & Conditions',
+          htmlContent: html,
+          language: i18n.language as 'en' | 'ar' | 'fr' | 'es',
+          category: 'general',
+        }, true); // تظهر toast للنجاح
+      }
+      
+      // Reload terms after save (بدون toast)
+      await getTermsByStore(false);
+    } catch (error) {
+      console.error('Save failed:', error);
+      // Error message will be shown by the hook via toast
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="sm:p-4" >
@@ -30,27 +86,37 @@ const TermsConditionsPage = () => {
         showAddButton={false}
         searchPlaceholder={t('termsConditions.search', 'Search Terms')}
       /> */}
-<HeaderWithAction
-title={t('sideBar.termsConditions')}
-// addLabel=""
- isRtl={isRTL}
-// showSearch={true}
-// searchValue={search}
-// onSearchChange={e => setSearch(e.target.value)}
-// searchPlaceholder={t('termsConditions.search', 'Search Terms')}
-/>
+      <HeaderWithAction
+        title={t('sideBar.termsConditions')}
+        // addLabel=""
+        isRtl={isRTL}
+        // showSearch={true}
+        // searchValue={search}
+        // onSearchChange={e => setSearch(e.target.value)}
+        // searchPlaceholder={t('termsConditions.search', 'Search Terms')}
+      />
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      )}
+
+      {/* Error messages are now handled by toast notifications */}
+
       {/* Card/Region */}
       <div className="bg-white rounded-lg  border-2 border-gray-200 mb-6 flex-1 flex flex-col">
         {/* Editor */}
         <div className={`flex-1 p-6 ${isRTL ? 'text-right' : 'text-left'}`}>
           <label className="block mb-2 font-semibold text-gray-700">{t('termsConditions.edit', 'Edit Terms & Conditions')}</label>
           <ReactQuill
-  theme="snow"
-  value={html}
-  onChange={setHtml}
-  className={`bg-white ${isRTL ? 'quill-rtl' : ''}`}
-  style={{ minHeight: 180 }}
-/>
+            theme="snow"
+            value={html}
+            onChange={setHtml}
+            className={`bg-white ${isRTL ? 'quill-rtl' : ''}`}
+            style={{ minHeight: 180 }}
+          />
           {/* HTML Preview */}
           <div className="mt-6">
             <div className="mb-2 font-semibold text-gray-700">{t('termsConditions.htmlPreview', 'HTML Preview')}</div>
@@ -63,12 +129,13 @@ title={t('sideBar.termsConditions')}
         <div className={`flex justify-between items-center px-6 py-4 border-t-2 border-gray-200 bg-white sticky bottom-0 z-10 ${isRTL ? 'flex-row' : 'flex-row-reverse'}`}>
         
           <CustomButton
-            text={t('common.save', 'Save')}
+            text={saving ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
             color="primary"
             textColor="white"
             action={handleSave}
             className="t-Button t-Button--hot"
-            icon={<span className="fa fa-save" />}
+            disabled={saving}
+            icon={saving ? <span className="fa fa-spinner fa-spin" /> : <span className="fa fa-save" />}
           />
         </div>
       </div>

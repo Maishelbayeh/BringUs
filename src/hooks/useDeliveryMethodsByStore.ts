@@ -109,6 +109,81 @@ const useDeliveryMethodsByStore = (
     return await fetchDeliveryMethods({ isDefault: true });
   }, [fetchDeliveryMethods]);
 
+  // Create delivery method
+  const createDeliveryMethod = useCallback(async (deliveryMethodData: Partial<DelieveryMethod>) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Prevent creating default method as inactive
+      if (deliveryMethodData.isDefault && deliveryMethodData.isActive === false) {
+        setError(t('deliveryDetails.errors.defaultCannotBeCreatedInactive'));
+        return null;
+      }
+
+      // Get storeId from localStorage
+      const finalStoreId = localStorage.getItem('storeId');
+      
+      if (!finalStoreId) {
+        setError(t('deliveryDetails.errors.storeIdRequired'));
+        return null;
+      }
+
+      // Add storeId to the request body
+      const requestData = { ...deliveryMethodData, store: finalStoreId };
+
+      const response = await fetch(`${BASE_URL}delivery-methods`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400 && errorData.error === 'Default method cannot be inactive') {
+          setError(t('deliveryDetails.errors.defaultCannotBeCreatedInactive'));
+          return null;
+        }
+        if (response.status === 401) {
+          throw new Error(t('deliveryDetails.errors.unauthorized'));
+        } else if (response.status === 403) {
+          throw new Error(t('deliveryDetails.errors.forbidden'));
+        } else if (response.status === 404) {
+          throw new Error(t('deliveryDetails.errors.notFound'));
+        } else if (response.status >= 500) {
+          throw new Error(t('deliveryDetails.errors.serverError'));
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      }
+
+      const data: ApiResponse<DelieveryMethod> = await response.json();
+
+      if (data.success) {
+        // Update the list directly instead of refetching
+        if (data.data) {
+          setDeliveryMethods(prev => [...prev, data.data as DelieveryMethod]);
+        }
+        const successMessage = t('deliveryDetails.success.createSuccess');
+        console.log('Create success, showing toast:', successMessage);
+        showSuccessToast(successMessage);
+        return data.data;
+      } else {
+        setError(data.message || t('deliveryDetails.errors.createError'));
+        return null;
+      }
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [showSuccessToast]);
+
   // Clear error
   const clearError = useCallback(() => {
     setError(null);
@@ -128,6 +203,7 @@ const useDeliveryMethodsByStore = (
     fetchDeliveryMethods,
     fetchActiveDeliveryMethods,
     fetchDefaultDeliveryMethod,
+    createDeliveryMethod,
     clearError,
   };
 };

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Toast, ToastOptions } from '../Types';
+import { Toast, ToastOptions } from '../Types.tsx';
 
 const useToast = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -75,4 +75,5 @@ const useToast = () => {
   };
 };
 
+export { useToast };
 export default useToast; 

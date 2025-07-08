@@ -8,9 +8,10 @@ interface SallersFormProps {
   form: any;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   isRTL: boolean;
+  isEdit?: boolean;
 }
 
-const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) => {
+const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL, isEdit = false }) => {
   const { t } = useTranslation();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
@@ -22,14 +23,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         onChange={onFormChange}
         required 
       />
-      <CustomInput
-        label={t('wholesalers.password')}
-        name="password"
-        type="password"
-        value={form.password}
-        onChange={onFormChange}
-        required 
-      />
+
       <CustomInput
         label={t('wholesalers.firstName')}
         name="firstName"
@@ -63,17 +57,20 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL }) 
         required
         
       />
-      <CustomRadioGroup
-        label={t('wholesalers.status')}
-        name="status"
-        value={form.status}
-        onChange={onFormChange}
-        options={[
-          { value: 'A', label: t('wholesalers.active') },
-          { value: 'I', label: t('wholesalers.inactive') },
-        ]}
-       
-      />
+      {isEdit && (
+        <CustomRadioGroup
+          label={t('wholesalers.status')}
+          name="status"
+          value={form.status}
+          onChange={onFormChange}
+          options={[
+            { value: 'Active', label: t('wholesalers.active') },
+            { value: 'Inactive', label: t('wholesalers.inactive') },
+            // { value: 'Suspended', label: t('wholesalers.suspended') || 'Suspended' },
+            // { value: 'Pending', label: t('wholesalers.pending') || 'Pending' },
+          ]}
+        />
+      )}
       <CustomTextArea
         label={t('wholesalers.address')}
         name="address"

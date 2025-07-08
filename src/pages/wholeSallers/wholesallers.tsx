@@ -1,34 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import SallersDrawer from './componnent/sallersDrawer';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import PermissionModal from '../../components/common/PermissionModal';
-import { mockWholesalers } from '../../data/mockWholesalers';
+import { useWholesalers, Wholesaler } from '@/hooks/useWholesalers';
 
 //-------------------------------------------- initialForm -------------------------------------------
-const initialForm = {
+const initialForm: Partial<Wholesaler> = {
   email: '',
-  password: '',
   firstName: '',
   lastName: '',
   mobile: '',
-  discount: '',
+  discount: 0,
   status: 'Active',
   address: '',
 };
+
 //-------------------------------------------- WholesallersPage -------------------------------------------
 const WholesallersPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [data, setData] = useState(mockWholesalers);
-  const [form, setForm] = useState(initialForm);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [form, setForm] = useState<Partial<Wholesaler>>(initialForm);
+  const [editId, setEditId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [wholesalerToDelete, setWholesalerToDelete] = useState<any | null>(null);
-//-------------------------------------------- columns -------------------------------------------
+  const [wholesalerToDelete, setWholesalerToDelete] = useState<Wholesaler | null>(null);
+
+  // TODO: Replace with actual storeId and token from context/auth
+  const storeId = '686a719956a82bfcc93a2e2d';
+  const token = localStorage.getItem('token') || '';
+
+  const {
+    loading,
+    error,
+    wholesalers,
+    getWholesalers,
+    createWholesaler,
+    updateWholesaler,
+    deleteWholesaler,
+  } = useWholesalers(storeId, token);
+
+  useEffect(() => {
+    getWholesalers();
+    // eslint-disable-next-line
+  }, []);
+
+  //-------------------------------------------- columns -------------------------------------------
   const columns = [
     { key: 'email', label: { en: 'Email', ar: 'البريد الإلكتروني' } },
     { key: 'firstName', label: { en: 'First Name', ar: 'الاسم الأول' } },
@@ -38,62 +57,60 @@ const WholesallersPage = () => {
     {
       key: 'status',
       label: { en: 'Status', ar: 'الحالة' }
-    
     },
     { key: 'address', label: { en: 'Address', ar: 'العنوان' } }
   ];
-//-------------------------------------------- handleFormChange -------------------------------------------
+
+  //-------------------------------------------- handleFormChange -------------------------------------------
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
-//-------------------------------------------- handleDrawerOpen -------------------------------------------
+
+  //-------------------------------------------- handleDrawerOpen -------------------------------------------
   const handleDrawerOpen = () => {
     setForm(initialForm);
+    setEditId(null);
     setDrawerOpen(true);
   };
-//-------------------------------------------- handleEdit -------------------------------------------
+
+  //-------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (item: any) => {
-    setForm({
-      ...item,
-      status: item.status === 'Active' ? 'Active' : 'Inactive'
-    });
-    setEditIndex(data.findIndex((d) => d.id === item.id));
+    setForm({ ...item, status: item.status === 'Active' ? 'Active' : 'Inactive' });
+    setEditId(item._id);
     setDrawerOpen(true);
   };
-//-------------------------------------------- handleDelete -------------------------------------------
+
+  //-------------------------------------------- handleDelete -------------------------------------------
   const handleDelete = (item: any) => {
     setWholesalerToDelete(item);
     setShowDeleteModal(true);
   };
-//-------------------------------------------- handleDeleteConfirm -------------------------------------------
-  const handleDeleteConfirm = () => {
-    if (wholesalerToDelete) {
-      setData(prev => prev.filter(d => d.id !== wholesalerToDelete.id));
+
+  //-------------------------------------------- handleDeleteConfirm -------------------------------------------
+  const handleDeleteConfirm = async () => {
+    if (wholesalerToDelete && wholesalerToDelete._id) {
+      await deleteWholesaler(wholesalerToDelete._id);
+      await getWholesalers();
       setWholesalerToDelete(null);
     }
     setShowDeleteModal(false);
   };
-//-------------------------------------------- handleSubmit -------------------------------------------
-  const handleSubmit = (e: React.FormEvent) => {
+
+  //-------------------------------------------- handleSubmit -------------------------------------------
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editIndex !== null) {
-      setData(prev => prev.map((d, idx) => idx === editIndex ? { ...form, id: d.id, discount: Number(form.discount), status: form.status === 'A' ? 'Active' : 'Inactive' } : d));
-      setEditIndex(null);
+    if (editId) {
+      await updateWholesaler(editId, form);
     } else {
-      setData(prev => [
-        ...prev,
-        {
-          ...form,
-          id: prev.length + 1,
-          discount: Number(form.discount),
-          status: form.status === 'A' ? 'Active' : 'Inactive',
-        }
-      ]);
+      await createWholesaler(form);
     }
+    await getWholesalers();
     setDrawerOpen(false);
+    setEditId(null);
   };
-//-------------------------------------------- return -------------------------------------------
+
+  //-------------------------------------------- return -------------------------------------------
   return (
     <div className="sm:p-4">
       <CustomBreadcrumb items={[
@@ -106,12 +123,12 @@ const WholesallersPage = () => {
         addLabel={t('common.add') || 'Add'}
         onAdd={handleDrawerOpen}
         isRtl={i18n.language === 'ARABIC'}
-        count={data.length}
+        count={wholesalers.length}
       />
       {/* ------------------------------------------- CustomTable ------------------------------------------- */}
       <CustomTable
         columns={columns}
-        data={data}
+        data={wholesalers}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
@@ -124,6 +141,7 @@ const WholesallersPage = () => {
         form={form}
         onFormChange={handleFormChange}
         onSubmit={handleSubmit}
+        isEdit={!!editId}
       />
       {/* ------------------------------------------- PermissionModal ------------------------------------------- */}
       <PermissionModal
@@ -137,6 +155,8 @@ const WholesallersPage = () => {
         isRTL={isRTL}
         severity="danger"
       />
+      {/* ------------------------------------------- Error/Loading ------------------------------------------- */}
+      {error && <div className="text-red-500 mt-2">{error}</div>}
     </div>
   );
 };

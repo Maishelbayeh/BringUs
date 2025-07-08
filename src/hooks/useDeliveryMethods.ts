@@ -320,10 +320,16 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
         return null;
       }
 
-      // Add storeId to the request body if provided
-      const requestData = storeId 
-        ? { ...deliveryMethodData, store: storeId }
-        : deliveryMethodData;
+      // Get storeId from localStorage if not provided
+      const finalStoreId = storeId || localStorage.getItem('storeId');
+      
+      if (!finalStoreId) {
+        setError(t('deliveryDetails.errors.storeIdRequired'));
+        return null;
+      }
+
+      // Add storeId to the request body
+      const requestData = { ...deliveryMethodData, store: finalStoreId };
 
       const response = await makeRequest(`${BASE_URL}delivery-methods`, {
         method: 'POST',

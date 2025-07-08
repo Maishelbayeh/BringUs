@@ -11,9 +11,10 @@ interface SallersDrawerProps {
   form?: any;
   onFormChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onSubmit?: (e: React.FormEvent) => void;
+  isEdit?: boolean;
 }
 
-const SallersDrawer: React.FC<SallersDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onSubmit }) => {
+const SallersDrawer: React.FC<SallersDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onSubmit, isEdit = false }) => {
   const { t } = useTranslation();
   if (!open) return null;
 //-------------------------------------------- return -------------------------------------------
@@ -28,7 +29,7 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({ open, onClose, isRTL, tit
         </div>
 {/* ------------------------------------------- Form ------------------------------------------- */}
         <form onSubmit={onSubmit} className="p-4 flex-1 flex flex-col">
-          {form && onFormChange && <SallersForm form={form} onFormChange={onFormChange} isRTL={isRTL} />}
+          {form && onFormChange && <SallersForm form={form} onFormChange={onFormChange} isRTL={isRTL} isEdit={isEdit} />}
         </form>
 {/* ------------------------------------------- Footer ------------------------------------------- */}
         <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">

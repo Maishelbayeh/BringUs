@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CustomTable } from '../../components/common/CustomTable';
 import CustomButton from '../../components/common/CustomButton';
@@ -6,23 +6,40 @@ import AdvertisementForm from './AdvertisementForm';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import PermissionModal from '@/components/common/PermissionModal';
-
-const initialHtml = [
-  { id: 1, html: '<h2 style="color:green">Welcome to Advertisement!</h2>', status: 'Active' },
-];
+import { useAdvertisements } from '../../hooks/useAdvertisements';
 
 const AdvertisementPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
-  const [data, setData] = useState(initialHtml);
+
+  // TODO: Replace with actual storeId from context/auth if needed
+  const storeId = '686a719956a82bfcc93a2e2d';
+  const token = localStorage.getItem('token') || '';
+
+  const {
+    advertisements,
+    loading,
+    error,
+    createAdvertisement,
+    updateAdvertisement,
+    deleteAdvertisement,
+    getAdvertisements,
+    toggleActiveStatus,
+  } = useAdvertisements(storeId, token);
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [formHtml, setFormHtml] = useState('');
+  const [formTitle, setFormTitle] = useState('');
   const [formStatus, setFormStatus] = useState<'Active' | 'Inactive'>('Active');
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  
-  // Permission Modal State
   const [permissionModalOpen, setPermissionModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [formLoading, setFormLoading] = useState(false);
+
+  // جلب البيانات عند التحميل
+  useEffect(() => {
+    getAdvertisements();
+  }, [getAdvertisements]);
 
   // Function to safely render HTML
   const renderHtml = (html: string) => {
@@ -33,6 +50,14 @@ const AdvertisementPage = () => {
       return { __html: '<p style="color: red;">Error rendering HTML</p>' };
     }
   };
+
+  // تجهيز البيانات للجدول
+  const data = advertisements.map(ad => ({
+    id: ad._id,
+    html: ad.htmlContent,
+    status: ad.isActive ? 'Active' : 'Inactive',
+    raw: ad,
+  }));
 
   const columns = [
     {
@@ -67,17 +92,19 @@ const AdvertisementPage = () => {
       },
       align: 'center' as const,
     },
-    
   ];
 
   const handleAdd = () => {
     setFormHtml('');
+    setFormTitle('');
     setFormStatus('Active');
+    setEditIndex(null);
     setDrawerOpen(true);
   };
 
   const handleEdit = (item: any) => {
     setFormHtml(item.html);
+    setFormTitle(item.raw?.title || '');
     setFormStatus(item.status);
     setEditIndex(data.findIndex((d) => d.id === item.id));
     setDrawerOpen(true);
@@ -88,27 +115,56 @@ const AdvertisementPage = () => {
     setPermissionModalOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (itemToDelete) {
-      setData(prev => prev.filter(d => d.id !== itemToDelete.id));
-      setItemToDelete(null);
+  const confirmDelete = async () => {
+    if (itemToDelete && itemToDelete.id) {
+      try {
+        await deleteAdvertisement(String(itemToDelete.id));
+        await getAdvertisements();
+        setItemToDelete(null);
+      } catch (error) {
+        console.error('Delete error:', error);
+      }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formHtml.trim()) {
-      if (editIndex !== null) {
-        setData(prev => prev.map((d, idx) => idx === editIndex ? { ...d, html: formHtml, status: formStatus } : d));
-        setEditIndex(null);
-      } else {
-        setData(prev => [
-          ...prev,
-          { id: prev.length + 1, html: formHtml, status: formStatus }
-        ]);
-      }
+    
+    if (!formHtml.trim()) {
+      return;
     }
-    setDrawerOpen(false);
+
+    setFormLoading(true);
+    
+    try {
+      if (editIndex !== null && data[editIndex] && data[editIndex].id) {
+        // Update existing advertisement
+        await updateAdvertisement(String(data[editIndex].id), {
+          htmlContent: formHtml,
+          isActive: formStatus === 'Active',
+          title: formTitle,
+        });
+      } else {
+        // Create new advertisement
+        await createAdvertisement({
+          htmlContent: formHtml,
+          isActive: formStatus === 'Active',
+          title: formTitle,
+        });
+      }
+      
+      // Refresh data and close drawer
+      await getAdvertisements();
+      setDrawerOpen(false);
+      setEditIndex(null);
+      setFormHtml('');
+      setFormTitle('');
+      setFormStatus('Active');
+    } catch (error) {
+      console.error('Submit error:', error);
+    } finally {
+      setFormLoading(false);
+    }
   };
 
   return (
@@ -124,6 +180,8 @@ const AdvertisementPage = () => {
         isRtl={i18n.language === 'ARABIC'}
         count={data.length}
       />
+      {loading && <div className="text-center py-4">{t('common.loading', 'Loading...')}</div>}
+      {error && <div className="text-center text-red-500 py-2">{error}</div>}
       <CustomTable columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
       
       {/* Permission Modal */}
@@ -140,45 +198,59 @@ const AdvertisementPage = () => {
         severity="danger"
         requirePermission={true}
       />
-
+      
       {drawerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
             dir={isRTL ? 'rtl' : 'ltr'}>
             {/* Header */}
             <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
-              <span className="text-xl font-bold text-primary">{t('advertisement.add', 'Add HTML')}</span>
-              <button onClick={() => setDrawerOpen(false)} className="text-primary hover:text-red-500 text-2xl">×</button>
+              <span className="text-xl font-bold text-primary">
+                {editIndex !== null ? t('advertisement.edit', 'Edit Advertisement') : t('advertisement.add', 'Add Advertisement')}
+              </span>
+              <button 
+                onClick={() => setDrawerOpen(false)} 
+                className="text-primary hover:text-red-500 text-2xl"
+                disabled={formLoading}
+              >
+                ×
+              </button>
             </div>
+            
             {/* Form */}
-            <AdvertisementForm
-              formHtml={formHtml}
-              setFormHtml={setFormHtml}
-              formStatus={formStatus}
-              setFormStatus={setFormStatus}
-              isRTL={isRTL}
-              t={t}
-              handleSubmit={handleSubmit}
-              renderHtml={renderHtml}
-            />
-
-            {/* Footer */}
-        <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl `}>
-          <CustomButton
-            color="primary"
-            textColor="white"
-            text={editIndex ? t("deliveryDetails.updateArea") : t("deliveryDetails.createArea")}
-              action={() => {}}
-            type="submit"
-          />
-          <CustomButton
-            color="white"
-            textColor="primary"
-            text={t("deliveryDetails.cancel")}
-            action={() => setDrawerOpen(false)}
-          />
-        </div>
-      
+            <form onSubmit={handleSubmit}>
+              <AdvertisementForm
+                formHtml={formHtml}
+                setFormHtml={setFormHtml}
+                formStatus={formStatus}
+                setFormStatus={setFormStatus}
+                isRTL={isRTL}
+                t={t}
+                handleSubmit={handleSubmit}
+                renderHtml={renderHtml}
+                formTitle={formTitle}
+                setFormTitle={setFormTitle}
+              />
+              
+              {/* Footer */}
+              <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl`}>
+                <CustomButton
+                  color="primary"
+                  textColor="white"
+                  text={formLoading ? t('common.loading', 'Loading...') : (editIndex !== null ? t("deliveryDetails.updateArea") : t("deliveryDetails.createArea"))}
+                  action={() => {}}
+                  type="submit"
+                  disabled={formLoading}
+                />
+                <CustomButton
+                  color="white"
+                  textColor="primary"
+                  text={t("deliveryDetails.cancel")}
+                  action={() => setDrawerOpen(false)}
+                  disabled={formLoading}
+                />
+              </div>
+            </form>
           </div>
         </div>
       )}
