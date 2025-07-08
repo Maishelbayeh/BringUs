@@ -1,51 +1,157 @@
 import React, { useState } from 'react';
 import { ordersData as ordersDataRaw, customersData, deliveryAreas, affiliates, currencies } from '../../api/mockCustomers';
-import CustomTable from '../../components/common/CustomTable';
+import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
 import PermissionModal from '../../components/common/PermissionModal';
-//-------------------------------------------- Column -------------------------------------------
+
+//-------------------------------------------- Types -------------------------------------------
 type Column = {
   key: string;
   label: { ar: string; en: string };
-  type?: 'number' | 'text' | 'date';
+  type?: 'number' | 'text' | 'date' | 'status';
   align?: 'left' | 'center' | 'right';
+  render?: (value: any, item: any) => React.ReactNode;
 };
+
+type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+
 //-------------------------------------------- OrdersPage -------------------------------------------
 const OrdersPage: React.FC = () => {
   const { i18n, t } = useTranslation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<any | null>(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [orderToUpdateStatus, setOrderToUpdateStatus] = useState<any | null>(null);
+  const [newStatus, setNewStatus] = useState<OrderStatus>('pending');
+
 //-------------------------------------------- tableData -------------------------------------------
   const tableData = ordersDataRaw.map(order => {
     const customer = customersData.find(c => c.id === order.customerId);
     const area = deliveryAreas.find(a => a.id === order.deliveryAreaId);
     const affiliate = affiliates.find(a => a.id === order.affiliateId);
     const currency = currencies.find(cur => cur.id === order.currencyId);
+    
+    // Enhanced order status - using existing properties or defaulting
+    const getOrderStatus = (order: any) => {
+      // Since the mock data doesn't have status fields, we'll create a simple status based on date and paid status
+      const orderDate = new Date(order.date);
+      const today = new Date();
+      const daysDiff = Math.floor((today.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (!order.paid) return 'pending';
+      if (daysDiff > 30) return 'delivered';
+      if (daysDiff > 15) return 'shipped';
+      if (daysDiff > 7) return 'processing';
+      return 'confirmed';
+    };
+
     return {
       id: order.id,
       customer: customer && i18n.language === 'ARABIC' ? customer.nameAr : customer && i18n.language === 'ENGLISH' ? customer.nameEn : '-',
       phone: customer ? customer.phone : '-',
+      email: '-', // Customers don't have email in mock data
       deliveryArea: area && i18n.language === 'ARABIC' ? area.labelAr : area && i18n.language === 'ENGLISH' ? area.labelEn : '-',
       affiliate: affiliate && i18n.language === 'ARABIC' ? affiliate.nameAr : affiliate && i18n.language === 'ENGLISH' ? affiliate.nameEn : '-',
       currency: currency && i18n.language === 'ARABIC' ? currency.labelAr : currency && i18n.language === 'ENGLISH' ? currency.labelEn : '-',
       price: order.price,
       date: order.date,
-      status: order.paid ? t('orders.paid') : t('orders.unpaid'),
+      status: getOrderStatus(order),
+      paymentStatus: order.paid ? 'paid' : 'unpaid',
+      itemsCount: order.products?.length || 0,
+      notes: '', // Orders don't have notes in mock data
+      originalOrder: order, // Keep original data for status updates
     };
   });
+
+//-------------------------------------------- Status Renderer -------------------------------------------
+  const renderStatus = (status: string) => {
+    const statusConfig = {
+      pending: { 
+        label: i18n.language === 'ARABIC' ? 'في الانتظار' : 'Pending',
+        class: 'bg-yellow-100 text-yellow-700'
+      },
+      confirmed: { 
+        label: i18n.language === 'ARABIC' ? 'مؤكد' : 'Confirmed',
+        class: 'bg-blue-100 text-blue-700'
+      },
+      processing: { 
+        label: i18n.language === 'ARABIC' ? 'قيد المعالجة' : 'Processing',
+        class: 'bg-orange-100 text-orange-700'
+      },
+      shipped: { 
+        label: i18n.language === 'ARABIC' ? 'تم الشحن' : 'Shipped',
+        class: 'bg-purple-100 text-purple-700'
+      },
+      delivered: { 
+        label: i18n.language === 'ARABIC' ? 'تم التوصيل' : 'Delivered',
+        class: 'bg-green-100 text-green-700'
+      },
+      cancelled: { 
+        label: i18n.language === 'ARABIC' ? 'ملغي' : 'Cancelled',
+        class: 'bg-red-100 text-red-700'
+      }
+    };
+
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+    
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.class}`}>
+        {config.label}
+      </span>
+    );
+  };
+
+  const renderPaymentStatus = (status: string) => {
+    const isPaid = status === 'paid';
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+        {isPaid ? (i18n.language === 'ARABIC' ? 'مدفوع' : 'Paid') : (i18n.language === 'ARABIC' ? 'غير مدفوع' : 'Unpaid')}
+      </span>
+    );
+  };
+
+  const renderActions = (value: any, item: any) => (
+    <div className="flex justify-center space-x-2">
+      <button
+        onClick={() => handleEditStatus(item)}
+        className="text-blue-600 hover:text-blue-900 p-1"
+        title={i18n.language === 'ARABIC' ? 'تغيير الحالة' : 'Change Status'}
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      </button>
+      <button
+        onClick={() => handleDelete(item)}
+        className="text-red-600 hover:text-red-900 p-1"
+        title={i18n.language === 'ARABIC' ? 'حذف الطلب' : 'Delete Order'}
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </button>
+    </div>
+  );
+
 //-------------------------------------------- columns -------------------------------------------
   const columns: Column[] = [
     { key: 'id', label: { ar: 'رقم الطلب', en: 'Order Number' }, type: 'number'},
     { key: 'customer', label: { ar: 'العميل', en: 'Customer' }, type: 'text'},
     { key: 'phone', label: { ar: 'رقم الهاتف', en: 'Phone' }, type: 'text'},
+    { key: 'email', label: { ar: 'البريد الإلكتروني', en: 'Email' }, type: 'text'},
     { key: 'deliveryArea', label: { ar: 'منطقة التوصيل', en: 'Delivery Area' }, type: 'text'},
     { key: 'affiliate', label: { ar: 'المسوق', en: 'Affiliate' }, type: 'text'},
     { key: 'currency', label: { ar: 'العملة', en: 'Currency' }, type: 'text'},
     { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number'},
     { key: 'date', label: { ar: 'تاريخ الطلب', en: 'Order Date' }, type: 'date'},
-    { key: 'status', label: { ar: 'الحالة', en: 'Status' }, type: 'text'},
+    { key: 'status', label: { ar: 'حالة الطلب', en: 'Order Status' }, type: 'status', render: renderStatus},
+    { key: 'paymentStatus', label: { ar: 'حالة الدفع', en: 'Payment Status' }, type: 'status', render: renderPaymentStatus},
+    { key: 'itemsCount', label: { ar: 'عدد المنتجات', en: 'Items Count' }, type: 'number'},
+    { key: 'notes', label: { ar: 'ملاحظات', en: 'Notes' }, type: 'text'},
+    { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text', render: renderActions},
   ];
+
 //-------------------------------------------- visibleTableData -------------------------------------------     
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
   
@@ -64,6 +170,29 @@ const OrdersPage: React.FC = () => {
     }
     setShowDeleteModal(false);
   };
+
+  //-------------------------------------------- handleEditStatus -------------------------------------------
+  const handleEditStatus = (order: any) => {
+    setOrderToUpdateStatus(order);
+    setNewStatus(order.status);
+    setShowStatusModal(true);
+  };
+
+  //-------------------------------------------- handleStatusUpdate -------------------------------------------
+  const handleStatusUpdate = () => {
+    if (orderToUpdateStatus) {
+      // في التطبيق الحقيقي، هنا سيتم إرسال طلب تحديث للخادم
+      console.log('Updating order status:', orderToUpdateStatus.id, 'to:', newStatus);
+      
+      // Note: In a real application, you would send an API request here
+      // For now, we'll just log the status change
+      // The mock data doesn't have status fields, so we can't update them directly
+      
+      setOrderToUpdateStatus(null);
+    }
+    setShowStatusModal(false);
+  };
+
 //-------------------------------------------- return -------------------------------------------
   return (
     <div className="sm:p-4 w-full">
@@ -73,12 +202,11 @@ const OrdersPage: React.FC = () => {
       isRtl={i18n.language === 'ARABIC'}
      />
      {/* ------------------------------------------- CustomTable ------------------------------------------- */}
-      <div className="overflow-x-auto ">
+      <div className="overflow-x-auto">
         <CustomTable 
           columns={columns} 
           data={tableData} 
           onFilteredDataChange={setVisibleTableData}
-          onDelete={handleDelete}
           linkConfig={[{
             column: 'id',
             getPath: (row) => `/orders/${row.id}`
@@ -116,6 +244,8 @@ const OrdersPage: React.FC = () => {
           </div>
         );
       })()}
+
+      {/* ------------------------------------------- Delete Modal ------------------------------------------- */}
       <PermissionModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -127,6 +257,63 @@ const OrdersPage: React.FC = () => {
         isRTL={i18n.language === 'ARABIC'}
         severity="danger"
       />
+
+      {/* ------------------------------------------- Status Update Modal ------------------------------------------- */}
+      {showStatusModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {i18n.language === 'ARABIC' ? 'تغيير حالة الطلب' : 'Change Order Status'}
+              </h3>
+              <button
+                onClick={() => setShowStatusModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 mb-2">
+                {i18n.language === 'ARABIC' ? 'الطلب رقم:' : 'Order #'}{orderToUpdateStatus?.id}
+              </p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {i18n.language === 'ARABIC' ? 'الحالة الجديدة:' : 'New Status:'}
+              </label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value as OrderStatus)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              >
+                <option value="pending">{i18n.language === 'ARABIC' ? 'في الانتظار' : 'Pending'}</option>
+                <option value="confirmed">{i18n.language === 'ARABIC' ? 'مؤكد' : 'Confirmed'}</option>
+                <option value="processing">{i18n.language === 'ARABIC' ? 'قيد المعالجة' : 'Processing'}</option>
+                <option value="shipped">{i18n.language === 'ARABIC' ? 'تم الشحن' : 'Shipped'}</option>
+                <option value="delivered">{i18n.language === 'ARABIC' ? 'تم التوصيل' : 'Delivered'}</option>
+                <option value="cancelled">{i18n.language === 'ARABIC' ? 'ملغي' : 'Cancelled'}</option>
+              </select>
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowStatusModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition"
+              >
+                {i18n.language === 'ARABIC' ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleStatusUpdate}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition"
+              >
+                {i18n.language === 'ARABIC' ? 'تحديث' : 'Update'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

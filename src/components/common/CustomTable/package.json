@@ -1,0 +1,33 @@
+{
+  "name": "@bringus/custom-table",
+  "version": "2.0.0",
+  "description": "A customizable and advanced table component with full Arabic and English support",
+  "main": "index.ts",
+  "types": "types.ts",
+  "keywords": [
+    "react",
+    "table",
+    "typescript",
+    "arabic",
+    "rtl",
+    "filter",
+    "sort",
+    "pagination",
+    "image-modal"
+  ],
+  "author": "BringUs Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5",
+    "papaparse": "^5.4.1",
+    "jspdf-autotable": "^3.8.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/papaparse": "^5.3.14"
+  }
+} 

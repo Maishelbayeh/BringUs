@@ -13,7 +13,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 980,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1647337785606-648919ad0ffb?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/1647976/pexels-photo-1647976.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 102,
@@ -29,7 +29,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 980,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1663456304458-e14c11b3cd0b?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/1647976/pexels-photo-1647976.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 103,
@@ -45,7 +45,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 10,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1587825140708-6fdc69a3c3d7?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/18105/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 104,
@@ -61,7 +61,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 10,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/18105/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 105,
@@ -77,7 +77,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 30,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1581578017420-ea5b8e118996?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/991509/pexels-photo-991509.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 106,
@@ -93,7 +93,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 72,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/2526878/pexels-photo-2526878.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 107,
@@ -109,7 +109,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 552,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1593032457869-1f40798b49ef?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/994523/pexels-photo-994523.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 108,
@@ -125,7 +125,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 52,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1615730045516-1e9b8e2d9e56?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 109,
@@ -141,7 +141,7 @@ export const initialProducts = [
       unitId: 2,
       availableQuantity: 0,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1581091215367-3aa0cde55169?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/3747468/pexels-photo-3747468.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 110,
@@ -157,7 +157,7 @@ export const initialProducts = [
       unitId: 13,
       availableQuantity: 0,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/3747468/pexels-photo-3747468.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 111,
@@ -173,7 +173,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 80,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1579980363603-920f6a3513d8?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/2526878/pexels-photo-2526878.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 112,
@@ -189,7 +189,7 @@ export const initialProducts = [
       unitId: 2,
       availableQuantity: 100,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1589758438368-ffb60e4a2670?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/3621104/pexels-photo-3621104.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 113,
@@ -205,7 +205,7 @@ export const initialProducts = [
       unitId: 10,
       availableQuantity: 10,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1590247813690-04c54cf0b4ae?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
       id: 114,
@@ -221,7 +221,7 @@ export const initialProducts = [
       unitId: 14,
       availableQuantity: 10,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
-      image: 'https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=400',
+      image: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
   ];
   

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import CustomTable from '../../components/common/CustomTable';
+import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import AffiliationDrawer from './component/AffiliationDrawer';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import PermissionModal from '../../components/common/PermissionModal';
 import { mockAffiliates } from '../../data/mockAffiliates';
 import AffiliatePaymentDrawer from './AffiliatePaymentDrawer';
 //------------------------------------------- initialForm -------------------------------------------
@@ -28,6 +29,8 @@ const AffiliationPage = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false);
   const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [affiliateToDelete, setAffiliateToDelete] = useState<any | null>(null);
 //------------------------------------------- columns -------------------------------------------
   const columns = [
     {
@@ -69,7 +72,16 @@ const AffiliationPage = () => {
   };
 //------------------------------------------- handleDelete -------------------------------------------
   const handleDelete = (item: any) => {
-    console.log(item);
+    setAffiliateToDelete(item);
+    setShowDeleteModal(true);
+  };
+//------------------------------------------- handleDeleteConfirm -------------------------------------------
+  const handleDeleteConfirm = () => {
+    if (affiliateToDelete) {
+      setData(prev => prev.filter(d => d.id !== affiliateToDelete.id));
+      setAffiliateToDelete(null);
+    }
+    setShowDeleteModal(false);
   };
 //------------------------------------------- handleSubmit -------------------------------------------  
   const handleSubmit = (e: React.FormEvent) => {
@@ -129,6 +141,18 @@ const AffiliationPage = () => {
         onClose={() => setPaymentDrawerOpen(false)}
         isRTL={isRTL}
         affiliate={selectedAffiliate}
+      />
+      {/* ------------------------------------------- PermissionModal ------------------------------------------- */}
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('affiliation.deleteConfirmTitle') || 'Confirm Delete Affiliate'}
+        message={t('affiliation.deleteConfirmMessage') || 'Are you sure you want to delete this affiliate?'}
+        itemName={affiliateToDelete ? `${affiliateToDelete.firstName} ${affiliateToDelete.lastName}` : ''}
+        itemType={t('affiliation.affiliate') || 'affiliate'}
+        isRTL={isRTL}
+        severity="danger"
       />
     </div>
   );

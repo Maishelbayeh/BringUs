@@ -1,51 +1,81 @@
 // src/components/DeliveryAreas/DeliveryAreaDrawer.tsx
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
-import DeliveryAreaForm from './DelieveryForm';
-import { DeliveryArea } from '../../../Types';
-
+import DeliveryAreaForm, { FormRef } from './DelieveryForm';
+import { DelieveryMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '@/components/common/CustomButton';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  area: DeliveryArea | null;
-  onSave: (area: DeliveryArea) => void;
+  area: DelieveryMethod | null;
+  onSave: (area: DelieveryMethod) => void;
   language: 'ENGLISH' | 'ARABIC';
   isEditMode: boolean;
+  loading?: boolean;
 }
 
-const DeliveryAreaModal: React.FC<Props> = ({ open, onClose, area, onSave, language, isEditMode }) => {
+const DeliveryAreaModal: React.FC<Props> = ({ open, onClose, area, onSave, language, isEditMode, loading }) => {
   const { t } = useTranslation();
+  const formRef = useRef<FormRef>(null);
+  const [isFormValid, setIsFormValid] = useState(true); // Start as true to allow submission
+
   if (!open) return null;
+  
   const isRTL = language === 'ARABIC';
+
+  const handleDrawerSubmit = () => {
+    console.log('Drawer submit clicked');
+    if (formRef.current) {
+      console.log('Calling form handleSubmit');
+      formRef.current.handleSubmit();
+    } else {
+      console.log('Form ref is null');
+    }
+  };
+
+  const handleValidationChange = (isValid: boolean) => {
+    console.log('Validation changed:', isValid);
+    setIsFormValid(isValid);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className={`bg-white rounded-2xl shadow-xl w-full max-w-md mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
         dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Header */}
-        <div className={`flex items-center justify-between border-b border-primary/20 px-6 py-4 `}>
+        <div className={`flex items-center justify-between border-b border-primary/20 px-6 py-4`}>
           <div className="flex items-center gap-2">
-           
             <span className="text-xl font-bold text-primary">
               {isEditMode ? t('deliveryDetails.editDeliveryArea') : t('deliveryDetails.addNewDeliveryArea')}
             </span>
           </div>
-          <button onClick={onClose} className="text-primary hover:text-red-500 text-2xl"><CloseIcon fontSize="inherit" /></button>
+          <button onClick={onClose} className="text-primary hover:text-red-500 text-2xl">
+            <CloseIcon fontSize="inherit" />
+          </button>
         </div>
+        
         {/* Form */}
-        <div className="">
-          <DeliveryAreaForm area={area} onSubmit={onSave} onCancel={onClose} language={language} />
+        <div className="flex-1">
+          <DeliveryAreaForm 
+            ref={formRef}
+            area={area} 
+            onSubmit={onSave} 
+            onCancel={onClose} 
+            language={language}
+            onValidationChange={handleValidationChange}
+          />
         </div>
+        
         {/* Footer */}
-        <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl `}>
+        <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl`}>
           <CustomButton
             color="primary"
             textColor="white"
             text={area ? t("deliveryDetails.updateArea") : t("deliveryDetails.createArea")}
-            action={() => {}}
-            type="submit"
+            action={handleDrawerSubmit}
+            disabled={false} // Temporarily disable validation to test
           />
           <CustomButton
             color="white"

@@ -8,6 +8,7 @@ import { getMenuAsText, MenuModel } from './constants/sideBarData';
 import { MenuItem } from './Types';
 import Sidebar from './components/common/navigation/sidebar';
 import TopNavbar from './components/common/navigation/topNav';
+import { ToastProvider } from './contexts/ToastContext';
 
 // Component to check if we're on login page
 const AppContent: React.FC = () => {
@@ -86,7 +87,9 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </BrowserRouter>
   );
 }

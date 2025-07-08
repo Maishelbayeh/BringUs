@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
-import CustomTable from '../../components/common/CustomTable';
-import PaymentVariantsDrawer from './PaymentVariantsDrawer';
+import { CustomTable } from '../../components/common/CustomTable';
+import PaymentVariantsDrawer, { PaymentVariantsDrawerRef } from './PaymentVariantsDrawer';
 import { useNavigate } from 'react-router-dom';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
+import useProductVariants from '@/hooks/useProductVariants';
 
 interface PaymentVariant {
   id: number;
@@ -30,6 +31,9 @@ const PaymentVariants: React.FC = () => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<PaymentVariant | undefined>();
+  const [isFormValid, setIsFormValid] = useState(false);
+  const drawerRef = useRef<PaymentVariantsDrawerRef>(null);
+  
   const [variants, setVariants] = useState<PaymentVariant[]>([
     {
       id: 1,
@@ -123,6 +127,21 @@ const PaymentVariants: React.FC = () => {
     setSelectedVariant(undefined);
   };
 
+  const handleAddNew = () => {
+    setSelectedVariant(undefined);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedVariant(undefined);
+  };
+
+  const handleValidationChange = (isValid: boolean) => {
+    console.log('PaymentVariants validation changed:', isValid);
+    setIsFormValid(isValid);
+  };
+
   return (
     <div className="sm:p-4 w-full">
       {/* Breadcrumb */}
@@ -134,10 +153,11 @@ const PaymentVariants: React.FC = () => {
           </React.Fragment>
         ))}
       </nav>
+      
       <HeaderWithAction
         title={t('productVariant.title')}
         addLabel={t('productVariant.addProductVariant')}
-        onAdd={() => setIsDrawerOpen(true)}
+        onAdd={handleAddNew}
         isRtl={i18n.language === 'ARABIC'}
         count={variants.length}
       />
@@ -150,18 +170,17 @@ const PaymentVariants: React.FC = () => {
       />
 
       <PaymentVariantsDrawer
+        ref={drawerRef}
         isOpen={isDrawerOpen}
-        onClose={() => {
-          setIsDrawerOpen(false);
-          setSelectedVariant(undefined);
-        }}
+        onClose={handleCloseDrawer}
         onSubmit={handleSubmit}
         initialData={selectedVariant}
         products={[
           { id: 1, name: { en: 'Product 1', ar: 'المنتج 1' } },
           { id: 2, name: { en: 'Product 2', ar: 'المنتج 2' } }
         ]}
-                isRTL={i18n.language === 'ARABIC'}
+        isRTL={i18n.language === 'ARABIC'}
+        onValidationChange={handleValidationChange}
       />
     </div>
   );

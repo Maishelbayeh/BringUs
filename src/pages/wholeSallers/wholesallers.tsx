@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import CustomTable from '../../components/common/CustomTable';
+import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import SallersDrawer from './componnent/sallersDrawer';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import PermissionModal from '../../components/common/PermissionModal';
 import { mockWholesalers } from '../../data/mockWholesalers';
 
 //-------------------------------------------- initialForm -------------------------------------------
@@ -25,6 +26,8 @@ const WholesallersPage = () => {
   const [data, setData] = useState(mockWholesalers);
   const [form, setForm] = useState(initialForm);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [wholesalerToDelete, setWholesalerToDelete] = useState<any | null>(null);
 //-------------------------------------------- columns -------------------------------------------
   const columns = [
     { key: 'email', label: { en: 'Email', ar: 'البريد الإلكتروني' } },
@@ -60,7 +63,16 @@ const WholesallersPage = () => {
   };
 //-------------------------------------------- handleDelete -------------------------------------------
   const handleDelete = (item: any) => {
-    setData(prev => prev.filter(d => d.id !== item.id));
+    setWholesalerToDelete(item);
+    setShowDeleteModal(true);
+  };
+//-------------------------------------------- handleDeleteConfirm -------------------------------------------
+  const handleDeleteConfirm = () => {
+    if (wholesalerToDelete) {
+      setData(prev => prev.filter(d => d.id !== wholesalerToDelete.id));
+      setWholesalerToDelete(null);
+    }
+    setShowDeleteModal(false);
   };
 //-------------------------------------------- handleSubmit -------------------------------------------
   const handleSubmit = (e: React.FormEvent) => {
@@ -112,6 +124,18 @@ const WholesallersPage = () => {
         form={form}
         onFormChange={handleFormChange}
         onSubmit={handleSubmit}
+      />
+      {/* ------------------------------------------- PermissionModal ------------------------------------------- */}
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('wholesalers.deleteConfirmTitle') || 'Confirm Delete Wholesaler'}
+        message={t('wholesalers.deleteConfirmMessage') || 'Are you sure you want to delete this wholesaler?'}
+        itemName={wholesalerToDelete ? `${wholesalerToDelete.firstName} ${wholesalerToDelete.lastName}` : ''}
+        itemType={t('wholesalers.wholesaler') || 'wholesaler'}
+        isRTL={isRTL}
+        severity="danger"
       />
     </div>
   );

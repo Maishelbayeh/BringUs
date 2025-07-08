@@ -12,11 +12,16 @@ interface CategoryTreeProps {
   level?: number;
 }
 
+const STORE_ID_KEY = 'storeId';
+const DEFAULT_STORE_ID = '686a719956a82bfcc93a2e2d';
+
 const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, isRTL, onAdd, onEdit, onDelete, level = 0 }) => {
   const [expanded, setExpanded] = useState<{ [key: number]: boolean }>({});
   const { i18n } = useTranslation();
   const lang = i18n.language;
   const navigate = useNavigate();
+  console.log(categories);
+  const storeId = typeof window !== 'undefined' ? (localStorage.getItem(STORE_ID_KEY) || DEFAULT_STORE_ID) : DEFAULT_STORE_ID;
   const toggleExpand = (id: number) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -44,7 +49,9 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, isRTL, onAdd, o
             )}
             {/* صورة الفئة */}
             <img
-              src={cat.image && typeof cat.image === 'string' && cat.image.trim() !== '' ? cat.image : `https://via.placeholder.com/40x40?text=${encodeURIComponent((lang === 'ar' || lang === 'ARABIC' ? cat.nameAr : cat.nameEn).charAt(0))}`}
+              src={
+                typeof cat.image === 'string' ? cat.image : (cat.image && typeof cat.image === 'object' && (cat.image as any).url ? (cat.image as any).url : '')
+              }
               alt={cat.nameAr}
               className={`object-cover border border-primary/20 mr-2 ml-2 rounded-full ${level === 0 ? 'sm:w-16 sm:h-16 w-10 h-10' : 'sm:w-12 sm:h-12 w-8 h-8'}`}
               onError={e => {

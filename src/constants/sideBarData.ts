@@ -27,14 +27,14 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.categories',
     icon: ViewColumnsIcon,
     path: '/categories',
-    children: [
-      {
-        id: 21,
-        title: 'sideBar.subcategories',
-        icon: Squares2X2Icon,
-        path: '/subcategories',
-      }
-    ]
+    // children: [
+    //   {
+    //     id: 21,
+    //     title: 'sideBar.subcategories',
+    //     icon: Squares2X2Icon,
+    //     path: '/subcategories',
+    //   }
+    // ]
   },
   {
     id: 3,

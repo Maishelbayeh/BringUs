@@ -1,5 +1,5 @@
 import React from 'react';
-import CustomTable from '../../components/common/CustomTable';
+import { CustomTable } from '../../components/common/CustomTable';
 import { getAffiliatePaymentsById } from '../../data/mockAffiliatePayments';
 import { useTranslation } from 'react-i18next';
 import PaymentForm from './PaymentForm';

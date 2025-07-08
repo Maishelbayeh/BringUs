@@ -1,5 +1,5 @@
 import i18n from 'i18next';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const useLanguage = () => {
   const [language, setLanguage] = useState<'ENGLISH' | 'ARABIC'>(i18n.language === 'ARABIC' ? 'ARABIC' : 'ENGLISH');
@@ -19,7 +19,24 @@ const useLanguage = () => {
     i18n.changeLanguage(newLanguage);
   };
 
-  return { language, toggleLanguage };
+  // Translation function that uses the current language
+  const t = useCallback((key: string, options?: any): string => {
+    return i18n.t(key, options) as string;
+  }, []);
+
+  // Check if current language is RTL
+  const isRTL = language === 'ARABIC';
+
+  return { 
+    language, 
+    toggleLanguage, 
+    t, 
+    isRTL,
+    setLanguage: (lang: 'ENGLISH' | 'ARABIC') => {
+      setLanguage(lang);
+      i18n.changeLanguage(lang);
+    }
+  };
 };
 
 export default useLanguage; 

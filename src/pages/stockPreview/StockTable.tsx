@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CustomTable from '../../components/common/CustomTable';
+import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
 import CustomBreadcrumb from '@/components/common/CustomBreadcrumb';

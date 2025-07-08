@@ -28,47 +28,67 @@ const NestedRadialChart: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <div style={{ width: "100%", height: 400 }}>
-      <h2 className="text-xl font-bold mb-4 text-center">{t('chart.salesDistributionByCategory')}</h2>
-      <ResponsiveContainer>
-        <PieChart>
-          <Tooltip formatter={(value, name) => [`${value}`, `${name}`]} />
-          <Legend verticalAlign="bottom" height={36} />
-          <Pie
-            data={salesData}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={120}
-            fill="#8884d8"
-            label={({ cx, cy, midAngle, innerRadius, outerRadius, index }) => {
-              const RADIAN = Math.PI / 180;
-              const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-              const x = cx + radius * Math.cos(-midAngle * RADIAN);
-              const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    <div className="p-2 sm:p-3 md:p-4 h-full">
+      <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 md:mb-4 text-center">{t('chart.salesDistributionByCategory')}</h2>
+      <div className="w-full h-64 sm:h-72 md:h-80 lg:h-96">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Tooltip 
+              formatter={(value, name) => [`${value}`, `${name}`]}
+              contentStyle={{
+                fontSize: 'clamp(12px, 1.5vw, 14px)',
+                borderRadius: '8px',
+                border: 'none',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+              }}
+            />
+            <Legend 
+              verticalAlign="bottom" 
+              height={36}
+              wrapperStyle={{
+                fontSize: 'clamp(10px, 1.5vw, 12px)',
+                paddingTop: '10px'
+              }}
+            />
+            <Pie
+              data={salesData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius="60%"
+              fill="#8884d8"
+              label={({ cx, cy, midAngle, innerRadius, outerRadius, index }) => {
+                const RADIAN = Math.PI / 180;
+                const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-              return (
-                <text
-                  x={x}
-                  y={y}
-                  fill="white"
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  style={{ fontSize: '12px', fontWeight: 'bold' }}
-                >
-                  {salesData[index].value}
-                </text>
-              );
-            }}
-            labelLine={false}
-          >
-            {salesData.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
+                return (
+                  <text
+                    x={x}
+                    y={y}
+                    fill="white"
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    style={{ 
+                      fontSize: 'clamp(10px, 1.5vw, 12px)', 
+                      fontWeight: 'bold' 
+                    }}
+                  >
+                    {salesData[index].value}
+                  </text>
+                );
+              }}
+              labelLine={false}
+            >
+              {salesData.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

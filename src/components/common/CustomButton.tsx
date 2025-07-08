@@ -25,19 +25,30 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   bordercolor = 'primary',
   style = {},
   type = 'button',
+  disabled = false,
   ...props
 }) => {
   let justifyContent: React.CSSProperties['justifyContent'] = 'center';
   if (alignment === 'left') justifyContent = 'flex-start';
   if (alignment === 'right') justifyContent = 'flex-end';
 
+  const handleClick = () => {
+    if (!disabled && action) {
+      action();
+    }
+  };
+
   return (
     <button
       type={type}
-      onClick={action}
-      className={`flex items-center  font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-all duration-200 text-${textColor} bg-${color} shadow-sm ${className} border border-${bordercolor} hover:bg-${color}-light hover:text-${textColor}`}
+      onClick={handleClick}
+      disabled={disabled}
+      className={`flex items-center font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-all duration-200 ${
+        disabled 
+          ? 'opacity-40 cursor-not-allowed bg-gray-200 text-gray-400 border-gray-200 hover:bg-gray-200 hover:text-gray-400' 
+          : `text-${textColor} bg-${color} shadow-sm border border-${bordercolor} hover:bg-${color}-light hover:text-${textColor} cursor-pointer hover:shadow-md`
+      } ${className}`}
       style={{
-      
         justifyContent,
         ...style,
       }}

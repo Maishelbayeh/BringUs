@@ -17,26 +17,63 @@ const CustomBarChart: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4 text-center">{t('chart.salesByProductType')}</h2>
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart
-          data={data}
-          margin={{ top: 5, right: 20, bottom: 10, left: 0 }}
-          className="bg-white rounded-lg overflow-hidden"
-        >
-          <XAxis
-            dataKey="productType"            // عرض اسم النوع بدل الـ name
-            axisLine={true}                  // إظهار خط المحور
-            tickLine={false}                 // إزالة الخطوط الصغيرة عند كل تكت
-            tick={{ dy: 10, fontSize: 12 }}  // مسافة عمودية للكتابة
-          />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="uv" fill="#8884d8" label={{ position: 'top', dy: -6 }} isAnimationActive={true} animationDuration={1500} />
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="p-2 sm:p-3 md:p-4 h-full">
+      <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 md:mb-4 text-center">{t('chart.salesByProductType')}</h2>
+      <div className="w-full h-64 sm:h-72 md:h-80 lg:h-96">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            margin={{ 
+              top: 5, 
+              right: 10, 
+              bottom: 20, 
+              left: 10 
+            }}
+            className="bg-white rounded-lg overflow-hidden"
+          >
+            <XAxis
+              dataKey="productType"
+              axisLine={true}
+              tickLine={false}
+              tick={{ 
+                dy: 10, 
+                fontSize: 'clamp(10px, 1.5vw, 12px)'
+              }}
+              height={60}
+            />
+            <YAxis 
+              tick={{ fontSize: 'clamp(10px, 1.5vw, 12px)' }}
+              width={40}
+            />
+            <Tooltip 
+              contentStyle={{
+                fontSize: 'clamp(12px, 1.5vw, 14px)',
+                borderRadius: '8px',
+                border: 'none',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+              }}
+            />
+            <Legend 
+              wrapperStyle={{
+                fontSize: 'clamp(12px, 1.5vw, 14px)',
+                paddingTop: '10px'
+              }}
+            />
+            <Bar 
+              dataKey="uv" 
+              fill="#8884d8" 
+              label={{ 
+                position: 'top', 
+                dy: -6,
+                fontSize: 'clamp(10px, 1.5vw, 12px)'
+              }} 
+              isAnimationActive={true} 
+              animationDuration={1500}
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

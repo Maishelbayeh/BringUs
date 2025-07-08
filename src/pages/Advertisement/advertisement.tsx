@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import CustomTable from '../../components/common/CustomTable';
+import { CustomTable } from '../../components/common/CustomTable';
 import CustomButton from '../../components/common/CustomButton';
 import AdvertisementForm from './AdvertisementForm';
 import HeaderWithAction from '@/components/common/HeaderWithAction';

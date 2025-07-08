@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
@@ -75,11 +76,18 @@ const StoreSliderPage: React.FC = () => {
     setDrawerMode('add');
     setShowDrawer(true);
   };
-  const handleDelete = () => {
-    if (editProduct) {
-      setProductToDelete(editProduct);
-      setShowDrawer(false);
-      setShowDeleteModal(true);
+  const handleDelete = (product?: any) => {
+    const productToDelete = product || editProduct;
+    if (productToDelete) {
+      setProductToDelete(productToDelete);
+      if (product) {
+        // إذا تم الضغط على أيقونة الحذف مباشرة، لا نفتح الدرج
+        setShowDeleteModal(true);
+      } else {
+        // إذا تم الضغط من داخل الدرج
+        setShowDrawer(false);
+        setShowDeleteModal(true);
+      }
     }
   };
   
@@ -129,9 +137,17 @@ const StoreSliderPage: React.FC = () => {
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             <div className="relative w-full h-48 rounded-t-2xl overflow-hidden flex items-center justify-center bg-gray-100">
-            <img
-              src={product.image || 'https://via.placeholder.com/150'}
-              alt={product.name}
+              {/* أيقونة الحذف */}
+              <button
+                className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 bg-red-500/90 hover:bg-red-500 text-white rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110`}
+                onClick={e => { e.stopPropagation(); handleDelete(product); }}
+                title={t('common.delete')}
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+              <img
+                src={product.image || 'https://via.placeholder.com/150'}
+                alt={product.name}
                 className="w-full h-full object-cover transition group-hover:scale-105 duration-300"
               />
             </div>
@@ -166,7 +182,7 @@ const StoreSliderPage: React.FC = () => {
                   color="red-100"
                   textColor="red-700"
                   text={t('common.delete', 'Delete')}
-                  action={handleDelete}
+                  action={() => handleDelete(editProduct)}
                   className="min-w-[100px]"
                 />
               )}

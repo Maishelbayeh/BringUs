@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Dialog } from '@mui/material';
-import { CogIcon } from '@heroicons/react/24/outline';
+import { CogIcon, TrashIcon } from '@heroicons/react/24/outline';
 import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import PermissionModal from '../../components/common/PermissionModal';
 //-------------------------------------------- initialVideos -------------------------------------------
 const initialVideos: any[] = [
   { id: 1, name: 'Store Tour', url: 'https://www.youtube.com/watch?v=ObXiEqzjx9U', description: 'Take a tour in our store!' },
@@ -22,6 +23,8 @@ const StoreVideoPage: React.FC = () => {
   const [openVideo, setOpenVideo] = useState<string | null>(null);
   const [drawerMode, setDrawerMode] = useState<'add' | 'edit'>('add');
   const [editId, setEditId] = useState<number | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [videoToDelete, setVideoToDelete] = useState<any | null>(null);
 //-------------------------------------------- handleSave -------------------------------------------
   const handleSave = (formData: any) => {
     if (drawerMode === 'edit' && editId) {
@@ -46,6 +49,21 @@ const StoreVideoPage: React.FC = () => {
     setEditId(video.id);
     setDrawerMode('edit');
     setShowDrawer(true);
+  };
+
+  //-------------------------------------------- handleDelete -------------------------------------------
+  const handleDelete = (video: any) => {
+    setVideoToDelete(video);
+    setShowDeleteModal(true);
+  };
+  
+  //-------------------------------------------- handleDeleteConfirm -------------------------------------------
+  const handleDeleteConfirm = () => {
+    if (videoToDelete) {
+      setVideos(videos.filter(v => v.id !== videoToDelete.id));
+      setVideoToDelete(null);
+    }
+    setShowDeleteModal(false);
   };
 
   return (
@@ -81,13 +99,22 @@ const StoreVideoPage: React.FC = () => {
               className="relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition group flex flex-col overflow-hidden"
             >
               {/* ------------------------------------------- زر الإعدادات دائماً ظاهر ------------------------------------------- */}
-              <button
-                className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 bg-primary/90 hover:bg-primary text-white rounded-full p-2 shadow`}
-                onClick={e => { e.stopPropagation(); handleEdit(video); }}
-                title={t('storeVideos.edit')}
-              >
-                <CogIcon className="w-6 h-6" />
-              </button>
+              <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                <button
+                  className="bg-primary/90 hover:bg-primary text-white rounded-full p-2 shadow hover:scale-110 transition-transform duration-200"
+                  onClick={e => { e.stopPropagation(); handleEdit(video); }}
+                  title={t('storeVideos.edit')}
+                >
+                  <CogIcon className="w-6 h-6" />
+                </button>
+                <button
+                  className="bg-red-500/90 hover:bg-red-500 text-white rounded-full p-2 shadow hover:scale-110 transition-transform duration-200"
+                  onClick={e => { e.stopPropagation(); handleDelete(video); }}
+                  title={t('common.delete')}
+                >
+                  <TrashIcon className="w-6 h-6" />
+                </button>
+              </div>
               {/* ------------------------------------------- صورة الفيديو أو الفيديو نفسه ------------------------------------------- */}
               <div className="relative w-full aspect-video bg-black flex items-center justify-center cursor-pointer"
                 onClick={() => isYoutube && setOpenVideo(youtubeId)}
@@ -163,6 +190,17 @@ const StoreVideoPage: React.FC = () => {
         onImageChange={() => {}}
         isRTL={isRTL}
         mode={'video'}
+      />
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t('storeVideos.deleteConfirmTitle') || 'Confirm Delete Video'}
+        message={t('storeVideos.deleteConfirmMessage') || 'Are you sure you want to delete this video?'}
+        itemName={videoToDelete ? videoToDelete.name : ''}
+        itemType={t('storeVideos.video') || 'video'}
+        isRTL={isRTL}
+        severity="danger"
       />
     </div>
   );

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon, BuildingStorefrontIcon, UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { PrinterIcon } from '@heroicons/react/24/outline';
-import CustomTable from '../../components/common/CustomTable';
+import { CustomTable } from '../../components/common/CustomTable';
 import PermissionModal from '../../components/common/PermissionModal';
 //-------------------------------------------- OrderDetailPage -------------------------------------------
 const OrderDetailPage: React.FC = () => {

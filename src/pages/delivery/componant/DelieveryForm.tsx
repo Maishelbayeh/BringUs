@@ -1,98 +1,163 @@
 // src/components/DeliveryAreas/DeliveryAreaForm.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { DeliveryArea } from '../../../Types';
 
 import CustomInput from '../../../components/common/CustomInput';
 import { useTranslation } from 'react-i18next';
+import { validateDeliveryForm } from '../validation/deliveryValidation';
 
 interface Props {
   area: DeliveryArea | null;
   onSubmit: (area: DeliveryArea) => void;
   onCancel: () => void;
   language: 'ENGLISH' | 'ARABIC';
+  onValidationChange?: (isValid: boolean) => void;
 }
 
-const DeliveryAreaForm: React.FC<Props> = ({ area, onSubmit, language }) => {
+interface ValidationErrors {
+  locationAr?: string;
+  locationEn?: string;
+  price?: string;
+  whatsappNumber?: string;
+}
+
+export interface FormRef {
+  handleSubmit: () => void;
+}
+
+const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel, language, onValidationChange }, ref) => {
   const [locationAr, setLocationAr] = useState(area?.locationAr || '');
   const [locationEn, setLocationEn] = useState(area?.locationEn || '');
   const [price, setPrice] = useState(area?.price !== undefined ? area.price.toString() : '');
   const [whatsappNumber, setWhatsappNumber] = useState(area?.whatsappNumber || '');
+  const [errors, setErrors] = useState<ValidationErrors>({});
   const { t } = useTranslation();
+
   useEffect(() => {
     setLocationAr(area?.locationAr || '');
     setLocationEn(area?.locationEn || '');
     setPrice(area?.price !== undefined ? area.price.toString() : '');
     setWhatsappNumber(area?.whatsappNumber || '');
+    setErrors({});
   }, [area]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!locationAr || !locationEn || !price || !whatsappNumber) return;
-    onSubmit({
-      id: area?.id || Date.now(),
+  const validateForm = () => {
+    const validationErrors = validateDeliveryForm({
       locationAr,
       locationEn,
-      price: Number(price),
-      whatsappNumber,
-    });
+      price,
+      whatsappNumber
+    }, t);
+
+    setErrors(validationErrors);
+    const isValid = Object.keys(validationErrors).length === 0;
+    
+    if (onValidationChange) {
+      onValidationChange(isValid);
+    }
+    
+    return isValid;
   };
 
+  const handleSubmit = () => {
+    console.log('Form handleSubmit called');
+    console.log('Form data:', { locationAr, locationEn, price, whatsappNumber });
+    
+    const isValid = validateForm();
+    console.log('Form validation result:', isValid);
+    
+    if (isValid) {
+      console.log('Form is valid, calling onSubmit');
+      // Submit form
+      onSubmit({
+        id: area?.id || Date.now(),
+        locationAr,
+        locationEn,
+        price: Number(price),
+        whatsappNumber,
+      });
+    } else {
+      console.log('Form is invalid, not submitting');
+    }
+  };
+
+  const clearError = (field: keyof ValidationErrors) => {
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  // Expose handleSubmit to parent component
+  useImperativeHandle(ref, () => ({
+    handleSubmit
+  }));
+
   return (
-   
-      <form onSubmit={handleSubmit} className="flex flex-col  p-4">
+    <div className="flex flex-col p-4">
+      <CustomInput
+        label={t("deliveryDetails.locationAr")}
+        id="location_ar"
+        value={locationAr}
+        onChange={e => {
+          setLocationAr(e.target.value);
+          clearError('locationAr');
+        }}
+        required
+        placeholder={t("deliveryDetails.locationArPlaceholder")}
+        type="text"
+        style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
+        error={errors.locationAr}
+      />
       
-   
-        
-        <CustomInput
-          label={t("deliveryDetails.locationAr")}
-          id="location_ar"
-          value={locationAr}
-          onChange={e => setLocationAr(e.target.value)}
-          required
-          placeholder={t("deliveryDetails.locationArPlaceholder")}
-          type="text"
-          style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-
-        />
-        <CustomInput
-          label={t("deliveryDetails.locationEn")}
-          id="location_en"
-          value={locationEn}
-          onChange={e => setLocationEn(e.target.value)}
-          required
-          placeholder={t("deliveryDetails.locationEnPlaceholder")}
-          type="text"
-          style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-          
-        />
-        <CustomInput
-          label={t("deliveryDetails.price")}
-          id="price"
-          value={price}
-          onChange={e => setPrice(e.target.value)}
-          required
-          placeholder={t("deliveryDetails.pricePlaceholder")}
-          type="number"
-          min="0"
-          style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-          
-        />
-        <CustomInput
-          label={t("deliveryDetails.whatsappNumber")}
-          id="whatsapp"
-          value={whatsappNumber}
-          onChange={e => setWhatsappNumber(e.target.value)}
-          required
-          placeholder={t("deliveryDetails.whatsappNumberPlaceholder")}
-          type="text"
-          style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
-          
-        />
-
-       
-        </form>
-   
+      <CustomInput
+        label={t("deliveryDetails.locationEn")}
+        id="location_en"
+        value={locationEn}
+        onChange={e => {
+          setLocationEn(e.target.value);
+          clearError('locationEn');
+        }}
+        required
+        placeholder={t("deliveryDetails.locationEnPlaceholder")}
+        type="text"
+        style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
+        error={errors.locationEn}
+      />
+      
+      <CustomInput
+        label={t("deliveryDetails.price")}
+        id="price"
+        value={price}
+        onChange={e => {
+          setPrice(e.target.value);
+          clearError('price');
+        }}
+        required
+        placeholder={t("deliveryDetails.pricePlaceholder")}
+        type="number"
+        min="0"
+        style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
+        error={errors.price}
+      />
+      
+      <CustomInput
+        label={t("deliveryDetails.whatsappNumber")}
+        id="whatsapp"
+        value={whatsappNumber}
+        onChange={e => {
+          setWhatsappNumber(e.target.value);
+          clearError('whatsappNumber');
+        }}
+        required
+        placeholder={t("deliveryDetails.whatsappNumberPlaceholder")}
+        type="text"
+        style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
+        error={errors.whatsappNumber}
+      />
+    </div>
   );
-};
+});
+
+DeliveryAreaForm.displayName = 'DeliveryAreaForm';
 
 export default DeliveryAreaForm;

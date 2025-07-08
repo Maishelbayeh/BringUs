@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FiEdit, FiTrash2, FiPlus, FiFolder,} from 'react-icons/fi';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CategoriesDrawer from './components/CategoriesDrawer';
 import PermissionModal from '../../components/common/PermissionModal';
+import axios, { AxiosResponse } from 'axios';
 
 import CategoryTree from './CategoryTree';
 import { initialCategories } from '../../data/initialCategories';
+import useCategories from '@/hooks/useCategories';
 
 // تعريف نوع الفئة المتداخلة
 interface Category {
-  id: number;
+  id: number | string;
   nameAr: string;
   nameEn: string;
-  image: string; // صورة مصغرة إلزامية
+  image: string; // صورة مصغرة كـ string مباشر
   order: number; // ترتيب إلزامي
   visible: boolean; // مفعّل إلزامي
-  parentId: number | null;
+  parentId: number | string | null;
   descriptionAr: string;
   descriptionEn: string;
+  icon?: string;
 }
 
 // مكون بطاقات الفئات المتداخلة
 const CategoryCards: React.FC<{
   categories: Category[];
   isRTL: boolean;
-  onAdd: (parentId?: number | null) => void;
+  onAdd: (parentId?: string | number | null) => void;
   onEdit: (cat: Category) => void;
   onDelete: (cat: Category) => void;
   level?: number;
@@ -39,11 +42,15 @@ const CategoryCards: React.FC<{
         <div key={cat.id} className={`py-3 bg-white rounded-2xl shadow-md border border-primary/10 p-5 flex flex-col gap-2 relative`} style={{ [isRTL ? 'marginRight' : 'marginLeft']: level * 32 }}>
           <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
             {/* صورة الفئة */}
-            {cat.image ? (
-              <img src={cat.image} alt={cat.nameAr} className="w-14 h-14 rounded-xl object-cover border-2 border-primary/30 shadow" />
-            ) : (
-              <span className="flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40 text-primary rounded-xl w-14 h-14 shadow-lg"><FiFolder className="w-7 h-7" /></span>
-            )}
+            {(() => {
+              const imageUrl = cat.image || '';
+              console.log('CATEGORY IMAGE URL:', imageUrl);
+              return imageUrl ? (
+                <img src={imageUrl} alt={cat.nameAr} className="w-14 h-14 rounded-xl object-cover border-2 border-primary/30 shadow" />
+              ) : (
+                <span className="flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40 text-primary rounded-xl w-14 h-14 shadow-lg"><FiFolder className="w-7 h-7" /></span>
+              );
+            })()}
             {/* اسم الفئة */}
             <div className="flex flex-col flex-1 min-w-0">
               <span
@@ -91,8 +98,9 @@ const CategoryCards: React.FC<{
 };
 
 // دالة لتسطيح شجرة الفئات
-function flattenCategories(categories: Category[], isRTL: boolean): { id: number; name: string; parentId: number | null }[] {
-  let result: { id: number; name: string; parentId: number | null }[] = [];
+function flattenCategories(categories: any[], isRTL: boolean): { id: any; name: string; parentId: any }[] {
+  if (!Array.isArray(categories)) return [];
+  let result: { id: any; name: string; parentId: any }[] = [];
   for (const cat of categories) {
     result.push({ id: cat.id, name: isRTL ? cat.nameAr : cat.nameEn, parentId: cat.parentId ?? null });
     if ('children' in cat && Array.isArray((cat as any).children) && (cat as any).children.length > 0) {
@@ -102,47 +110,73 @@ function flattenCategories(categories: Category[], isRTL: boolean): { id: number
   return result;
 }
 
-// أضف دالة buildCategoryTree(categories: Category[], parentId: number | null): Category[]
-function buildCategoryTree(categories: Category[], parentId: number | null): Category[] {
-  return categories
-    .filter(cat => cat.parentId === parentId)
-    .map(cat => {
-      const children = buildCategoryTree(categories, cat.id);
-      return children.length > 0 ? { ...(cat as any), children } : { ...(cat as any) };
-    });
+function buildCategoryTree(flatCategories: any[]): any[] {
+  if (!Array.isArray(flatCategories)) return [];
+  const idMap: { [key: string]: any } = {};
+  const tree: any[] = [];
+  flatCategories.forEach(cat => {
+    idMap[cat.id] = { ...cat, children: [] };
+  });
+  flatCategories.forEach(cat => {
+    if (cat.parent && typeof cat.parent === 'object' && cat.parent.id && idMap[cat.parent.id]) {
+      idMap[cat.parent.id].children.push(idMap[cat.id]);
+    } else if (!cat.parent || cat.parent === null) {
+      tree.push(idMap[cat.id]);
+    }
+  });
+  return tree;
 }
+
+const STORE_ID = '686a719956a82bfcc93a2e2d'; // storeId ثابت للاختبار
 
 const CategoriesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
-  const [categories, setCategories] = useState(initialCategories);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState<{ nameAr: string; nameEn: string; parentId: number | null; image: string; order: number; visible: boolean; descriptionAr: string; descriptionEn: string }>(
-    { nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '' }
+  const [form, setForm] = useState<{ id?: string | number; nameAr: string; nameEn: string; parentId: string | number | null; image: string; order: number; visible: boolean; descriptionAr: string; descriptionEn: string; icon: string }>(
+    { nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '', icon: '' }
   );
-  const [editId, setEditId] = useState<number | null>(null);
+  const [editId, setEditId] = useState<string | number | null>(null);
   const [search, setSearch] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
- 
+
+  // استخدم الهوك الجديد
+  const { categories, setCategories, fetchCategories, saveCategory, deleteCategory, uploadCategoryImage, testToast } = useCategories();
+
+  useEffect(() => {
+    fetchCategories();
+    // eslint-disable-next-line
+  }, []);
+
   // إدارة الإضافة والتعديل
-  const handleAdd = (parentId?: number | null) => {
-    setForm({ nameAr: '', nameEn: '', parentId: parentId !== undefined ? parentId : null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '' });
+  const handleAdd = (parentId?: string | number | null) => {
+    setForm({ nameAr: '', nameEn: '', parentId: parentId !== undefined ? parentId : null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '', icon: '' });
     setEditId(null);
     setShowForm(true);
   };
   const handleEdit = (cat: Category) => {
-    setForm({
+    console.log('handleEdit - Original category:', cat);
+    console.log('handleEdit - cat.image:', cat.image);
+    console.log('handleEdit - cat.image type:', typeof cat.image);
+    
+    const formData = {
+      ...cat,
+      id: cat.id || (cat as any)._id,
       nameAr: cat.nameAr,
       nameEn: cat.nameEn,
-      parentId: cat.parentId !== undefined ? cat.parentId : null,
-      image: cat.image,
+      parentId: (cat as any).parent && typeof (cat as any).parent === 'object' ? (cat as any).parent.id : (cat.parentId !== undefined ? cat.parentId : null),
+      image: typeof cat.image === 'string' ? cat.image : (cat.image && typeof cat.image === 'object' && (cat.image as any).url ? (cat.image as any).url : ''),
       order: cat.order,
       visible: cat.visible,
       descriptionAr: cat.descriptionAr || '',
       descriptionEn: cat.descriptionEn || '',
-    });
-    setEditId(cat.id);
+      icon: cat.icon || '',
+    };
+    
+    console.log('handleEdit - Final form data:', formData);
+    setForm(formData);
+    setEditId(cat.id || (cat as any)._id);
     setShowForm(true);
   };
   // حذف فئة
@@ -151,49 +185,41 @@ const CategoriesPage: React.FC = () => {
     setShowDeleteModal(true);
   };
   // حفظ (إضافة أو تعديل)
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.nameAr.trim() && !form.nameEn.trim()) return;
-    if (editId) {
-      // تعديل
-      setCategories((prev: Category[]) => prev.map(c =>
-        c.id === editId
-          ? { ...c, nameAr: form.nameAr, nameEn: form.nameEn, image: form.image || c.image || 'https://via.placeholder.com/40x40?text=C', order: form.order, visible: form.visible, parentId: form.parentId, descriptionAr: form.descriptionAr || '', descriptionEn: form.descriptionEn || '' }
-          : c
-      ));
-    } else {
-      // إضافة
-      const newCat: Category = {
-        id: Date.now(),
-        nameAr: form.nameAr,
-        nameEn: form.nameEn,
-        image: form.image || 'https://via.placeholder.com/40x40?text=N',
-        order: form.order,
-        visible: form.visible,
-        parentId: form.parentId,
-        descriptionAr: form.descriptionAr || '',
-        descriptionEn: form.descriptionEn || '',
-      };
-      setCategories((prev: Category[]) => [...prev, newCat]);
+    
+    try {
+      await saveCategory(form, editId, isRTL);
+      setShowForm(false);
+      setForm({ nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '', icon: '' });
+      setEditId(null);
+    } catch (error) {
+      console.error('Error in handleSave:', error);
+      // الخطأ سيتم عرضه من خلال التوست في saveCategory
     }
-    setShowForm(false);
-    setForm({ nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '' });
-    setEditId(null);
   };
   // إغلاق الفورم
   const handleCancel = () => {
     setShowForm(false);
-    setForm({ nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '' });
+    setForm({ nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '', icon: '' });
     setEditId(null);
   };
-
   // إغلاق المودال الحذف
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (selectedCategory) {
-      setCategories((prev: Category[]) => prev.filter(c => c.id !== selectedCategory.id && c.parentId !== selectedCategory.id));
+      await deleteCategory(selectedCategory.id);
       setSelectedCategory(null);
     }
     setShowDeleteModal(false);
+  };
+  // رفع صورة التصنيف
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const url = await uploadCategoryImage(file);
+      setForm(f => ({ ...f, image: url }));
+    }
   };
 
   // Breadcrumb
@@ -214,12 +240,23 @@ const CategoriesPage: React.FC = () => {
         searchValue={search}
         onSearchChange={e => setSearch(e.target.value)}
         searchPlaceholder={t('categories.search') || 'Search categories...'}
-        count={categories.length}
+        count={(categories || []).length}
       />
+      
+      {/* زر اختبار التوست - يمكن حذفه لاحقاً */}
+      {/* <div className="mb-4">
+        <button
+          onClick={testToast}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          اختبار التوست / Test Toast
+        </button>
+      </div> */}
+      
       {/* شجرة الفئات */}
       <div className="">
         <CategoryTree
-          categories={buildCategoryTree(categories, null)}
+          categories={categories}
           isRTL={isRTL}
           onAdd={handleAdd}
           onEdit={handleEdit}
@@ -239,16 +276,10 @@ const CategoriesPage: React.FC = () => {
             [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
           }));
         }}
-        onImageChange={e => {
-          const file = e.target.files && e.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = ev => setForm(f => ({ ...f, image: ev.target?.result as string }));
-            reader.readAsDataURL(file);
-          }
-        }}
+        onImageChange={handleImageChange}
         onSubmit={handleSave}
-        categories={flattenCategories(categories, isRTL)}
+        categories={flattenCategories(categories || [], isRTL) as any}
+        allCategories={categories || []}
       />
       <PermissionModal
         isOpen={showDeleteModal}

@@ -43,7 +43,7 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [permissionInput, setPermissionInput] = useState('');
-  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [, setIsConfirmed] = useState(false);
 
   // Default texts
   const defaultTitle = title || t('general.confirmDelete', 'Confirm Delete');

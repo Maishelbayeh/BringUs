@@ -5,9 +5,9 @@ import ProductsDrawer from './ProductsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import PermissionModal from '../../components/common/PermissionModal';
+import { CustomTable } from '../../components/common/CustomTable';
 import * as XLSX from 'xlsx';
 import { initialCategories } from '../../data/initialCategories';
-import ProductCard from './ProductCard';
 import { initialProducts } from '../../data/initialProducts';
 import { initialSubcategories } from '../subcategories/subcategories';
 import { productLabelOptions } from '../../data/productLabelOptions';
@@ -74,6 +74,7 @@ const ProductsPage: React.FC = () => {
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+  const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
@@ -103,6 +104,126 @@ const ProductsPage: React.FC = () => {
   } else if (sort === 'oldest') {
     filteredProducts = [...filteredProducts].sort((a, b) => a.id - b.id);
   }
+  //-------------------------------------------- getCategoryName -------------------------------------------    
+  const getCategoryName = (catId: number) => {
+    const cat = categories.find(c => c.id === catId);
+    return isRTL ? (cat?.nameAr || '') : (cat?.nameEn || '');
+  };
+  //-------------------------------------------- getSubcategoryName -------------------------------------------
+  const getSubcategoryName = (subId: number) => {
+    const sub = subcategories.find(s => s.id === subId);
+    return isRTL ? (sub?.nameAr || '') : (sub?.nameEn || '');
+  };
+  //-------------------------------------------- getLabelName -------------------------------------------
+  const getLabelName = (label: string | number) => {
+    const found = productLabelOptions.find(l => String(l.id) === String(label));
+    return found ? (isRTL ? found.nameAr : found.nameEn) : String(label);
+  };
+  //-------------------------------------------- getUnitName -------------------------------------------
+  const getUnitName = (unitId: number) => {
+    const unit = unitOptions.find(u => u.id === unitId);
+    return isRTL ? (unit?.nameAr || '') : (unit?.nameEn || '');
+  };
+  //-------------------------------------------- tableData -------------------------------------------
+  const tableData = filteredProducts.map(product => ({
+    id: product.id,
+    image: product.image || (product.images && product.images.length > 0 ? product.images[0] : null),
+    name: isRTL ? product.nameAr : product.nameEn,
+    category: getCategoryName(product.categoryId),
+    subcategory: getSubcategoryName(product.subcategoryId),
+    price: product.price,
+    originalPrice: product.originalPrice,
+    wholesalePrice: product.wholesalePrice,
+    unit: getUnitName(product.unitId),
+    availableQuantity: product.availableQuantity,
+    maintainStock: product.maintainStock === 'Y' ? (isRTL ? 'نعم' : 'Yes') : (isRTL ? 'لا' : 'No'),
+    visibility: product.visibility === 'Y' ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden'),
+    productLabel: getLabelName(product.productLabel),
+    description: isRTL ? product.descriptionAr : product.descriptionEn,
+    parcode: product.parcode,
+    images: product.image ? 1 : (product.images?.length || 0),
+    colors: product.colors?.length || 0,
+    originalProduct: product,
+  }));
+  //-------------------------------------------- renderPrice -------------------------------------------
+  const renderPrice = (value: any, item: any) => {
+    return (
+      <div className="text-sm">
+        <div className="font-semibold text-primary">{value}</div>
+        {item.originalPrice && item.originalPrice !== value && (
+          <div className="text-xs text-gray-500 line-through">{item.originalPrice}</div>
+        )}
+      </div>
+    );
+  };
+  //-------------------------------------------- renderStock -------------------------------------------
+  const renderStock = (value: any, item: any) => {
+    const quantity = Number(value);
+    let colorClass = 'bg-green-100 text-green-700';
+    let text = value;
+    if (quantity === 0) {
+      colorClass = 'bg-red-100 text-red-700';
+      text = isRTL ? 'نفذ المخزون' : 'Out of Stock';
+    } else if (quantity < 10) {
+      colorClass = 'bg-orange-100 text-orange-700';
+      text = `${value} (${isRTL ? 'منخفض' : 'Low'})`;
+    }
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${colorClass}`}>
+        {text}
+      </span>
+    );
+  };
+  //-------------------------------------------- renderVisibility -------------------------------------------
+  const renderVisibility = (value: any) => {
+    const isVisible = value === (isRTL ? 'ظاهر' : 'Visible');
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isVisible ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+        {value}
+      </span>
+    );
+  };
+  //-------------------------------------------- renderActions -------------------------------------------
+  const renderActions = (value: any, item: any) => (
+    <div className="flex justify-center space-x-2">
+      <button
+        onClick={() => handleEdit(item)}
+        className="text-blue-600 hover:text-blue-900 p-1"
+        title={isRTL ? 'تعديل المنتج' : 'Edit Product'}
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      </button>
+      <button
+        onClick={() => handleDelete(item)}
+        className="text-red-600 hover:text-red-900 p-1"
+        title={isRTL ? 'حذف المنتج' : 'Delete Product'}
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </button>
+    </div>
+  );
+  //-------------------------------------------- columns -------------------------------------------
+  const columns = [
+    { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const },
+    { key: 'image', label: { ar: 'الصورة', en: 'Image' }, type: 'image' as const },
+    { key: 'name', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
+    { key: 'category', label: { ar: 'الفئة', en: 'Category' }, type: 'text' as const },
+    { key: 'subcategory', label: { ar: 'الفئة الفرعية', en: 'Subcategory' }, type: 'text' as const },
+    { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number' as const, render: renderPrice },
+    { key: 'wholesalePrice', label: { ar: 'سعر الجملة', en: 'Wholesale Price' }, type: 'number' as const },
+    { key: 'unit', label: { ar: 'الوحدة', en: 'Unit' }, type: 'text' as const },
+    { key: 'availableQuantity', label: { ar: 'الكمية المتوفرة', en: 'Available Quantity' }, type: 'number' as const, render: renderStock },
+    { key: 'maintainStock', label: { ar: 'إدارة المخزون', en: 'Stock Management' }, type: 'text' as const },
+    { key: 'visibility', label: { ar: 'الظهور', en: 'Visibility' }, type: 'status' as const, render: renderVisibility },
+    { key: 'productLabel', label: { ar: 'التصنيف', en: 'Label' }, type: 'text' as const },
+    { key: 'images', label: { ar: 'عدد الصور', en: 'Images Count' }, type: 'number' as const },
+    { key: 'colors', label: { ar: 'عدد الألوان', en: 'Colors Count' }, type: 'number' as const },
+    { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text' as const, render: renderActions, showControls: false },
+  ];
   //-------------------------------------------- handleFormChange -------------------------------------------
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (e.target.name === 'maintainStock') {
@@ -129,7 +250,6 @@ const ProductsPage: React.FC = () => {
       setForm({ ...form, images: [] });
       return;
     }
-    //-------------------------------------------- imageUrls -------------------------------------------
     const fileArray = Array.isArray(files) ? files : [files];
     const imageUrls = fileArray.map(file => URL.createObjectURL(file));
     setForm({ ...form, images: imageUrls });
@@ -137,11 +257,11 @@ const ProductsPage: React.FC = () => {
   //-------------------------------------------- handleSubmit -------------------------------------------
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // تحويل الألوان إلى مصفوفة مصفوفات قبل الحفظ
     const saveColors = Array.isArray(form.colors)
       ? form.colors.map((variant: any) => Array.isArray(variant.colors) ? variant.colors : [])
       : [];
     const productToSave = { ...form, colors: saveColors };
+    
     if (drawerMode === 'edit' && editProduct) {
       setProducts(products.map(p => p.id === editProduct.id ? { ...editProduct, ...productToSave } : p));
     } else {
@@ -151,38 +271,32 @@ const ProductsPage: React.FC = () => {
     setEditProduct(null);
     setDrawerMode('add');
     setForm(initialForm);
-    //-------------------------------------------- console.log -------------------------------------------
-    console.log("---- Form Values ----");
-    Object.entries(productToSave).forEach(([key, value]) => {
-      console.log(`${key}:`, value);
-    });
   };
-  //-------------------------------------------- handleCardClick -------------------------------------------
-  const handleCardClick = (product: any) => {
-    // تحويل الألوان إلى الشكل المطلوب للفورم
-    const formColors = Array.isArray(product.colors)
-      ? product.colors.map((arr: string[], idx: number) => ({
+  //-------------------------------------------- handleEdit -------------------------------------------
+  const handleEdit = (product: any) => {
+    const formColors = Array.isArray(product.originalProduct.colors)
+      ? product.originalProduct.colors.map((arr: string[], idx: number) => ({
           id: String(idx) + '-' + Date.now(),
           colors: arr
         }))
       : [];
-    // منطق تفعيل إدارة المخزون حسب الكمية المتوفرة
-    const maintainStock = product.availableQuantity > 0 ? 'Y' : 'N';
-    // استخراج unitId من unitOptions إذا كان المنتج يحتوي على unit نص فقط
-    let unitId = product.unitId;
-    if (!unitId && product.unit) {
-      const found = unitOptions.find(u => u.nameAr === product.unit || u.nameEn === product.unit);
+    
+    const maintainStock = product.originalProduct.availableQuantity > 0 ? 'Y' : 'N';
+    let unitId = product.originalProduct.unitId;
+    if (!unitId && product.originalProduct.unit) {
+      const found = unitOptions.find(u => u.nameAr === product.originalProduct.unit || u.nameEn === product.originalProduct.unit);
       unitId = found ? found.id : '';
     }
+    
     setForm({
-      ...product,
+      ...product.originalProduct,
       colors: formColors,
-      name: isRTL ? product.nameAr : product.nameEn,
-      description: isRTL ? product.descriptionAr : product.descriptionEn,
+      name: isRTL ? product.originalProduct.nameAr : product.originalProduct.nameEn,
+      description: isRTL ? product.originalProduct.descriptionAr : product.originalProduct.descriptionEn,
       maintainStock,
       unitId: unitId ? String(unitId) : '',
     });
-    setEditProduct(product);
+    setEditProduct(product.originalProduct);
     setDrawerMode('edit');
     setShowDrawer(true);
   };
@@ -208,35 +322,24 @@ const ProductsPage: React.FC = () => {
   //-------------------------------------------- handleDeleteConfirm -------------------------------------------
   const handleDeleteConfirm = () => {
     if (selectedProduct) {
-      setProducts(products.filter(p => p.id !== selectedProduct.id));
+      setProducts(products.filter(p => p.id !== selectedProduct.originalProduct.id));
       setSelectedProduct(null);
     }
     setShowDeleteModal(false);
   };
-  //-------------------------------------------- getCategoryName -------------------------------------------    
-  const getCategoryName = (catId: number) => {
-    const cat = categories.find(c => c.id === catId);
-    return isRTL ? (cat?.nameAr || '') : (cat?.nameEn || '');
-  };
-  //-------------------------------------------- getSubcategoryName -------------------------------------------
-  const getSubcategoryName = (subId: number) => {
-    const sub = subcategories.find(s => s.id === subId);
-    return isRTL ? (sub?.nameAr || '') : (sub?.nameEn || '');
-  };
-  //-------------------------------------------- getLabelName -------------------------------------------
-  const getLabelName = (label: string | number) => {
-    const found = productLabelOptions.find(l => String(l.id) === String(label));
-    return found ? (isRTL ? found.nameAr : found.nameEn) : String(label);
-  };
   //-------------------------------------------- handleDownloadExcel -------------------------------------------
   const handleDownloadExcel = () => {
     const rows: any[] = [];
-    filteredProducts.forEach((product) => {
+    visibleTableData.forEach((product) => {
       rows.push({
-        [isRTL ? 'اسم المنتج' : 'Product Name']: isRTL ? product.nameAr : product.nameEn,
-        [isRTL ? 'الفئة' : 'Category']: getCategoryName(product.categoryId),
-        [isRTL ? 'الفئة الفرعية' : 'Subcategory']: getSubcategoryName(product.subcategoryId),
-        [isRTL ? 'الوصف' : 'Description']: product.description,
+        [isRTL ? 'اسم المنتج' : 'Product Name']: product.name,
+        [isRTL ? 'الفئة' : 'Category']: product.category,
+        [isRTL ? 'الفئة الفرعية' : 'Subcategory']: product.subcategory,
+        [isRTL ? 'السعر' : 'Price']: product.price,
+        [isRTL ? 'سعر الجملة' : 'Wholesale Price']: product.wholesalePrice,
+        [isRTL ? 'الوحدة' : 'Unit']: product.unit,
+        [isRTL ? 'الكمية المتوفرة' : 'Available Quantity']: product.availableQuantity,
+        [isRTL ? 'الظهور' : 'Visibility']: product.visibility,
       });
     });
     const worksheet = XLSX.utils.json_to_sheet(rows);
@@ -246,42 +349,34 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- return -------------------------------------------   
   return (
-    <div className="sm:p-4 w-full" >
+    <div className="sm:p-4 w-full">
       <CustomBreadcrumb items={[
         { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
         { name: t('sideBar.products') || 'Products', href: '/products' }
       ]} isRtl={isRTL} />
+      
       {/* ------------------------------------------- HeaderWithAction ------------------------------------------- */}
       <HeaderWithAction
         title={t('sideBar.products') || 'Products'}
         addLabel={t('products.add') || 'Add'}
         onAdd={handleAddClick}
         isRtl={isRTL}
-        showSearch={true}
-        searchValue={search}
-        onSearchChange={e => setSearch(e.target.value)}
-        searchPlaceholder={t('products.search') || 'Search products...'}
-        showSort={true}
-        sortValue={sort}
-        onSortChange={e => setSort(e.target.value)}
-        sortOptions={sortOptions}
+       
         onDownload={handleDownloadExcel}
-        count={filteredProducts.length}
+        count={visibleTableData.length}
       />
-      {/* ------------------------------------------- ProductCard ------------------------------------------- */}
-      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-6">
-        {filteredProducts.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            isRTL={isRTL}
-            onClick={handleCardClick}
-            getCategoryName={getCategoryName}
-            getLabelName={getLabelName}
-            onDelete={handleDelete}
-          />
-        ))}
+
+      {/* ------------------------------------------- CustomTable ------------------------------------------- */}
+      <div className="overflow-x-auto">
+        <CustomTable 
+          columns={columns} 
+          data={tableData} 
+          onFilteredDataChange={setVisibleTableData}
+          autoScrollToFirst={true}
+        />
       </div>
+
+      {/* ------------------------------------------- ProductsDrawer ------------------------------------------- */}
       <ProductsDrawer
         open={showDrawer}
         onClose={handleDrawerClose}
@@ -294,13 +389,15 @@ const ProductsPage: React.FC = () => {
         categories={categories as any}
         subcategories={subcategories as any}
       />
+
+      {/* ------------------------------------------- PermissionModal ------------------------------------------- */}
       <PermissionModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteConfirm}
         title={t('products.deleteConfirmTitle') || 'Confirm Delete Product'}
         message={t('products.deleteConfirmMessage') || 'Are you sure you want to delete this product?'}
-        itemName={selectedProduct ? (isRTL ? selectedProduct.nameAr : selectedProduct.nameEn) : ''}
+        itemName={selectedProduct ? selectedProduct.name : ''}
         itemType={t('products.product') || 'product'}
         isRTL={isRTL}
         severity="danger"

@@ -1,53 +1,105 @@
-import React, { useState } from 'react';
-import CustomTable from '../../components/common/CustomTable';
+import React, { useState, useEffect } from 'react';
+import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
- 
+import useProductSpecifications from '../../hooks/useProductSpecifications';
 import ProductSpecificationsDrawer from './ProductSpecificationsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
-import { initialProductSpecifications } from '../../data/initialProductSpecifications';
-
-const initialSpecs = initialProductSpecifications;
 
 const ProductSpecifications: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const [specs, setSpecs] = useState(initialSpecs);
+  const isRTL = i18n.language === 'ARABIC' || i18n.language === 'ar';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingSpec, setEditingSpec] = useState<any>(null);
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
 
-  const handleDelete = (item: any) => {
-    setSpecs(prev => prev.filter(s => s.id !== item.id));
+  const {
+    specifications,
+    loading,
+    fetchSpecifications,
+    saveSpecification,
+    deleteSpecification,
+    validateSpecification
+  } = useProductSpecifications();
+
+  // جلب البيانات عند تحميل الصفحة (مرة واحدة فقط)
+  useEffect(() => {
+    if (specifications.length === 0) {
+      fetchSpecifications();
+    }
+  }, [fetchSpecifications, specifications.length]);
+
+  const handleDelete = async (item: any) => {
+    try {
+      await deleteSpecification(item._id || item.id);
+    } catch (error) {
+      console.error('Error deleting specification:', error);
+    }
   };
+
   const handleEdit = (item: any) => {
     setEditingSpec(item);
     setDrawerOpen(true);
+    setValidationErrors({});
   };
+
   const handleAdd = () => {
     setEditingSpec(null);
     setDrawerOpen(true);
+    setValidationErrors({});
   };
+
   const handleDrawerClose = () => {
     setDrawerOpen(false);
     setEditingSpec(null);
+    setValidationErrors({});
   };
-  const handleDrawerSave = (spec: any) => {
-    if (spec.id) {
-      setSpecs(prev => prev.map(s => (s.id === spec.id ? spec : s)));
-    } else {
-      setSpecs(prev => [...prev, { ...spec, id: Date.now() }]);
+
+  const handleDrawerSave = async (form: any) => {
+    try {
+      // التحقق من صحة البيانات
+      const errors = validateSpecification(form, isRTL);
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        return;
+      }
+
+      // حفظ البيانات
+      await saveSpecification(form, editingSpec?._id || editingSpec?.id, isRTL);
+      setDrawerOpen(false);
+      setEditingSpec(null);
+      setValidationErrors({});
+    } catch (error) {
+      console.error('Error saving specification:', error);
     }
-    setDrawerOpen(false);
-    setEditingSpec(null);
+  };
+
+  const handleFieldChange = (field: string) => {
+    if (validationErrors[field]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const columns = [
-    { key: 'description', label: { ar: 'وصف الصفة', en: 'Specification Description' }, type: 'text', align: 'center' },
+    { 
+      key: 'description', 
+      label: { ar: 'وصف المواصفة', en: 'Specification Description' }, 
+      type: 'text', 
+      align: 'center' 
+    },
+   
+
   ];
 
   const lang = i18n.language;
-  const tableData = specs.map(spec => ({
+  const tableData = specifications.map(spec => ({
     ...spec,
-    description: lang === 'ar' || lang === 'ARABIC' ? spec.descriptionAr : spec.descriptionEn
+    description: lang === 'ar' || lang === 'ARABIC' ? spec.descriptionAr : spec.descriptionEn,
+    category: spec.category ? (lang === 'ar' || lang === 'ARABIC' ? spec.category.nameAr : spec.category.nameEn) : (isRTL ? 'بدون تصنيف' : 'No Category')
   }));
 
   // Breadcrumb
@@ -59,18 +111,33 @@ const ProductSpecifications: React.FC = () => {
   return (
     <div className="sm:p-4 w-full">
       {/* Breadcrumb */}
-      <CustomBreadcrumb items={breadcrumb} isRtl={i18n.language === 'ARABIC'} />
+      <CustomBreadcrumb items={breadcrumb} isRtl={isRTL} />
+      
       <HeaderWithAction
         title={t('products.productSpecifications') || 'Product Specifications'}
         addLabel={t('common.add') || 'Add'}
         onAdd={handleAdd}
-        isRtl={i18n.language === 'ARABIC'}
-        count={specs.length}
+        isRtl={isRTL}
+        count={specifications.length}
       />
+      
       <div className="overflow-x-auto">
-        <CustomTable columns={columns as any} data={tableData} onEdit={handleEdit} onDelete={handleDelete} />
+        <CustomTable 
+          columns={columns as any} 
+          data={tableData} 
+          onEdit={handleEdit} 
+          onDelete={handleDelete}
+        />
       </div>
-      <ProductSpecificationsDrawer open={drawerOpen} onClose={handleDrawerClose} onSave={handleDrawerSave} spec={editingSpec} />
+      
+      <ProductSpecificationsDrawer 
+        open={drawerOpen} 
+        onClose={handleDrawerClose} 
+        onSave={handleDrawerSave} 
+        spec={editingSpec}
+        validationErrors={validationErrors}
+        onFieldChange={handleFieldChange}
+      />
     </div>
   );
 };
