@@ -1,8 +1,7 @@
 // src/components/DeliveryAreas/DeliveryAreaCard.tsx
 import React from 'react';
-import SettingsIcon from '@mui/icons-material/Settings';
 import RoomIcon from '@mui/icons-material/Room';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { EyeIcon, EyeSlashIcon, PencilSquareIcon, TrashIcon, StarIcon } from '@heroicons/react/24/outline';
 import { DelieveryMethod } from '../../../Types';
 import useLanguage from '../../../hooks/useLanguage';
 
@@ -92,74 +91,60 @@ const DeliveryAreaCard: React.FC<Props> = ({
       </div>
 
       {/* Controls */}
-      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} onClick={e => e.stopPropagation()}>
         <div className="min-w-[70px] text-center text-sm font-bold text-primary border border-primary px-3 py-1 rounded-full bg-primary/10">
           {area.price} <span className="text-[10px] font-normal text-gray-500">ILS</span>
         </div>
 
-                {onToggleActive && (
+        {onToggleActive && (
           <button
             onClick={handleToggleActive}
-            disabled={area.isDefault || loading}
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold transition-all shadow-sm ${
-              area.isDefault
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : area.isActive
-                ? 'bg-yellow-500 hover:bg-yellow-600 hover:shadow-md'
-                : 'bg-yellow-400 hover:bg-yellow-500 hover:shadow-md'
-            }`}
+            disabled={loading}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 transition"
             title={area.isActive ? t('deliveryDetails.tooltips.deactivate') : t('deliveryDetails.tooltips.activate')}
             type="button"
           >
-            {area.isActive ? '✓' : '✗'}
+            {area.isActive ? <EyeIcon className="w-4 h-4" /> : <EyeSlashIcon className="w-4 h-4" />}
           </button>
         )}
 
-        {onSetDefault && (
+        <button
+          onClick={handleSettings}
+          disabled={loading}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition"
+          title={t('deliveryDetails.tooltips.settings')}
+          type="button"
+        >
+          <PencilSquareIcon className="w-4 h-4" />
+        </button>
+
+        {!area.isDefault && (
+          <button
+            onClick={handleDelete}
+            disabled={loading}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 transition"
+            title={t('deliveryDetails.tooltips.delete')}
+            type="button"
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+        )}
+
+        {onSetDefault && !area.isDefault && (
           <button
             onClick={handleSetDefault}
-            disabled={area.isDefault || !area.isActive || loading}
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm transition-all shadow-sm ${
-              area.isDefault || !area.isActive
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-500 hover:bg-blue-600 hover:shadow-md'
-            }`}
+            disabled={!area.isActive || loading}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-50 hover:bg-yellow-100 text-yellow-600 transition"
             title={
-              area.isDefault
-                ? t('deliveryDetails.tooltips.alreadyDefault')
-                : !area.isActive
+              !area.isActive
                 ? t('deliveryDetails.tooltips.cannotSetInactiveAsDefault')
                 : t('deliveryDetails.tooltips.setDefault')
             }
             type="button"
           >
-            ⭐
+            <StarIcon className="w-4 h-4" />
           </button>
         )}
-        
-        <button
-          onClick={handleSettings}
-          disabled={loading}
-          className="w-8 h-8 rounded-full flex items-center justify-center bg-primary hover:bg-primary-dark text-white transition-all shadow-sm hover:shadow-md"
-          type="button"
-          title={t('deliveryDetails.tooltips.settings')}
-        >
-          <SettingsIcon style={{ fontSize: 18 }} />
-        </button>
-
-        <button
-          onClick={handleDelete}
-          disabled={area.isDefault || loading}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${
-            area.isDefault
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-red-500 hover:bg-red-600 text-white hover:shadow-md'
-          }`}
-          title={area.isDefault ? t('deliveryDetails.tooltips.cannotDeleteDefault') : t('deliveryDetails.tooltips.delete')}
-          type="button"
-        >
-          <DeleteIcon style={{ fontSize: 18 }} />
-        </button>
       </div>
     </div>
   );

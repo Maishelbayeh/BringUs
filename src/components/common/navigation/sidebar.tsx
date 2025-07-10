@@ -30,6 +30,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   toggleSidebar,
   isRTL,
 }) => {
+  // CSS for hiding scrollbar
+  const scrollbarHideStyles = `
+    .sidebar-scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .sidebar-scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  `;
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -59,18 +69,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 
 
-  return (
-    <aside
-      className={`
-        w-80 max-w-xs p-4 bg-primary-light flex flex-col
-        transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}
-        overflow-y-auto custom-scrollbar-hide
-        ${isRTL ? 'items-end' : 'items-start'}
-        h-screen
-      `}
-      dir={isRTL ? 'rtl' : 'ltr'}
-    >
+    return (
+    <>
+      <style>{scrollbarHideStyles}</style>
+      <aside
+        className={`
+          h-screen w-80 max-w-xs p-4 bg-primary-light flex flex-col 
+          transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}
+          overflow-y-auto sidebar-scrollbar-hide
+          ${isRTL ? 'items-end' : 'items-start'}
+        `}
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
       {/* Logo & Store Name */}
       <div className={`mb-6 mt-2 w-full flex flex-col items-center justify-center`}>
         <div className="flex items-center gap-2">
@@ -217,6 +228,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </DialogActions>
       </Dialog>
     </aside>
+    </>
   );
 };
 
