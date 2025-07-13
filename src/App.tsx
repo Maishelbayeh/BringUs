@@ -36,7 +36,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className={
-        `flex min-h-screen w-full bg-main_bg_w overflow-x-hidden ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
+        `flex h-screen w-full bg-main_bg_w overflow-x-hidden ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
       }>
       {/* Sidebar for all screens, but with different style for mobile */}
       {isSidebarOpen && (
