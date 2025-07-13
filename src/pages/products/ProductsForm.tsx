@@ -23,13 +23,12 @@ interface ProductsFormProps {
   onTagsChange: (values: string[]) => void;
   onImageChange: (files: File | File[] | null) => void;
   categories?: { id: number; nameAr: string; nameEn: string }[];
-  subcategories?: { id: number; nameAr: string; nameEn: string; categoryId: number }[];
   tags?: any[];
   units?: any[];
 }
 
 //-------------------------------------------- ProductsForm -------------------------------------------
-const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsChange, onImageChange, categories = [], subcategories = [], tags = [], units = [] }) => {
+const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsChange, onImageChange, categories = [], tags = [], units = [] }) => {
   const { i18n } = useTranslation();
   const isRtl = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   

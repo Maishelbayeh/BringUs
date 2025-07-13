@@ -22,7 +22,6 @@ const initialForm: {
   nameAr: string;
   nameEn: string;
   categoryId: string;
-  subcategoryId: string;
   storeId: string;
   visibility: string;
   unit: string;
@@ -30,7 +29,6 @@ const initialForm: {
   price: string;
   compareAtPrice: string;
   costPrice: string;
-  originalPrice: string;
 
   tags: string[];
   productOrder: string;
@@ -48,7 +46,6 @@ const initialForm: {
   nameAr: '',
   nameEn: '',
   categoryId: '',
-  subcategoryId: '',
   storeId: '',
   visibility: 'Y',
   unit: '',
@@ -56,7 +53,6 @@ const initialForm: {
   price: '',
   costPrice: '',
   compareAtPrice: '',
-  originalPrice: '',
 
   tags: [],
   productOrder: '',
@@ -184,10 +180,9 @@ const ProductsPage: React.FC = () => {
       availableQuantity: product.availableQuantity || product.stock || 0,
       maintainStock: (product.availableQuantity || product.stock || 0) > 0 ? (isRTL ? 'نعم' : 'Yes') : (isRTL ? 'لا' : 'No'),
       visibility: product.visibility ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden'),
-      tags: product.tags && product.tags.length > 0 
-        ? product.tags.map((labelId: string) => {
-            const label = productLabels.find((l: any) => l._id === labelId || l.id === labelId);
-            return label ? (isRTL ? label.nameAr : label.nameEn) : labelId;
+      tags: product.productLabels && product.productLabels.length > 0 
+        ? product.productLabels.map((label: any) => {
+            return label ? (isRTL ? label.nameAr : label.nameEn) : '';
           }).join(', ')
         : (isRTL ? 'لا يوجد تصنيف' : 'No Labels'),
       descriptionAr: product.descriptionAr,
@@ -378,13 +373,11 @@ const ProductsPage: React.FC = () => {
         price: parseFloat(form.price) || 0,
         costPrice: parseFloat(form.costPrice) || 0,
         compareAtPrice: parseFloat(form.compareAtPrice) || 0,
-        originalPrice: parseFloat(form.originalPrice) || 0,
         availableQuantity: parseInt(String(form.availableQuantity)) || 0,
         productOrder: parseInt(String(form.productOrder)) || 0,
         visibility: form.visibility === 'Y',
         unitId: form.unitId || form.unit || null,
         categoryId: form.categoryId || null,
-        subcategoryId: form.subcategoryId || null,
         tags: form.tags || [],
         barcode: form.barcode || '',
         colors: Array.isArray(form.colors)
@@ -427,7 +420,6 @@ const ProductsPage: React.FC = () => {
     const maintainStock = (product.originalProduct.availableQuantity || product.originalProduct.stock || 0) > 0 ? 'Y' : 'N';
     let unitId = product.originalProduct.unit?._id || product.originalProduct.unitId;
     let categoryId = product.originalProduct.category?._id || product.originalProduct.categoryId;
-    let subcategoryId = product.originalProduct.subcategory?._id || product.originalProduct.subcategoryId;
     let storeId = product.originalProduct.store?._id || product.originalProduct.storeId;
     
     const newForm = {
@@ -442,7 +434,6 @@ const ProductsPage: React.FC = () => {
       maintainStock,
       unitId: unitId ? String(unitId) : '',
       categoryId: categoryId ? String(categoryId) : '',
-      subcategoryId: subcategoryId ? String(subcategoryId) : '',
       storeId: storeId ? String(storeId) : '',
       tags: product.originalProduct.tags || [],
       visibility: product.originalProduct.visibility ? 'Y' : 'N',
@@ -550,7 +541,6 @@ const ProductsPage: React.FC = () => {
         onImageChange={handleImageChange}
         onSubmit={handleSubmit}
         categories={categories as any}
-        subcategories={subcategories as any}
         tags={productLabels}
         units={units}
       />
