@@ -33,7 +33,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   if (alignment === 'right') justifyContent = 'flex-end';
 
   const handleClick = () => {
-    if (!disabled && action) {
+    if (!disabled && action && type !== 'submit') {
       action();
     }
   };

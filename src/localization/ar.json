@@ -9,8 +9,8 @@
     "add":"إضافة",
     "save":"حفظ",
     "saving":"جاري الحفظ...",
-    "cancel":"إلغاء",
     "active":"نشط",
+    "update": "تعديل",
     "inactive":"غير نشط",
     "yes":"نعم",
     "no":"لا",
@@ -152,6 +152,7 @@
        "products": "المنتجات",
        "customers": "العملاء",
        "orders": "الطلبات",
+       "labels": "التصنيفات",
        "storeSlider": "شريط المتجر",
        "storePreview": "معاينة المتجر",
        "storeVideos": "فيديوهات المتجر",
@@ -170,7 +171,8 @@
        "termsConditions": "الشروط والأحكام",
        "productSpecifications": "الصفات",
        "testimonials": "التعليقات",
-       "subcategories": "الفئات الفرعية"
+       "subcategories": "الفئات الفرعية",
+       "units": "الوحدات"
    },
   "chart": {
     "salesByProductType": "المبيعات حسب نوع المنتج",
@@ -284,7 +286,7 @@
   },
   "paymentMethods": {
     "title": "طرق الدفع",
-    "description": "إعداد طرق الدفع والرسوم والإعدادات.",
+   
     "addPaymentMethod": "إضافة طريقة دفع",
     "editPaymentMethod": "تعديل طريقة الدفع",
     "manage": "تعديل الطريقة",
@@ -430,6 +432,7 @@
     "descriptionEn": "الوصف (انجليزي)",
     "image": "الصورة"
   },
+ 
   "customers": {
     "title": "العملاء",
     "phone": "رقم الهاتف",
@@ -470,6 +473,7 @@
     "add": "إضافة",
     "edit": "تعديل",
     "delete": "حذف",
+    "update": "تعديل",
     "cancel": "إلغاء",
     "save": "حفظ",
     "none": "لا يوجد",
@@ -638,8 +642,7 @@
   "termsConditions": {
     "edit": "تعديل الشروط والأحكام",
     "htmlPreview": "معاينة الكود HTML",
-    "saved": "تم حفظ التغييرات!",
-    "saveError": "فشل في حفظ التغييرات. يرجى المحاولة مرة أخرى.",
+   
     "view": "الشروط والأحكام",
     "saved": "تم حفظ التغييرات!",
     "saveError": "فشل في حفظ التغييرات. يرجى المحاولة مرة أخرى.",
@@ -726,5 +729,58 @@
       "accountProtection": "حماية الحساب",
       "accountProtectionDesc": "حسابك يبقى آمناً طوال العملية"
     }
+  },
+  "units": {
+    "title": "الوحدات",
+    "add": "إضافة وحدة",
+    "edit": "تعديل وحدة",
+    "nameAr": "الاسم (عربي)",
+    "nameEn": "الاسم (إنجليزي)",
+    "nameArPlaceholder": "أدخل اسم الوحدة بالعربية",
+    "nameEnPlaceholder": "أدخل اسم الوحدة بالإنجليزية",
+    "sortOrder": "ترتيب الفرز",
+    "isActive": "مفعل؟",
+    "symbol": "الرمز",
+    
+    "descriptionAr": "الوصف (عربي)",
+    "descriptionEn": "الوصف (إنجليزي)",
+    "descriptionArPlaceholder": "أدخل الوصف بالعربية",
+    "unit": "وحدة",
+    "addUnit": "إضافة وحدة",
+    "editUnit": "تعديل الوحدة",
+    "addSuccess": "تم إضافة الوحدة بنجاح",
+    "editSuccess": "تم تعديل الوحدة بنجاح",
+    "deleteSuccess": "تم حذف الوحدة بنجاح",
+    "downloadSuccess": "تم تحميل البيانات بنجاح",
+    "deleteConfirmTitle": "تأكيد حذف الوحدة",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذه الوحدة؟",
+    "helpTitle": "ملاحظات مهمة:",
+    "helpAr": "• الاسم العربي سيظهر للعملاء العرب",
+    "helpEn": "• الاسم الإنجليزي سيظهر للعملاء الناطقين بالإنجليزية",
+    "helpUnique": "• يجب أن يكون الاسم فريداً وغير مكرر"
+    
+  },
+
+  "productsLabels": {
+    "title": "التصنيفات",
+    "add": "إضافة التصنيف",
+    "edit": "تعديل التصنيف",
+    "nameAr": "الاسم (عربي)",
+    "nameEn": "الاسم (إنجليزي)",
+    "nameArPlaceholder": "أدخل اسم التصنيف بالعربية",
+    "nameEnPlaceholder": "أدخل اسم التصنيف بالإنجليزية",
+    "sortOrder": "ترتيب الفرز",
+    "isActive": "مفعل؟",
+    "symbol": "الرمز",
+    "descriptionAr": "الوصف (عربي)",
+    "descriptionEn": "الوصف (إنجليزي)",
+    "descriptionArPlaceholder": "أدخل الوصف بالعربية",
+    "descriptionEnPlaceholder": "أدخل الوصف بالإنجليزية",
+    "label": "التصنيف",
+    "addLabel": "إضافة التصنيف",
+    "editLabel": "تعديل التصنيف",
+    "deleteLabel": "حذف التصنيف",
+    "deleteConfirmTitle": "تأكيد حذف التصنيف",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا التصنيف؟"
   }
 } 

@@ -38,9 +38,11 @@ const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onCha
           checked={checked}
           onChange={handleChange}
           name={name}
+          
           disabled={disabled}
           sx={{
             '& .MuiSwitch-switchBase.Mui-checked': {
+              direction: 'rtl',
               color: '#634C9F',
               '& + .MuiSwitch-track': {
                 backgroundColor: '#634C9F',

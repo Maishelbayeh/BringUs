@@ -7,11 +7,11 @@ import HeaderWithAction from '@/components/common/HeaderWithAction';
 import PermissionModal from '../../components/common/PermissionModal';
 import { CustomTable } from '../../components/common/CustomTable';
 import * as XLSX from 'xlsx';
-import { initialCategories } from '../../data/initialCategories';
-import { initialProducts } from '../../data/initialProducts';
 import { initialSubcategories } from '../subcategories/subcategories';
-import { productLabelOptions } from '../../data/productLabelOptions';
-import { unitOptions } from '../../data/unitOptions';
+import useProducts from '../../hooks/useProducts';
+import useProductLabel from '../../hooks/useProductLabel';
+import useCategories from '../../hooks/useCategories';
+import useUnits from '../../hooks/useUnits';
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
@@ -19,39 +19,53 @@ interface ColorVariant {
 }
 //-------------------------------------------- initialForm -------------------------------------------
 const initialForm: {
-  name: string;
+  nameAr: string;
+  nameEn: string;
   categoryId: string;
   subcategoryId: string;
+  storeId: string;
   visibility: string;
   unit: string;
+  unitId: string;
   price: string;
+  compareAtPrice: string;
+  costPrice: string;
   originalPrice: string;
-  wholesalePrice: string;
-  productLabel: number;
+
+  tags: string[];
   productOrder: string;
   maintainStock: string;
   availableQuantity: number;
-  description: string;
-  parcode: string;
+  
+  descriptionAr: string;
+  descriptionEn: string;
+  barcode: string;
   productSpecifications: string[];
   colors: ColorVariant[];
   images: string[];
   productVideo: string;
 } = {
-  name: '',
+  nameAr: '',
+  nameEn: '',
   categoryId: '',
   subcategoryId: '',
+  storeId: '',
   visibility: 'Y',
   unit: '',
+  unitId: '',
   price: '',
+  costPrice: '',
+  compareAtPrice: '',
   originalPrice: '',
-  wholesalePrice: '',
-  productLabel: 1,
+
+  tags: [],
   productOrder: '',
   maintainStock: 'Y',
   availableQuantity: 0,
-  description: '',
-  parcode: '',
+  
+  descriptionAr: '',
+  descriptionEn: '',
+  barcode: '',
   productSpecifications: [],
   colors: [],
   images: [],
@@ -59,17 +73,15 @@ const initialForm: {
 };
 //-------------------------------------------- ProductsPage -------------------------------------------
 const ProductsPage: React.FC = () => {
-  const [categories] = useState(initialCategories);
   const [subcategories] = useState(initialSubcategories);
-  const [products, setProducts] = useState<any[]>(initialProducts);
   const [showDrawer, setShowDrawer] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [editProduct, setEditProduct] = useState<any | null>(null);
   const [drawerMode, setDrawerMode] = useState<'add' | 'edit'>('add');
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
-  const [search, setSearch] = useState('');
-  const [sort, setSort] = useState('default');
+  const [search] = useState('');
+  const [sort] = useState('default');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -79,6 +91,43 @@ const ProductsPage: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
   const subcategoryIdParam = params.get('subcategoryId');
+
+  // استخدام الهوك الجديد
+  const {
+    products,
+   
+    fetchProducts,
+    saveProduct,
+    deleteProduct,
+    uploadProductImage,
+    validateProduct
+  } = useProducts();
+
+  const {
+    productLabels,
+    fetchProductLabels,
+    loading: loadingLabels
+  } = useProductLabel();
+
+  const {
+    categories,
+    fetchCategories
+  } = useCategories();
+
+  const {
+    units,
+    fetchUnits
+  } = useUnits();
+
+  // جلب البيانات عند تحميل الصفحة
+  useEffect(() => {
+    fetchProducts();
+    fetchProductLabels();
+    fetchCategories();
+    fetchUnits();
+  }, [fetchProducts, fetchProductLabels, fetchCategories, fetchUnits]);
+
+
   //-------------------------------------------- sortOptions -------------------------------------------
   const sortOptions = [
     { value: 'default', label: t('products.sort.default') || 'Default' },
@@ -92,21 +141,19 @@ const ProductsPage: React.FC = () => {
     if (subcategoryIdParam) setSelectedSubcategoryId(subcategoryIdParam);
   }, [categoryIdParam, subcategoryIdParam]);
   //-------------------------------------------- filteredProducts -------------------------------------------
-  let filteredProducts = products.filter(product =>
-    (selectedCategoryId ? product.categoryId === Number(selectedCategoryId) : true) &&
-    (selectedSubcategoryId ? product.subcategoryId === Number(selectedSubcategoryId) : true) &&
-    (isRTL ? product.nameAr.toLowerCase().includes(search.toLowerCase()) : product.nameEn.toLowerCase().includes(search.toLowerCase()))
-  );
+  let filteredProducts = Array.isArray(products) ? products.filter(product =>
+    (selectedCategoryId ? product.category?._id === selectedCategoryId : true) &&    (isRTL ? product.nameAr.toLowerCase().includes(search.toLowerCase()) : product.nameEn.toLowerCase().includes(search.toLowerCase()))
+  ) : [];
   if (sort === 'alpha') {
     filteredProducts = [...filteredProducts].sort((a, b) => (isRTL ? a.nameAr.localeCompare(b.nameAr) : a.nameEn.localeCompare(b.nameEn)));
   } else if (sort === 'newest') {
-    filteredProducts = [...filteredProducts].sort((a, b) => b.id - a.id);
+    filteredProducts = [...filteredProducts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } else if (sort === 'oldest') {
-    filteredProducts = [...filteredProducts].sort((a, b) => a.id - b.id);
+    filteredProducts = [...filteredProducts].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }
   //-------------------------------------------- getCategoryName -------------------------------------------    
   const getCategoryName = (catId: number) => {
-    const cat = categories.find(c => c.id === catId);
+    const cat = categories.find((c: any) => c.id === catId || c._id === catId);
     return isRTL ? (cat?.nameAr || '') : (cat?.nameEn || '');
   };
   //-------------------------------------------- getSubcategoryName -------------------------------------------
@@ -114,37 +161,43 @@ const ProductsPage: React.FC = () => {
     const sub = subcategories.find(s => s.id === subId);
     return isRTL ? (sub?.nameAr || '') : (sub?.nameEn || '');
   };
-  //-------------------------------------------- getLabelName -------------------------------------------
-  const getLabelName = (label: string | number) => {
-    const found = productLabelOptions.find(l => String(l.id) === String(label));
-    return found ? (isRTL ? found.nameAr : found.nameEn) : String(label);
-  };
+
   //-------------------------------------------- getUnitName -------------------------------------------
   const getUnitName = (unitId: number) => {
-    const unit = unitOptions.find(u => u.id === unitId);
+    const unit = units?.find((u: any) => u.id === unitId || u._id === unitId);
     return isRTL ? (unit?.nameAr || '') : (unit?.nameEn || '');
   };
-  //-------------------------------------------- tableData -------------------------------------------
-  const tableData = filteredProducts.map(product => ({
-    id: product.id,
-    image: product.image || (product.images && product.images.length > 0 ? product.images[0] : null),
-    name: isRTL ? product.nameAr : product.nameEn,
-    category: getCategoryName(product.categoryId),
-    subcategory: getSubcategoryName(product.subcategoryId),
-    price: product.price,
-    originalPrice: product.originalPrice,
-    wholesalePrice: product.wholesalePrice,
-    unit: getUnitName(product.unitId),
-    availableQuantity: product.availableQuantity,
-    maintainStock: product.maintainStock === 'Y' ? (isRTL ? 'نعم' : 'Yes') : (isRTL ? 'لا' : 'No'),
-    visibility: product.visibility === 'Y' ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden'),
-    productLabel: getLabelName(product.productLabel),
-    description: isRTL ? product.descriptionAr : product.descriptionEn,
-    parcode: product.parcode,
-    images: product.image ? 1 : (product.images?.length || 0),
-    colors: product.colors?.length || 0,
-    originalProduct: product,
-  }));
+    //-------------------------------------------- tableData -------------------------------------------
+  const tableData = Array.isArray(filteredProducts) ? filteredProducts.map(product => {
+
+    return {
+      id: product._id || product.id,
+      image: product.mainImage || (product.images && product.images.length > 0 ? product.images[0] : null),
+      nameAr: product.nameAr,
+      nameEn: product.nameEn,
+      category: product.category ? (isRTL ? product.category.nameAr : product.category.nameEn) : '',
+      price: product.price,
+      costPrice: product.costPrice,
+      compareAtPrice: product.compareAtPrice,
+      originalPrice: product.originalPrice,
+      unit: product.unit ? (isRTL ? product.unit.nameAr : product.unit.nameEn) : '',
+      availableQuantity: product.availableQuantity || product.stock || 0,
+      maintainStock: (product.availableQuantity || product.stock || 0) > 0 ? (isRTL ? 'نعم' : 'Yes') : (isRTL ? 'لا' : 'No'),
+      visibility: product.visibility ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden'),
+      tags: product.tags && product.tags.length > 0 
+        ? product.tags.map((labelId: string) => {
+            const label = productLabels.find((l: any) => l._id === labelId || l.id === labelId);
+            return label ? (isRTL ? label.nameAr : label.nameEn) : labelId;
+          }).join(', ')
+        : (isRTL ? 'لا يوجد تصنيف' : 'No Labels'),
+      descriptionAr: product.descriptionAr,
+      descriptionEn: product.descriptionEn,
+      barcode: product.barcode || '',
+      images: product.mainImage ? 1 : (product.images?.length || 0),
+      colors: product.colors?.length || 0,
+      originalProduct: product,
+    };
+  }) : [];
   //-------------------------------------------- renderPrice -------------------------------------------
   const renderPrice = (value: any, item: any) => {
     return (
@@ -152,6 +205,12 @@ const ProductsPage: React.FC = () => {
         <div className="font-semibold text-primary">{value}</div>
         {item.originalPrice && item.originalPrice !== value && (
           <div className="text-xs text-gray-500 line-through">{item.originalPrice}</div>
+        )}
+        {item.costPrice && (
+          <div className="text-xs text-green-600">{isRTL ? 'تكلفة: ' : 'Cost: '}{item.costPrice}</div>
+        )}
+        {item.compareAtPrice && (
+          <div className="text-xs text-blue-600">{isRTL ? 'جملة: ' : 'Wholesale: '}{item.compareAtPrice}</div>
         )}
       </div>
     );
@@ -183,6 +242,48 @@ const ProductsPage: React.FC = () => {
       </span>
     );
   };
+  //-------------------------------------------- renderProductLabels -------------------------------------------
+  const renderProductLabels = (value: any, item: any) => {
+    if (!value || value === (isRTL ? 'لا يوجد تصنيف' : 'No Labels')) {
+      return (
+        <span className="text-gray-500 text-sm">
+          {isRTL ? 'لا يوجد تصنيف' : 'No Labels'}
+        </span>
+      );
+    }
+    
+    const labels = value.split(', ');
+    return (
+      <div className="flex flex-wrap gap-1">
+        {labels.map((label: string, index: number) => (
+          <span 
+            key={index}
+            className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold"
+          >
+            {label}
+          </span>
+        ))}
+      </div>
+    );
+  };
+  //-------------------------------------------- renderBarcode -------------------------------------------
+  const renderBarcode = (value: any, item: any) => {
+    if (!value || value === '') {
+      return (
+        <span className="text-gray-500 text-sm">
+          {isRTL ? 'لا يوجد باركود' : 'No Barcode'}
+        </span>
+      );
+    }
+    
+    return (
+      <div className="text-sm">
+        <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
+          {value}
+        </span>
+      </div>
+    );
+  };
   //-------------------------------------------- renderActions -------------------------------------------
   const renderActions = (value: any, item: any) => (
     <div className="flex justify-center space-x-2">
@@ -210,16 +311,18 @@ const ProductsPage: React.FC = () => {
   const columns = [
     { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const },
     { key: 'image', label: { ar: 'الصورة', en: 'Image' }, type: 'image' as const },
-    { key: 'name', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
+    { key: 'nameAr', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
+    { key: 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
     { key: 'category', label: { ar: 'الفئة', en: 'Category' }, type: 'text' as const },
-    { key: 'subcategory', label: { ar: 'الفئة الفرعية', en: 'Subcategory' }, type: 'text' as const },
     { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number' as const, render: renderPrice },
-    { key: 'wholesalePrice', label: { ar: 'سعر الجملة', en: 'Wholesale Price' }, type: 'number' as const },
+    { key: 'costPrice', label: { ar: 'سعر التكلفة', en: 'Cost Price' }, type: 'number' as const },
+    { key: 'compareAtPrice', label: { ar: 'سعر الجملة', en: 'Wholesale Price' }, type: 'number' as const },
     { key: 'unit', label: { ar: 'الوحدة', en: 'Unit' }, type: 'text' as const },
     { key: 'availableQuantity', label: { ar: 'الكمية المتوفرة', en: 'Available Quantity' }, type: 'number' as const, render: renderStock },
     { key: 'maintainStock', label: { ar: 'إدارة المخزون', en: 'Stock Management' }, type: 'text' as const },
     { key: 'visibility', label: { ar: 'الظهور', en: 'Visibility' }, type: 'status' as const, render: renderVisibility },
-    { key: 'productLabel', label: { ar: 'التصنيف', en: 'Label' }, type: 'text' as const },
+    { key: 'tags', label: { ar: 'التصنيف', en: 'Label' }, type: 'text' as const, render: renderProductLabels },
+    { key: 'barcode', label: { ar: 'الباركود', en: 'Barcode' }, type: 'text' as const, render: renderBarcode },
     { key: 'images', label: { ar: 'عدد الصور', en: 'Images Count' }, type: 'number' as const },
     { key: 'colors', label: { ar: 'عدد الألوان', en: 'Colors Count' }, type: 'number' as const },
     { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text' as const, render: renderActions, showControls: false },
@@ -244,6 +347,11 @@ const ProductsPage: React.FC = () => {
       setForm({ ...form, [e.target.name]: e.target.value });
     }
   };
+
+  //-------------------------------------------- handleProductLabelsChange -------------------------------------------
+  const handleTagsChange = (values: string[]) => {
+    setForm({ ...form, tags: values });
+  };
   //-------------------------------------------- handleImageChange -------------------------------------------
   const handleImageChange = (files: File | File[] | null) => {
     if (!files) {
@@ -255,22 +363,57 @@ const ProductsPage: React.FC = () => {
     setForm({ ...form, images: imageUrls });
   };
   //-------------------------------------------- handleSubmit -------------------------------------------
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const saveColors = Array.isArray(form.colors)
-      ? form.colors.map((variant: any) => Array.isArray(variant.colors) ? variant.colors : [])
-      : [];
-    const productToSave = { ...form, colors: saveColors };
     
-    if (drawerMode === 'edit' && editProduct) {
-      setProducts(products.map(p => p.id === editProduct.id ? { ...editProduct, ...productToSave } : p));
-    } else {
-      setProducts([...products, { ...productToSave, id: Date.now() }]);
+    try {
+     
+            // تحويل البيانات إلى الشكل المطلوب للـ API
+      const productData = {
+        nameAr: form.nameAr || '',
+        nameEn: form.nameEn || '',
+        descriptionAr: form.descriptionAr || '',
+        descriptionEn: form.descriptionEn || '',
+        storeId: form.storeId || '',
+        price: parseFloat(form.price) || 0,
+        costPrice: parseFloat(form.costPrice) || 0,
+        compareAtPrice: parseFloat(form.compareAtPrice) || 0,
+        originalPrice: parseFloat(form.originalPrice) || 0,
+        availableQuantity: parseInt(String(form.availableQuantity)) || 0,
+        productOrder: parseInt(String(form.productOrder)) || 0,
+        visibility: form.visibility === 'Y',
+        unitId: form.unitId || form.unit || null,
+        categoryId: form.categoryId || null,
+        subcategoryId: form.subcategoryId || null,
+        tags: form.tags || [],
+        barcode: form.barcode || '',
+        colors: Array.isArray(form.colors)
+          ? form.colors.map((variant: any) => Array.isArray(variant.colors) ? variant.colors : [])
+          : [],
+        images: form.images || [],
+        isActive: true,
+      };
+
+
+
+      // التحقق من صحة البيانات
+      const errors = validateProduct(productData, isRTL, editProduct?._id || editProduct?.id);
+      if (Object.keys(errors).length > 0) {
+        console.error('Validation errors:', errors);
+        return;
+      }
+
+      // حفظ المنتج
+      const editId = editProduct?._id || editProduct?.id;
+      await saveProduct(productData, editId, isRTL);
+      
+      setShowDrawer(false);
+      setEditProduct(null);
+      setDrawerMode('add');
+      setForm(initialForm);
+    } catch (error) {
+      console.error('Error saving product:', error);
     }
-    setShowDrawer(false);
-    setEditProduct(null);
-    setDrawerMode('add');
-    setForm(initialForm);
   };
   //-------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (product: any) => {
@@ -281,21 +424,34 @@ const ProductsPage: React.FC = () => {
         }))
       : [];
     
-    const maintainStock = product.originalProduct.availableQuantity > 0 ? 'Y' : 'N';
-    let unitId = product.originalProduct.unitId;
-    if (!unitId && product.originalProduct.unit) {
-      const found = unitOptions.find(u => u.nameAr === product.originalProduct.unit || u.nameEn === product.originalProduct.unit);
-      unitId = found ? found.id : '';
-    }
+    const maintainStock = (product.originalProduct.availableQuantity || product.originalProduct.stock || 0) > 0 ? 'Y' : 'N';
+    let unitId = product.originalProduct.unit?._id || product.originalProduct.unitId;
+    let categoryId = product.originalProduct.category?._id || product.originalProduct.categoryId;
+    let subcategoryId = product.originalProduct.subcategory?._id || product.originalProduct.subcategoryId;
+    let storeId = product.originalProduct.store?._id || product.originalProduct.storeId;
     
-    setForm({
+    const newForm = {
       ...product.originalProduct,
       colors: formColors,
-      name: isRTL ? product.originalProduct.nameAr : product.originalProduct.nameEn,
-      description: isRTL ? product.originalProduct.descriptionAr : product.originalProduct.descriptionEn,
+        // name: isRTL ? product.originalProduct.nameAr : product.originalProduct.nameEn,
+      nameAr: product.originalProduct.nameAr || '',
+      nameEn: product.originalProduct.nameEn || '',
+
+      descriptionAr: product.originalProduct.descriptionAr || '',
+      descriptionEn: product.originalProduct.descriptionEn || '',
       maintainStock,
       unitId: unitId ? String(unitId) : '',
-    });
+      categoryId: categoryId ? String(categoryId) : '',
+      subcategoryId: subcategoryId ? String(subcategoryId) : '',
+      storeId: storeId ? String(storeId) : '',
+      tags: product.originalProduct.tags || [],
+      visibility: product.originalProduct.visibility ? 'Y' : 'N',
+      costPrice: product.originalProduct.costPrice || '',
+      compareAtPrice: product.originalProduct.compareAtPrice || '',
+      barcode: product.originalProduct.barcode || '',
+    };
+    
+    setForm(newForm);
     setEditProduct(product.originalProduct);
     setDrawerMode('edit');
     setShowDrawer(true);
@@ -320,10 +476,15 @@ const ProductsPage: React.FC = () => {
     setShowDeleteModal(true);
   };
   //-------------------------------------------- handleDeleteConfirm -------------------------------------------
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (selectedProduct) {
-      setProducts(products.filter(p => p.id !== selectedProduct.originalProduct.id));
-      setSelectedProduct(null);
+      try {
+        const productId = selectedProduct.originalProduct._id || selectedProduct.originalProduct.id;
+        await deleteProduct(productId);
+        setSelectedProduct(null);
+      } catch (error) {
+        console.error('Error deleting product:', error);
+      }
     }
     setShowDeleteModal(false);
   };
@@ -332,12 +493,13 @@ const ProductsPage: React.FC = () => {
     const rows: any[] = [];
     visibleTableData.forEach((product) => {
       rows.push({
-        [isRTL ? 'اسم المنتج' : 'Product Name']: product.name,
+        [isRTL ? 'اسم المنتج' : 'Product Name']: isRTL ? product.nameAr : product.nameEn,
         [isRTL ? 'الفئة' : 'Category']: product.category,
-        [isRTL ? 'الفئة الفرعية' : 'Subcategory']: product.subcategory,
         [isRTL ? 'السعر' : 'Price']: product.price,
-        [isRTL ? 'سعر الجملة' : 'Wholesale Price']: product.wholesalePrice,
+        [isRTL ? 'سعر التكلفة' : 'Cost Price']: product.costPrice,
+        [isRTL ? 'سعر الجملة' : 'Wholesale Price']: product.compareAtPrice,
         [isRTL ? 'الوحدة' : 'Unit']: product.unit,
+        [isRTL ? 'الباركود' : 'Barcode']: product.barcode,
         [isRTL ? 'الكمية المتوفرة' : 'Available Quantity']: product.availableQuantity,
         [isRTL ? 'الظهور' : 'Visibility']: product.visibility,
       });
@@ -384,10 +546,13 @@ const ProductsPage: React.FC = () => {
         title={drawerMode === 'edit' ? t('products.edit') || 'Edit Product' : t('products.add')}
         form={form}
         onFormChange={handleFormChange}
+        onTagsChange={handleTagsChange}
         onImageChange={handleImageChange}
         onSubmit={handleSubmit}
         categories={categories as any}
         subcategories={subcategories as any}
+        tags={productLabels}
+        units={units}
       />
 
       {/* ------------------------------------------- PermissionModal ------------------------------------------- */}

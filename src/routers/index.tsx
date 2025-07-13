@@ -22,7 +22,8 @@ import ProductSpecifications from '../pages/products/ProductSpecifications';
 import Login from '../pages/Login/Login';
 import Signup from '../pages/Login/Signup';
 import ForgotPassword from '../pages/Login/ForgotPassword';
-
+import Units from "../pages/units/Units";
+import ProductsLabels from "../pages/labels/ProductsLabels";
 
 export default function Routers() {
   return (
@@ -50,6 +51,8 @@ export default function Routers() {
       <Route path="/advertisement" element={<AdvertisementPage />} />
       <Route path="/terms-conditions" element={<TermsConditionsPage />} />
       <Route path="/products/specifications" element={<ProductSpecifications />} />
+      <Route path="/units" element={<Units />} />
+      <Route path="/labels" element={<ProductsLabels />} /> 
        <Route path="/testimonials" element={<Testimonial />} /> 
     </Routes>
   );

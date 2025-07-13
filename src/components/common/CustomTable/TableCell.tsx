@@ -80,18 +80,18 @@ const TableCell: React.FC<TableCellProps> = ({
     let statusValue = value;
     let colorClass = 'bg-gray-200 text-gray-500';
     
-    if (value === 'A' || value === 'Active' || value === 'نشط') {
+    if (value === true) {
       statusValue = i18n.language === 'ARABIC' ? 'نشط' : 'Active';
-      colorClass = 'bg-green-100 text-green-700';
-    } else if (value === 'I' || value === 'Inactive' || value === 'غير نشط') {
+      colorClass = 'bg-green-100 text-green-700 px-3 py-1 rounded-md';
+    } else if (value === false) {
       statusValue = i18n.language === 'ARABIC' ? 'غير نشط' : 'Inactive';
-      colorClass = 'bg-gray-200 text-gray-500';
+      colorClass = 'bg-gray-200 text-gray-500 px-3 py-1 rounded-md';
     } else if (value === 'Paid' || value === 'مدفوع') {
       statusValue = i18n.language === 'ARABIC' ? 'مدفوع' : 'Paid';
-      colorClass = 'bg-green-100 text-green-700';
+      colorClass = 'bg-green-100 text-green-700 px-3 py-1 rounded-md';
     } else if (value === 'Unpaid' || value === 'غير مدفوع') {
       statusValue = i18n.language === 'ARABIC' ? 'غير مدفوع' : 'Unpaid';
-      colorClass = 'bg-red-100 text-red-700';
+      colorClass = 'bg-red-100 text-red-700 px-3 py-1 rounded-md';
     }
     
     return (

@@ -13,32 +13,40 @@ interface ProductsDrawerProps {
   isRTL: boolean;
   title: string;
   form: {
-    name: string;
+    nameAr: string;
+    nameEn: string;
     categoryId: string;
     subcategoryId: string;
+    storeId: string;
     visibility: string;
     unit: string;
+    unitId: string;
     price: string;
+    compareAtPrice: string;
+    costPrice: string;
     originalPrice: string;
-    wholesalePrice: string;
-    productLabel: number;
+    tags: string[];
     productOrder: string;
     maintainStock: string;
     availableQuantity: number;
-    description: string;
-    parcode: string;
+    descriptionAr: string;
+    descriptionEn: string;
+    barcode: string;
     productSpecifications: string[];
     colors: ColorVariant[];
     images: string[];
     productVideo: string;
   };
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onTagsChange: (values: string[]) => void;
   onImageChange: (files: File | File[] | null) => void;
   onSubmit: (e: React.FormEvent) => void;
   categories?: { id: number; nameAr: string; nameEn: string }[];
   subcategories?: { id: number; nameAr: string; nameEn: string; categoryId: number }[];
+  tags?: any[];
+  units?: any[];
 }
-const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onImageChange, onSubmit, categories = [], subcategories = [] }) => {
+const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onTagsChange, onImageChange, onSubmit, categories = [], subcategories = [], tags = [], units = [] }) => {
   if (!open) return null;
   
   //-------------------------------------------- return ------------------------------------------- 
@@ -64,13 +72,16 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
           </button>
         </div>
         {/* ------------------------------------------- Form ------------------------------------------- */}
-        <form onSubmit={onSubmit} className="flex-1">
+        <form id="product-form" onSubmit={onSubmit} className="flex-1">
           <ProductsForm
             form={form}
             onFormChange={onFormChange}
+            onTagsChange={onTagsChange}
             onImageChange={onImageChange}
             categories={categories}
             subcategories={subcategories}
+            tags={tags}
+            units={units}
           />
         </form>
         {/* ------------------------------------------- Footer ------------------------------------------- */}

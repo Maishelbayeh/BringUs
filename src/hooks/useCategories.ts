@@ -26,18 +26,18 @@ const useCategories = () => {
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
   
-  console.log('useCategories hook initialized with toast functions:', { 
-    showSuccess: typeof showSuccess, 
-    showError: typeof showError,
-    showSuccessFunction: showSuccess,
-    showErrorFunction: showError
-  });
+  // console.log('useCategories hook initialized with toast functions:', { 
+  //   showSuccess: typeof showSuccess, 
+  //   showError: typeof showError,
+  //   showSuccessFunction: showSuccess,
+  //   showErrorFunction: showError
+  // });
 
   // جلب جميع التصنيفات كشجرة
   const fetchCategories = useCallback(async (forceRefresh: boolean = false) => {
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasLoaded && !forceRefresh && categories.length > 0) {
-      console.log('Categories already loaded, skipping API call');
+      // console.log('Categories already loaded, skipping API call');
       return categories;
     }
 

@@ -8,7 +8,7 @@ interface Option {
 
 interface CustomSelectProps {
   label?: string;
-  value: string;
+  value: string | string[];
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: Option[];
   id?: string;
@@ -16,6 +16,7 @@ interface CustomSelectProps {
   className?: string;
   disabled?: boolean;
   error?: string;
+  multiple?: boolean;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({ 
@@ -27,10 +28,11 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   icon, 
   className = '', 
   disabled, 
-  error 
+  error,
+  multiple = false
 }) => {
   const { i18n, t } = useTranslation();
-  
+  const isMultiple = !!multiple;
   return (
     <div className={`w-full mb-4 ${className}`}>
       {label && (
@@ -43,7 +45,6 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           {label}
         </label>
       )}
-      
       <div className="relative">
         <select
           id={id}
@@ -59,15 +60,17 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           }
           style={{ direction: i18n.language === 'ARABIC' ? 'rtl' : 'ltr' }}
           disabled={disabled}
+          multiple={isMultiple}
         >
-          <option value="">{t('common.selectOption', 'Select an option')}</option>
+          {!isMultiple && (
+            <option value="">{t('common.selectOption', 'Select an option')}</option>
+          )}
           {options.map(opt => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
           ))}
         </select>
-        
         <span 
           className={`pointer-events-none absolute inset-y-0 flex items-center ${
             i18n.language === 'ARABIC' ? 'right-3' : 'left-3'
@@ -92,7 +95,6 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           )}
         </span>
       </div>
-      
       {error && (
         <p className={`mt-1 text-sm text-red-600 ${
           i18n.language === 'ARABIC' ? 'text-right' : 'text-left'

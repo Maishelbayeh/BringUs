@@ -8,11 +8,11 @@ import {
   AdjustmentsHorizontalIcon,
   DocumentTextIcon,
   VideoCameraIcon,
-
   EyeIcon,
   ChartBarIcon,
   Squares2X2Icon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  CubeIcon
 } from '@heroicons/react/24/outline';
 
 export const getMenuAsText = (): MenuItem[] => [
@@ -37,6 +37,18 @@ export const getMenuAsText = (): MenuItem[] => [
     // ]
   },
   {
+    id: 2.5,
+    title: 'sideBar.units',
+    icon: CubeIcon,
+    path: '/units',
+  },
+  {
+    id: 2.6,
+    title: 'sideBar.labels',
+    icon: ViewColumnsIcon,
+    path: '/labels',
+  },  
+  {
     id: 3,
     title: 'sideBar.products',
     icon: DocumentDuplicateIcon,
@@ -55,6 +67,7 @@ export const getMenuAsText = (): MenuItem[] => [
         path: '/products/specifications',
         
       },
+      
     ]
   },
   {
