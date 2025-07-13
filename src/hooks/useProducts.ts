@@ -21,7 +21,7 @@ const useProducts = () => {
 
     try {
       setLoading(true);
-      const url = `${BASE_URL}meta/products?includeInactive=true`;
+      const url = `${BASE_URL}meta/products`;
       const res = await axios.get(url);
       console.log('FETCHED PRODUCTS FROM API:', res.data);
       setProducts(res.data.data || res.data);
@@ -41,7 +41,6 @@ const useProducts = () => {
   const saveProduct = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
     console.log('Saving product with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     console.log('Store ID from form:', form.storeId);
-    console.log('STORE_ID constant:', STORE_ID);
     
     const payload: any = {
       nameAr: form.nameAr?.trim() || '',
@@ -52,7 +51,6 @@ const useProducts = () => {
       compareAtPrice: parseFloat(form.compareAtPrice) || 0,
       barcode: form.barcode?.trim() || '',
       costPrice: parseFloat(form.costPrice) || 0,
-      originalPrice: parseFloat(form.originalPrice) || 0,
       availableQuantity: parseInt(String(form.availableQuantity)) || 0,
       stock: parseInt(String(form.availableQuantity)) || 0,
       lowStockThreshold: parseInt(String(form.lowStockThreshold)) || 5,
@@ -61,21 +59,18 @@ const useProducts = () => {
       isActive: form.isActive !== undefined ? form.isActive : true,
       isFeatured: form.isFeatured || false,
       isOnSale: form.isOnSale || false,
-      discountPercentage: parseFloat(form.discountPercentage) || 0,
+      salePercentage: parseFloat(form.salePercentage) || 0,
       category: form.categoryId || null,
-      subcategory: form.subcategoryId || null,
       unit: form.unitId && form.unitId !== '' ? form.unitId : null,
       images: form.images || [],
       mainImage: form.mainImage || null,
       colors: Array.isArray(form.colors) 
         ? form.colors.map((variant: any) => Array.isArray(variant.colors) ? variant.colors : [])
         : [],
-      tags: form.tags || [],
+      productLabels: form.tags || [],
       attributes: form.attributes || [],
       specifications: form.specifications || [],
-      storeId:  form.storeId || STORE_ID,
-      
-      
+      storeId: form.storeId || STORE_ID,
     };
 
           console.log('Final payload to send:', payload);
@@ -87,7 +82,7 @@ const useProducts = () => {
         console.log('Product updated successfully:', response.data);
         showSuccess('تم تعديل المنتج بنجاح', 'نجح التحديث');
       } else {
-        const response = await axios.post(`${BASE_URL}meta/products`, payload);
+        const response = await axios.post(`${BASE_URL}products`, payload);
         console.log('Product created successfully:', response.data);
         showSuccess('تم إضافة المنتج بنجاح', 'نجح الإضافة');
       }
@@ -115,7 +110,7 @@ const useProducts = () => {
   // حذف منتج
   const deleteProduct = async (productId: string | number) => {
     try {
-      const response = await axios.delete(`${BASE_URL}meta/products/${productId}`);
+      const response = await axios.delete(`${BASE_URL}meta/products/${productId}?storeId=${STORE_ID}`);
       console.log('Product deleted successfully:', response.data);
       showSuccess('تم حذف المنتج بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
@@ -142,16 +137,16 @@ const useProducts = () => {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      formData.append('store', STORE_ID);
+      formData.append('storeId', STORE_ID);
 
-      const response = await axios.post(`${BASE_URL}upload/product-image`, formData, {
+      const response = await axios.post(`${BASE_URL}meta/products/upload-main-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       console.log('Image uploaded successfully:', response.data);
-      return response.data.url || response.data.imageUrl;
+      return response.data.imageUrl || response.data.url;
     } catch (err: any) {
       console.error('Error uploading product image:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة';

@@ -16,7 +16,6 @@ interface ProductsDrawerProps {
     nameAr: string;
     nameEn: string;
     categoryId: string;
-    subcategoryId: string;
     storeId: string;
     visibility: string;
     unit: string;
@@ -24,7 +23,6 @@ interface ProductsDrawerProps {
     price: string;
     compareAtPrice: string;
     costPrice: string;
-    originalPrice: string;
     tags: string[];
     productOrder: string;
     maintainStock: string;
@@ -42,11 +40,10 @@ interface ProductsDrawerProps {
   onImageChange: (files: File | File[] | null) => void;
   onSubmit: (e: React.FormEvent) => void;
   categories?: { id: number; nameAr: string; nameEn: string }[];
-  subcategories?: { id: number; nameAr: string; nameEn: string; categoryId: number }[];
   tags?: any[];
   units?: any[];
 }
-const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onTagsChange, onImageChange, onSubmit, categories = [], subcategories = [], tags = [], units = [] }) => {
+const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onTagsChange, onImageChange, onSubmit, categories = [], tags = [], units = [] }) => {
   if (!open) return null;
   
   //-------------------------------------------- return ------------------------------------------- 
@@ -79,7 +76,6 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
             onTagsChange={onTagsChange}
             onImageChange={onImageChange}
             categories={categories}
-            subcategories={subcategories}
             tags={tags}
             units={units}
           />
