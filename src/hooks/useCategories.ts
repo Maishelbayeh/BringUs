@@ -41,6 +41,7 @@ const useCategories = () => {
       return categories;
     }
 
+    
     try {
       const url = `http://localhost:5001/api/categories/store/${STORE_ID}`;
       const res = await axios.get(url);
