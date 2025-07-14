@@ -24,7 +24,7 @@ interface ProductsDrawerProps {
     compareAtPrice: string;
     costPrice: string;
     tags: string[];
-    productOrder: string;
+    // productOrder: string;
     maintainStock: string;
     availableQuantity: number;
     descriptionAr: string;
@@ -68,7 +68,9 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
             </svg>
           </button>
         </div>
+        
         {/* ------------------------------------------- Form ------------------------------------------- */}
+        
         <form id="product-form" onSubmit={onSubmit} className="flex-1">
           <ProductsForm
             form={form}

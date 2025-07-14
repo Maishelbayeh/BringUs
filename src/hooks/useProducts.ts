@@ -15,7 +15,7 @@ const useProducts = () => {
   const fetchProducts = useCallback(async (forceRefresh: boolean = false) => {
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasLoaded && !forceRefresh && Array.isArray(products) && products.length > 0) {
-      console.log('Products data already loaded, skipping API call');
+      // console.log('Products data already loaded, skipping API call');
       return products;
     }
 
@@ -23,7 +23,7 @@ const useProducts = () => {
       setLoading(true);
       const url = `${BASE_URL}meta/products`;
       const res = await axios.get(url);
-      console.log('FETCHED PRODUCTS FROM API:', res.data);
+      // console.log('FETCHED PRODUCTS FROM API:', res.data);
       setProducts(res.data.data || res.data);
       setHasLoaded(true); // تم تحميل البيانات
       return res.data.data || res.data;
@@ -54,7 +54,7 @@ const useProducts = () => {
       availableQuantity: parseInt(String(form.availableQuantity)) || 0,
       stock: parseInt(String(form.availableQuantity)) || 0,
       lowStockThreshold: parseInt(String(form.lowStockThreshold)) || 5,
-      productOrder: parseInt(String(form.productOrder)) || 0,
+      // productOrder: parseInt(String(form.productOrder)) || 0,
       visibility: form.visibility === 'Y' || form.visibility === true,
       isActive: form.isActive !== undefined ? form.isActive : true,
       isFeatured: form.isFeatured || false,
@@ -69,11 +69,29 @@ const useProducts = () => {
         : [],
       productLabels: form.tags || [],
       attributes: form.attributes || [],
-      specifications: form.specifications || [],
+      specifications: Array.isArray(form.productSpecifications) 
+        ? form.productSpecifications
+            .map((spec: any) => {
+              // إذا كان كائن كامل، نرسل فقط name و value
+              if (typeof spec === 'object' && spec.name && spec.value) {
+                return {
+                  name: spec.name,
+                  value: spec.value
+                };
+              }
+              // إذا كان ID فقط، نتجاهله
+              if (typeof spec === 'string') {
+                return null; // نتجاهل الـ IDs التي لا تحتوي على بيانات كاملة
+              }
+              return spec;
+            })
+            .filter((spec: any) => spec) // إزالة القيم الفارغة
+        : [],
       storeId: form.storeId || STORE_ID,
     };
 
-          console.log('Final payload to send:', payload);
+    console.log('Product specifications in payload:', form.productSpecifications);
+    console.log('Final specifications to send:', payload.specifications);
 
       console.log('Store field in payload:', payload.store);
     try {

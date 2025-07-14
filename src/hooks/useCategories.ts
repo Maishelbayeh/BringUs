@@ -45,7 +45,7 @@ const useCategories = () => {
     try {
       const url = `http://localhost:5001/api/categories/store/${STORE_ID}`;
       const res = await axios.get(url);
-      console.log('FETCHED CATEGORIES FROM API:', res.data.data);
+      // console.log('FETCHED CATEGORIES FROM API:', res.data.data);
       const treeData = buildCategoryTree(res.data.data);
       setCategories(treeData);
       setHasLoaded(true); // تم تحميل البيانات

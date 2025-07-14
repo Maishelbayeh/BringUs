@@ -22,11 +22,11 @@ interface ToastProviderProps {
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const toast = useToast();
   
-  console.log('ToastProvider rendered with toast functions:', {
-    showSuccess: typeof toast.showSuccess,
-    showError: typeof toast.showError,
-    toastsCount: toast.toasts.length
-  });
+  // console.log('ToastProvider rendered with toast functions:', {
+  //   showSuccess: typeof toast.showSuccess,
+  //   showError: typeof toast.showError,
+  //   toastsCount: toast.toasts.length
+  // });
 
   return (
     <ToastContext.Provider value={toast}>

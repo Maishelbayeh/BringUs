@@ -15,7 +15,7 @@ const useProductLabel = () => {
   const fetchProductLabels = useCallback(async (forceRefresh: boolean = false) => {
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasLoaded && !forceRefresh && productLabels.length > 0) {
-      console.log('Data already loaded, skipping API call');
+      // console.log('Data already loaded, skipping API call');
       return productLabels;
     }
 
@@ -23,7 +23,7 @@ const useProductLabel = () => {
         setLoading(true);
       const url = `${BASE_URL}meta/stores/${STORE_ID}/product-labels`;
       const res = await axios.get(url);
-      console.log('FETCHED PRODUCT LABELS FROM API:', res.data);
+      // console.log('FETCHED PRODUCT LABELS FROM API:', res.data);
       setProductLabels(res.data);
       setHasLoaded(true); // تم تحميل البيانات
       return res.data;

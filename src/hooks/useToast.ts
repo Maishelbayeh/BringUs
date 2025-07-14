@@ -33,10 +33,10 @@ const useToast = () => {
   }, []);
 
   const removeToast = useCallback((id: string) => {
-    console.log('Removing toast with id:', id);
+    // console.log('Removing toast with id:', id);
     setToasts(prev => {
       const newToasts = prev.filter(toast => toast.id !== id);
-      console.log('Toasts after removal:', newToasts);
+      // console.log('Toasts after removal:', newToasts);
       return newToasts;
     });
   }, []);

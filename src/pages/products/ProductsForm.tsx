@@ -8,9 +8,9 @@ import CustomColorPicker from '../../components/common/CustomColorPicker';
 import CustomTextArea from '../../components/common/CustomTextArea';
 
 import { t } from 'i18next';
-import { initialProductSpecifications } from '@/data/initialProductSpecifications';
 import { useTranslation } from 'react-i18next';
 import MultiSelect from '@/components/common/MultiSelect';
+import useProductSpecifications from '@/hooks/useProductSpecifications';
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
@@ -32,13 +32,21 @@ const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsC
   const { i18n } = useTranslation();
   const isRtl = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   
+  // استخدام hook لجلب مواصفات المنتجات من API
+  const { specifications, fetchSpecifications } = useProductSpecifications();
 
-  
+  // جلب مواصفات المنتجات عند تحميل المكون
+  useEffect(() => {
+    fetchSpecifications();
+  }, [fetchSpecifications]);
 
-  const specOptions = initialProductSpecifications.map(spec => ({
-    value: spec.id.toString(),
+  // تحويل مواصفات المنتجات إلى خيارات للـ CustomShuttle
+  const specOptions = specifications.map(spec => ({
+    value: spec._id || spec.id.toString(),
     label: isRtl ? spec.descriptionAr : spec.descriptionEn
   }));
+
+
   //-------------------------------------------- handleShuttleChange -------------------------------------------
   const handleShuttleChange = (e: React.ChangeEvent<{ name: string; value: string[] }>) => {
     onFormChange({
@@ -142,13 +150,13 @@ const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsC
             }))
           ]}
         />
-        <CustomInput
+        {/* <CustomInput
           label={isRtl ? t('products.productOrder') : 'Product Order'}
           name="productOrder"
           value={form.productOrder || ''}
           onChange={(e) => handleInputChange('productOrder', e.target.value)}
           type="number"
-        />
+        /> */}
         <CustomInput
           label={isRtl ? t('products.price') : 'Price'}
           name="price"

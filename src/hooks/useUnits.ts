@@ -22,7 +22,7 @@ const useUnits = () => {
       setLoading(true);
       const url = `${BASE_URL}meta/units?storeId=${STORE_ID}`;
       const res = await axios.get(url);
-      console.log('FETCHED UNITS FROM API:', res.data);
+      // console.log('FETCHED UNITS FROM API:', res.data);
       setUnits(res.data);
       setHasLoaded(true);
       return res.data;

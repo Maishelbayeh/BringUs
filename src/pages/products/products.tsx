@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductsDrawer from './ProductsDrawer';
@@ -12,6 +12,7 @@ import useProducts from '../../hooks/useProducts';
 import useProductLabel from '../../hooks/useProductLabel';
 import useCategories from '../../hooks/useCategories';
 import useUnits from '../../hooks/useUnits';
+import useProductSpecifications from '../../hooks/useProductSpecifications';
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
@@ -22,6 +23,7 @@ const initialForm: {
   nameAr: string;
   nameEn: string;
   categoryId: string;
+  subcategoryId: string;
   storeId: string;
   visibility: string;
   unit: string;
@@ -29,6 +31,7 @@ const initialForm: {
   price: string;
   compareAtPrice: string;
   costPrice: string;
+  originalPrice: string;
 
   tags: string[];
   productOrder: string;
@@ -46,6 +49,7 @@ const initialForm: {
   nameAr: '',
   nameEn: '',
   categoryId: '',
+  subcategoryId: '',
   storeId: '',
   visibility: 'Y',
   unit: '',
@@ -53,6 +57,7 @@ const initialForm: {
   price: '',
   costPrice: '',
   compareAtPrice: '',
+  originalPrice: '',
 
   tags: [],
   productOrder: '',
@@ -115,14 +120,28 @@ const ProductsPage: React.FC = () => {
     fetchUnits
   } = useUnits();
 
+  const {
+    specifications,
+    fetchSpecifications
+  } = useProductSpecifications();
+
   // جلب البيانات عند تحميل الصفحة
   useEffect(() => {
     fetchProducts();
     fetchProductLabels();
     fetchCategories();
     fetchUnits();
-  }, [fetchProducts, fetchProductLabels, fetchCategories, fetchUnits]);
+    fetchSpecifications();
+  }, [fetchProducts, fetchProductLabels, fetchCategories, fetchUnits, fetchSpecifications]);
 
+  // دالة لتحديث البيانات
+  const refreshData = useCallback(() => {
+    fetchProducts(true); // force refresh
+    fetchProductLabels();
+    fetchCategories();
+    fetchUnits();
+    fetchSpecifications(true); // force refresh
+  }, [fetchProducts, fetchProductLabels, fetchCategories, fetchUnits, fetchSpecifications]);
 
   //-------------------------------------------- sortOptions -------------------------------------------
   const sortOptions = [
@@ -180,14 +199,26 @@ const ProductsPage: React.FC = () => {
       availableQuantity: product.availableQuantity || product.stock || 0,
       maintainStock: (product.availableQuantity || product.stock || 0) > 0 ? (isRTL ? 'نعم' : 'Yes') : (isRTL ? 'لا' : 'No'),
       visibility: product.visibility ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden'),
-      tags: product.productLabels && product.productLabels.length > 0 
-        ? product.productLabels.map((label: any) => {
-            return label ? (isRTL ? label.nameAr : label.nameEn) : '';
+      tags: product.tags && product.tags.length > 0 
+        ? product.tags.map((labelId: string) => {
+            const label = productLabels.find((l: any) => l._id === labelId || l.id === labelId);
+            return label ? (isRTL ? label.nameAr : label.nameEn) : labelId;
           }).join(', ')
         : (isRTL ? 'لا يوجد تصنيف' : 'No Labels'),
       descriptionAr: product.descriptionAr,
       descriptionEn: product.descriptionEn,
       barcode: product.barcode || '',
+      specifications: product.specifications && product.specifications.length > 0 
+        ? product.specifications.map((spec: any) => {
+            // إذا كانت البيانات كاملة من API (embedded documents)
+            if (typeof spec === 'object' && spec.name && spec.value) {
+              return `${spec.name}: ${spec.value}`;
+            }
+            // إذا كانت مجرد ID، نبحث عن المواصفة في البيانات المحملة
+            const specData = specifications.find((s: any) => s._id === spec || s.id === spec);
+            return specData ? (isRTL ? specData.descriptionAr : specData.descriptionEn) : spec;
+          }).join(', ')
+        : (isRTL ? 'لا توجد مواصفات' : 'No Specifications'),
       images: product.mainImage ? 1 : (product.images?.length || 0),
       colors: product.colors?.length || 0,
       originalProduct: product,
@@ -201,12 +232,7 @@ const ProductsPage: React.FC = () => {
         {item.originalPrice && item.originalPrice !== value && (
           <div className="text-xs text-gray-500 line-through">{item.originalPrice}</div>
         )}
-        {item.costPrice && (
-          <div className="text-xs text-green-600">{isRTL ? 'تكلفة: ' : 'Cost: '}{item.costPrice}</div>
-        )}
-        {item.compareAtPrice && (
-          <div className="text-xs text-blue-600">{isRTL ? 'جملة: ' : 'Wholesale: '}{item.compareAtPrice}</div>
-        )}
+       
       </div>
     );
   };
@@ -279,6 +305,31 @@ const ProductsPage: React.FC = () => {
       </div>
     );
   };
+
+  //-------------------------------------------- renderSpecifications -------------------------------------------
+  const renderSpecifications = (value: any, item: any) => {
+    if (!value || value === (isRTL ? 'لا توجد مواصفات' : 'No Specifications')) {
+      return (
+        <span className="text-gray-500 text-sm">
+          {isRTL ? 'لا توجد مواصفات' : 'No Specifications'}
+        </span>
+      );
+    }
+    
+    const specs = value.split(', ');
+    return (
+      <div className="flex flex-wrap gap-1">
+        {specs.map((spec: string, index: number) => (
+          <span 
+            key={index}
+            className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold"
+          >
+            {spec}
+          </span>
+        ))}
+      </div>
+    );
+  };
   //-------------------------------------------- renderActions -------------------------------------------
   const renderActions = (value: any, item: any) => (
     <div className="flex justify-center space-x-2">
@@ -306,8 +357,8 @@ const ProductsPage: React.FC = () => {
   const columns = [
     { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const },
     { key: 'image', label: { ar: 'الصورة', en: 'Image' }, type: 'image' as const },
-    { key: 'nameAr', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
-    { key: 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
+    { key: isRTL ? 'nameAr' : 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
+    { key: isRTL ? 'descriptionAr' : 'descriptionEn', label: { ar: 'الوصف', en: 'Description' }, type: 'text' as const },
     { key: 'category', label: { ar: 'الفئة', en: 'Category' }, type: 'text' as const },
     { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number' as const, render: renderPrice },
     { key: 'costPrice', label: { ar: 'سعر التكلفة', en: 'Cost Price' }, type: 'number' as const },
@@ -317,6 +368,7 @@ const ProductsPage: React.FC = () => {
     { key: 'maintainStock', label: { ar: 'إدارة المخزون', en: 'Stock Management' }, type: 'text' as const },
     { key: 'visibility', label: { ar: 'الظهور', en: 'Visibility' }, type: 'status' as const, render: renderVisibility },
     { key: 'tags', label: { ar: 'التصنيف', en: 'Label' }, type: 'text' as const, render: renderProductLabels },
+    { key: 'specifications', label: { ar: 'المواصفات', en: 'Specifications' }, type: 'text' as const, render: renderSpecifications },
     { key: 'barcode', label: { ar: 'الباركود', en: 'Barcode' }, type: 'text' as const, render: renderBarcode },
     { key: 'images', label: { ar: 'عدد الصور', en: 'Images Count' }, type: 'number' as const },
     { key: 'colors', label: { ar: 'عدد الألوان', en: 'Colors Count' }, type: 'number' as const },
@@ -373,12 +425,15 @@ const ProductsPage: React.FC = () => {
         price: parseFloat(form.price) || 0,
         costPrice: parseFloat(form.costPrice) || 0,
         compareAtPrice: parseFloat(form.compareAtPrice) || 0,
+        originalPrice: parseFloat(form.originalPrice) || 0,
         availableQuantity: parseInt(String(form.availableQuantity)) || 0,
         productOrder: parseInt(String(form.productOrder)) || 0,
         visibility: form.visibility === 'Y',
         unitId: form.unitId || form.unit || null,
         categoryId: form.categoryId || null,
+        subcategoryId: form.subcategoryId || null,
         tags: form.tags || [],
+        productSpecifications: form.productSpecifications || [],
         barcode: form.barcode || '',
         colors: Array.isArray(form.colors)
           ? form.colors.map((variant: any) => Array.isArray(variant.colors) ? variant.colors : [])
@@ -386,8 +441,6 @@ const ProductsPage: React.FC = () => {
         images: form.images || [],
         isActive: true,
       };
-
-
 
       // التحقق من صحة البيانات
       const errors = validateProduct(productData, isRTL, editProduct?._id || editProduct?.id);
@@ -420,6 +473,7 @@ const ProductsPage: React.FC = () => {
     const maintainStock = (product.originalProduct.availableQuantity || product.originalProduct.stock || 0) > 0 ? 'Y' : 'N';
     let unitId = product.originalProduct.unit?._id || product.originalProduct.unitId;
     let categoryId = product.originalProduct.category?._id || product.originalProduct.categoryId;
+    let subcategoryId = product.originalProduct.subcategory?._id || product.originalProduct.subcategoryId;
     let storeId = product.originalProduct.store?._id || product.originalProduct.storeId;
     
     const newForm = {
@@ -434,8 +488,10 @@ const ProductsPage: React.FC = () => {
       maintainStock,
       unitId: unitId ? String(unitId) : '',
       categoryId: categoryId ? String(categoryId) : '',
+      subcategoryId: subcategoryId ? String(subcategoryId) : '',
       storeId: storeId ? String(storeId) : '',
       tags: product.originalProduct.tags || [],
+      productSpecifications: product.originalProduct.specifications || [],
       visibility: product.originalProduct.visibility ? 'Y' : 'N',
       costPrice: product.originalProduct.costPrice || '',
       compareAtPrice: product.originalProduct.compareAtPrice || '',
@@ -514,7 +570,6 @@ const ProductsPage: React.FC = () => {
         addLabel={t('products.add') || 'Add'}
         onAdd={handleAddClick}
         isRtl={isRTL}
-       
         onDownload={handleDownloadExcel}
         count={visibleTableData.length}
       />
@@ -541,6 +596,7 @@ const ProductsPage: React.FC = () => {
         onImageChange={handleImageChange}
         onSubmit={handleSubmit}
         categories={categories as any}
+       
         tags={productLabels}
         units={units}
       />

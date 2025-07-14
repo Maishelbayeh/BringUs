@@ -15,7 +15,7 @@ const useProductSpecifications = () => {
   const fetchSpecifications = useCallback(async (forceRefresh: boolean = false) => {
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasLoaded && !forceRefresh && specifications.length > 0) {
-      console.log('Data already loaded, skipping API call');
+      // console.log('Data already loaded, skipping API call');
       return specifications;
     }
 
@@ -23,7 +23,7 @@ const useProductSpecifications = () => {
       setLoading(true);
       const url = `${BASE_URL}meta/product-specifications/by-store?storeId=${STORE_ID}`;
       const res = await axios.get(url);
-      console.log('FETCHED SPECIFICATIONS FROM API:', res.data);
+      // console.log('FETCHED SPECIFICATIONS FROM API:', res.data);
       setSpecifications(res.data);
       setHasLoaded(true); // تم تحميل البيانات
       return res.data;
