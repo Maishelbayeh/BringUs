@@ -15,7 +15,7 @@ const useProducts = () => {
   const fetchProducts = useCallback(async (forceRefresh: boolean = false) => {
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasLoaded && !forceRefresh && Array.isArray(products) && products.length > 0) {
-      // console.log('Products data already loaded, skipping API call');
+      console.log('Products data already loaded, skipping API call');
       return products;
     }
 
@@ -23,7 +23,7 @@ const useProducts = () => {
       setLoading(true);
       const url = `${BASE_URL}meta/products`;
       const res = await axios.get(url);
-      // console.log('FETCHED PRODUCTS FROM API:', res.data);
+      console.log('FETCHED PRODUCTS FROM API:', res.data);
       setProducts(res.data.data || res.data);
       setHasLoaded(true); // تم تحميل البيانات
       return res.data.data || res.data;
@@ -54,7 +54,7 @@ const useProducts = () => {
       availableQuantity: parseInt(String(form.availableQuantity)) || 0,
       stock: parseInt(String(form.availableQuantity)) || 0,
       lowStockThreshold: parseInt(String(form.lowStockThreshold)) || 5,
-      // productOrder: parseInt(String(form.productOrder)) || 0,
+      productOrder: parseInt(String(form.productOrder)) || 0,
       visibility: form.visibility === 'Y' || form.visibility === true,
       isActive: form.isActive !== undefined ? form.isActive : true,
       isFeatured: form.isFeatured || false,
@@ -65,33 +65,32 @@ const useProducts = () => {
       images: form.images || [],
       mainImage: form.mainImage || null,
       colors: Array.isArray(form.colors) 
-        ? form.colors.map((variant: any) => Array.isArray(variant.colors) ? variant.colors : [])
+        ? form.colors.map((variant: any) => {
+            // إذا كان variant يحتوي على colors property (من CustomColorPicker)
+            if (variant && typeof variant === 'object' && Array.isArray(variant.colors)) {
+              return variant.colors;
+            }
+            // إذا كان variant مصفوفة ألوان مباشرة
+            else if (Array.isArray(variant)) {
+              return variant;
+            }
+            // إذا كان لون واحد
+            else if (typeof variant === 'string') {
+              return [variant];
+            }
+            // إذا كان null أو undefined
+            else {
+              return [];
+            }
+          }).filter((colors: string[]) => colors.length > 0) // إزالة المصفوفات الفارغة
         : [],
       productLabels: form.tags || [],
       attributes: form.attributes || [],
-      specifications: Array.isArray(form.productSpecifications) 
-        ? form.productSpecifications
-            .map((spec: any) => {
-              // إذا كان كائن كامل، نرسل فقط name و value
-              if (typeof spec === 'object' && spec.name && spec.value) {
-                return {
-                  name: spec.name,
-                  value: spec.value
-                };
-              }
-              // إذا كان ID فقط، نتجاهله
-              if (typeof spec === 'string') {
-                return null; // نتجاهل الـ IDs التي لا تحتوي على بيانات كاملة
-              }
-              return spec;
-            })
-            .filter((spec: any) => spec) // إزالة القيم الفارغة
-        : [],
+      specifications: form.productSpecifications || [],
       storeId: form.storeId || STORE_ID,
     };
 
-    console.log('Product specifications in payload:', form.productSpecifications);
-    console.log('Final specifications to send:', payload.specifications);
+          console.log('Final payload to send:', payload);
 
       console.log('Store field in payload:', payload.store);
     try {
@@ -173,6 +172,54 @@ const useProducts = () => {
     }
   };
 
+  // رفع صور متعددة للمنتج
+  const uploadProductImages = async (files: File[]): Promise<string[]> => {
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('images', file);
+      });
+      formData.append('storeId', STORE_ID);
+
+      const response = await axios.post(`${BASE_URL}meta/products/upload-gallery-images`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Images uploaded successfully:', response.data);
+      return response.data.images.map((img: any) => img.imageUrl || img.url);
+    } catch (err: any) {
+      console.error('Error uploading product images:', err);
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصور';
+      showError(errorMessage, 'خطأ في رفع الصور');
+      throw err;
+    }
+  };
+
+  // رفع صورة واحدة للمعرض
+  const uploadSingleImage = async (file: File): Promise<string> => {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('storeId', STORE_ID);
+
+      const response = await axios.post(`${BASE_URL}meta/products/upload-single-image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Single image uploaded successfully:', response.data);
+      return response.data.imageUrl || response.data.url;
+    } catch (err: any) {
+      console.error('Error uploading single image:', err);
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة';
+      showError(errorMessage, 'خطأ في رفع الصورة');
+      throw err;
+    }
+  };
+
   // دالة التحقق من صحة البيانات
   const validateProduct = (form: any, isRTL: boolean = false, editId?: string | number) => {
     const errors: { [key: string]: string } = {};
@@ -231,6 +278,8 @@ const useProducts = () => {
     saveProduct,
     deleteProduct,
     uploadProductImage,
+    uploadProductImages,
+    uploadSingleImage,
     validateProduct,
   };
 };
