@@ -13,6 +13,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 980,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
+      specifications: [1, 3], // طويل، كبير
       image: 'https://images.pexels.com/photos/1647976/pexels-photo-1647976.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
@@ -77,6 +78,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 30,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
+      specifications: [4, 5], // وسط، صغير
       image: 'https://images.pexels.com/photos/991509/pexels-photo-991509.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
@@ -93,6 +95,7 @@ export const initialProducts = [
       unitId: 22,
       availableQuantity: 72,
       colors: [['#000000'], ['#FFFFFF', '#FF0000']],
+      specifications: [6, 7, 8], // نمرة 40، نمرة 42، نمرة 44
       image: 'https://images.pexels.com/photos/2526878/pexels-photo-2526878.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
