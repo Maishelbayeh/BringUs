@@ -3,7 +3,7 @@ import useDeliveryMethods from './useDeliveryMethods';
 import useDeliveryMethodsByStore from './useDeliveryMethodsByStore';
 
 const TestDeliveryMethods: React.FC = () => {
-  const [storeId] = useState('686a719956a82bfcc93a2e2d');
+  const [storeId] = useState('687505893fbf3098648bfe16');
   const [selectedMethodId, setSelectedMethodId] = useState<string>('');
   const [formData, setFormData] = useState({
     locationAr: '',

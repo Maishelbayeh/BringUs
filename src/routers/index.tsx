@@ -19,6 +19,7 @@ import AffiliationPage from "@/pages/Affiliation/wholeAffiliation";
 import AdvertisementPage from "@/pages/Advertisement/advertisement";
 import TermsConditionsPage from "@/pages/TermsConditions/termsConditions";
 import ProductSpecifications from '../pages/products/ProductSpecifications';
+import CheckboxSpecificationTest from '../pages/products/CheckboxSpecificationTest';
 import Login from '../pages/Login/Login';
 import Signup from '../pages/Login/Signup';
 import ForgotPassword from '../pages/Login/ForgotPassword';
@@ -51,6 +52,7 @@ export default function Routers() {
       <Route path="/advertisement" element={<AdvertisementPage />} />
       <Route path="/terms-conditions" element={<TermsConditionsPage />} />
       <Route path="/products/specifications" element={<ProductSpecifications />} />
+      <Route path="/test-checkbox-specifications" element={<CheckboxSpecificationTest />} />
       <Route path="/units" element={<Units />} />
       <Route path="/labels" element={<ProductsLabels />} /> 
        <Route path="/testimonials" element={<Testimonial />} /> 

@@ -13,6 +13,8 @@ import useProductLabel from '../../hooks/useProductLabel';
 import useCategories from '../../hooks/useCategories';
 import useUnits from '../../hooks/useUnits';
 import useProductSpecifications from '../../hooks/useProductSpecifications';
+import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
+import TableImage from '../../components/common/TableImage';
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
@@ -188,7 +190,7 @@ const ProductsPage: React.FC = () => {
 
     return {
       id: product._id || product.id,
-      image: product.mainImage || (product.images && product.images.length > 0 ? product.images[0] : null),
+      image: product.mainImage || (product.images && product.images.length > 0 ? product.images[0] : DEFAULT_PRODUCT_IMAGE),
       nameAr: product.nameAr,
       nameEn: product.nameEn,
       category: product.category ? (isRTL ? product.category.nameAr : product.category.nameEn) : '',
@@ -198,6 +200,7 @@ const ProductsPage: React.FC = () => {
       originalPrice: product.originalPrice,
       unit: product.unit ? (isRTL ? product.unit.nameAr : product.unit.nameEn) : '',
       availableQuantity: product.availableQuantity || product.stock || 0,
+      hasVariants: product.hasVariants,
       maintainStock: (product.availableQuantity || product.stock || 0) > 0 ? (isRTL ? 'نعم' : 'Yes') : (isRTL ? 'لا' : 'No'),
       visibility: product.visibility ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden'),
       tags: product.productLabels && product.productLabels.length > 0 
@@ -215,15 +218,15 @@ const ProductsPage: React.FC = () => {
       descriptionAr: product.descriptionAr,
       descriptionEn: product.descriptionEn,
       barcode: product.barcode || '',
-      specifications: product.specifications && product.specifications.length > 0 
+      specifications: product.specifications && Array.isArray(product.specifications) && product.specifications.length > 0 
         ? product.specifications.map((spec: any) => {
             // إذا كانت البيانات كاملة من API (populated objects)
-            if (typeof spec === 'object' && spec.descriptionAr && spec.descriptionEn) {
-              return isRTL ? spec.descriptionAr : spec.descriptionEn;
+            if (typeof spec === 'object' && spec.titleAr && spec.titleEn) {
+              return isRTL ? spec.titleAr : spec.titleEn;
             }
             // إذا كانت مجرد ID، نبحث عن المواصفة في البيانات المحملة
-            const specData = specifications.find((s: any) => s._id === spec || s.id === spec);
-            return specData ? (isRTL ? specData.descriptionAr : specData.descriptionEn) : spec;
+            const specData = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec || s.id === spec) : null;
+            return specData ? (isRTL ? specData.titleAr : specData.titleEn) : spec;
           }).join(', ')
         : (isRTL ? 'لا توجد مواصفات' : 'No Specifications'),
       images: product.mainImage ? 1 : (product.images?.length || 0),
@@ -231,6 +234,17 @@ const ProductsPage: React.FC = () => {
       originalProduct: product,
     };
   }) : [];
+  //-------------------------------------------- renderImage -------------------------------------------
+  const renderImage = (value: any, item: any) => {
+    return (
+      <TableImage
+        src={value}
+        alt={isRTL ? item.nameAr : item.nameEn}
+        size="md"
+      />
+    );
+  };
+
   //-------------------------------------------- renderPrice -------------------------------------------
   const renderPrice = (value: any, item: any) => {
     return (
@@ -337,6 +351,26 @@ const ProductsPage: React.FC = () => {
       </div>
     );
   };
+  //-------------------------------------------- handleAddVariant -------------------------------------------
+  const handleAddVariant = (product: any) => {
+    // فتح الفورم في وضع إضافة متغير جديد
+    setEditProduct(product);
+    setDrawerMode('add');
+    
+    // تعيين المنتج الأصلي كـ parent product
+    const newForm = {
+      ...initialForm,
+      categoryId: product.category?._id || product.categoryId,
+      unitId: product.unit?._id || product.unitId,
+      storeId: product.store?._id || product.storeId,
+      // نسخ المواصفات من المنتج الأصلي
+      productSpecifications: Array.isArray(product.specifications) ? product.specifications.map((spec: any) => spec._id || spec) : []
+    };
+    
+    setForm(newForm);
+    setShowDrawer(true);
+  };
+
   //-------------------------------------------- renderActions -------------------------------------------
   const renderActions = (value: any, item: any) => (
     <div className="flex justify-center space-x-2">
@@ -350,6 +384,15 @@ const ProductsPage: React.FC = () => {
         </svg>
       </button>
       <button
+        onClick={() => handleAddVariant(item)}
+        className="text-green-600 hover:text-green-900 p-1"
+        title={isRTL ? 'إضافة متغير' : 'Add Variant'}
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </button>
+      <button
         onClick={() => handleDelete(item)}
         className="text-red-600 hover:text-red-900 p-1"
         title={isRTL ? 'حذف المنتج' : 'Delete Product'}
@@ -360,10 +403,29 @@ const ProductsPage: React.FC = () => {
       </button>
     </div>
   );
+  //-------------------------------------------- renderVariantStatus -------------------------------------------
+  const renderVariantStatus = (value: any, item: any) => {
+    const hasVariants = item.hasVariants;
+    
+    if (hasVariants) {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          {isRTL ? 'أصلي' : 'Parent'}
+        </span>
+      );
+    } else {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          {isRTL ? 'عادي' : 'Regular'}
+        </span>
+      );
+    }
+  };
+
   //-------------------------------------------- columns -------------------------------------------
   const columns = [
     { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const },
-    { key: 'image', label: { ar: 'الصورة', en: 'Image' }, type: 'image' as const },
+    { key: 'image', label: { ar: 'الصورة', en: 'Image' }, type: 'image' as const, render: renderImage },
     { key: isRTL ? 'nameAr' : 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
     { key: isRTL ? 'descriptionAr' : 'descriptionEn', label: { ar: 'الوصف', en: 'Description' }, type: 'text' as const },
     { key: 'category', label: { ar: 'الفئة', en: 'Category' }, type: 'text' as const },
@@ -377,6 +439,7 @@ const ProductsPage: React.FC = () => {
     { key: 'tags', label: { ar: 'التصنيف', en: 'Label' }, type: 'text' as const, render: renderProductLabels },
     { key: 'specifications', label: { ar: 'المواصفات', en: 'Specifications' }, type: 'text' as const, render: renderSpecifications },
     { key: 'barcode', label: { ar: 'الباركود', en: 'Barcode' }, type: 'text' as const, render: renderBarcode },
+    { key: 'variantStatus', label: { ar: 'النوع', en: 'Type' }, type: 'text' as const, render: renderVariantStatus },
     { key: 'images', label: { ar: 'عدد الصور', en: 'Images Count' }, type: 'number' as const },
     { key: 'colors', label: { ar: 'عدد الألوان', en: 'Colors Count' }, type: 'number' as const },
     { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text' as const, render: renderActions, showControls: false },

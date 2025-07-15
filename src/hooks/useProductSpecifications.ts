@@ -3,7 +3,7 @@ import axios, { AxiosResponse } from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 
-const STORE_ID = '686a719956a82bfcc93a2e2d'; // ثابت للاختبار، يمكن تعديله لاحقاً
+const STORE_ID = '687505893fbf3098648bfe16'; // Store ID الجديد
 
 const useProductSpecifications = () => {
   const [specifications, setSpecifications] = useState<any[]>([]);
@@ -24,9 +24,10 @@ const useProductSpecifications = () => {
       const url = `${BASE_URL}meta/product-specifications/by-store?storeId=${STORE_ID}`;
       const res = await axios.get(url);
       // console.log('FETCHED SPECIFICATIONS FROM API:', res.data);
-      setSpecifications(res.data);
+      const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
+      setSpecifications(data);
       setHasLoaded(true); // تم تحميل البيانات
-      return res.data;
+      return data;
     } catch (err: any) {
       console.error('Error fetching specifications:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب مواصفات المنتجات';
@@ -42,9 +43,10 @@ const useProductSpecifications = () => {
     console.log('Saving specification with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
     const payload: any = {
-      descriptionAr: form.descriptionAr.trim(),
-      descriptionEn: form.descriptionEn.trim(),
-      store: STORE_ID,
+      titleAr: form.titleAr?.trim() || form.descriptionAr?.trim(),
+      titleEn: form.titleEn?.trim() || form.descriptionEn?.trim(),
+      values: form.values || [],
+      storeId: STORE_ID,
       sortOrder: form.sortOrder || 0,
     };
     
@@ -112,30 +114,46 @@ const useProductSpecifications = () => {
   const validateSpecification = (form: any, isRTL: boolean = false) => {
     const errors: { [key: string]: string } = {};
 
-    // التحقق من الوصف العربي
-    if (!form.descriptionAr || form.descriptionAr.trim() === '') {
-      errors.descriptionAr = isRTL ? 'الوصف العربي مطلوب' : 'Arabic description is required';
-    } else if (form.descriptionAr.trim().length > 100) {
-      errors.descriptionAr = isRTL ? 'الوصف العربي لا يمكن أن يتجاوز 100 حرف' : 'Arabic description cannot exceed 100 characters';
+    // التحقق من العنوان العربي
+    const titleAr = form.titleAr?.trim() || form.descriptionAr?.trim();
+    if (!titleAr || titleAr === '') {
+      errors.titleAr = isRTL ? 'العنوان العربي مطلوب' : 'Arabic title is required';
+    } else if (titleAr.length > 100) {
+      errors.titleAr = isRTL ? 'العنوان العربي لا يمكن أن يتجاوز 100 حرف' : 'Arabic title cannot exceed 100 characters';
     }
 
-    // التحقق من الوصف الإنجليزي
-    if (!form.descriptionEn || form.descriptionEn.trim() === '') {
-      errors.descriptionEn = isRTL ? 'الوصف الإنجليزي مطلوب' : 'English description is required';
-    } else if (form.descriptionEn.trim().length > 100) {
-      errors.descriptionEn = isRTL ? 'الوصف الإنجليزي لا يمكن أن يتجاوز 100 حرف' : 'English description cannot exceed 100 characters';
+    // التحقق من العنوان الإنجليزي
+    const titleEn = form.titleEn?.trim() || form.descriptionEn?.trim();
+    if (!titleEn || titleEn === '') {
+      errors.titleEn = isRTL ? 'العنوان الإنجليزي مطلوب' : 'English title is required';
+    } else if (titleEn.length > 100) {
+      errors.titleEn = isRTL ? 'العنوان الإنجليزي لا يمكن أن يتجاوز 100 حرف' : 'English title cannot exceed 100 characters';
     }
 
-    // التحقق من عدم تكرار الاسم في نفس المستوى
+    // التحقق من القيم
+    if (!form.values || !Array.isArray(form.values) || form.values.length === 0) {
+      errors.values = isRTL ? 'يجب إضافة قيم للمواصفة' : 'Values are required for specification';
+    } else {
+      // التحقق من كل قيمة
+      form.values.forEach((value: any, index: number) => {
+        if (!value.valueAr || value.valueAr.trim() === '') {
+          errors[`values.${index}.valueAr`] = isRTL ? 'القيمة العربية مطلوبة' : 'Arabic value is required';
+        }
+        if (!value.valueEn || value.valueEn.trim() === '') {
+          errors[`values.${index}.valueEn`] = isRTL ? 'القيمة الإنجليزية مطلوبة' : 'English value is required';
+        }
+      });
+    }
+
+    // التحقق من عدم تكرار العنوان في نفس المتجر
     const existingSpec = specifications.find(spec => 
-      spec.id !== form.id && 
-      spec.descriptionAr === form.descriptionAr.trim() && 
-      spec.descriptionEn === form.descriptionEn.trim()
+      spec._id !== form._id && 
+      (spec.titleAr === titleAr || spec.titleEn === titleEn)
     );
     
     if (existingSpec) {
-      errors.descriptionAr = isRTL ? 'هذه المواصفة موجودة مسبقاً' : 'This specification already exists';
-      errors.descriptionEn = isRTL ? 'هذه المواصفة موجودة مسبقاً' : 'This specification already exists';
+      errors.titleAr = isRTL ? 'هذه المواصفة موجودة مسبقاً' : 'This specification already exists';
+      errors.titleEn = isRTL ? 'هذه المواصفة موجودة مسبقاً' : 'This specification already exists';
     }
 
     return errors;

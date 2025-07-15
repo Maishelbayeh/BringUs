@@ -13,7 +13,7 @@ interface CategoryTreeProps {
 }
 
 const STORE_ID_KEY = 'storeId';
-const DEFAULT_STORE_ID = '686a719956a82bfcc93a2e2d';
+const DEFAULT_STORE_ID = '687505893fbf3098648bfe16';
 
 const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, isRTL, onAdd, onEdit, onDelete, level = 0 }) => {
   const [expanded, setExpanded] = useState<{ [key: number]: boolean }>({});

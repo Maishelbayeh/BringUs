@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 
-const STORE_ID = '686a719956a82bfcc93a2e2d'; // ثابت للاختبار، يمكن تعديله لاحقاً
+const STORE_ID = '687505893fbf3098648bfe16'; // ثابت للاختبار، يمكن تعديله لاحقاً
 
 const useProductLabel = () => {
   const [productLabels, setProductLabels] = useState<any[]>([]);
@@ -24,9 +24,10 @@ const useProductLabel = () => {
       const url = `${BASE_URL}meta/stores/${STORE_ID}/product-labels`;
       const res = await axios.get(url);
       // console.log('FETCHED PRODUCT LABELS FROM API:', res.data);
-      setProductLabels(res.data);
+      const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
+      setProductLabels(data);
       setHasLoaded(true); // تم تحميل البيانات
-      return res.data;
+      return data;
     } catch (err: any) {
       console.error('Error fetching product labels:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب التصنيفات';

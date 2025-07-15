@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { FiTrash2 } from 'react-icons/fi';
 import { t } from 'i18next';
+import { ProductCardImage } from '../../components/common';
 //-------------------------------------------- ProductCardProps -------------------------------------------
 interface ProductCardProps {
   product: any;
@@ -52,10 +53,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isRTL, onClick, onDe
           {getLabelName(product.productLabel)}
         </span>
         {/* ------------------------------------------- Product Image ------------------------------------------- */}
-        <img
-          src={product.image || 'https://via.placeholder.com/150'}
-          alt={product.name}
-          className="h-40 w-full object-cover rounded-xl"
+        <ProductCardImage
+          src={product.image}
+          alt={isRTL ? product.nameAr : product.nameEn}
+          className="h-40 w-full"
         />
         {/* ------------------------------------------- Product Category ------------------------------------------- */}
         <span className={`absolute top-2 ${isRTL ? 'right-2' : 'left-2'} bg-primary text-white text-xs px-3 py-1 rounded-full shadow`}>

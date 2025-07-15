@@ -29,7 +29,7 @@ const WholesallersPage = () => {
   const [wholesalerToDelete, setWholesalerToDelete] = useState<Wholesaler | null>(null);
 
   // TODO: Replace with actual storeId and token from context/auth
-  const storeId = '686a719956a82bfcc93a2e2d';
+  const storeId = '687505893fbf3098648bfe16';
   const token = localStorage.getItem('token') || '';
 
   const {

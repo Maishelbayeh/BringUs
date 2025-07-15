@@ -127,7 +127,7 @@ function buildCategoryTree(flatCategories: any[]): any[] {
   return tree;
 }
 
-const STORE_ID = '686a719956a82bfcc93a2e2d'; // storeId ثابت للاختبار
+const STORE_ID = '687505893fbf3098648bfe16'; // storeId ثابت للاختبار
 
 const CategoriesPage: React.FC = () => {
   const { t, i18n } = useTranslation();

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 
-const STORE_ID = '686a719956a82bfcc93a2e2d'; // ثابت للاختبار، يمكن تعديله لاحقاً
+const STORE_ID = '687505893fbf3098648bfe16'; // ثابت للاختبار، يمكن تعديله لاحقاً
 
 const useUnits = () => {
   const [units, setUnits] = useState<any[]>([]);
@@ -23,9 +23,10 @@ const useUnits = () => {
       const url = `${BASE_URL}meta/units?storeId=${STORE_ID}`;
       const res = await axios.get(url);
       // console.log('FETCHED UNITS FROM API:', res.data);
-      setUnits(res.data);
+      const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
+      setUnits(data);
       setHasLoaded(true);
-      return res.data;
+      return data;
     } catch (err: any) {
       console.error('Error fetching units:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب الوحدات';

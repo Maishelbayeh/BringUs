@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import CustomInput from '../../components/common/CustomInput';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomSelect from '../../components/common/CustomSelect';
@@ -6,6 +6,7 @@ import CustomSwitch from '../../components/common/CustomSwitch';
 import CustomShuttle from '../../components/common/CustomShuttle';
 import CustomColorPicker from '../../components/common/CustomColorPicker';
 import CustomTextArea from '../../components/common/CustomTextArea';
+import { CheckboxSpecificationSelector } from '../../components/common';
 
 import { t } from 'i18next';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +17,21 @@ interface ColorVariant {
   id: string;
   colors: string[];
 }
+
+//-------------------------------------------- ProductSpecification -------------------------------------------
+interface ProductSpecification {
+  _id: string;
+  titleAr: string;
+  titleEn: string;
+  values: Array<{
+    valueAr: string;
+    valueEn: string;
+  }>;
+  store: string;
+  isActive: boolean;
+  sortOrder: number;
+}
+
 //-------------------------------------------- ProductsFormProps -------------------------------------------
 interface ProductsFormProps {
   form: any;
@@ -34,18 +50,39 @@ const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsC
   
   // استخدام hook لجلب مواصفات المنتجات من API
   const { specifications, fetchSpecifications } = useProductSpecifications();
+  
+  // state للمواصفات المختارة
+  const [selectedSpecifications, setSelectedSpecifications] = useState<any[]>([]);
 
   // جلب مواصفات المنتجات عند تحميل المكون
   useEffect(() => {
     fetchSpecifications();
   }, [fetchSpecifications]);
 
-  // تحويل مواصفات المنتجات إلى خيارات للـ CustomShuttle
-  const specOptions = specifications.map(spec => ({
-    value: spec._id || spec.id.toString(),
-    label: isRtl ? spec.descriptionAr : spec.descriptionEn
-  }));
+  // تحويل البيانات من النموذج إلى التنسيق المطلوب
+  useEffect(() => {
+    if (form.selectedSpecifications) {
+      try {
+        const parsed = JSON.parse(form.selectedSpecifications);
+        if (Array.isArray(parsed)) {
+          setSelectedSpecifications(parsed);
+        }
+      } catch (error) {
+        console.error('Error parsing selectedSpecifications:', error);
+      }
+    }
+  }, [form.selectedSpecifications]);
 
+  // تحويل مواصفات المنتجات إلى التنسيق المطلوب للمكون الجديد
+  const formattedSpecifications = Array.isArray(specifications) ? specifications.map((spec: ProductSpecification) => ({
+    _id: spec._id,
+    title: isRtl ? spec.titleAr : spec.titleEn,
+    values: spec.values.map((value, index) => ({
+      _id: `${spec._id}_${index}`,
+      value: isRtl ? value.valueAr : value.valueEn,
+      title: isRtl ? spec.titleAr : spec.titleEn
+    }))
+  })) : [];
 
   //-------------------------------------------- handleShuttleChange -------------------------------------------
   const handleShuttleChange = (e: React.ChangeEvent<{ name: string; value: string[] }>) => {
@@ -131,10 +168,10 @@ const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsC
           onChange={(e) => handleSelectChange('categoryId', e.target.value)}
           options={[
             { value: '', label: isRtl ? t('products.selectCategory') : 'Select Category' },
-            ...categories.map((cat: any) => ({ 
+            ...(Array.isArray(categories) ? categories.map((cat: any) => ({ 
               value: String(cat._id || cat.id), 
               label: isRtl ? cat.nameAr : cat.nameEn 
-            }))
+            })) : [])
           ]}
         />
       
@@ -144,10 +181,10 @@ const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsC
           onChange={(e) => handleSelectChange('unitId', e.target.value)}
           options={[
             { value: '', label: isRtl ? t('products.selectUnit') : 'Select Unit' },
-            ...units.map((u: any) => ({ 
+            ...(Array.isArray(units) ? units.map((u: any) => ({ 
               value: String(u._id || u.id), 
               label: isRtl ? u.nameAr : u.nameEn 
-            }))
+            })) : [])
           ]}
         />
         {/* <CustomInput
@@ -185,10 +222,10 @@ const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsC
           value={Array.isArray(form.tags) ? form.tags : []}
           onChange={handleTagsChange}
           options={[
-            ...tags.map((opt: any) => ({
+            ...(Array.isArray(tags) ? tags.map((opt: any) => ({
               value: String(opt._id || opt.id),
               label: isRtl ? opt.nameAr : opt.nameEn
-            }))
+            })) : [])
           ]}
           placeholder={isRtl ? 'اختر علامات المنتج' : 'Select product labels'}
         />
@@ -228,13 +265,13 @@ const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsC
           disabled={form.maintainStock !== 'Y'}
         />
         <div className="col-span-full">
-          <CustomShuttle
-            label={isRtl ? t('products.productSpecifications') : 'Product Specifications'}
-            name="productSpecifications"
-            value={form.productSpecifications || []}
-            options={specOptions}
-            onChange={handleShuttleChange}
-            isRTL={isRtl}
+          <CheckboxSpecificationSelector
+            specifications={formattedSpecifications}
+            selectedSpecifications={selectedSpecifications}
+            onSelectionChange={(selected) => {
+              setSelectedSpecifications(selected);
+              handleInputChange('selectedSpecifications', JSON.stringify(selected));
+            }}
           />
         </div>
         <div className="col-span-full">

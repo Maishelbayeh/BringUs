@@ -4,7 +4,7 @@ import { useToastContext } from '../../contexts/ToastContext';
 
 const SimpleDeliveryTest: React.FC = () => {
   const { showSuccess, showError, showInfo } = useToastContext();
-  const storeId = '686a719956a82bfcc93a2e2d';
+  const storeId = '687505893fbf3098648bfe16';
 
   const {
     deliveryMethods,
