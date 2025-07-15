@@ -21,11 +21,12 @@ interface UserData {
   role?: 'superadmin' | 'admin' | 'client';
   status?: 'active' | 'inactive' | 'banned';
   addresses: UserAddress[];
-  store?: string; // Store ID for clients
+  store?: string | { _id: string }; // Store ID for clients (string or object)
 }
 
 interface UserResponse {
-  _id: string;
+  _id?: string;
+  id?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -38,11 +39,11 @@ interface UserResponse {
     url: string;
   };
   isEmailVerified: boolean;
-  lastLogin: string;
+  lastLogin?: string;
   isActive: boolean;
-  store?: string;
+  store?: string | { _id: string };
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 interface AuthResponse {
@@ -332,3 +333,4 @@ export const useUser = () => {
     checkEmailExists,
   };
 };
+ 

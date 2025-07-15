@@ -11,21 +11,24 @@ interface OwnerData {
 }
 
 interface OwnerResponse {
-  _id: string;
+  _id?: string;
+  id?: string;
   userId: string;
   storeId: string;
   status: string;
   permissions: string[];
    isPrimaryOwner: boolean;
   user?: {
-    _id: string;
+    _id?: string;
+    id?: string;
     firstName: string;
     lastName: string;
     email: string;
     phone: string;
   };
   store?: {
-    _id: string;
+    _id?: string;
+    id?: string;
     nameAr: string;
     nameEn: string;
     slug: string;

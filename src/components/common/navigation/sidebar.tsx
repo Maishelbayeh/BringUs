@@ -12,6 +12,8 @@ import {
 import { MenuItem } from '../../../Types';
 import logo from '../../../assets/bringus.svg';
 import { FaUserCircle } from 'react-icons/fa';
+import { useAuth } from '../../../hooks/useAuth';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
 interface SidebarProps {
   userName: string;
@@ -20,6 +22,7 @@ interface SidebarProps {
   isOpen: boolean;
   toggleSidebar: () => void;
   isRTL: boolean;
+  language: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -29,6 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   toggleSidebar,
   isRTL,
+  language,
 }) => {
   // CSS for hiding scrollbar
   const scrollbarHideStyles = `
@@ -47,6 +51,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [expandedRegion, setExpandedRegion] = useState<number | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
+  const { getCurrentUser } = useAuth();
+  const { getStoreName, getStoreLogo, getUserAvatar } = useLocalStorage();
+  
+  // الحصول على بيانات المستخدم والمتجر
+  const user = getCurrentUser();
+  const storeName = getStoreName(language) || 'BringUs';
+  const userDisplayName = user?.firstName && user?.lastName 
+    ? `${user.firstName} ${user.lastName}`
+    : userName;
+  const userRole = user?.role || 'Sales Manager';
+  const storeLogo = getStoreLogo();
+  const userAvatar = getUserAvatar();
 
   const menuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -85,8 +101,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Logo & Store Name */}
       <div className={`mb-6 mt-2 w-full flex flex-col items-center justify-center`}>
         <div className="flex items-center gap-2">
-          <img src={logo} alt="logo" className="h-10 w-10" />
-          <span className="text-2xl font-bold text-gray-900">BringUs</span>
+          <img 
+            src={storeLogo || logo} 
+            alt="logo" 
+            className="h-10 w-10 rounded-full object-cover border border-gray-200" 
+          />
+          <span className="text-2xl font-bold text-gray-900">{storeName}</span>
           <span className="text-xs text-gray-500 self-start mt-2">.com</span>
         </div>
       </div>
@@ -94,11 +114,19 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="w-full flex flex-col items-center mb-8">
         <div className="bg-white rounded-xl shadow p-4 flex items-center gap-4 w-full">
           <div className="flex-shrink-0">
-            <FaUserCircle className="h-12 w-12 text-primary" />
+            {userAvatar ? (
+              <img 
+                src={userAvatar} 
+                alt="User Avatar" 
+                className="h-12 w-12 rounded-full object-cover border border-gray-200" 
+              />
+            ) : (
+              <FaUserCircle className="h-12 w-12 text-primary" />
+            )}
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-primary text-base">{userName}</span>
-            <span className="text-gray-400 text-sm">Sales Manager</span>
+            <span className="font-bold text-primary text-base">{userDisplayName}</span>
+            <span className="text-gray-400 text-sm">{userRole}</span>
           </div>
         </div>
       </div>
