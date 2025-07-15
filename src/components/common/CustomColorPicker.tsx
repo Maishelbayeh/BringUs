@@ -53,11 +53,18 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, valu
       return { background: colors[0] };
     }
 
-    const step = 100 / colors.length;
+    if (colors.length === 2) {
+      return {
+        background: `linear-gradient(90deg, ${colors[0]} 50%, ${colors[1]} 50%)`
+      };
+    }
+
+    // For more than 2 colors, use conic gradient
+    const step = 360 / colors.length;
     const segments = colors.map((color, index) => {
       const start = step * index;
       const end = step * (index + 1);
-      return `${color} ${start}% ${end}%`;
+      return `${color} ${start}deg ${end}deg`;
     }).join(', ');
 
     return {
@@ -75,13 +82,13 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, valu
           {value.map((variant) => (
             <div key={variant.id} className="relative group">
               <div
-                className="w-12 h-12 rounded-full border-4 border-white shadow transition-transform duration-200 group-hover:scale-110"
-                style={{ background: getCircleDivisionStyle(variant.colors).background }}
+                className="w-12 h-12 rounded-full border-4 border-white shadow-lg transition-transform duration-200 group-hover:scale-110"
+                style={getCircleDivisionStyle(variant.colors)}
               />
               <button
                 type="button"
                 onClick={() => handleVariantRemove(variant.id)}
-                className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} bg-white border border-gray-300 rounded-full p-1 opacity-0 group-hover:opacity-100 transition`}
+                className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} bg-white border border-gray-300 rounded-full p-1 opacity-0 group-hover:opacity-100 transition shadow-sm`}
                 title={isRTL ? 'حذف' : 'Delete'}
               >
                 <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,11 +113,14 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, valu
               <div className="flex flex-wrap gap-2 mb-2">
                 {currentColors.map((color, idx) => (
                   <div key={idx} className="relative group">
-                    <div className="w-8 h-8 rounded-full border border-gray-300" style={{ background: color }} />
+                    <div 
+                      className="w-8 h-8 rounded-full border border-gray-300 shadow-sm" 
+                      style={{ background: color }}
+                    />
                     <button
                       type="button"
                       onClick={() => handleColorRemove(idx)}
-                      className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} bg-white border border-gray-300 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition`}
+                      className={`absolute -top-1 ${isRTL ? '-left-1' : '-right-1'} bg-white border border-gray-300 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition shadow-sm`}
                       title={isRTL ? 'حذف' : 'Delete'}
                     >
                       <svg className="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
