@@ -24,6 +24,7 @@ import Signup from '../pages/Login/Signup';
 import ForgotPassword from '../pages/Login/ForgotPassword';
 import Units from "../pages/units/Units";
 import ProductsLabels from "../pages/labels/ProductsLabels";
+import StoreGeneralInfo from "@/pages/store/StoreGeneralInfo";
 
 export default function Routers() {
   return (
@@ -47,6 +48,7 @@ export default function Routers() {
       <Route path="/store-preview" element={<StorePreview />} />
       <Route path="/store-videos" element={<StoreVideoPage />} />
       <Route path="/wholesalers" element={<WholesallersPage />} />
+      <Route path="/store-info" element={<StoreGeneralInfo   />} />
       <Route path="/affiliate" element={<AffiliationPage />} />
       <Route path="/advertisement" element={<AdvertisementPage />} />
       <Route path="/terms-conditions" element={<TermsConditionsPage />} />

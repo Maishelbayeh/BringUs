@@ -11,12 +11,13 @@ import {
   Support,
   TrendingUp,
   Speed,
-  Check
+  Check,
+  Store
 } from '@mui/icons-material';
 import CustomInput from '@/components/common/CustomInput';
 import CustomButton from '@/components/common/CustomButton';
 import useLanguage from '@/hooks/useLanguage';
-
+import StoreRegistrationWizard from '../../pages/store/StoreRegistrationWizard';
 const Signup: React.FC = () => {
   const { t } = useTranslation();
   const { language, toggleLanguage } = useLanguage();
@@ -43,6 +44,7 @@ const Signup: React.FC = () => {
     terms?: string; 
   }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showStoreWizard, setShowStoreWizard] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -391,6 +393,26 @@ const Signup: React.FC = () => {
                 ) : <CheckCircle />}
               />
 
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">{t('signup.or')}</span>
+                </div>
+              </div>
+
+              {/* Store Registration Button */}
+              <CustomButton
+                text={t('signup.registerStore')}
+                color="white"
+                textColor="purple"
+                action={() => setShowStoreWizard(true)}
+                className="w-full py-3 text-base font-semibold border-2 border-purple-600 hover:bg-purple-50 transform hover:scale-105 transition-all duration-200"
+                icon={<Store />}
+              />
+
               <div className="text-center">
                 <span className="text-gray-600">
                   {t('signup.haveAccount')}{' '}
@@ -407,6 +429,12 @@ const Signup: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Store Registration Wizard Modal */}
+      <StoreRegistrationWizard
+        isOpen={showStoreWizard}
+        onClose={() => setShowStoreWizard(false)}
+      />
     </div>
   );
 };

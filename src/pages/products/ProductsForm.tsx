@@ -135,8 +135,8 @@ const ProductsForm: React.FC<ProductsFormProps> = ({ form, onFormChange, onTagsC
               value: String(cat._id || cat.id), 
               label: isRtl ? cat.nameAr : cat.nameEn 
             }))
-          ]}
-        />
+            ]}
+          />
       
         <CustomSelect
           label={isRtl ? t('products.unit') : 'Unit'}

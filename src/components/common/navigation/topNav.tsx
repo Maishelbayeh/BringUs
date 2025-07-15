@@ -36,7 +36,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
         >
           <Bars3Icon className="h-6 w-6" />
         </button>
-        <div className={`flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
+        <div onClick={() => navigate('/store-info')} className={`cursor-pointer flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
           <img src={logo} alt="logo" className="h-7 w-7" />
           <span className="hidden sm:inline sm:text-2xl font-bold text-primary tracking-wide">bring us</span>
         </div>
