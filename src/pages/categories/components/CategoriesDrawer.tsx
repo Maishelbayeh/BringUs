@@ -21,7 +21,7 @@ interface CategoriesDrawerProps {
 }
 
 const STORE_ID_KEY = 'storeId';
-const DEFAULT_STORE_ID = '686a719956a82bfcc93a2e2d';
+const DEFAULT_STORE_ID = '687505893fbf3098648bfe16';
 
 const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onImageChange, onSubmit, isSubcategory, categories, allCategories }) => {
   const { t } = useTranslation();

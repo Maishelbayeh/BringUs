@@ -13,7 +13,7 @@ const AdvertisementPage = () => {
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
 
   // TODO: Replace with actual storeId from context/auth if needed
-  const storeId = '686a719956a82bfcc93a2e2d';
+  const storeId = '687505893fbf3098648bfe16';
   const token = localStorage.getItem('token') || '';
 
   const {

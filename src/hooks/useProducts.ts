@@ -3,39 +3,67 @@ import axios from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 
-const STORE_ID = '686a719956a82bfcc93a2e2d'; // ثابت للاختبار، يمكن تعديله لاحقاً
+const STORE_ID = '687505893fbf3098648bfe16'; // ثابت للاختبار، يمكن تعديله لاحقاً
 
 const useProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0); // لتتبع آخر وقت تم فيه جلب البيانات
+  const [hasError, setHasError] = useState(false); // لتتبع وجود خطأ
   const { showSuccess, showError } = useToastContext();
 
   // جلب جميع المنتجات
   const fetchProducts = useCallback(async (forceRefresh: boolean = false) => {
+    // إذا كان هناك خطأ سابق ولا نحتاج تحديث قسري، لا نضرب الـ API
+    if (hasError && !forceRefresh) {
+      console.log('Previous error occurred, skipping API call. Use forceRefresh to retry.');
+      return products;
+    }
+
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasLoaded && !forceRefresh && Array.isArray(products) && products.length > 0) {
       console.log('Products data already loaded, skipping API call');
       return products;
     }
 
+    // منع الاستدعاءات المتكررة أثناء التحميل
+    if (loading) {
+      console.log('Already loading products, skipping duplicate call');
+      return products;
+    }
+
+    // منع الاستدعاءات المتكررة خلال 5 ثوانٍ
+    const now = Date.now();
+    if (!forceRefresh && hasLoaded && (now - lastFetchTime) < 5000) {
+      console.log('Products fetched recently, skipping API call');
+      return products;
+    }
+
     try {
       setLoading(true);
+      setHasError(false); // إعادة تعيين حالة الخطأ عند بدء محاولة جديدة
       const url = `${BASE_URL}meta/products`;
       const res = await axios.get(url);
       console.log('FETCHED PRODUCTS FROM API:', res.data);
       setProducts(res.data.data || res.data);
       setHasLoaded(true); // تم تحميل البيانات
+      setLastFetchTime(now); // تحديث وقت آخر جلب
+      setHasError(false); // تأكيد عدم وجود خطأ
       return res.data.data || res.data;
     } catch (err: any) {
       console.error('Error fetching products:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب المنتجات';
       showError(errorMessage);
-      throw err;
+      // تعيين حالة الخطأ لمنع الاستدعاءات المتكررة
+      setHasError(true);
+      setHasLoaded(false);
+      // لا نرمي الخطأ مرة أخرى لمنع الاستدعاءات المتكررة
+      return products;
     } finally {
       setLoading(false);
     }
-  }, [hasLoaded, products, showError]);
+  }, [hasLoaded, products, loading, lastFetchTime, hasError, showError]);
 
   // إضافة أو تعديل منتج
   const saveProduct = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
@@ -156,7 +184,7 @@ const useProducts = () => {
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
 
-      const response = await axios.post(`${BASE_URL}meta/products/upload-main-image`, formData, {
+      const response = await axios.post(`${BASE_URL}/products/upload-main-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -181,7 +209,7 @@ const useProducts = () => {
       });
       formData.append('storeId', STORE_ID);
 
-      const response = await axios.post(`${BASE_URL}meta/products/upload-gallery-images`, formData, {
+      const response = await axios.post(`${BASE_URL}products/upload-gallery-images`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -270,10 +298,25 @@ const useProducts = () => {
     return errors;
   };
 
+  // دالة لإعادة تعيين حالة التحميل
+  const resetLoadingState = useCallback(() => {
+    setLoading(false);
+    setHasLoaded(false);
+    setLastFetchTime(0);
+    setHasError(false); // إعادة تعيين حالة الخطأ أيضاً
+  }, []);
+
+  // دالة لإعادة المحاولة في حالة الخطأ
+  const retryFetch = useCallback(async () => {
+    setHasError(false);
+    return await fetchProducts(true);
+  }, [fetchProducts]);
+
   return {
     products,
     setProducts,
     loading,
+    hasError,
     fetchProducts,
     saveProduct,
     deleteProduct,
@@ -281,6 +324,8 @@ const useProducts = () => {
     uploadProductImages,
     uploadSingleImage,
     validateProduct,
+    resetLoadingState,
+    retryFetch,
   };
 };
 

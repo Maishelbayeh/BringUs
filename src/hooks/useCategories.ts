@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 
-const STORE_ID = '686a719956a82bfcc93a2e2d'; // ثابت للاختبار، يمكن تعديله لاحقاً
+const STORE_ID = '687505893fbf3098648bfe16'; // ثابت للاختبار، يمكن تعديله لاحقاً
 
 function buildCategoryTree(flatCategories: any[]): any[] {
   if (!Array.isArray(flatCategories)) return [];
@@ -46,11 +46,12 @@ const useCategories = () => {
       const url = `http://localhost:5001/api/categories/store/${STORE_ID}`;
       const res = await axios.get(url);
       // console.log('FETCHED CATEGORIES FROM API:', res.data.data);
-      const treeData = buildCategoryTree(res.data.data);
+      const data = Array.isArray(res.data.data) ? res.data.data : [];
+      const treeData = buildCategoryTree(data);
       setCategories(treeData);
       setHasLoaded(true); // تم تحميل البيانات
       // لا نعرض توست عند جلب البيانات الأولي
-      return res.data.data;
+      return data;
     } catch (err: any) {
       console.error('Error fetching categories:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب التصنيفات';

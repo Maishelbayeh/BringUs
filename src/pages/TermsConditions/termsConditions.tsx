@@ -8,7 +8,7 @@ import HeaderWithAction from '@/components/common/HeaderWithAction';
 import { useTermsConditions } from '../../hooks/useTermsConditions';
 
 // Mock store ID - replace with actual store ID from context
-const STORE_ID = '686a719956a82bfcc93a2e2d';
+const STORE_ID = '687505893fbf3098648bfe16';
 
 const initialHtml = `<h2>Terms & Conditions</h2><ul><li>All users must be 18+ years old.</li><li>Respect privacy and data policies.</li></ul>`;
 

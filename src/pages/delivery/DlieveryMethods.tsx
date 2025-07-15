@@ -34,7 +34,7 @@ const DeliveryMethods: React.FC = () => {
     clearError,
     clearRateLimit
   } = useDeliveryMethods({
-    storeId: '686a719956a82bfcc93a2e2d'
+    storeId: '687505893fbf3098648bfe16'
   });
 
   const [drawerOpen, setDrawerOpen] = useState(false);
