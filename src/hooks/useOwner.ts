@@ -7,7 +7,7 @@ interface OwnerData {
   storeId: string;
   status: 'active'| 'inactive' ;
   permissions?: string[];
-  isActive?: boolean;
+  isPrimaryOwner?: boolean;
 }
 
 interface OwnerResponse {
@@ -16,7 +16,7 @@ interface OwnerResponse {
   storeId: string;
   status: string;
   permissions: string[];
-  // isActive: boolean;
+   isPrimaryOwner: boolean;
   user?: {
     _id: string;
     firstName: string;

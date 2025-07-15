@@ -447,7 +447,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
           'view_analytics',
           'manage_settings'
         ],
-        // isActive: true
+       isPrimaryOwner: true
       };
       
       const owner = await createOwner(ownerData);
