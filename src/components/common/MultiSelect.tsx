@@ -19,11 +19,11 @@ interface MultiSelectProps {
   placeholder?: string;
 }
 
-const MultiSelect: React.FC<MultiSelectProps> = ({ 
-  label, 
+const MultiSelect: React.FC<MultiSelectProps> = ({
+  label,
   value, 
   onChange, 
-  options, 
+  options,
   id, 
   icon, 
   className = '', 
@@ -101,31 +101,31 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
             dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary`
           }
           style={{ direction: i18n.language === 'ARABIC' ? 'rtl' : 'ltr' }}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
-        >
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+      >
           <div className="flex flex-wrap gap-1 min-h-[20px] items-center">
             {selectedLabels.length > 0 ? (
               selectedLabels.map((label, index) => (
-                <span
+            <span
                   key={index}
                   className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-primary text-white rounded-md"
-                >
+            >
                   {label}
-                  <button
-                    type="button"
+                <button
+                  type="button"
                     onClick={(e) => removeOption(selectedValues[index], e)}
                     className="ml-1 text-white hover:text-red-200 focus:outline-none"
                   >
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
-                  </button>
+                </button>
                 </span>
               ))
             ) : (
               <span className="text-gray-500">
                 {placeholder || t('common.selectOptions', 'Select options')}
-              </span>
+            </span>
             )}
           </div>
         </div>
@@ -137,20 +137,20 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
           style={{ top: '50%', transform: 'translateY(-50%)' }}
         >
           {icon || (
-            <svg 
+          <svg
               className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24" 
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
-            >
+          >
               <path 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
                 strokeWidth={2} 
                 d="M19 9l-7 7-7-7" 
               />
-            </svg>
+          </svg>
           )}
         </span>
 

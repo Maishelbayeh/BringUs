@@ -185,7 +185,7 @@ const ProductsPage: React.FC = () => {
     const unit = units?.find((u: any) => u.id === unitId || u._id === unitId);
     return isRTL ? (unit?.nameAr || '') : (unit?.nameEn || '');
   };
-    //-------------------------------------------- tableData -------------------------------------------
+  //-------------------------------------------- tableData -------------------------------------------
   const tableData = Array.isArray(filteredProducts) ? filteredProducts.map(product => {
 
     return {
@@ -193,8 +193,8 @@ const ProductsPage: React.FC = () => {
       image: product.mainImage || (product.images && product.images.length > 0 ? product.images[0] : DEFAULT_PRODUCT_IMAGE),
       nameAr: product.nameAr,
       nameEn: product.nameEn,
-      category: product.category ? (isRTL ? product.category.nameAr : product.category.nameEn) : '',
-      price: product.price,
+    category: product.category ? (isRTL ? product.category.nameAr : product.category.nameEn) : '',
+    price: product.price,
       costPrice: product.costPrice,
       compareAtPrice: product.compareAtPrice,
       originalPrice: product.originalPrice,
@@ -229,9 +229,9 @@ const ProductsPage: React.FC = () => {
             return specData ? (isRTL ? specData.titleAr : specData.titleEn) : spec;
           }).join(', ')
         : (isRTL ? 'لا توجد مواصفات' : 'No Specifications'),
-      images: product.mainImage ? 1 : (product.images?.length || 0),
-      colors: product.colors?.length || 0,
-      originalProduct: product,
+    images: product.mainImage ? 1 : (product.images?.length || 0),
+    colors: product.colors?.length || 0,
+    originalProduct: product,
     };
   }) : [];
   //-------------------------------------------- renderImage -------------------------------------------
@@ -500,7 +500,7 @@ const ProductsPage: React.FC = () => {
     
     try {
      
-            // تحويل البيانات إلى الشكل المطلوب للـ API
+      // تحويل البيانات إلى الشكل المطلوب للـ API
       const productData = {
         nameAr: form.nameAr || '',
         nameEn: form.nameEn || '',
