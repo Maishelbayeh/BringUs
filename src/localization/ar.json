@@ -471,7 +471,11 @@
     "productVideo": "رابط فيديو المنتج",
     "product": "منتج",
     "deleteConfirmTitle": "تأكيد حذف المنتج",
-    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج؟"
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج؟",
+    "searchSpecifications": "البحث في المواصفات...",
+    "deleteSpecConfirmTitle": "تأكيد حذف المواصفة",
+    "deleteSpecConfirmMessage": "هل أنت متأكد من حذف هذه المواصفة؟",
+    "specification": "مواصفة"
   },
   "subcategories": {
     "title": "الفئات الفرعية",

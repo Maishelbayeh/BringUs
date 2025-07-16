@@ -385,7 +385,11 @@
       "productVideo": "Product Video",
       "product": "product",
       "deleteConfirmTitle": "Confirm Delete Product",
-      "deleteConfirmMessage": "Are you sure you want to delete this product?"
+      "deleteConfirmMessage": "Are you sure you want to delete this product?",
+      "searchSpecifications": "Search specifications...",
+      "deleteSpecConfirmTitle": "Confirm Delete Specification",
+      "deleteSpecConfirmMessage": "Are you sure you want to delete this specification?",
+      "specification": "specification"
     },
   "subcategories": {
     "title": "Subcategories",

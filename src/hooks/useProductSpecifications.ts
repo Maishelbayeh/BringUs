@@ -25,7 +25,9 @@ const useProductSpecifications = () => {
       console.log('🔍 Fetching specifications from:', url);
       const res = await axios.get(url);
       console.log('🔍 Raw API response:', res.data);
-      const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
+      
+      // التعامل مع الـ response الجديد
+      const data = res.data.success ? (res.data.data || []) : (Array.isArray(res.data) ? res.data : []);
       console.log('🔍 Processed specifications data:', data);
       setSpecifications(data);
       setHasLoaded(true); // تم تحميل البيانات
@@ -42,14 +44,17 @@ const useProductSpecifications = () => {
 
   // إضافة أو تعديل مواصفة منتج
   const saveSpecification = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
-    console.log('Saving specification with form:', form, 'editId:', editId, 'isRTL:', isRTL);
+    console.log('🔄 Starting saveSpecification...');
+    console.log('📝 Form data:', form);
+    console.log('🔧 Edit ID:', editId);
     
     const payload: any = {
-      titleAr: form.titleAr?.trim() || form.descriptionAr?.trim(),
-      titleEn: form.titleEn?.trim() || form.descriptionEn?.trim(),
+      titleAr: form.titleAr?.trim(),
+      titleEn: form.titleEn?.trim(),
       values: form.values || [],
-      storeId: STORE_ID,
       sortOrder: form.sortOrder || 0,
+      isActive: form.isActive !== undefined ? form.isActive : true, // إعادة تفعيل
+      storeId: STORE_ID, // إرسال storeId في كل الحالات
     };
     
     // إضافة التصنيف فقط إذا كان محدداً
@@ -57,22 +62,27 @@ const useProductSpecifications = () => {
       payload.category = form.categoryId;
     }
     
-    console.log('Final payload to send:', payload);
+    console.log('📦 Final payload to send:', payload);
+    
     try {
       if (editId) {
+        console.log('🔄 Sending PUT request to:', `${BASE_URL}meta/product-specifications/${editId}`);
         const response = await axios.put(`${BASE_URL}meta/product-specifications/${editId}`, payload);
-        console.log('Specification updated successfully:', response.data);
+        console.log('✅ Specification updated successfully:', response.data);
         showSuccess('تم تعديل مواصفة المنتج بنجاح', 'نجح التحديث');
       } else {
+        console.log('🔄 Sending POST request to:', `${BASE_URL}meta/product-specifications`);
         const response = await axios.post(`${BASE_URL}meta/product-specifications`, payload);
-        console.log('Specification created successfully:', response.data);
+        console.log('✅ Specification created successfully:', response.data);
         showSuccess('تم إضافة مواصفة المنتج بنجاح', 'نجح الإضافة');
       }
       // تحديث القائمة فقط
       await fetchSpecifications(true);
       return true;
     } catch (err: any) {
-      console.error('Error saving specification:', err);
+      console.error('❌ Error saving specification:', err);
+      console.error('❌ Error response:', err?.response?.data);
+      console.error('❌ Error status:', err?.response?.status);
       
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
@@ -117,7 +127,7 @@ const useProductSpecifications = () => {
     const errors: { [key: string]: string } = {};
 
     // التحقق من العنوان العربي
-    const titleAr = form.titleAr?.trim() || form.descriptionAr?.trim();
+    const titleAr = form.titleAr?.trim();
     if (!titleAr || titleAr === '') {
       errors.titleAr = isRTL ? 'العنوان العربي مطلوب' : 'Arabic title is required';
     } else if (titleAr.length > 100) {
@@ -125,7 +135,7 @@ const useProductSpecifications = () => {
     }
 
     // التحقق من العنوان الإنجليزي
-    const titleEn = form.titleEn?.trim() || form.descriptionEn?.trim();
+    const titleEn = form.titleEn?.trim();
     if (!titleEn || titleEn === '') {
       errors.titleEn = isRTL ? 'العنوان الإنجليزي مطلوب' : 'English title is required';
     } else if (titleEn.length > 100) {
@@ -149,7 +159,7 @@ const useProductSpecifications = () => {
 
     // التحقق من عدم تكرار العنوان في نفس المتجر
     const existingSpec = specifications.find(spec => 
-      spec._id !== form._id && 
+      spec._id !== form.id && 
       (spec.titleAr === titleAr || spec.titleEn === titleEn)
     );
     
