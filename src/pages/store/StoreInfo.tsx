@@ -8,7 +8,7 @@ const StoreInfo: React.FC = () => {
   const isRTL = language === 'ARABIC';
 
   return (
-    <div className={`min-h-screen bg-primary-50 p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`min-h-screen bg-primary-50 p-10 `}>
       <StoreGeneralInfo />
     </div>
   );

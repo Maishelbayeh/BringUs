@@ -1,5 +1,5 @@
 // src/components/common/navigation/Sidebar.tsx
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -56,13 +56,31 @@ const Sidebar: React.FC<SidebarProps> = ({
   
   // الحصول على بيانات المستخدم والمتجر
   const user = getCurrentUser();
-  const storeName = getStoreName(language) || 'BringUs';
+  const [storeName, setStoreName] = useState(getStoreName(language) || 'BringUs');
+  const [storeLogo, setStoreLogo] = useState(getStoreLogo());
   const userDisplayName = user?.firstName && user?.lastName 
     ? `${user.firstName} ${user.lastName}`
     : userName;
   const userRole = user?.role || 'Sales Manager';
-  const storeLogo = getStoreLogo();
   const userAvatar = getUserAvatar();
+
+  // الاستماع لتحديث بيانات المتجر
+  useEffect(() => {
+    const handleStoreDataUpdate = (event: CustomEvent) => {
+      const { nameAr, nameEn, logo } = event.detail;
+      const newStoreName = language === 'ARABIC' ? nameAr : nameEn;
+      setStoreName(newStoreName || 'BringUs');
+      if (logo?.url) {
+        setStoreLogo(logo.url);
+      }
+    };
+
+    window.addEventListener('storeDataUpdated', handleStoreDataUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('storeDataUpdated', handleStoreDataUpdate as EventListener);
+    };
+  }, [language]);
 
   const menuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
 

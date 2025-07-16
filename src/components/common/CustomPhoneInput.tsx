@@ -7,6 +7,8 @@ interface CustomPhoneInputProps {
   required?: boolean;
   error?: string;
   placeholder?: string;
+  className?: string;
+  disabled?: boolean;
 }
 
 // استخدام بيانات من مكتبة react-phone-input-2
@@ -222,7 +224,9 @@ const CustomPhoneInput: React.FC<CustomPhoneInputProps> = ({
   onChange,
   required,
   error,
-  placeholder
+  placeholder,
+  className,
+  disabled
 }) => {
   const initial = getInitialParts(value || '');
   const [countryCode, setCountryCode] = useState(initial.code);
@@ -244,13 +248,13 @@ const CustomPhoneInput: React.FC<CustomPhoneInputProps> = ({
   return (
     <div>
       {label && (
-        <label className="block mb-2 text-sm font-medium text-gray-900">
+        <label className="block mb-2 text-sm font-medium">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
-      <div className="flex gap-2 flex-row-reverse">
+      <div className="flex gap-2 ">
         <select
-          className="border rounded-lg p-2 bg-gray-50 text-gray-900 focus:ring-primary focus:border-primary min-w-[120px]"
+          className="border rounded-lg p-2 bg-gray-50 text-gray-900 focus:ring-primary focus:border-primary max-w-[140px] min-w-[140px]"
           value={countryCode}
           onChange={e => setCountryCode(e.target.value)}
         >
@@ -262,7 +266,10 @@ const CustomPhoneInput: React.FC<CustomPhoneInputProps> = ({
         </select>
         <input
           type="tel"
-          className={`flex-1 border rounded-lg p-2 bg-gray-50 text-gray-900 focus:ring-primary focus:border-primary ${error ? 'border-red-500' : 'border-gray-300'}`}
+          className={`appearance-none border text-sm rounded-lg block w-full p-3 transition-all duration-200
+            ${disabled ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-900  focus:ring-primary focus:border-primary'}
+            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary
+            ${error ? 'border-red-500' : ''} ${className}`}
           value={number}
           onChange={e => setNumber(e.target.value.replace(/[^\d]/g, ''))}
           placeholder={placeholder || '5xxxxxxxx'}

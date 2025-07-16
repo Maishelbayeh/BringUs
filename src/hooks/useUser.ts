@@ -282,7 +282,7 @@ export const useUser = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم جلب المستخدمين بنجاح:', response.data.data);
+       
         return response.data.data || [];
       } else {
         throw new Error(response.data.message || 'فشل في جلب المستخدمين');

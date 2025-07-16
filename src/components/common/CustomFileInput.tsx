@@ -1,4 +1,4 @@
-import React, { useRef,  useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -16,7 +16,7 @@ interface CustomFileInputProps {
 
 const CustomFileInput: React.FC<CustomFileInputProps> = ({ 
   label, 
-  // value, 
+  value, 
   onChange, 
   error, 
   placeholder, 
@@ -33,6 +33,25 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   const { t } = useTranslation();
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
+
+  // إضافة الصور الموجودة مسبقاً عند تحميل المكون
+  useEffect(() => {
+    if (value) {
+      const existingImages = Array.isArray(value) ? value : [value];
+      const validImages = existingImages.filter(img => img && img.trim() !== '');
+      setPreviews(validImages);
+      setFileCount(validImages.length);
+      // مسح الملفات المحددة عند تحميل صور موجودة
+      setSelectedFiles([]);
+      setFileNames([]);
+    } else {
+      setPreviews([]);
+      setFileCount(0);
+      setSelectedFiles([]);
+      setFileNames([]);
+    }
+  }, [value]);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) {
@@ -40,14 +59,14 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
     }
 
     const newFiles = Array.from(files);
-    const updatedFiles = multiple ? [...selectedFiles, ...newFiles] : newFiles;
-    setSelectedFiles(updatedFiles);
-    setFileCount(updatedFiles.length);
-    setFileNames(updatedFiles.map(file => file.name));
-    onChange(multiple ? updatedFiles : updatedFiles[0]);
+    // استبدال الملفات القديمة بالجديدة (ليس إضافتها)
+    setSelectedFiles(newFiles);
+    setFileCount(newFiles.length);
+    setFileNames(newFiles.map(file => file.name));
+    onChange(multiple ? newFiles : newFiles[0]);
 
-    // Generate previews for new files
-    const newPreviews: string[] = [...previews];
+    // استبدال الصور الموجودة بالصور الجديدة
+    const newPreviews: string[] = [];
     newFiles.forEach(file => {
       const reader = new FileReader();
       reader.onload = e => {
@@ -67,16 +86,22 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
     }
   };
 
-  const removeFile = (index: number) => {
-    const newFiles = selectedFiles.filter((_, i) => i !== index);
+  const removeImage = (index: number) => {
     const newPreviews = previews.filter((_, i) => i !== index);
-    const newFileNames = fileNames.filter((_, i) => i !== index);
-    
-    setSelectedFiles(newFiles);
     setPreviews(newPreviews);
-    setFileNames(newFileNames);
-    setFileCount(newFiles.length);
-    onChange(multiple ? newFiles : null);
+    setFileCount(newPreviews.length);
+    
+    // إذا كانت الصورة من الملفات المحددة حديثاً
+    if (index < selectedFiles.length) {
+      const newFiles = selectedFiles.filter((_, i) => i !== index);
+      const newFileNames = fileNames.filter((_, i) => i !== index);
+      setSelectedFiles(newFiles);
+      setFileNames(newFileNames);
+      onChange(multiple ? newFiles : null);
+    } else {
+      // إذا كانت الصورة موجودة مسبقاً
+      onChange(null);
+    }
   };
 
   return (
@@ -111,7 +136,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    removeFile(index);
+                    removeImage(index);
                   }}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 >

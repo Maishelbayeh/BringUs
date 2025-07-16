@@ -52,7 +52,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   
   // استخدام الـ hooks
   const { createUser, checkEmailExists } = useUser();
-  const { createStore } = useStore();
+  const { createStore, uploadStoreLogo, updateStore } = useStore();
   const { createOwner } = useOwner();
   
   const [currentStep, setCurrentStep] = useState(1);
@@ -84,6 +84,12 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  
+  // إضافة state لتخزين ملف اللوجو
+  const [storeLogoFile, setStoreLogoFile] = useState<File | null>(null);
+  const [storeData, setStoreData] = useState<any>(null);
+  const [isStoreValid, setIsStoreValid] = useState(false);
+  const [isMerchantValid, setIsMerchantValid] = useState(false);
 
   const validateField = (name: string, value: string) => {
     let error = '';
@@ -296,20 +302,49 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       return;
     }
     
-   
-    
     try {
-      // 1. إنشاء المتجر أولاً
-     
-      const store = await createStore(storeData);
+      // 1. إنشاء المتجر أولاً بدون لوجو
+      const storeDataWithoutLogo = {
+        ...storeData,
+        logo: { public_id: null, url: null } // بدون لوجو في البداية
+      };
+      
+      console.log('🔍 البيانات المرسلة للخادم:', storeDataWithoutLogo);
+      console.log('🔍 contact.email:', storeDataWithoutLogo.contact?.email);
+      console.log('🔍 nameAr:', storeDataWithoutLogo.nameAr);
+      console.log('🔍 nameEn:', storeDataWithoutLogo.nameEn);
+      console.log('🔍 slug:', storeDataWithoutLogo.slug);
+      
+      console.log('🔄 إنشاء المتجر بدون لوجو...');
+      const store = await createStore(storeDataWithoutLogo);
       
       if (!store) {
         console.error('❌ فشل في إنشاء المتجر');
-      
         return;
       }
       
-    
+      console.log('✅ تم إنشاء المتجر بنجاح:', store);
+      
+      // 2. إذا كان هناك ملف لوجو، ارفعه للمتجر الجديد
+      if (storeLogoFile) {
+        console.log('🔄 رفع اللوجو للمتجر الجديد:', store.id || store._id);
+        try {
+          const logoResult = await uploadStoreLogo(storeLogoFile, store.id || store._id);
+          if (logoResult) {
+            console.log('✅ تم رفع اللوجو بنجاح:', logoResult);
+            // تحديث المتجر باللوجو الجديد
+            const updatedStore = await updateStore(store.id || store._id || '', { logo: logoResult });
+            if (updatedStore) {
+              console.log('✅ تم تحديث المتجر باللوجو الجديد:', updatedStore);
+              // تحديث store في state
+              setStoreData((prev: any) => ({ ...prev, createdStore: updatedStore }));
+            }
+          }
+        } catch (logoError) {
+          console.error('❌ خطأ في رفع اللوجو:', logoError);
+        }
+      }
+      
       // حفظ بيانات المتجر للاستخدام في الخطوة التالية
       setStoreData((prev: any) => ({ ...prev, createdStore: store }));
       
@@ -318,14 +353,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       
     } catch (error) {
       console.error('❌ خطأ في إنشاء المتجر:', error);
-     
     }
   };
-
-  const [storeData, setStoreData] = useState<any>(null);
-  const [isStoreValid, setIsStoreValid] = useState(false);
-  const [isMerchantValid, setIsMerchantValid] = useState(false);
-
 
   // التحقق من صحة نموذج التاجر
   useEffect(() => {
@@ -363,7 +392,22 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   }, [merchantErrors, merchantData]);
 
   const handleStoreDataChange = async (storeData: any) => {
+    console.log('🔍 البيانات المستلمة من StoreGeneralInfo:', storeData);
+    console.log('🔍 contact.email في البيانات المستلمة:', storeData.contact?.email);
+    
     setStoreData(storeData);
+    
+    // إذا كان هناك ملف لوجو جديد، احفظه
+    if (storeData.logo && storeData.logo.url && storeData.logo.url.startsWith('blob:')) {
+      // نحتاج للحصول على ملف اللوجو من StoreGeneralInfo
+      // سنقوم بإضافة prop لتمرير ملف اللوجو
+      console.log('🔄 تم حفظ بيانات المتجر مع لوجو جديد');
+    }
+  };
+
+  const handleLogoFileChange = (file: File | null) => {
+    setStoreLogoFile(file);
+    console.log('🔄 تم حفظ ملف اللوجو:', file ? file.name : 'تم إزالة اللوجو');
   };
 
   const handleMerchantSubmit = async () => {
@@ -532,10 +576,12 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
-           dir={isRTL ? 'rtl' : 'ltr'}>
+          >
         
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200"
+        style={{ direction: isRTL ? 'rtl' : 'ltr' }}
+        >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
               {currentStep === 1 ? <Store className="text-white" /> : <Person className="text-white" />}
@@ -608,6 +654,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                             <StoreGeneralInfo 
                 onSubmit={handleStoreDataChange}
                 onValidate={setIsStoreValid}
+                onLogoFileChange={handleLogoFileChange}
               />
               
               {/* Navigation Buttons */}
@@ -920,7 +967,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+                <div className={`${isRTL ? 'flex-row-reverse' : 'flex-row'} flex justify-between items-center mt-8 pt-6 border-t border-gray-200`}>
                   <CustomButton
                     text={t('common.back')}
                     color="gray"
@@ -931,7 +978,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                     className="flex items-center gap-2"
                   />
                   
-                  <div className="flex items-center gap-4">
+                  <div className={`${isRTL ? 'flex-row-reverse' : 'flex-row'} flex items-center gap-4`}>
                     <span className="text-sm text-gray-500">
                       {t('storeRegistration.step')} 2/2
                     </span>
