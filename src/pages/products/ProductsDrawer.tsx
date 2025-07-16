@@ -1,6 +1,6 @@
 import React from 'react';
 import CustomButton from '../../components/common/CustomButton';
-import ProductsForm from './ProductsForm';
+import ProductsForm from './ProductsForm';  
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
@@ -12,6 +12,7 @@ interface ProductsDrawerProps {
   onClose: () => void;
   isRTL: boolean;
   title: string;
+  drawerMode?: 'add' | 'edit' | 'variant';
   form: {
     nameAr: string;
     nameEn: string;
@@ -29,7 +30,7 @@ interface ProductsDrawerProps {
     availableQuantity: number;
     descriptionAr: string;
     descriptionEn: string;
-    barcode: string;
+    barcodes: string[];
     productSpecifications: string[];
     colors: ColorVariant[];
     images: string[];
@@ -42,8 +43,9 @@ interface ProductsDrawerProps {
   categories?: { id: number; nameAr: string; nameEn: string }[];
   tags?: any[];
   units?: any[];
+  specifications?: any[];
 }
-const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onTagsChange, onImageChange, onSubmit, categories = [], tags = [], units = [] }) => {
+const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onSubmit, categories = [], tags = [], units = [], specifications = [] }) => {
   if (!open) return null;
   
   //-------------------------------------------- return ------------------------------------------- 
@@ -51,12 +53,19 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className={`relative w-full max-w-3xl bg-white shadow-2xl rounded-2xl flex flex-col  transition-all duration-300 p-0 ${isRTL ? 'text-right' : 'text-left'}`}
+        className={`relative w-full max-w-3xl h-[85vh] bg-white shadow-2xl rounded-2xl flex flex-col transition-all duration-300 p-0 ${isRTL ? 'text-right' : 'text-left'}`}
         dir={isRTL ? 'rtl' : 'ltr'}
       >
         {/* ------------------------------------------- Header ------------------------------------------- */}
         <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4 rounded-t-2xl">
-          <h2 className="text-2xl font-bold text-primary">{title}</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-primary">{title}</h2>
+            {drawerMode === 'variant' && (
+              <p className="text-sm text-gray-600 mt-1">
+                {isRTL ? 'إضافة متغير جديد للمنتج' : 'Adding new variant to product'}
+              </p>
+            )}
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -71,16 +80,19 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
         
         {/* ------------------------------------------- Form ------------------------------------------- */}
         
-        <form id="product-form" onSubmit={onSubmit} className="flex-1">
-          <ProductsForm
-            form={form}
-            onFormChange={onFormChange}
-            onTagsChange={onTagsChange}
-            onImageChange={onImageChange}
-            categories={categories}
-            tags={tags}
-            units={units}
-          />
+        <form id="product-form" onSubmit={onSubmit} className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            <ProductsForm
+              form={form}
+              onFormChange={onFormChange}
+              onTagsChange={onTagsChange}
+              onImageChange={onImageChange}
+              categories={categories}
+              tags={tags}
+              units={units}
+              specifications={specifications}
+            />
+          </div>
         </form>
         {/* ------------------------------------------- Footer ------------------------------------------- */}
         <div className="flex justify-between gap-3 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl sticky bottom-0">

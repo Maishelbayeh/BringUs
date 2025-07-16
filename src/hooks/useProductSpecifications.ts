@@ -22,9 +22,11 @@ const useProductSpecifications = () => {
     try {
       setLoading(true);
       const url = `${BASE_URL}meta/product-specifications/by-store?storeId=${STORE_ID}`;
+      console.log('🔍 Fetching specifications from:', url);
       const res = await axios.get(url);
-      // console.log('FETCHED SPECIFICATIONS FROM API:', res.data);
+      console.log('🔍 Raw API response:', res.data);
       const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
+      console.log('🔍 Processed specifications data:', data);
       setSpecifications(data);
       setHasLoaded(true); // تم تحميل البيانات
       return data;

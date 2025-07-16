@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductsDrawer from './ProductsDrawer';
+import ProductTreeView from './ProductTreeView';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import PermissionModal from '../../components/common/PermissionModal';
@@ -42,8 +43,10 @@ const initialForm: {
   
   descriptionAr: string;
   descriptionEn: string;
-  barcode: string;
+  barcodes: string[];
+  newBarcode: string;
   productSpecifications: string[];
+  selectedSpecifications: string;
   colors: ColorVariant[];
   images: string[];
   productVideo: string;
@@ -68,8 +71,10 @@ const initialForm: {
   
   descriptionAr: '',
   descriptionEn: '',
-  barcode: '',
+  barcodes: [],
+  newBarcode: '',
   productSpecifications: [],
+  selectedSpecifications: '',
   colors: [],
   images: [],
   productVideo: '',
@@ -80,7 +85,7 @@ const ProductsPage: React.FC = () => {
   const [showDrawer, setShowDrawer] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [editProduct, setEditProduct] = useState<any | null>(null);
-  const [drawerMode, setDrawerMode] = useState<'add' | 'edit'>('add');
+  const [drawerMode, setDrawerMode] = useState<'add' | 'edit' | 'variant'>('add');
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
   const [search] = useState('');
@@ -90,6 +95,7 @@ const ProductsPage: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
+  const [viewMode, setViewMode] = useState<'table' | 'tree'>('table');
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
@@ -159,9 +165,29 @@ const ProductsPage: React.FC = () => {
     if (subcategoryIdParam) setSelectedSubcategoryId(subcategoryIdParam);
   }, [categoryIdParam, subcategoryIdParam]);
   //-------------------------------------------- filteredProducts -------------------------------------------
-  let filteredProducts = Array.isArray(products) ? products.filter(product =>
-    (selectedCategoryId ? product.category?._id === selectedCategoryId : true) &&    (isRTL ? product.nameAr.toLowerCase().includes(search.toLowerCase()) : product.nameEn.toLowerCase().includes(search.toLowerCase()))
-  ) : [];
+  // اجمع كل الـ _id للمتغيرات من جميع المنتجات
+  const allVariantIds = Array.isArray(products)
+    ? products.reduce((acc: string[], product: any) => {
+        if (Array.isArray(product.variants) && product.variants.length > 0) {
+          acc.push(...product.variants.map((v: any) => (typeof v === 'object' ? v._id || v.id : v)));
+        }
+        return acc;
+      }, [])
+    : [];
+
+  let filteredProducts = Array.isArray(products)
+    ? products.filter(product => {
+        // استبعد المنتجات التي هي متغيرات (أي الـ _id الخاص بها موجود في allVariantIds)
+        const productId = product._id || product.id;
+        const isVariant = allVariantIds.includes(productId);
+        // فلترة حسب البحث والفئة
+        const matchesCategory = selectedCategoryId ? product.category?._id === selectedCategoryId : true;
+        const matchesSearch = isRTL
+          ? product.nameAr.toLowerCase().includes(search.toLowerCase())
+          : product.nameEn.toLowerCase().includes(search.toLowerCase());
+        return !isVariant && matchesCategory && matchesSearch;
+      })
+    : [];
   if (sort === 'alpha') {
     filteredProducts = [...filteredProducts].sort((a, b) => (isRTL ? a.nameAr.localeCompare(b.nameAr) : a.nameEn.localeCompare(b.nameEn)));
   } else if (sort === 'newest') {
@@ -186,8 +212,12 @@ const ProductsPage: React.FC = () => {
     return isRTL ? (unit?.nameAr || '') : (unit?.nameEn || '');
   };
   //-------------------------------------------- tableData -------------------------------------------
-  const tableData = Array.isArray(filteredProducts) ? filteredProducts.map(product => {
-
+  const tableData = Array.isArray(filteredProducts) ? filteredProducts.map((product, index) => {
+    // Log barcodes for debugging
+    console.log(`🔍 tableData - Product ${index + 1} barcodes:`, product.barcodes);
+    console.log(`🔍 tableData - Product ${index + 1} barcodes type:`, typeof product.barcodes);
+    console.log(`🔍 tableData - Product ${index + 1} barcodes is array:`, Array.isArray(product.barcodes));
+    
     return {
       id: product._id || product.id,
       image: product.mainImage || (product.images && product.images.length > 0 ? product.images[0] : DEFAULT_PRODUCT_IMAGE),
@@ -217,18 +247,39 @@ const ProductsPage: React.FC = () => {
         : (isRTL ? 'لا يوجد تصنيف' : 'No Labels'),
       descriptionAr: product.descriptionAr,
       descriptionEn: product.descriptionEn,
-      barcode: product.barcode || '',
-      specifications: product.specifications && Array.isArray(product.specifications) && product.specifications.length > 0 
-        ? product.specifications.map((spec: any) => {
-            // إذا كانت البيانات كاملة من API (populated objects)
-            if (typeof spec === 'object' && spec.titleAr && spec.titleEn) {
-              return isRTL ? spec.titleAr : spec.titleEn;
+          barcodes: Array.isArray(product.barcodes) ? product.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [],
+      specifications: (() => {
+        // أولاً نتحقق من قيم المواصفات المختارة (الحقل الجديد)
+        if (product.specificationValues && Array.isArray(product.specificationValues) && product.specificationValues.length > 0) {
+          return product.specificationValues.map((spec: any) => {
+            if (typeof spec === 'object' && spec.value && spec.title) {
+              return `${spec.title}: ${spec.value}`;
             }
-            // إذا كانت مجرد ID، نبحث عن المواصفة في البيانات المحملة
+            return spec;
+          }).join(', ');
+        }
+        
+        // إذا لم تكن موجودة، نتحقق من المواصفات القديمة
+        if (!product.specifications || !Array.isArray(product.specifications) || product.specifications.length === 0) {
+          return isRTL ? 'لا توجد مواصفات' : 'No Specifications';
+        }
+        
+        return product.specifications.map((spec: any) => {
+          // التنسيق الجديد: { specificationId, valueId, value, title }
+          if (typeof spec === 'object' && spec.value && spec.title) {
+            return `${spec.title}: ${spec.value}`;
+          }
+          // التنسيق القديم: populated objects
+          else if (typeof spec === 'object' && spec.titleAr && spec.titleEn) {
+            return isRTL ? spec.titleAr : spec.titleEn;
+          }
+          // إذا كانت مجرد ID، نبحث عن المواصفة في البيانات المحملة
+          else {
             const specData = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec || s.id === spec) : null;
             return specData ? (isRTL ? specData.titleAr : specData.titleEn) : spec;
-          }).join(', ')
-        : (isRTL ? 'لا توجد مواصفات' : 'No Specifications'),
+          }
+        }).join(', ');
+      })(),
     images: product.mainImage ? 1 : (product.images?.length || 0),
     colors: product.colors?.length || 0,
     originalProduct: product,
@@ -310,7 +361,11 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- renderBarcode -------------------------------------------
   const renderBarcode = (value: any, item: any) => {
-    if (!value || value === '') {
+    console.log('🔍 renderBarcode - value:', value);
+    console.log('🔍 renderBarcode - value type:', typeof value);
+    console.log('🔍 renderBarcode - value is array:', Array.isArray(value));
+    
+    if (!value || value.length === 0) {
       return (
         <span className="text-gray-500 text-sm">
           {isRTL ? 'لا يوجد باركود' : 'No Barcode'}
@@ -318,6 +373,20 @@ const ProductsPage: React.FC = () => {
       );
     }
     
+    // إذا كان الباركود مصفوفة، نعرض كل واحد في سطر منفصل
+    if (Array.isArray(value)) {
+      return (
+        <div className="text-sm space-y-1">
+          {value.map((barcode: string, index: number) => (
+            <div key={index} className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
+              {barcode}
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
+    // إذا كان الباركود قيمة واحدة
     return (
       <div className="text-sm">
         <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
@@ -353,20 +422,129 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- handleAddVariant -------------------------------------------
   const handleAddVariant = (product: any) => {
-    // فتح الفورم في وضع إضافة متغير جديد
-    setEditProduct(product);
-    setDrawerMode('add');
+    // Use originalProduct data which contains the raw API data
+    const originalProduct = product.originalProduct || product;
     
-    // تعيين المنتج الأصلي كـ parent product
+    // Handle colors from original product data
+    const productColors = originalProduct.colors || [];
+    const formColors = Array.isArray(productColors) && productColors.length > 0
+      ? productColors.map((arr: string[], idx: number) => ({
+          id: String(idx) + '-' + Date.now(),
+          colors: arr
+        }))
+      : [];
+    
+    const maintainStock = (originalProduct.availableQuantity || originalProduct.stock || 0) > 0 ? 'Y' : 'N';
+    let unitId = originalProduct.unit?._id || originalProduct.unitId;
+    let categoryId = originalProduct.category?._id || originalProduct.categoryId;
+    let subcategoryId = originalProduct.subcategory?._id || originalProduct.subcategoryId;
+    let storeId = originalProduct.store?._id || originalProduct.storeId;
+    
+    // Extract productLabels and convert to array of IDs
+    const productLabels = originalProduct.productLabels || [];
+    const productLabelIds = Array.isArray(productLabels) && productLabels.length > 0
+      ? productLabels.map((label: any) => {
+          // Handle both populated objects and IDs
+          if (typeof label === 'object' && label._id) {
+            return label._id;
+          } else {
+            return label; // Already an ID
+          }
+        })
+      : [];
+
+    // Extract specifications and convert to the format expected by the form
+    const specifications = originalProduct.specifications || [];
+    const specificationValues = originalProduct.specificationValues || [];
+    
+    const selectedSpecifications = Array.isArray(specificationValues) && specificationValues.length > 0
+      ? specificationValues.map((spec: any) => {
+          // ابحث عن المواصفة في المواصفات المحملة
+          const foundSpec = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec.specificationId) : null;
+          let valueText = spec.value;
+          let valueIndex = -1;
+          if (foundSpec && Array.isArray(foundSpec.values)) {
+            valueIndex = foundSpec.values.findIndex((v: any) =>
+              v.valueAr === spec.value || v.valueEn === spec.value
+            );
+            if (valueIndex !== -1) {
+              valueText = isRTL ? foundSpec.values[valueIndex].valueAr : foundSpec.values[valueIndex].valueEn;
+            }
+          }
+          return {
+            _id: valueIndex !== -1 ? `${spec.specificationId}_${valueIndex}` : spec.valueId,
+            value: valueText,
+            title: isRTL && foundSpec ? foundSpec.titleAr : foundSpec ? foundSpec.titleEn : spec.title
+          };
+        })
+      : Array.isArray(specifications) && specifications.length > 0
+        ? specifications.map((spec: any) => {
+            // التنسيق الجديد: { specificationId, valueId, value, title }
+            if (typeof spec === 'object' && spec.value && spec.title) {
+              return {
+                _id: spec.valueId || `${spec.specificationId}_${Date.now()}`,
+                value: spec.value,
+                title: spec.title
+              };
+            }
+            // التنسيق القديم: populated objects
+            else if (typeof spec === 'object' && spec.titleAr && spec.titleEn) {
+              return {
+                _id: spec._id || spec.id,
+                value: isRTL ? spec.titleAr : spec.titleEn,
+                title: isRTL ? spec.titleAr : spec.titleEn
+              };
+            }
+            // إذا كانت مجرد ID
+            else {
+              const specData = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec || s.id === spec) : null;
+              return {
+                _id: spec,
+                value: specData ? (isRTL ? specData.titleAr : specData.titleEn) : spec,
+                title: specData ? (isRTL ? specData.titleAr : specData.titleEn) : spec
+              };
+            }
+          })
+        : [];
+    
+    // إنشاء نموذج جديد للمتغير مع نسخ معلومات المنتج الأصلي وإفراغ الأسعار والباركود والصور
     const newForm = {
-      ...initialForm,
-      categoryId: product.category?._id || product.categoryId,
-      unitId: product.unit?._id || product.unitId,
-      storeId: product.store?._id || product.storeId,
-      // نسخ المواصفات من المنتج الأصلي
-      productSpecifications: Array.isArray(product.specifications) ? product.specifications.map((spec: any) => spec._id || spec) : []
+      ...originalProduct,
+      colors: formColors,
+      nameAr: originalProduct.nameAr || '',
+      nameEn: originalProduct.nameEn || '',
+      descriptionAr: originalProduct.descriptionAr || '',
+      descriptionEn: originalProduct.descriptionEn || '',
+      maintainStock,
+      unitId: unitId ? String(unitId) : '',
+      categoryId: categoryId ? String(categoryId) : '',
+      subcategoryId: subcategoryId ? String(subcategoryId) : '',
+      storeId: storeId ? String(storeId) : '',
+      tags: productLabelIds, // Use the extracted productLabel IDs
+      selectedSpecifications: JSON.stringify(selectedSpecifications), // Use the extracted specifications in JSON format
+      // إفراغ الصور للمتغير الجديد
+      images: [],
+      mainImage: null,
+      visibility: originalProduct.visibility ? 'Y' : 'N',
+      costPrice: originalProduct.costPrice || '',
+      compareAtPrice: originalProduct.compareAtPrice || '',
+      // إفراغ الباركود للمتغير الجديد
+      barcodes: [],
+      newBarcode: '',
+      // إفراغ الأسعار للمتغير الجديد
+      price: '',
+      // إفراغ الكمية المتاحة
+      availableQuantity: 0,
+      // إفراغ المخزون
+      stock: 0,
     };
     
+    console.log('🔍 handleAddVariant - Creating variant form:', newForm);
+    console.log('🔍 handleAddVariant - Parent product ID:', originalProduct._id);
+    
+    // تعيين المنتج الأصلي كـ parent product للمتغير
+    setEditProduct(originalProduct);
+    setDrawerMode('variant'); // وضع جديد للمتغيرات
     setForm(newForm);
     setShowDrawer(true);
   };
@@ -438,7 +616,7 @@ const ProductsPage: React.FC = () => {
     { key: 'visibility', label: { ar: 'الظهور', en: 'Visibility' }, type: 'status' as const, render: renderVisibility },
     { key: 'tags', label: { ar: 'التصنيف', en: 'Label' }, type: 'text' as const, render: renderProductLabels },
     { key: 'specifications', label: { ar: 'المواصفات', en: 'Specifications' }, type: 'text' as const, render: renderSpecifications },
-    { key: 'barcode', label: { ar: 'الباركود', en: 'Barcode' }, type: 'text' as const, render: renderBarcode },
+    { key: 'barcodes', label: { ar: 'الباركود', en: 'Barcode' }, type: 'text' as const, render: renderBarcode },
     { key: 'variantStatus', label: { ar: 'النوع', en: 'Type' }, type: 'text' as const, render: renderVariantStatus },
     { key: 'images', label: { ar: 'عدد الصور', en: 'Images Count' }, type: 'number' as const },
     { key: 'colors', label: { ar: 'عدد الألوان', en: 'Colors Count' }, type: 'number' as const },
@@ -446,33 +624,70 @@ const ProductsPage: React.FC = () => {
   ];
   //-------------------------------------------- handleFormChange -------------------------------------------
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    console.log('🔍 handleFormChange:', { name: e.target.name, value: e.target.value });
+    
     if (e.target.name === 'maintainStock') {
       if (e.target.value === 'N') {
-        setForm({ ...form, maintainStock: 'N', availableQuantity: 0 });
+        const newForm = { ...form, maintainStock: 'N', availableQuantity: 0 };
+        setForm(newForm);
       } else {
-        setForm({ ...form, maintainStock: 'Y' });
+        const newForm = { ...form, maintainStock: 'Y' };
+        setForm(newForm);
       }
     } else if (e.target.name === 'availableQuantity') {
       const val = e.target.value;
       const numVal = val === '' ? 0 : Number(val);
       if (!numVal || numVal <= 0) {
-        setForm({ ...form, availableQuantity: numVal, maintainStock: 'N' });
+        const newForm = { ...form, availableQuantity: numVal, maintainStock: 'N' };
+        setForm(newForm);
       } else {
-        setForm({ ...form, availableQuantity: numVal, maintainStock: 'Y' });
+        const newForm = { ...form, availableQuantity: numVal, maintainStock: 'Y' };
+        setForm(newForm);
       }
+    } else if (e.target.name === 'barcodes') {
+      // التعامل مع الباركود كمصفوفة
+      let barcodesValue: any = e.target.value;
+      
+      // إذا كانت القيمة مصفوفة، استخدمها كما هي
+      if (Array.isArray(e.target.value)) {
+        barcodesValue = e.target.value;
+      } else if (typeof e.target.value === 'string') {
+        // إذا كانت القيمة نص، حاول تحليلها كـ JSON
+        try {
+          barcodesValue = JSON.parse(e.target.value);
+        } catch {
+          // إذا فشل التحليل، استخدمها كنص واحد
+          barcodesValue = [e.target.value];
+        }
+      }
+      
+      // تأكد من أن القيمة مصفوفة
+      const barcodesArray = Array.isArray(barcodesValue) ? barcodesValue : [barcodesValue];
+      
+      const newForm = { ...form, barcodes: barcodesArray };
+      console.log('🔍 handleFormChange - Updated barcodes:', newForm.barcodes);
+      setForm(newForm);
     } else {
-      setForm({ ...form, [e.target.name]: e.target.value });
+      // التعامل مع الحقول الأخرى
+      const newForm = { ...form, [e.target.name]: e.target.value };
+      setForm(newForm);
     }
   };
 
   //-------------------------------------------- handleProductLabelsChange -------------------------------------------
   const handleTagsChange = (values: string[]) => {
-    setForm({ ...form, tags: values });
+    console.log('🔍 handleTagsChange:', values);
+    const newForm = { ...form, tags: values };
+    console.log('🔍 handleTagsChange - newForm.barcodes:', newForm.barcodes);
+    setForm(newForm);
   };
   //-------------------------------------------- handleImageChange -------------------------------------------
   const handleImageChange = async (files: File | File[] | null) => {
+    console.log('🔍 handleImageChange:', files);
     if (!files) {
-      setForm({ ...form, images: [] });
+      const newForm = { ...form, images: [] };
+      console.log('🔍 handleImageChange (no files) - newForm.barcodes:', newForm.barcodes);
+      setForm(newForm);
       return;
     }
 
@@ -483,7 +698,9 @@ const ProductsPage: React.FC = () => {
       const uploadedUrls = await uploadProductImages(fileArray);
       
       // تحديث النموذج بالروابط الجديدة
-      setForm({ ...form, images: uploadedUrls });
+      const newForm = { ...form, images: uploadedUrls };
+      console.log('🔍 handleImageChange - newForm.barcodes:', newForm.barcodes);
+      setForm(newForm);
       
       console.log('✅ Images uploaded to Cloudflare:', uploadedUrls);
     } catch (error) {
@@ -491,12 +708,19 @@ const ProductsPage: React.FC = () => {
       // في حالة الخطأ، نستخدم الروابط المحلية كـ fallback
       const fileArray = Array.isArray(files) ? files : [files];
       const imageUrls = fileArray.map(file => URL.createObjectURL(file));
-      setForm({ ...form, images: imageUrls });
+      const newForm = { ...form, images: imageUrls };
+      console.log('🔍 handleImageChange (fallback) - newForm.barcodes:', newForm.barcodes);
+      setForm(newForm);
     }
   };
   //-------------------------------------------- handleSubmit -------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('🔍 handleSubmit - form data:', form);
+    console.log('🔍 handleSubmit - form.barcodes:', form.barcodes);
+    console.log('🔍 handleSubmit - form.barcodes type:', typeof form.barcodes);
+    console.log('🔍 handleSubmit - form.barcodes is array:', Array.isArray(form.barcodes));
     
     try {
      
@@ -518,8 +742,8 @@ const ProductsPage: React.FC = () => {
         categoryId: form.categoryId || null,
         subcategoryId: form.subcategoryId || null,
         tags: form.tags || [],
-        productSpecifications: form.productSpecifications || [],
-        barcode: form.barcode || '',
+        barcodes: Array.isArray(form.barcodes) ? form.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [], // إضافة الباركود مع فلترة القيم الفارغة
+        selectedSpecifications: form.selectedSpecifications || '', // إرسال المواصفات المختارة
         colors: Array.isArray(form.colors)
           ? form.colors.map((variant: any) => Array.isArray(variant.colors) ? variant.colors : [])
           : [],
@@ -527,6 +751,18 @@ const ProductsPage: React.FC = () => {
         isActive: true,
       };
 
+      console.log('🔍 handleSubmit - productData:', productData);
+      console.log('🔍 handleSubmit - productData.barcodes:', productData.barcodes);
+      console.log('🔍 handleSubmit - productData.barcodes type:', typeof productData.barcodes);
+      console.log('🔍 handleSubmit - productData.barcodes is array:', Array.isArray(productData.barcodes));
+      console.log('🔍 handleSubmit - productData.barcodes length:', Array.isArray(productData.barcodes) ? productData.barcodes.length : 'N/A');
+
+      // Debug: طباعة معلومات editProduct
+      console.log('🔍 handleSubmit - editProduct:', editProduct);
+      console.log('🔍 handleSubmit - editProduct._id:', editProduct?._id);
+      console.log('🔍 handleSubmit - editProduct.id:', editProduct?.id);
+      console.log('🔍 handleSubmit - editId for validation:', editProduct?._id || editProduct?.id);
+      
       // التحقق من صحة البيانات
       const errors = validateProduct(productData, isRTL, editProduct?._id || editProduct?.id);
       if (Object.keys(errors).length > 0) {
@@ -536,11 +772,23 @@ const ProductsPage: React.FC = () => {
 
       // حفظ المنتج
       const editId = editProduct?._id || editProduct?.id;
-      await saveProduct(productData, editId, isRTL);
+      console.log('🔍 handleSubmit - editId:', editId);
+      console.log('🔍 handleSubmit - drawerMode:', drawerMode);
+      
+      if (drawerMode === 'variant') {
+        // إنشاء متغير جديد
+        console.log('🔍 handleSubmit - Creating variant for parent product:', editProduct);
+        await saveProduct(productData, null, isRTL); // إنشاء منتج جديد كمتغير
+      } else {
+        // تعديل أو إنشاء منتج عادي
+        await saveProduct(productData, editId, isRTL);
+      }
       
       setShowDrawer(false);
       setEditProduct(null);
       setDrawerMode('add');
+      console.log('🔍 handleSubmit - Resetting form to initialForm');
+      console.log('🔍 handleSubmit - Setting form with initialForm.barcodes:', initialForm.barcodes);
       setForm(initialForm);
     } catch (error) {
       console.error('Error saving product:', error);
@@ -579,18 +827,69 @@ const ProductsPage: React.FC = () => {
         })
       : [];
 
-    // Extract specifications and convert to array of IDs
+    // Extract specifications and convert to the format expected by the form
     const specifications = originalProduct.specifications || [];
-    const specificationIds = Array.isArray(specifications) && specifications.length > 0
-      ? specifications.map((spec: any) => {
-          // Handle both populated objects and IDs
-          if (typeof spec === 'object' && spec._id) {
-            return spec._id;
-          } else {
-            return spec; // Already an ID
+    const specificationValues = originalProduct.specificationValues || [];
+    
+    // استخدام قيم المواصفات المختارة إذا كانت موجودة
+    console.log('🔍 handleEdit - specificationValues:', specificationValues);
+    console.log('🔍 handleEdit - specifications:', specifications);
+    console.log('🔍 handleEdit - loaded specifications from hook:', specifications);
+    console.log('🔍 handleEdit - originalProduct.barcodes:', originalProduct.barcodes);
+    console.log('🔍 handleEdit - originalProduct.barcodes type:', typeof originalProduct.barcodes);
+    console.log('🔍 handleEdit - originalProduct.barcodes is array:', Array.isArray(originalProduct.barcodes));
+    
+    const selectedSpecifications = Array.isArray(specificationValues) && specificationValues.length > 0
+      ? specificationValues.map((spec: any) => {
+          // ابحث عن المواصفة في المواصفات المحملة
+          const foundSpec = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec.specificationId) : null;
+          let valueText = spec.value;
+          let valueIndex = -1;
+          if (foundSpec && Array.isArray(foundSpec.values)) {
+            valueIndex = foundSpec.values.findIndex((v: any) =>
+              v.valueAr === spec.value || v.valueEn === spec.value
+            );
+            if (valueIndex !== -1) {
+              valueText = isRTL ? foundSpec.values[valueIndex].valueAr : foundSpec.values[valueIndex].valueEn;
+            }
           }
+          return {
+            _id: valueIndex !== -1 ? `${spec.specificationId}_${valueIndex}` : spec.valueId,
+            value: valueText,
+            title: isRTL && foundSpec ? foundSpec.titleAr : foundSpec ? foundSpec.titleEn : spec.title
+          };
         })
-      : [];
+      : Array.isArray(specifications) && specifications.length > 0
+        ? specifications.map((spec: any) => {
+            // التنسيق الجديد: { specificationId, valueId, value, title }
+            if (typeof spec === 'object' && spec.value && spec.title) {
+              return {
+                _id: spec.valueId || `${spec.specificationId}_${Date.now()}`,
+                value: spec.value,
+                title: spec.title
+              };
+            }
+            // التنسيق القديم: populated objects
+            else if (typeof spec === 'object' && spec.titleAr && spec.titleEn) {
+              return {
+                _id: spec._id || spec.id,
+                value: isRTL ? spec.titleAr : spec.titleEn,
+                title: isRTL ? spec.titleAr : spec.titleEn
+              };
+            }
+            // إذا كانت مجرد ID
+            else {
+              const specData = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec || s.id === spec) : null;
+              return {
+                _id: spec,
+                value: specData ? (isRTL ? specData.titleAr : specData.titleEn) : spec,
+                title: specData ? (isRTL ? specData.titleAr : specData.titleEn) : spec
+              };
+            }
+          })
+        : [];
+    
+    console.log('🔍 handleEdit - Final selectedSpecifications:', selectedSpecifications);
     
     const newForm = {
       ...originalProduct,
@@ -605,19 +904,34 @@ const ProductsPage: React.FC = () => {
       subcategoryId: subcategoryId ? String(subcategoryId) : '',
       storeId: storeId ? String(storeId) : '',
       tags: productLabelIds, // Use the extracted productLabel IDs
-      productSpecifications: specificationIds, // Use the extracted specification IDs
+      selectedSpecifications: JSON.stringify(selectedSpecifications), // Use the extracted specifications in JSON format
+      images: originalProduct.images || [], // إضافة الصور
+      mainImage: originalProduct.mainImage || null, // إضافة الصورة الرئيسية
       visibility: originalProduct.visibility ? 'Y' : 'N',
       costPrice: originalProduct.costPrice || '',
       compareAtPrice: originalProduct.compareAtPrice || '',
-      barcode: originalProduct.barcode || '',
+      barcodes: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [],
+      newBarcode: '',
     };
+    
+    console.log('🔍 newForm.barcodes:', newForm.barcodes);
+    console.log('🔍 newForm.barcodes type:', typeof newForm.barcodes);
+    console.log('🔍 newForm.barcodes is array:', Array.isArray(newForm.barcodes));
     
     console.log('🔍 Edit Form Data:', {
       colors: formColors,
       productLabels: productLabelIds,
-      specifications: specificationIds
+      specifications: selectedSpecifications,
+      selectedSpecificationsJSON: JSON.stringify(selectedSpecifications),
+      images: originalProduct.images,
+      mainImage: originalProduct.mainImage,
+      barcodes: originalProduct.barcodes,
+      barcodesType: typeof originalProduct.barcodes,
+      barcodesIsArray: Array.isArray(originalProduct.barcodes),
+      barcodesLength: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.length : 'N/A'
     });
     
+    console.log('🔍 handleEdit - Setting form with newForm.barcodes:', newForm.barcodes);
     setForm(newForm);
     setEditProduct(originalProduct);
     setDrawerMode('edit');
@@ -625,6 +939,7 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- handleAddClick -------------------------------------------
   const handleAddClick = () => {
+    console.log('🔍 handleAddClick - initialForm.barcodes:', initialForm.barcodes);
     setForm(initialForm);
     setEditProduct(null);
     setDrawerMode('add');
@@ -632,9 +947,11 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- handleDrawerClose -------------------------------------------
   const handleDrawerClose = () => {
+    console.log('🔍 handleDrawerClose - Resetting form');
     setShowDrawer(false);
     setEditProduct(null);
     setDrawerMode('add');
+    console.log('🔍 handleDrawerClose - Setting form with initialForm.barcodes:', initialForm.barcodes);
     setForm(initialForm);
   };
   //-------------------------------------------- handleDelete -------------------------------------------
@@ -667,7 +984,7 @@ const ProductsPage: React.FC = () => {
         [isRTL ? 'سعر التكلفة' : 'Cost Price']: product.costPrice,
         [isRTL ? 'سعر الجملة' : 'Wholesale Price']: product.compareAtPrice,
         [isRTL ? 'الوحدة' : 'Unit']: product.unit,
-        [isRTL ? 'الباركود' : 'Barcode']: product.barcode,
+        [isRTL ? 'الباركود' : 'Barcode']: Array.isArray(product.barcodes) ? product.barcodes.join(', ') : product.barcodes,
         [isRTL ? 'الكمية المتوفرة' : 'Available Quantity']: product.availableQuantity,
         [isRTL ? 'الظهور' : 'Visibility']: product.visibility,
       });
@@ -695,31 +1012,86 @@ const ProductsPage: React.FC = () => {
         count={visibleTableData.length}
       />
 
-      {/* ------------------------------------------- CustomTable ------------------------------------------- */}
-      <div className="overflow-x-auto">
-        <CustomTable 
-          columns={columns} 
-          data={tableData} 
-          onFilteredDataChange={setVisibleTableData}
-          autoScrollToFirst={true}
-        />
+      {/* ------------------------------------------- View Mode Toggle ------------------------------------------- */}
+      <div className="mb-4 flex justify-between items-center">
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setViewMode('table')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'table'
+                ? 'bg-primary text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            {isRTL ? 'عرض الجدول' : 'Table View'}
+          </button>
+          <button
+            onClick={() => setViewMode('tree')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'tree'
+                ? 'bg-primary text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            {isRTL ? 'عرض الشجرة' : 'Tree View'}
+          </button>
+        </div>
+        <div className="text-sm text-gray-600">
+          {isRTL ? 'إجمالي المنتجات:' : 'Total Products:'} {visibleTableData.length}
+        </div>
       </div>
+
+      {/* ------------------------------------------- Content ------------------------------------------- */}
+      {viewMode === 'table' ? (
+        <div className="overflow-x-auto">
+          <CustomTable 
+            columns={columns} 
+            data={tableData} 
+            onFilteredDataChange={setVisibleTableData}
+            autoScrollToFirst={true}
+          />
+        </div>
+      ) : (
+        <ProductTreeView
+          products={visibleTableData}
+          isRTL={isRTL}
+          onEdit={handleEdit}
+          onAddVariant={handleAddVariant}
+          onDelete={handleDelete}
+          renderImage={renderImage}
+          renderPrice={renderPrice}
+          renderStock={renderStock}
+          renderVisibility={renderVisibility}
+          renderProductLabels={renderProductLabels}
+          renderBarcode={renderBarcode}
+          renderSpecifications={renderSpecifications}
+          renderVariantStatus={renderVariantStatus}
+          renderActions={renderActions}
+        />
+      )}
 
       {/* ------------------------------------------- ProductsDrawer ------------------------------------------- */}
       <ProductsDrawer
         open={showDrawer}
         onClose={handleDrawerClose}
         isRTL={isRTL}
-        title={drawerMode === 'edit' ? t('products.edit') || 'Edit Product' : t('products.add')}
+        title={
+          drawerMode === 'edit' 
+            ? (isRTL ? 'تعديل المنتج' : 'Edit Product') 
+            : drawerMode === 'variant'
+              ? (isRTL ? 'إضافة متغير' : 'Add Variant')
+              : (isRTL ? 'إضافة منتج جديد' : 'Add New Product')
+        }
+        drawerMode={drawerMode}
         form={form}
         onFormChange={handleFormChange}
         onTagsChange={handleTagsChange}
         onImageChange={handleImageChange}
         onSubmit={handleSubmit}
         categories={categories as any}
-       
         tags={productLabels}
         units={units}
+        specifications={specifications}
       />
 
       {/* ------------------------------------------- PermissionModal ------------------------------------------- */}

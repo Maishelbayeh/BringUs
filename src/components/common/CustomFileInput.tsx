@@ -1,4 +1,4 @@
-import React, { useRef,  useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -16,7 +16,7 @@ interface CustomFileInputProps {
 
 const CustomFileInput: React.FC<CustomFileInputProps> = ({ 
   label, 
-  // value, 
+  value, 
   onChange, 
   error, 
   placeholder, 
@@ -33,6 +33,21 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   const { t } = useTranslation();
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
+
+  // تحميل الصور الموجودة مسبقاً
+  useEffect(() => {
+    console.log('🔍 CustomFileInput - value:', value);
+    if (value) {
+      const imageUrls = Array.isArray(value) ? value : [value];
+      const validUrls = imageUrls.filter(url => url && typeof url === 'string');
+      
+      if (validUrls.length > 0) {
+        setPreviews(validUrls);
+        setFileCount(validUrls.length);
+        setFileNames(validUrls.map(url => url.split('/').pop() || 'image'));
+      }
+    }
+  }, [value]);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) {
