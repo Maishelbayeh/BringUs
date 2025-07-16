@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   Close, 
   ArrowBack, 
-  
+  ArrowForward,
   Store, 
   Person,
   CheckCircle,
@@ -289,34 +289,37 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleMerchantSubmit = async () => {
-    // التحقق من صحة النموذج
-    const isValid = validateMerchantForm();
-    
-    if (!isValid) {
-      console.log('❌ نموذج التاجر يحتوي على أخطاء، لا يمكن الانتقال للخطوة التالية');
+  const handleStoreSubmit = async () => {
+    // التحقق من صحة نموذج المتجر
+    if (!storeData || !isStoreValid) {
+      console.log('❌ نموذج المتجر يحتوي على أخطاء، لا يمكن الانتقال للخطوة التالية');
       return;
     }
     
-    console.log('✅ نموذج التاجر صحيح، جاري الانتقال للخطوة التالية...');
+   
     
-    // إعداد بيانات التاجر للباك إند
-    const merchantDataForBackend = {
-      firstName: merchantData.firstName,
-      lastName: merchantData.lastName,
-      email: merchantData.email,
-      password: merchantData.password,
-      phone: merchantData.phone,
-      role: 'admin' as const, // الرول الافتراضي للتاجر
-      status: 'active' as const, // الستاتس الافتراضي
-      addresses: merchantData.addresses
-    };
+    try {
+      // 1. إنشاء المتجر أولاً
+     
+      const store = await createStore(storeData);
+      
+      if (!store) {
+        console.error('❌ فشل في إنشاء المتجر');
+      
+        return;
+      }
+      
     
-    // طباعة بيانات التاجر في الكونسول
-    console.log('Merchant Data for Backend:', merchantDataForBackend);
-    
-    // الانتقال للخطوة الثانية
-    setCurrentStep(2);
+      // حفظ بيانات المتجر للاستخدام في الخطوة التالية
+      setStoreData((prev: any) => ({ ...prev, createdStore: store }));
+      
+      // الانتقال للخطوة الثانية
+      setCurrentStep(2);
+      
+    } catch (error) {
+      console.error('❌ خطأ في إنشاء المتجر:', error);
+     
+    }
   };
 
   const [storeData, setStoreData] = useState<any>(null);
@@ -359,25 +362,38 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
     setIsMerchantValid(isValid);
   }, [merchantErrors, merchantData]);
 
-  const handleStoreSubmit = async (storeData: any) => {
-   
+  const handleStoreDataChange = async (storeData: any) => {
     setStoreData(storeData);
-  
+  };
+
+  const handleMerchantSubmit = async () => {
+    // التحقق من صحة نموذج المالك
+    const isValid = validateMerchantForm();
+    
+    if (!isValid) {
+      console.log('❌ نموذج المالك يحتوي على أخطاء، لا يمكن إكمال التسجيل');
+      return;
+    }
+    
+    console.log('✅ نموذج المالك صحيح، جاري إكمال التسجيل...');
+    
+    // إكمال العملية
+    await handleFinalSubmit();
   };
 
   const handleFinalSubmit = async () => {
     try {
-      if (!storeData) {
+      if (!storeData || !storeData.createdStore) {
         alert('يرجى إكمال بيانات المتجر أولاً');
         return;
       }
 
-      if (!isStoreValid) {
-        alert('يرجى إكمال جميع الحقول المطلوبة في بيانات المتجر بشكل صحيح');
+      if (!isMerchantValid) {
+        alert('يرجى إكمال جميع الحقول المطلوبة في بيانات المالك بشكل صحيح');
         return;
       }
 
-      // إعداد بيانات التاجر
+      // إعداد بيانات التاجر مع إضافة store ID
       const merchantDataForBackend = {
         firstName: merchantData.firstName,
         lastName: merchantData.lastName,
@@ -386,49 +402,39 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         phone: merchantData.phone,
         role: 'admin' as const,
         status: 'active' as const,
-        addresses: merchantData.addresses
+        addresses: merchantData.addresses,
+        store: {
+          _id: storeData.createdStore.id || storeData.createdStore._id // إرسال كـ object
+        }
       };
 
-     
-      console.log('Store Data:', storeData);
+      console.log('Created Store:', storeData.createdStore);
+      console.log('Store ID being sent:', storeData.createdStore.id || storeData.createdStore._id);
+      console.log('Merchant Data with Store ID:', merchantDataForBackend);
 
-      // 1. تسجيل المستخدم أولاً
-      console.log('🔄 جاري تسجيل المستخدم...');
+      // 1. تسجيل المستخدم مع store ID
+      console.log('🔄 جاري تسجيل المستخدم مع store ID...');
       const user = await createUser(merchantDataForBackend);
       
       if (!user) {
-        console.error(' فشل في تسجيل المستخدم');
-      
+        console.error('❌ فشل في تسجيل المستخدم');
         return;
       }
-      
 
-      // 2. تسجيل المتجر
-      console.log('🔄 جاري تسجيل المتجر...');
-      const store = await createStore(storeData);
-      
-      if (!store) {
-        console.error(' فشل في تسجيل المتجر');
-      
-        return;
-      }
-      
-    
-
-      // 3. ربط المستخدم بالمتجر كمالك
+      // 2. ربط المستخدم بالمتجر كمالك
       console.log('🔄 جاري ربط المستخدم بالمتجر...');
       
-      // التأكد من استخدام الـ ID الصحيح (مع أو بدون _)
-      const userId = user._id || (user as any).id;
-      const storeId = store._id || (store as any).id;
+      // التأكد من استخدام الـ ID الصحيح
+      const userId = user.id;
+      const storeId = storeData.createdStore.id || storeData.createdStore._id;
       
-      console.log('🔍 User ID:', { _id: user._id, id: (user as any).id, finalId: userId });
-      console.log('🔍 Store ID:', { _id: store._id, id: (store as any).id, finalId: storeId });
+      console.log('🔍 User ID:', { id: user.id, finalId: userId });
+      console.log('🔍 Store ID:', { id: storeData.createdStore.id, finalId: storeId });
       
       if (!userId || !storeId) {
         console.error('❌ خطأ: لم يتم العثور على ID للمستخدم أو المتجر');
         console.error('User:', user);
-        console.error('Store:', store);
+        console.error('Store:', storeData.createdStore);
         alert('خطأ في البيانات. يرجى المحاولة مرة أخرى.');
         return;
       }
@@ -447,7 +453,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
           'view_analytics',
           'manage_settings'
         ],
-       isPrimaryOwner: true
+        isPrimaryOwner: false
       };
       
       const owner = await createOwner(ownerData);
@@ -463,7 +469,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       // نجاح العملية
       console.log('🎉 تم التسجيل الكامل بنجاح!');
       console.log('User:', user);
-      console.log('Store:', store);
+      console.log('Store:', storeData.createdStore);
       console.log('Owner:', owner);
       
       alert('تم التسجيل بنجاح!');
@@ -532,38 +538,38 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-              {currentStep === 1 ? <Person className="text-white" /> : <Store className="text-white" />}
+              {currentStep === 1 ? <Store className="text-white" /> : <Person className="text-white" />}
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
-                {currentStep === 1 ? t('store.registerMerchant') : t('store.createStore')}
+                {currentStep === 1 ? t('store.createStore') : t('store.registerMerchant')}
               </h2>
               <p className="text-sm text-gray-600">
-                {currentStep === 1 ? t('store.merchantStepDesc') : t('store.storeStepDesc')}
+                {currentStep === 1 ? t('store.storeStepDesc') : t('store.merchantStepDesc')}
               </p>
-              {currentStep === 1 && !isMerchantValid && (
-                <p className="text-xs text-red-500 mt-1">
-                  {t('storeRegistration.completeMerchantInfo')}
-                </p>
-              )}
-              {currentStep === 1 && isMerchantValid && (
-                <p className="text-xs text-green-500 mt-1">
-                  {t('storeRegistration.merchantInfoComplete')}
-                </p>
-              )}
-              {currentStep === 1 && !isMerchantValid && merchantData.phone && !merchantData.phone.trim() && (
-                <p className="text-xs text-red-500 mt-1">
-                  {t('signup.phoneRequired')}
-                </p>
-              )}
-              {currentStep === 2 && !isStoreValid && (
+              {currentStep === 1 && !isStoreValid && (
                 <p className="text-xs text-red-500 mt-1">
                   {t('storeRegistration.completeStoreInfo')}
                 </p>
               )}
-              {currentStep === 2 && isStoreValid && (
+              {currentStep === 1 && isStoreValid && (
                 <p className="text-xs text-green-500 mt-1">
                   {t('storeRegistration.storeInfoComplete')}
+                </p>
+              )}
+              {currentStep === 2 && !isMerchantValid && (
+                <p className="text-xs text-red-500 mt-1">
+                  {t('storeRegistration.completeMerchantInfo')}
+                </p>
+              )}
+              {currentStep === 2 && isMerchantValid && (
+                <p className="text-xs text-green-500 mt-1">
+                  {t('storeRegistration.merchantInfoComplete')}
+                </p>
+              )}
+              {currentStep === 2 && !isMerchantValid && merchantData.phone && !merchantData.phone.trim() && (
+                <p className="text-xs text-red-500 mt-1">
+                  {t('signup.phoneRequired')}
                 </p>
               )}
             </div>
@@ -574,7 +580,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
               currentStep >= 1 ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
             }`}>
-              {currentStep > 1 && isMerchantValid ? <CheckCircle className="w-5 h-5" /> : '1'}
+              {currentStep > 1 && isStoreValid ? <CheckCircle className="w-5 h-5" /> : '1'}
             </div>
             <div className={`w-8 h-1 ${currentStep >= 2 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
@@ -595,7 +601,37 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
           {currentStep === 1 ? (
-            // Step 1: Merchant Registration
+            // Step 1: Store Registration
+            <div className="max-w-2xl mx-auto">
+             
+
+                            <StoreGeneralInfo 
+                onSubmit={handleStoreDataChange}
+                onValidate={setIsStoreValid}
+              />
+              
+              {/* Navigation Buttons */}
+              <div className="flex justify-end items-center mt-8 pt-6 border-t border-gray-200">
+                <div className="flex flex-col items-end gap-2">
+                  {!isStoreValid && (
+                    <span className="text-xs text-red-500">
+                      {t('storeRegistration.completeStoreInfo')}
+                    </span>
+                  )}
+                  <CustomButton
+                    text={isStoreValid ? t('store.createStore') : t('store.createStore')}
+                    color={isStoreValid ? "primary" : "gray"}
+                    textColor="white"
+                    action={handleStoreSubmit}
+                    icon={isStoreValid ? <Store className="w-4 h-4" /> : undefined}
+                    className="flex items-center gap-2"
+                    disabled={!isStoreValid}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Step 2: Merchant Registration
             <div className="max-w-2xl mx-auto">
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -617,7 +653,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                     onChange={handleMerchantInputChange}
                     placeholder={t('signup.firstNamePlaceholder')}
                     error={merchantErrors.firstName}
-                   required
+                    required
                   />
                   <CustomInput
                     label={t('signup.lastName')}
@@ -633,7 +669,6 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
 
                 {/* Email */}
                 <div className="relative">
-                    
                   <CustomInput
                     label={t('signup.email')}
                     type="email"
@@ -658,19 +693,16 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                       label={t('signup.phone')}
                       value={merchantData.phone}
                       onChange={val => {
-                       
                         setMerchantData(prev => ({ ...prev, phone: val }));
                         
                         // استخدام نفس منطق الفالديشن المحسن
                         let phoneError = '';
-                       
                         
                         // إزالة المسافات من البداية والنهاية
                         const trimmedVal = val ? val.trim() : '';
                         
                         if (!trimmedVal) {
                           phoneError = t('signup.phoneRequired');
-                        
                         } else {
                           // Remove all spaces and special characters except + and numbers
                           const cleanPhone = trimmedVal.replace(/[^\d+]/g, '');
@@ -678,7 +710,6 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                           // Check if it contains only numbers and + symbol
                           if (!/^[\+]?[\d]+$/.test(cleanPhone)) {
                             phoneError = t('signup.phoneNumbersOnly');
-                          
                           }
                           // Check if it starts with + (international format)
                           else if (cleanPhone.startsWith('+')) {
@@ -687,12 +718,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                               phoneError = t('signup.phoneTooShort');
                             } else if (cleanPhone.length > 16) {
                               phoneError = t('signup.phoneTooLong');
-                             
                             } else if (!/^\+[1-9]\d{7,15}$/.test(cleanPhone)) {
                               phoneError = t('signup.phoneInvalidFormat');
-                              
-                            } else {
-                            
                             }
                           }
                           // Check if it doesn't start with + (local format)
@@ -700,24 +727,17 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                             // For local numbers (without country code)
                             if (cleanPhone.length < 7) {
                               phoneError = t('signup.phoneTooShort');
-                             
                             } else if (cleanPhone.length > 15) {
                               phoneError = t('signup.phoneTooLong');
-                              
                             } else if (!/^[1-9]\d{6,14}$/.test(cleanPhone)) {
                               phoneError = t('signup.phoneInvalidFormat');
-                             
-                            } else {
-                             
                             }
                           }
                         }
                         
-                       
                         // تحديث الأخطاء فوراً
                         setMerchantErrors(prev => {
                           const newErrors = { ...prev, phone: phoneError };
-          
                           return newErrors;
                         });
                       }}
@@ -741,11 +761,6 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                     {!merchantErrors.phone && (!merchantData.phone || !merchantData.phone.trim()) && (
                       <span className="mt-1 text-xs text-gray-500 block">{t('signup.phoneRequired')}</span>
                     )}
-                    {!merchantErrors.phone && merchantData.phone && merchantData.phone.trim().length > 0 && (
-                      <span className="mt-1 text-xs text-blue-500 block">
-                        
-                      </span>
-                    )}
                   </div>
                 </div>
 
@@ -767,7 +782,6 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                       setMerchantData(prev => ({ ...prev, addresses: newAddresses }));
                     }}
                     placeholder={t('signup.streetPlaceholder')}
-                   
                   />
 
                   {/* City and State */}
@@ -783,7 +797,6 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                         setMerchantData(prev => ({ ...prev, addresses: newAddresses }));
                       }}
                       placeholder={t('signup.cityPlaceholder')}
-                      
                     />
                     <CustomInput
                       label={t('signup.state')}
@@ -796,7 +809,6 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                         setMerchantData(prev => ({ ...prev, addresses: newAddresses }));
                       }}
                       placeholder={t('signup.statePlaceholder')}
-                      
                     />
                   </div>
 
@@ -813,7 +825,6 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                         setMerchantData(prev => ({ ...prev, addresses: newAddresses }));
                       }}
                       placeholder={t('signup.zipCodePlaceholder')}
-                     
                     />
                     <CustomInput
                       label={t('signup.country')}
@@ -826,10 +837,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                         setMerchantData(prev => ({ ...prev, addresses: newAddresses }));
                       }}
                       placeholder={t('signup.countryPlaceholder')}
-                      
                     />
                   </div>
-                  
                 </div>
 
                 {/* Password */}
@@ -910,48 +919,6 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <div className="flex justify-end pt-4">
-                  <div className="flex flex-col items-end gap-2">
-                    {!isMerchantValid && (
-                      <span className="text-xs text-red-500">
-                        {merchantData.phone && !merchantData.phone.trim() 
-                          ? t('signup.phoneRequired') 
-                          : t('storeRegistration.completeMerchantInfo')
-                        }
-                      </span>
-                    )}
-                    <CustomButton
-                      text={isMerchantValid ? t('store.registerMerchant') : t('store.registerMerchant')}
-                      color={isMerchantValid ? "primary" : "gray"}
-                      textColor="white"
-                      type="submit"
-                      icon={isMerchantValid ? <ArrowBack className="w-4 h-4" /> : undefined}
-                      className="flex items-center gap-2"
-                      disabled={!isMerchantValid}
-                    />
-                  </div>
-                </div>
-              </form>
-            </div>
-          ) : (
-            // Step 2: Store Creation
-            <div className="max-w-2xl mx-auto">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  {t('storeRegistration.step2Title')}
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  {t('storeRegistration.step2Description')}
-                </p>
-              </div>
-
-              <div className="bg-white">
-                <StoreGeneralInfo 
-                  onSubmit={handleStoreSubmit} 
-                  onValidate={setIsStoreValid}
-                />
-                
                 {/* Navigation Buttons */}
                 <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
                   <CustomButton
@@ -969,24 +936,24 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                       {t('storeRegistration.step')} 2/2
                     </span>
                     <div className="flex flex-col items-end gap-2">
-                      {!isStoreValid && (
+                      {!isMerchantValid && (
                         <span className="text-xs text-red-500">
-                          {t('storeRegistration.completeStoreInfo')}
+                          {t('storeRegistration.completeMerchantInfo')}
                         </span>
                       )}
                       <CustomButton
-                        text={isStoreValid ? t('storeRegistration.createStore') : t('storeRegistration.createStore')}
-                        color={isStoreValid ? "primary" : "gray"}
+                        text={isMerchantValid ? t('store.registerMerchant') : t('store.registerMerchant')}
+                        color={isMerchantValid ? "primary" : "gray"}
                         textColor="white"
-                        action={handleFinalSubmit}
-                        icon={isStoreValid ? <Store className="w-4 h-4" /> : undefined}
+                        type="submit"
+                        icon={isMerchantValid ? <Person className="w-4 h-4" /> : undefined}
                         className="flex items-center gap-2"
-                        disabled={!isStoreValid}
+                        disabled={!isMerchantValid}
                       />
                     </div>
                   </div>
                 </div>
-              </div>
+              </form>
             </div>
           )}
         </div>

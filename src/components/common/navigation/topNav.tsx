@@ -8,6 +8,8 @@ import { CreditCardIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { GlobeAltIcon } from '@heroicons/react/24/outline';
 
 import logo from '../../../assets/bringus.svg';
+
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 type TopNavbarProps = {
   // userName: string;
   userPosition: string;
@@ -24,6 +26,10 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { getStoreName, getStoreLogo } = useLocalStorage();
+  
+  const storeName = getStoreName(language) || 'bring us';
+  const storeLogo = getStoreLogo();
 
   return (
     <header className={`w-full bg-white px-2 sm:px-4 py-2 sm:py-4 border-b border-primary/20 shadow-sm`}> 
@@ -36,9 +42,13 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
         >
           <Bars3Icon className="h-6 w-6" />
         </button>
-        <div onClick={() => navigate('/store-info')} className={`cursor-pointer flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
-          <img src={logo} alt="logo" className="h-7 w-7" />
-          <span className="hidden sm:inline sm:text-2xl font-bold text-primary tracking-wide">bring us</span>
+        <div onClick={() => navigate('/store-info-container')} className={`cursor-pointer flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
+          <img 
+            src={storeLogo || logo} 
+            alt="logo" 
+            className="h-7 w-7 rounded-full object-cover border border-gray-200" 
+          />
+          <span className="hidden sm:inline sm:text-2xl font-bold text-primary tracking-wide">{storeName}</span>
         </div>
       </div>
         {/* Language icon only on mobile, full switcher on desktop */}
@@ -71,15 +81,6 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
           <span className="hidden sm:inline-block ml-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold shadow-sm border border-primary/20">
             {language === 'ARABIC' ? 'العربية' : 'English'}
           </span>
-          {/* User avatar and name, smaller on mobile, no last login */}
-          {/* <div className="flex items-center gap-2 text-gray-800 ">
-            <img
-              src="public/user.jpg"
-              alt="User"
-              className="mx-auto rounded-full border-2 border-gray-300 h-8 w-8 sm:h-10 sm:w-10"
-            />
-            <span className="font-medium text-sm sm:text-base">{userName}</span>
-          </div> */}
         </div>
       </div>
     </header>

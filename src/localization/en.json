@@ -34,6 +34,15 @@
     "currentImage": "Current Image",
     "back": "Back"
 },
+  "admin": {
+    "accessDenied": "Access Denied",
+    "adminRequired": "This page requires administrator privileges",
+    "goBack": "Go Back",
+    "insufficientPermissions": "Insufficient Permissions",
+    "contactAdmin": "Please contact the system administrator for required permissions",
+    "currentRole": "Current Role",
+    "requiredRole": "Required Role"
+  },
  
   "login": {
     "welcomeTitle": "Welcome to BringUs",
@@ -902,7 +911,14 @@
     "emailInvalid": "Please enter a valid email address",
     "phoneRequired": "Phone number is required",
     "phoneInvalid": "Please enter a valid phone number",
-    "whatsappInvalid": "Please enter a valid WhatsApp number"
+    "whatsappInvalid": "Please enter a valid WhatsApp number",
+    "editStoreInfo": "Edit Store Information",
+    "addNewStore": "Add New Store",
+    "editModeDescription": "You can edit the current store information",
+    "updateStore": "Update Store",
+    "currentLogo": "Current Logo",
+    "logoPreview": "Logo Preview",
+    "link": "Link"
   },
   "emailEnglishOnly": "Email must contain only English letters and numbers"
 }

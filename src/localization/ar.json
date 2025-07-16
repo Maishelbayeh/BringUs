@@ -34,6 +34,15 @@
     "currentImage": "الصورة الحالية",
     "back": "رجوع"
   },
+  "admin": {
+    "accessDenied": "الوصول مرفوض",
+    "adminRequired": "هذه الصفحة تتطلب صلاحيات مدير النظام",
+    "goBack": "العودة للصفحة السابقة",
+    "insufficientPermissions": "صلاحيات غير كافية",
+    "contactAdmin": "يرجى التواصل مع مدير النظام للحصول على الصلاحيات المطلوبة",
+    "currentRole": "الدور الحالي",
+    "requiredRole": "الدور المطلوب"
+  },
   "auth":{
     "since_2024":"منذ 2024",
     "login":"تسجيل دخول",
@@ -860,14 +869,13 @@
     "name": "اسم المتجر",
     "phone": "رقم هاتف المتجر",
     "currency": "عملة المتجر",
-    "link": "رابط المتجر",
     "color": "لون المتجر",
     "chooseColor": "اختر لون المتجر",
     "uploadLogo": "تحميل لوجو المتجر",
     "taxEnabled": "تفعيل الضريبة",
     "socialMedia": "روابط السوشال ميديا",
     "save": "حفظ",
-    "registerMerchant": "تسجيل المتجر",
+    "registerMerchant": "تسجيل التاجر",
     "createStore": "إنشاء المتجر",
     "merchantStepDesc": "الخطوة 1: تسجيل حساب التاجر",
     "storeStepDesc": "الخطوة 2: إنشاء المتجر",
@@ -894,7 +902,14 @@
     "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح",
     "phoneRequired": "رقم الهاتف مطلوب",
     "phoneInvalid": "يرجى إدخال رقم هاتف صحيح",
-    "whatsappInvalid": "يرجى إدخال رقم واتساب صحيح"
+    "whatsappInvalid": "يرجى إدخال رقم واتساب صحيح",
+    "editStoreInfo": "تعديل معلومات المتجر",
+    "addNewStore": "إضافة متجر جديد",
+    "editModeDescription": "يمكنك تعديل معلومات المتجر الحالي",
+    "updateStore": "تحديث المتجر",
+    "currentLogo": "اللوجو الحالي",
+    "logoPreview": "معاينة اللوجو",
+    "link": "رابط"
   },
   "emailEnglishOnly": "البريد الإلكتروني يجب أن يحتوي فقط على أحرف إنجليزية وأرقام"
 } 

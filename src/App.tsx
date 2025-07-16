@@ -62,6 +62,7 @@ const AppContent: React.FC = () => {
               isOpen={isSidebarOpen}
               toggleSidebar={toggleSidebar}
               isRTL={language === 'ARABIC'}
+              language={language}
               onItemClick={handleItemClick}
             />
           </div>

@@ -15,11 +15,13 @@ import {
 import CustomInput from '@/components/common/CustomInput';
 import CustomButton from '@/components/common/CustomButton';
 import useLanguage from '@/hooks/useLanguage';
+import { useAuth } from '@/hooks/useAuth';
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
+  const { login, isLoading: authLoading, error: authError } = useAuth();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -27,7 +29,6 @@ const Login: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -62,18 +63,18 @@ const Login: React.FC = () => {
     
     if (!validateForm()) return;
     
-    setIsLoading(true);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const result = await login({
+        email: formData.email,
+        password: formData.password
+      });
       
+      if (result) {
       // Navigate to dashboard on success
       navigate('/');
+      }
     } catch (error) {
       console.error('Login error:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -168,6 +169,13 @@ const Login: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* عرض رسائل الخطأ العامة */}
+              {authError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {authError}
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <CustomInput
                   label={t('login.email')}
@@ -237,12 +245,12 @@ const Login: React.FC = () => {
               </div>
 
               <CustomButton
-                text={isLoading ? t('login.signingIn') : t('login.signIn')}
+                text={authLoading ? t('login.signingIn') : t('login.signIn')}
                 color="purple"
                 type="submit"
-                disabled={isLoading}
+                disabled={authLoading}
                 className="w-full py-3 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200"
-                icon={isLoading ? (
+                icon={authLoading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                 ) : <LoginIcon />}
               />
