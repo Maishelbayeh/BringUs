@@ -46,7 +46,18 @@ const useProducts = () => {
       const url = `${BASE_URL}meta/products`;
       const res = await axios.get(url);
       console.log('FETCHED PRODUCTS FROM API:', res.data);
-      setProducts(res.data.data || res.data);
+      
+      // Log barcodes for debugging
+      const productsData = res.data.data || res.data;
+      if (Array.isArray(productsData)) {
+        productsData.forEach((product: any, index: number) => {
+          console.log(`🔍 Product ${index + 1} barcodes:`, product.barcodes);
+          console.log(`🔍 Product ${index + 1} barcodes type:`, typeof product.barcodes);
+          console.log(`🔍 Product ${index + 1} barcodes is array:`, Array.isArray(product.barcodes));
+        });
+      }
+      
+      setProducts(productsData);
       setHasLoaded(true); // تم تحميل البيانات
       setLastFetchTime(now); // تحديث وقت آخر جلب
       setHasError(false); // تأكيد عدم وجود خطأ
@@ -69,6 +80,9 @@ const useProducts = () => {
   const saveProduct = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
     console.log('Saving product with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     console.log('Store ID from form:', form.storeId);
+    console.log('Form barcodes:', form.barcodes);
+    console.log('Form barcodes type:', typeof form.barcodes);
+    console.log('Form barcodes is array:', Array.isArray(form.barcodes));
     
     const payload: any = {
       nameAr: form.nameAr?.trim() || '',
@@ -77,7 +91,24 @@ const useProducts = () => {
       descriptionEn: form.descriptionEn?.trim() || '',
       price: parseFloat(form.price) || 0,
       compareAtPrice: parseFloat(form.compareAtPrice) || 0,
-      barcode: form.barcode?.trim() || '',
+      barcodes: (() => {
+        console.log('🔍 Processing barcodes from form:', form.barcodes);
+        if (Array.isArray(form.barcodes)) {
+          console.log('🔍 Barcodes is array:', form.barcodes);
+          return form.barcodes;
+        } else if (typeof form.barcodes === 'string') {
+          try {
+            const parsed = JSON.parse(form.barcodes);
+            console.log('🔍 Parsed barcodes from string:', parsed);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (error) {
+            console.error('🔍 Error parsing barcodes string:', error);
+            return [];
+          }
+        }
+        console.log('🔍 Barcodes is not array or string, returning empty array');
+        return [];
+      })(),
       costPrice: parseFloat(form.costPrice) || 0,
       availableQuantity: parseInt(String(form.availableQuantity)) || 0,
       stock: parseInt(String(form.availableQuantity)) || 0,
@@ -90,7 +121,7 @@ const useProducts = () => {
       salePercentage: parseFloat(form.salePercentage) || 0,
       category: form.categoryId || null,
       unit: form.unitId && form.unitId !== '' ? form.unitId : null,
-      images: form.images || [],
+      images: Array.isArray(form.images) ? form.images : [],
       mainImage: form.mainImage || null,
       colors: Array.isArray(form.colors) 
         ? form.colors.map((variant: any) => {
@@ -114,19 +145,85 @@ const useProducts = () => {
         : [],
       productLabels: form.tags || [],
       attributes: form.attributes || [],
-      specifications: form.productSpecifications || [],
+      specifications: (() => {
+        // معالجة المواصفات المختارة
+        if (form.selectedSpecifications) {
+          try {
+            const parsed = JSON.parse(form.selectedSpecifications);
+            if (Array.isArray(parsed)) {
+              // استخراج IDs المواصفات فقط (بدون القيم)
+              const specificationIds = [...new Set(parsed.map((spec: any) => spec._id.split('_')[0]))];
+              console.log('Specification IDs:', specificationIds);
+              return specificationIds;
+            }
+          } catch (error) {
+            console.error('Error parsing selectedSpecifications:', error);
+          }
+        }
+        // إذا كانت المواصفات موجودة في form.productSpecifications
+        if (form.productSpecifications && Array.isArray(form.productSpecifications)) {
+          return form.productSpecifications;
+        }
+        return [];
+      })(),
+      specificationValues: (() => {
+        // معالجة قيم المواصفات المختارة
+        if (form.selectedSpecifications) {
+          try {
+            const parsed = JSON.parse(form.selectedSpecifications);
+            if (Array.isArray(parsed)) {
+              // تحويل المواصفات إلى التنسيق المطلوب للـ API
+              const formattedSpecs = parsed.map((spec: any) => {
+                const specificationId = spec._id.split('_')[0]; // أخذ ID المواصفة الأساسي
+                const valueIndex = spec._id.split('_')[1]; // أخذ index القيمة
+                
+                return {
+                  specificationId: specificationId,
+                  valueId: spec._id,
+                  value: spec.value, // القيمة المختارة (مثل: "أحمر"، "كبير")
+                  title: spec.title  // عنوان المواصفة (مثل: "اللون"، "الحجم")
+                };
+              });
+              console.log('Specification values:', formattedSpecs);
+              return formattedSpecs;
+            }
+          } catch (error) {
+            console.error('Error parsing selectedSpecifications:', error);
+          }
+        }
+        return [];
+      })(),
       storeId: form.storeId || STORE_ID,
     };
 
-          console.log('Final payload to send:', payload);
+    console.log('🔍 Final payload barcodes:', payload.barcodes);
+    console.log('🔍 Final payload barcodes type:', typeof payload.barcodes);
+    console.log('🔍 Final payload barcodes is array:', Array.isArray(payload.barcodes));
+
+                console.log('Final payload to send:', payload);
+      console.log('Barcodes in payload:', payload.barcodes);
+      console.log('Barcodes type:', typeof payload.barcodes);
+      console.log('Barcodes is array:', Array.isArray(payload.barcodes));
+      console.log('Barcodes length:', Array.isArray(payload.barcodes) ? payload.barcodes.length : 'N/A');
+          console.log('Specifications in payload:', payload.specifications);
+          console.log('Specifications type:', typeof payload.specifications);
+          console.log('Specifications is array:', Array.isArray(payload.specifications));
+          console.log('Specification values in payload:', payload.specificationValues);
+          console.log('Specification values type:', typeof payload.specificationValues);
+          console.log('Specification values is array:', Array.isArray(payload.specificationValues));
+          console.log('Images in payload:', payload.images);
 
       console.log('Store field in payload:', payload.store);
     try {
       if (editId) {
+        console.log('🔍 Updating product with ID:', editId);
+        console.log('🔍 Update URL:', `${BASE_URL}meta/products/${editId}`);
         const response = await axios.put(`${BASE_URL}meta/products/${editId}`, payload);
         console.log('Product updated successfully:', response.data);
         showSuccess('تم تعديل المنتج بنجاح', 'نجح التحديث');
       } else {
+        console.log('🔍 Creating new product');
+        console.log('🔍 Create URL:', `${BASE_URL}products`);
         const response = await axios.post(`${BASE_URL}products`, payload);
         console.log('Product created successfully:', response.data);
         showSuccess('تم إضافة المنتج بنجاح', 'نجح الإضافة');
@@ -183,15 +280,16 @@ const useProducts = () => {
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
+      formData.append('folder', 'products');
 
-      const response = await axios.post(`${BASE_URL}/products/upload-main-image`, formData, {
+      const response = await axios.post(`${BASE_URL}stores/upload-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       console.log('Image uploaded successfully:', response.data);
-      return response.data.imageUrl || response.data.url;
+      return response.data.data.url;
     } catch (err: any) {
       console.error('Error uploading product image:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة';
@@ -208,15 +306,16 @@ const useProducts = () => {
         formData.append('images', file);
       });
       formData.append('storeId', STORE_ID);
+      formData.append('folder', 'products');
 
-      const response = await axios.post(`${BASE_URL}products/upload-gallery-images`, formData, {
+      const response = await axios.post(`${BASE_URL}stores/upload-multiple-images`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       console.log('Images uploaded successfully:', response.data);
-      return response.data.images.map((img: any) => img.imageUrl || img.url);
+      return response.data.data.map((img: any) => img.url);
     } catch (err: any) {
       console.error('Error uploading product images:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصور';
@@ -231,15 +330,16 @@ const useProducts = () => {
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
+      formData.append('folder', 'products');
 
-      const response = await axios.post(`${BASE_URL}meta/products/upload-single-image`, formData, {
+      const response = await axios.post(`${BASE_URL}stores/upload-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       console.log('Single image uploaded successfully:', response.data);
-      return response.data.imageUrl || response.data.url;
+      return response.data.data.url;
     } catch (err: any) {
       console.error('Error uploading single image:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة';
@@ -279,20 +379,47 @@ const useProducts = () => {
     // التحقق من عدم تكرار الاسم في نفس المستوى
     // نتجاهل المنتج الحالي عند التعديل
     const currentProductId = editId || form.id || form._id;
-    const existingProduct = Array.isArray(products) ? products.find(product => {
+    
+    // التحقق من تكرار الاسم العربي
+    const existingProductAr = Array.isArray(products) ? products.find(product => {
       const productId = product._id || product.id;
       // إذا كان هذا هو نفس المنتج الذي نعدله، نتجاهله
       if (currentProductId && productId === currentProductId) {
         return false;
       }
-      // التحقق من التكرار بالاسمين العربي والإنجليزي
-      return product.nameAr === form.nameAr.trim() && product.nameEn === form.nameEn.trim();
+      // التحقق من التكرار بالاسم العربي فقط
+      return product.nameAr === form.nameAr.trim();
     }) : null;
     
-    if (existingProduct) {
-      const errorMsg = isRTL ? 'هذا المنتج موجود مسبقاً' : 'This product already exists';
-      errors.nameAr = errorMsg;
-      errors.nameEn = errorMsg;
+    // التحقق من تكرار الاسم الإنجليزي
+    const existingProductEn = Array.isArray(products) ? products.find(product => {
+      const productId = product._id || product.id;
+      // إذا كان هذا هو نفس المنتج الذي نعدله، نتجاهله
+      if (currentProductId && productId === currentProductId) {
+        return false;
+      }
+      // التحقق من التكرار بالاسم الإنجليزي فقط
+      return product.nameEn === form.nameEn.trim();
+    }) : null;
+    
+    // Debug: طباعة معلومات التحقق
+    console.log('🔍 Validation Debug:');
+    console.log('🔍 Current Product ID:', currentProductId);
+    console.log('🔍 Form nameAr:', form.nameAr.trim());
+    console.log('🔍 Form nameEn:', form.nameEn.trim());
+    console.log('🔍 Total products in array:', products.length);
+    console.log('🔍 Products sample:', products.slice(0, 3).map(p => ({ id: p._id || p.id, nameAr: p.nameAr, nameEn: p.nameEn })));
+    console.log('🔍 Existing Product Ar:', existingProductAr);
+    console.log('🔍 Existing Product En:', existingProductEn);
+    
+    if (existingProductAr) {
+      errors.nameAr = isRTL ? 'الاسم العربي موجود مسبقاً' : 'Arabic name already exists';
+      console.log('🔍 Arabic name validation failed');
+    }
+    
+    if (existingProductEn) {
+      errors.nameEn = isRTL ? 'الاسم الإنجليزي موجود مسبقاً' : 'English name already exists';
+      console.log('🔍 English name validation failed');
     }
 
     return errors;

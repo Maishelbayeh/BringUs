@@ -31,8 +31,22 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
 
   // Initialize selected values from props
   useEffect(() => {
-    const selectedIds = new Set(selectedSpecifications.map(spec => spec._id));
-    setSelectedValues(selectedIds);
+    console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);
+    console.log('🔍 CheckboxSpecificationSelector - specifications:', specifications);
+    
+    if (Array.isArray(selectedSpecifications) && selectedSpecifications.length > 0) {
+      const selectedIds = new Set(selectedSpecifications.map(spec => spec._id));
+      console.log('🔍 CheckboxSpecificationSelector - Setting selectedIds:', selectedIds);
+      console.log('🔍 CheckboxSpecificationSelector - Selected specs details:', selectedSpecifications.map(spec => ({
+        id: spec._id,
+        title: spec.title,
+        value: spec.value
+      })));
+      setSelectedValues(selectedIds);
+    } else {
+      console.log('🔍 CheckboxSpecificationSelector - No selectedSpecifications, clearing selectedValues');
+      setSelectedValues(new Set());
+    }
   }, [selectedSpecifications]);
 
   const toggleTitle = (titleId: string) => {
@@ -46,6 +60,9 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
   };
 
   const toggleValue = (value: SpecificationValue) => {
+    console.log('🔍 toggleValue - value:', value);
+    console.log('🔍 toggleValue - current selectedValues:', selectedValues);
+    
     const newSelected = new Set(selectedValues);
     if (newSelected.has(value._id)) {
       newSelected.delete(value._id);
@@ -58,6 +75,8 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
     const updatedSelection = specifications
       .flatMap(spec => spec.values)
       .filter(val => newSelected.has(val._id));
+    
+    console.log('🔍 toggleValue - updatedSelection:', updatedSelection);
     onSelectionChange(updatedSelection);
   };
 
@@ -74,13 +93,18 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
   };
 
   const isTitleSelected = (title: SpecificationTitle) => {
-    return title.values.some(value => selectedValues.has(value._id));
+    const selected = title.values.some(value => selectedValues.has(value._id));
+    console.log(`🔍 Title ${title.title} selected: ${selected}`);
+    return selected;
   };
 
   const getSelectedCountForTitle = (title: SpecificationTitle) => {
     return title.values.filter(value => selectedValues.has(value._id)).length;
   };
 
+  console.log('🔍 CheckboxSpecificationSelector - Rendering with specifications:', specifications);
+  console.log('🔍 CheckboxSpecificationSelector - Rendering with selectedSpecifications:', selectedSpecifications);
+  
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Selected Values Display */}
@@ -94,7 +118,7 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
                 className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
               >
                 <span className="text-xs text-blue-600">{spec.title}:</span>
-                {spec.value}
+                <span className="font-medium">{spec.value}</span>
                 <button
                   type="button"
                   onClick={() => removeValue(spec._id)}
@@ -109,8 +133,14 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
       )}
 
       {/* Specification Titles */}
-      <div className="space-y-2">
-        {specifications.map((title) => (
+      {specifications.length === 0 ? (
+        <div className="text-center py-4 text-gray-500">
+          <p>لا توجد مواصفات متاحة</p>
+          <p className="text-xs mt-2">يتم جلب المواصفات من الخادم...</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {specifications.map((title) => (
           <div key={title._id} className="border rounded-lg p-3">
             <div className="flex items-center justify-between">
               <label className="flex items-center space-x-2 cursor-pointer">
@@ -139,22 +169,27 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
             {/* Values for this title */}
             {expandedTitles.has(title._id) && (
               <div className="mt-3 ml-6 space-y-2">
-                {title.values.map((value) => (
-                  <label key={value._id} className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedValues.has(value._id)}
-                      onChange={() => toggleValue(value)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-gray-700">{value.value}</span>
-                  </label>
-                ))}
+                {title.values.map((value) => {
+                  const isChecked = selectedValues.has(value._id);
+                  console.log(`🔍 Checkbox for ${value._id}: ${value.value} - checked: ${isChecked}`);
+                  return (
+                    <label key={value._id} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleValue(value)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-gray-700">{value.value}</span>
+                    </label>
+                  );
+                })}
               </div>
             )}
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Summary */}
       {selectedSpecifications.length > 0 && (
@@ -164,6 +199,14 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
           </p>
         </div>
       )}
+      
+      {/* Debug info */}
+      <div className="mt-4 p-2 bg-yellow-100 rounded text-xs">
+        <p><strong>Debug:</strong></p>
+        <p>Specifications count: {specifications.length}</p>
+        <p>Selected count: {selectedSpecifications.length}</p>
+        <p>Expanded titles: {Array.from(expandedTitles).join(', ')}</p>
+      </div>
     </div>
   );
 };

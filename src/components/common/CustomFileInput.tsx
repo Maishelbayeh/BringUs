@@ -34,24 +34,20 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
 
-  // إضافة الصور الموجودة مسبقاً عند تحميل المكون
+  // تحميل الصور الموجودة مسبقاً
   useEffect(() => {
+    console.log('🔍 CustomFileInput - value:', value);
     if (value) {
-      const existingImages = Array.isArray(value) ? value : [value];
-      const validImages = existingImages.filter(img => img && img.trim() !== '');
-      setPreviews(validImages);
-      setFileCount(validImages.length);
-      // مسح الملفات المحددة عند تحميل صور موجودة
-      setSelectedFiles([]);
-      setFileNames([]);
-    } else {
-      setPreviews([]);
-      setFileCount(0);
-      setSelectedFiles([]);
-      setFileNames([]);
+      const imageUrls = Array.isArray(value) ? value : [value];
+      const validUrls = imageUrls.filter(url => url && typeof url === 'string');
+      
+      if (validUrls.length > 0) {
+        setPreviews(validUrls);
+        setFileCount(validUrls.length);
+        setFileNames(validUrls.map(url => url.split('/').pop() || 'image'));
+      }
     }
   }, [value]);
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) {
