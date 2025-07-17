@@ -44,7 +44,7 @@ import PermissionModal from '../../components/common/PermissionModal';
         await deleteUnit(unitId);
         setSelectedUnit(null);
       } catch (error) {
-        console.error('Error deleting unit:', error);
+        //CONSOLE.error('Error deleting unit:', error);
       }
     }
     setShowDeleteModal(false);
@@ -84,7 +84,7 @@ import PermissionModal from '../../components/common/PermissionModal';
       setEditingSpec(null);
       setValidationErrors({});
     } catch (error) {
-      console.error('Error saving unit:', error);
+      //CONSOLE.error('Error saving unit:', error);
     }
   };
 

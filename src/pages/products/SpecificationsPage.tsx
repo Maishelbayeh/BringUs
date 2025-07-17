@@ -129,7 +129,7 @@ const SpecificationsPage: React.FC = () => {
               <div className={`flex gap-3 mt-6 ${isRTL ? 'justify-end' : 'justify-start'}`}>
                 <button
                   onClick={() => {
-                    console.log('Selected Specifications:', selectedSpecifications);
+                    //CONSOLE.log('Selected Specifications:', selectedSpecifications);
                     // TODO: Export or use specifications
                   }}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"

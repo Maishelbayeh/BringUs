@@ -46,7 +46,7 @@ const AdvertisementPage = () => {
     try {
       return { __html: html };
     } catch (error) {
-      console.error('Error rendering HTML:', error);
+      //CONSOLE.error('Error rendering HTML:', error);
       return { __html: '<p style="color: red;">Error rendering HTML</p>' };
     }
   };
@@ -122,7 +122,7 @@ const AdvertisementPage = () => {
         await getAdvertisements();
         setItemToDelete(null);
       } catch (error) {
-        console.error('Delete error:', error);
+        //CONSOLE.error('Delete error:', error);
       }
     }
   };
@@ -161,7 +161,7 @@ const AdvertisementPage = () => {
       setFormTitle('');
       setFormStatus('Active');
     } catch (error) {
-      console.error('Submit error:', error);
+      //CONSOLE.error('Submit error:', error);
     } finally {
       setFormLoading(false);
     }

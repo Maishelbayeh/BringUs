@@ -59,12 +59,12 @@ const PaymentVariantsDrawer = forwardRef<PaymentVariantsDrawerRef, PaymentVarian
   // Expose handleSubmit function to parent
   useImperativeHandle(ref, () => ({
     handleSubmit: () => {
-      console.log('PaymentVariantsDrawer handleSubmit called');
+      //CONSOLE.log('PaymentVariantsDrawer handleSubmit called');
       if (validateForm()) {
-        console.log('PaymentVariantsDrawer validation passed, submitting...');
+        //CONSOLE.log('PaymentVariantsDrawer validation passed, submitting...');
         onSubmit(formData);
       } else {
-        console.log('PaymentVariantsDrawer validation failed');
+        //CONSOLE.log('PaymentVariantsDrawer validation failed');
       }
     }
   }));
@@ -85,22 +85,22 @@ const PaymentVariantsDrawer = forwardRef<PaymentVariantsDrawerRef, PaymentVarian
   // Validate form whenever formData changes
   useEffect(() => {
     const isValid = validateForm();
-    console.log('PaymentVariantsDrawer useEffect - validation result:', isValid);
+    //CONSOLE.log('PaymentVariantsDrawer useEffect - validation result:', isValid);
   }, [formData]);
 
   // Initial validation when component mounts or initialData changes
   useEffect(() => {
-    console.log('PaymentVariantsDrawer initial validation');
+    //CONSOLE.log('PaymentVariantsDrawer initial validation');
     const isValid = validateForm();
     
     // For edit mode, if we have initialData, the form should be valid by default
     if (initialData) {
-      console.log('Edit mode with initialData - setting form as valid');
+      //CONSOLE.log('Edit mode with initialData - setting form as valid');
       if (onValidationChange) {
         onValidationChange(true);
       }
     } else {
-      console.log('New mode or no initialData - validation result:', isValid);
+      //CONSOLE.log('New mode or no initialData - validation result:', isValid);
       if (onValidationChange) {
         onValidationChange(isValid);
       }
@@ -119,7 +119,7 @@ const PaymentVariantsDrawer = forwardRef<PaymentVariantsDrawerRef, PaymentVarian
     
     const isValid = Object.keys(validationErrors).length === 0;
     
-    console.log('PaymentVariantsDrawer validation result:', isValid, validationErrors);
+    //CONSOLE.log('PaymentVariantsDrawer validation result:', isValid, validationErrors);
     
     if (onValidationChange) {
       onValidationChange(isValid);

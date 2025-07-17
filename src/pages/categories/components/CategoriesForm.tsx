@@ -122,9 +122,9 @@ export const validateCategoryForm = (form: any, isRTL: boolean, categories: any[
 
 const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onImageChange, isSubcategory, isRTL, categories, validationErrors = {} }) => {
   // Debug: طباعة قيمة الصورة
-  console.log('CategoriesForm - form.image value:', form.image);
-  console.log('CategoriesForm - form.image type:', typeof form.image);
-  console.log('CategoriesForm - validation errors:', validationErrors);
+  //CONSOLE.log('CategoriesForm - form.image value:', form.image);
+  //CONSOLE.log('CategoriesForm - form.image type:', typeof form.image);
+  //CONSOLE.log('CategoriesForm - validation errors:', validationErrors);
   
   // استخراج الفئات الرئيسية فقط
   // const mainCategories = categories ? categories.filter(cat => !('parentId' in cat) || cat.parentId === null) : [];
@@ -225,7 +225,7 @@ const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onI
             className="w-16 h-16 rounded-full object-cover border mt-2 self-start" 
             style={{direction: isRTL ? 'rtl' : 'ltr'}}
             onError={(e) => {
-              console.error('Image failed to load:', e.currentTarget.src);
+              //CONSOLE.error('Image failed to load:', e.currentTarget.src);
               e.currentTarget.style.display = 'none';
             }}
           />

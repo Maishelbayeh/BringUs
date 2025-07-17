@@ -39,6 +39,8 @@ interface ProductsFormProps {
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onTagsChange: (values: string[]) => void;
   onImageChange: (files: File | File[] | null) => void;
+  onMainImageChange: (file: File | null) => void;
+  uploadMainImage?: (file: File) => Promise<string>;
   categories?: { id: number; nameAr: string; nameEn: string }[];
   tags?: any[];
   units?: any[];
@@ -51,6 +53,8 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   onFormChange, 
   onTagsChange, 
   onImageChange, 
+  onMainImageChange, 
+  uploadMainImage,
   categories = [], 
   tags = [], 
   units = [],
@@ -66,20 +70,22 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   const [selectedSpecifications, setSelectedSpecifications] = useState<any[]>([]);
   const [showBarcodeSuccess, setShowBarcodeSuccess] = useState(false);
   const [localNewBarcode, setLocalNewBarcode] = useState('');
+  const [mainImageUploading, setMainImageUploading] = useState(false);
+  const [showMainImageSuccess, setShowMainImageSuccess] = useState(false);
 
   // جلب مواصفات المنتجات عند تحميل المكون
   useEffect(() => {
-    console.log('🔍 ProductsForm - Fetching specifications...');
+    //CONSOLE.log('🔍 ProductsForm - Fetching specifications...');
     fetchSpecifications().then((data) => {
-      console.log('🔍 ProductsForm - Fetched specifications:', data);
+      //CONSOLE.log('🔍 ProductsForm - Fetched specifications:', data);
     }).catch((error) => {
-      console.error('🔍 ProductsForm - Error fetching specifications:', error);
+      //CONSOLE.error('🔍 ProductsForm - Error fetching specifications:', error);
     });
   }, [fetchSpecifications]);
 
   // تحويل البيانات من النموذج إلى التنسيق المطلوب
   useEffect(() => {
-    console.log('🔍 ProductsForm - form.selectedSpecifications:', form.selectedSpecifications);
+    //CONSOLE.log('🔍 ProductsForm - form.selectedSpecifications:', form.selectedSpecifications);
     if (form.selectedSpecifications) {
       try {
         let parsed;
@@ -90,40 +96,43 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
         }
         
         if (Array.isArray(parsed)) {
-          console.log('🔍 ProductsForm - Setting selectedSpecifications:', parsed);
+          //CONSOLE.log('🔍 ProductsForm - Setting selectedSpecifications:', parsed);
           setSelectedSpecifications(parsed);
         } else {
-          console.log('🔍 ProductsForm - parsed is not array:', parsed);
+          //CONSOLE.log('🔍 ProductsForm - parsed is not array:', parsed);
           setSelectedSpecifications([]);
         }
       } catch (error) {
-        console.error('Error parsing selectedSpecifications:', error);
+        //CONSOLE.error('Error parsing selectedSpecifications:', error);
         setSelectedSpecifications([]);
       }
     } else {
-      console.log('🔍 ProductsForm - No selectedSpecifications, setting empty array');
+      //CONSOLE.log('🔍 ProductsForm - No selectedSpecifications, setting empty array');
       setSelectedSpecifications([]);
     }
   }, [form.selectedSpecifications]);
 
   // Debug: طباعة بيانات النموذج
   useEffect(() => {
-    console.log('🔍 Form data in ProductsForm:', {
-      images: form.images,
-      selectedSpecifications: form.selectedSpecifications,
-      tags: form.tags,
-      colors: form.colors,
-      barcodes: form.barcodes,
-      newBarcode: form.newBarcode
-    });
-    console.log('🔍 Barcodes in form:', form.barcodes);
-    console.log('🔍 Barcodes type:', typeof form.barcodes);
-    console.log('🔍 Barcodes is array:', Array.isArray(form.barcodes));
-    console.log('🔍 Barcodes length:', Array.isArray(form.barcodes) ? form.barcodes.length : 'N/A');
-    console.log('🔍 Specifications prop:', specifications);
-    console.log('🔍 Specifications prop length:', specifications.length);
-    console.log('🔍 API Specifications:', apiSpecifications);
-    console.log('🔍 API Specifications length:', apiSpecifications.length);
+    // //CONSOLE.log('🔍 Form data in ProductsForm:', {
+    //   images: form.images,
+    //   mainImage: form.mainImage,
+    //   mainImageType: typeof form.mainImage,
+    //   mainImageIsNull: form.mainImage === null,
+    //   selectedSpecifications: form.selectedSpecifications,
+    //   tags: form.tags,
+    //   colors: form.colors,
+    //   barcodes: form.barcodes,
+    //   newBarcode: form.newBarcode
+    // });
+    //CONSOLE.log('🔍 Barcodes in form:', form.barcodes);
+    //CONSOLE.log('🔍 Barcodes type:', typeof form.barcodes);
+    //CONSOLE.log('🔍 Barcodes is array:', Array.isArray(form.barcodes));
+    //CONSOLE.log('🔍 Barcodes length:', Array.isArray(form.barcodes) ? form.barcodes.length : 'N/A');
+    //CONSOLE.log('🔍 Specifications prop:', specifications);
+    //CONSOLE.log('🔍 Specifications prop length:', specifications.length);
+    //CONSOLE.log('🔍 API Specifications:', apiSpecifications);
+    //CONSOLE.log('🔍 API Specifications length:', apiSpecifications.length);
   }, [form, specifications, apiSpecifications]);
 
   // تحويل مواصفات المنتجات إلى التنسيق المطلوب للمكون الجديد
@@ -148,14 +157,14 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
     }))
   })) : [];
 
-  console.log('🔍 ProductsForm - formattedSpecifications:', formattedSpecifications);
-  console.log('🔍 ProductsForm - formattedSpecificationsProp:', formattedSpecificationsProp);
-  console.log('🔍 ProductsForm - selectedSpecifications:', selectedSpecifications);
-  console.log('🔍 ProductsForm - apiSpecifications raw:', apiSpecifications);
+  // //CONSOLE.log('🔍 ProductsForm - formattedSpecifications:', formattedSpecifications);
+  // //CONSOLE.log('🔍 ProductsForm - formattedSpecificationsProp:', formattedSpecificationsProp);
+  // //CONSOLE.log('🔍 ProductsForm - selectedSpecifications:', selectedSpecifications);
+  // //CONSOLE.log('🔍 ProductsForm - apiSpecifications raw:', apiSpecifications);
 
   //-------------------------------------------- handleShuttleChange -------------------------------------------
   const handleShuttleChange = (e: React.ChangeEvent<{ name: string; value: string[] }>) => {
-    console.log('🔍 ProductsForm - handleShuttleChange:', e.target);
+    //CONSOLE.log('🔍 ProductsForm - handleShuttleChange:', e.target);
     onFormChange({
       target: {
         name: e.target.name,
@@ -166,7 +175,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   
   //-------------------------------------------- handleColorChange -------------------------------------------
   const handleColorChange = (e: React.ChangeEvent<{ name: string; value: ColorVariant[] }>) => {
-    console.log('🔍 ProductsForm - handleColorChange:', e.target);
+    //CONSOLE.log('🔍 ProductsForm - handleColorChange:', e.target);
     onFormChange({
       target: {
         name: e.target.name,
@@ -177,12 +186,18 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   
   //-------------------------------------------- handleInputChange -------------------------------------------
   const handleInputChange = (name: string, value: string | any[]) => {
-    console.log('🔍 ProductsForm - handleInputChange:', { name, value });
+    //CONSOLE.log('🔍 ProductsForm - handleInputChange:', { name, value });
     if (name === 'barcodes') {
-      console.log('🔍 ProductsForm - Updating barcodes:', value);
-      console.log('🔍 ProductsForm - barcodes type:', typeof value);
-      console.log('🔍 ProductsForm - barcodes is array:', Array.isArray(value));
-      console.log('🔍 ProductsForm - barcodes length:', Array.isArray(value) ? value.length : 'N/A');
+      //CONSOLE.log('🔍 ProductsForm - Updating barcodes:', value);
+      //CONSOLE.log('🔍 ProductsForm - barcodes type:', typeof value);
+      //CONSOLE.log('🔍 ProductsForm - barcodes is array:', Array.isArray(value));
+      //CONSOLE.log('🔍 ProductsForm - barcodes length:', Array.isArray(value) ? value.length : 'N/A');
+    }
+    
+    if (name === 'mainImage') {
+      //CONSOLE.log('🔍 ProductsForm - Updating mainImage:', value);
+      //CONSOLE.log('🔍 ProductsForm - mainImage type:', typeof value);
+      //CONSOLE.log('🔍 ProductsForm - mainImage === null:', value === null);
     }
     
     // إنشاء event object
@@ -194,8 +209,13 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
     } as any;
     
     if (name === 'barcodes') {
-      console.log('🔍 ProductsForm - handleInputChange - Sending event:', event);
-      console.log('🔍 ProductsForm - handleInputChange - Event value:', event.target.value);
+      //CONSOLE.log('🔍 ProductsForm - handleInputChange - Sending event:', event);
+      //CONSOLE.log('🔍 ProductsForm - handleInputChange - Event value:', event.target.value);
+    }
+    
+    if (name === 'mainImage') {
+      //CONSOLE.log('🔍 ProductsForm - handleInputChange - Sending mainImage event:', event);
+      //CONSOLE.log('🔍 ProductsForm - handleInputChange - MainImage event value:', event.target.value);
     }
     
     // إرسال الحدث إلى onFormChange
@@ -204,7 +224,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   
   //-------------------------------------------- handleSelectChange -------------------------------------------
   const handleSelectChange = (name: string, value: string) => {
-    console.log('🔍 ProductsForm - handleSelectChange:', { name, value });
+    //CONSOLE.log('🔍 ProductsForm - handleSelectChange:', { name, value });
     onFormChange({
       target: {
         name,
@@ -215,29 +235,29 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   
   // handle multi-select for product labels
   const handleTagsChange = (values: string[]) => {
-    console.log('🔍 ProductsForm - handleTagsChange:', values);
+    //CONSOLE.log('🔍 ProductsForm - handleTagsChange:', values);
     onTagsChange(values);
   };
 
   // دالة إضافة باركود جديد
   const addBarcode = () => {
-    console.log('🔍 addBarcode called');
-    console.log('🔍 localNewBarcode:', localNewBarcode);
-    console.log('🔍 form.barcodes before:', form.barcodes);
+    //CONSOLE.log('🔍 addBarcode called');
+    //CONSOLE.log('🔍 localNewBarcode:', localNewBarcode);
+    //CONSOLE.log('🔍 form.barcodes before:', form.barcodes);
     
     if (localNewBarcode && localNewBarcode.trim()) {
       const currentBarcodes = Array.isArray(form.barcodes) ? form.barcodes : [];
-      console.log('🔍 currentBarcodes:', currentBarcodes);
+      //CONSOLE.log('🔍 currentBarcodes:', currentBarcodes);
       
       // التحقق من عدم تكرار الباركود
       if (currentBarcodes.includes(localNewBarcode.trim())) {
-        console.log('🔍 Barcode already exists');
+        //CONSOLE.log('🔍 Barcode already exists');
         alert(isRtl ? 'الباركود موجود مسبقاً!' : 'Barcode already exists!');
         return;
       }
       
       const newBarcodes = [...currentBarcodes, localNewBarcode.trim()];
-      console.log('🔍 newBarcodes:', newBarcodes);
+      //CONSOLE.log('🔍 newBarcodes:', newBarcodes);
       
       // تحديث الباركود مباشرة باستخدام onFormChange
       onFormChange({
@@ -254,20 +274,20 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       setShowBarcodeSuccess(true);
       setTimeout(() => setShowBarcodeSuccess(false), 2000);
       
-      console.log('🔍 Barcode added successfully');
+      //CONSOLE.log('🔍 Barcode added successfully');
     } else {
-      console.log('🔍 No barcode to add - empty or whitespace');
+      //CONSOLE.log('🔍 No barcode to add - empty or whitespace');
       alert(isRtl ? 'يرجى إدخال باركود!' : 'Please enter a barcode!');
     }
   };
 
   // دالة حذف باركود
   const removeBarcode = (index: number) => {
-    console.log('🔍 removeBarcode called with index:', index);
-    console.log('🔍 form.barcodes before removal:', form.barcodes);
+    //CONSOLE.log('🔍 removeBarcode called with index:', index);
+    //CONSOLE.log('🔍 form.barcodes before removal:', form.barcodes);
     const currentBarcodes = Array.isArray(form.barcodes) ? form.barcodes : [];
     const updatedBarcodes = currentBarcodes.filter((_: string, i: number) => i !== index);
-    console.log('🔍 updatedBarcodes:', updatedBarcodes);
+    //CONSOLE.log('🔍 updatedBarcodes:', updatedBarcodes);
     
     // تحديث الباركود مباشرة باستخدام onFormChange
     onFormChange({
@@ -277,7 +297,46 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       }
     } as any);
     
-    console.log('🔍 Barcode removed successfully');
+    //CONSOLE.log('🔍 Barcode removed successfully');
+  };
+
+  // دالة معالجة رفع الصورة الأساسية
+  const handleMainImageUpload = async (file: File | null) => {
+    console.log('🔍 handleMainImageUpload called with file:', file);
+    
+    if (!file) {
+      console.log('🔍 No file provided, clearing main image');
+      handleInputChange('mainImage', null as any);
+      setShowMainImageSuccess(false);
+      return;
+    }
+
+    try {
+      setMainImageUploading(true);
+      setShowMainImageSuccess(false);
+      console.log('🔍 Starting main image upload...');
+      
+      // Use the uploadMainImage function if available
+      if (uploadMainImage) {
+        const uploadedUrl = await uploadMainImage(file);
+        console.log('🔍 Image uploaded successfully:', uploadedUrl);
+        handleInputChange('mainImage', uploadedUrl);
+        setShowMainImageSuccess(true);
+      } else {
+        // Fallback: just call onMainImageChange
+        console.log('🔍 uploadMainImage not available, using onMainImageChange');
+        onMainImageChange(file);
+        setShowMainImageSuccess(true);
+      }
+      
+    } catch (error) {
+      console.error('🔍 Error uploading main image:', error);
+      alert(isRtl ? 'فشل في رفع الصورة الأساسية' : 'Failed to upload main image');
+      handleInputChange('mainImage', null as any);
+      setShowMainImageSuccess(false);
+    } finally {
+      setMainImageUploading(false);
+    }
   };
 
   //-------------------------------------------- return -------------------------------------------
@@ -416,7 +475,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
               placeholder={isRtl ? 'أدخل الباركود واضغط Enter أو انقر على +' : 'Enter barcode and press Enter or click +'}
               value={localNewBarcode}
               onChange={(e) => {
-                console.log('🔍 Input onChange:', e.target.value);
+                //CONSOLE.log('🔍 Input onChange:', e.target.value);
                 setLocalNewBarcode(e.target.value);
               }}
               onKeyPress={(e) => {
@@ -554,7 +613,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
             specifications={formattedSpecificationsProp.length > 0 ? formattedSpecificationsProp : formattedSpecifications}
             selectedSpecifications={selectedSpecifications}
             onSelectionChange={(selected) => {
-              console.log('🔍 ProductsForm - onSelectionChange called with:', selected);
+              //CONSOLE.log('🔍 ProductsForm - onSelectionChange called with:', selected);
               setSelectedSpecifications(selected);
               handleInputChange('selectedSpecifications', JSON.stringify(selected));
             }}
@@ -572,8 +631,8 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
           </div>
         )}
         
-        {/* Debug info */}
-        <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs">
+        {/* Debug info - Commented out for production */}
+        {/* <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs">
           <p><strong>Debug Info:</strong></p>
           <p>Specifications prop length: {specifications.length}</p>
           <p>API Specifications length: {apiSpecifications.length}</p>
@@ -582,7 +641,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
           <p>Selected Specifications length: {selectedSpecifications.length}</p>
           <p>Using: {formattedSpecificationsProp.length > 0 ? 'formattedSpecificationsProp' : 'formattedSpecifications'}</p>
           <p>API Specs sample: {apiSpecifications.length > 0 ? JSON.stringify(apiSpecifications[0]).substring(0, 100) + '...' : 'None'}</p>
-        </div>
+        </div> */}
       </div>
 
       {/* ==================== Colors Section ==================== */}
@@ -612,21 +671,172 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
           {isRtl ? 'الوسائط' : 'Media'}
         </h3>
         
-        <div className="space-y-4">
-          <CustomFileInput
-            label={isRtl ? t('products.pictures') : 'Pictures'}
-            id="images"
-            value={form.images || []}
-            onChange={files => onImageChange(files)}
-            multiple={true}
-          />
-          <CustomInput
-            label={isRtl ? t('products.productVideo') : 'Product Video'}
-            name="productVideo"
-            value={form.productVideo || ''}
-            onChange={(e) => handleInputChange('productVideo', e.target.value)}
-            placeholder={isRtl ? 'رابط الفيديو' : 'Video URL'}
-          />
+        <div className="space-y-6">
+          {/* الصورة الأساسية */}
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <h4 className="text-md font-medium text-gray-800 mb-3 flex items-center">
+              <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+              {isRtl ? 'الصورة الأساسية' : 'Main Image'}
+            </h4>
+            <p className="text-sm text-gray-600 mb-3">
+              {isRtl ? 'الصورة الرئيسية التي ستظهر في قائمة المنتجات' : 'Main image that will appear in product listings'}
+            </p>
+            
+            <CustomFileInput
+              label={isRtl ? 'اختر الصورة الأساسية' : 'Select Main Image'}
+              id="mainImage"
+              value={form.mainImage && form.mainImage !== null ? [form.mainImage] : []}
+              onChange={files => {
+                console.log('🔍 CustomFileInput onChange called with:', files);
+                if (files && !Array.isArray(files)) {
+                  // Single file selected
+                  console.log('🔍 Single file selected:', files);
+                  handleMainImageUpload(files);
+                } else if (files && Array.isArray(files) && files.length > 0) {
+                  // Array of files, take the first one
+                  const file = files[0];
+                  console.log('🔍 First file from array:', file);
+                  handleMainImageUpload(file);
+                } else {
+                  // No files selected, clear main image
+                  console.log('🔍 No files selected, clearing main image');
+                  handleMainImageUpload(null);
+                }
+              }}
+              multiple={false}
+            />
+            
+            {/* مؤشر التحميل */}
+            {mainImageUploading && (
+              <div className="mt-3 flex items-center justify-center p-3 bg-blue-50 rounded-lg">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-2"></div>
+                <span className="text-blue-600 text-sm">
+                  {isRtl ? 'جاري رفع الصورة الأساسية...' : 'Uploading main image...'}
+                </span>
+              </div>
+            )}
+            
+            {/* رسالة النجاح */}
+            {showMainImageSuccess && (
+              <div className="mt-3 bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded-lg flex items-center text-sm">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {isRtl ? 'تم رفع الصورة الأساسية بنجاح!' : 'Main image uploaded successfully!'}
+              </div>
+            )}
+            
+            {/* معاينة الصورة الأساسية الموجودة */}
+            {form.mainImage && form.mainImage !== null && (
+              <div className="mt-3">
+                <h5 className="text-sm font-medium text-gray-700 mb-2">
+                  {isRtl ? 'الصورة الحالية:' : 'Current Image:'}
+                </h5>
+                <div className="relative inline-block">
+                  <img 
+                    src={form.mainImage} 
+                    alt={isRtl ? 'الصورة الأساسية' : 'Main Image'}
+                    className="w-24 h-24 object-cover rounded-lg border border-gray-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleInputChange('mainImage', null as any);
+                      setShowMainImageSuccess(false); // إزالة رسالة النجاح عند الحذف
+                    }}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                    title={isRtl ? 'حذف الصورة' : 'Remove Image'}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+            
+
+          </div>
+
+          {/* الصور الإضافية */}
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <h4 className="text-md font-medium text-gray-800 mb-3 flex items-center">
+              <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {isRtl ? 'الصور الإضافية' : 'Additional Images'}
+            </h4>
+            <p className="text-sm text-gray-600 mb-3">
+              {isRtl ? 'صور إضافية للمنتج (اختياري)' : 'Additional product images (optional)'}
+            </p>
+            
+            <CustomFileInput
+              label={isRtl ? 'اختر الصور الإضافية' : 'Select Additional Images'}
+              id="images"
+              value={form.images || []}
+              onChange={files => onImageChange(files)}
+              multiple={true}
+            />
+            
+            {/* معاينة الصور الإضافية الموجودة */}
+            {Array.isArray(form.images) && form.images.length > 0 && form.images.some((img: any) => img && img !== null) && (
+              <div className="mt-3">
+                <h5 className="text-sm font-medium text-gray-700 mb-2">
+                  {isRtl ? 'الصور الحالية:' : 'Current Images:'}
+                </h5>
+                <div className="flex flex-wrap gap-2">
+                  {form.images.filter((img: any) => img && img !== null).map((image: string, index: number) => (
+                    <div key={index} className="relative">
+                      <img 
+                        src={image} 
+                        alt={`${isRtl ? 'صورة' : 'Image'} ${index + 1}`}
+                        className="w-20 h-20 object-cover rounded-lg border border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const validImages = form.images.filter((img: any) => img && img !== null);
+                          const newImages = validImages.filter((_: string, i: number) => i !== index);
+                          handleInputChange('images', newImages);
+                        }}
+                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-xs"
+                        title={isRtl ? 'حذف الصورة' : 'Remove Image'}
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+
+          </div>
+
+          {/* رابط الفيديو */}
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <h4 className="text-md font-medium text-gray-800 mb-3 flex items-center">
+              <svg className="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              {isRtl ? 'فيديو المنتج' : 'Product Video'}
+            </h4>
+            <p className="text-sm text-gray-600 mb-3">
+              {isRtl ? 'رابط فيديو تعريفي للمنتج (اختياري)' : 'Product video URL (optional)'}
+            </p>
+            
+            <CustomInput
+              label={isRtl ? 'رابط الفيديو' : 'Video URL'}
+              name="productVideo"
+              value={form.productVideo || ''}
+              onChange={(e) => handleInputChange('productVideo', e.target.value)}
+              placeholder={isRtl ? 'https://example.com/video.mp4' : 'https://example.com/video.mp4'}
+            />
+          </div>
         </div>
       </div>
     </div>

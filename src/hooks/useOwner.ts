@@ -65,7 +65,7 @@ export const useOwner = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم ربط المستخدم بالمتجر بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم ربط المستخدم بالمتجر بنجاح:', response.data.data);
         return response.data.data || null;
       } else {
         throw new Error(response.data.message || 'فشل في ربط المستخدم بالمتجر');
@@ -73,7 +73,7 @@ export const useOwner = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء ربط المستخدم بالمتجر';
       setError(errorMessage);
-      console.error('❌ خطأ في ربط المستخدم بالمتجر:', errorMessage);
+      //CONSOLE.error('❌ خطأ في ربط المستخدم بالمتجر:', errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -97,7 +97,7 @@ export const useOwner = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم جلب owners بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم جلب owners بنجاح:', response.data.data);
         return response.data.data || [];
       } else {
         throw new Error(response.data.message || 'فشل في جلب owners');
@@ -105,7 +105,7 @@ export const useOwner = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء جلب owners';
       setError(errorMessage);
-      console.error('❌ خطأ في جلب owners:', errorMessage);
+      //CONSOLE.error('❌ خطأ في جلب owners:', errorMessage);
       return [];
     } finally {
       setLoading(false);
@@ -129,7 +129,7 @@ export const useOwner = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم جلب owners المتجر بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم جلب owners المتجر بنجاح:', response.data.data);
         return response.data.data || [];
       } else {
         throw new Error(response.data.message || 'فشل في جلب owners المتجر');
@@ -137,7 +137,7 @@ export const useOwner = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء جلب owners المتجر';
       setError(errorMessage);
-      console.error('❌ خطأ في جلب owners المتجر:', errorMessage);
+      //CONSOLE.error('❌ خطأ في جلب owners المتجر:', errorMessage);
       return [];
     } finally {
       setLoading(false);
@@ -161,7 +161,7 @@ export const useOwner = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم جلب متاجر المستخدم بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم جلب متاجر المستخدم بنجاح:', response.data.data);
         return response.data.data || [];
       } else {
         throw new Error(response.data.message || 'فشل في جلب متاجر المستخدم');
@@ -169,7 +169,7 @@ export const useOwner = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء جلب متاجر المستخدم';
       setError(errorMessage);
-      console.error('❌ خطأ في جلب متاجر المستخدم:', errorMessage);
+      //CONSOLE.error('❌ خطأ في جلب متاجر المستخدم:', errorMessage);
       return [];
     } finally {
       setLoading(false);
@@ -195,7 +195,7 @@ export const useOwner = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم تحديث owner بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم تحديث owner بنجاح:', response.data.data);
         return response.data.data || null;
       } else {
         throw new Error(response.data.message || 'فشل في تحديث owner');
@@ -203,7 +203,7 @@ export const useOwner = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء تحديث owner';
       setError(errorMessage);
-      console.error('❌ خطأ في تحديث owner:', errorMessage);
+      //CONSOLE.error('❌ خطأ في تحديث owner:', errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -227,7 +227,7 @@ export const useOwner = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم حذف owner بنجاح');
+        //CONSOLE.log('✅ تم حذف owner بنجاح');
         return true;
       } else {
         throw new Error(response.data.message || 'فشل في حذف owner');
@@ -235,7 +235,7 @@ export const useOwner = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء حذف owner';
       setError(errorMessage);
-      console.error('❌ خطأ في حذف owner:', errorMessage);
+      //CONSOLE.error('❌ خطأ في حذف owner:', errorMessage);
       return false;
     } finally {
       setLoading(false);

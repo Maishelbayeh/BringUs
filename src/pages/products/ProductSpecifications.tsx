@@ -33,7 +33,7 @@ const ProductSpecifications: React.FC = () => {
     try {
       await deleteSpecification(item._id || item.id);
     } catch (error) {
-      console.error('Error deleting specification:', error);
+      //CONSOLE.error('Error deleting specification:', error);
     }
   };
 
@@ -70,7 +70,7 @@ const ProductSpecifications: React.FC = () => {
       setEditingSpec(null);
       setValidationErrors({});
     } catch (error) {
-      console.error('Error saving specification:', error);
+      //CONSOLE.error('Error saving specification:', error);
     }
   };
 

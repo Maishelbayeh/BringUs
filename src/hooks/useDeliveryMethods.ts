@@ -364,7 +364,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
           setDeliveryMethods(prev => [...prev, data.data as DelieveryMethod]);
         }
         const successMessage = t('deliveryDetails.success.createSuccess');
-        console.log('Create success, showing toast:', successMessage);
+        //CONSOLE.log('Create success, showing toast:', successMessage);
         showSuccessToast(successMessage);
         return data.data;
       } else {
@@ -430,7 +430,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
           )
         );
         const successMessage = t('deliveryDetails.success.updateSuccess');
-        console.log('Update success, showing toast:', successMessage);
+        //CONSOLE.log('Update success, showing toast:', successMessage);
         showSuccessToast(successMessage);
         return data.data;
       } else {
@@ -489,7 +489,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
         // Remove from the list
         setDeliveryMethods(prev => prev.filter(method => method._id !== id));
         const successMessage = t('deliveryDetails.success.deleteSuccess');
-        console.log('Delete success, showing toast:', successMessage);
+        //CONSOLE.log('Delete success, showing toast:', successMessage);
         showSuccessToast(successMessage);
         return true;
       } else {
@@ -555,7 +555,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
         const successMessage = data.data?.isActive 
           ? t('deliveryDetails.success.activateSuccess')
           : t('deliveryDetails.success.deactivateSuccess');
-        console.log('Toggle active success, showing toast:', successMessage);
+        //CONSOLE.log('Toggle active success, showing toast:', successMessage);
         showSuccessToast(successMessage);
         return data.data;
       } else {
@@ -620,7 +620,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
           )
         );
         const successMessage = t('deliveryDetails.success.setDefaultSuccess');
-        console.log('Setting default success, showing toast:', successMessage);
+        //CONSOLE.log('Setting default success, showing toast:', successMessage);
         showSuccessToast(successMessage);
         return data.data;
       } else {

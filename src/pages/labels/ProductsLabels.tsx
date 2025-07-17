@@ -44,7 +44,7 @@ import useProductLabel from '../../hooks/useProductLabel';
         await deleteProductLabel(productLabelId);
         setSelectedLabel(null);
       } catch (error) {
-        console.error('Error deleting product label:', error);
+        //CONSOLE.error('Error deleting product label:', error);
       }
     }
     setShowDeleteModal(false);
@@ -70,7 +70,7 @@ import useProductLabel from '../../hooks/useProductLabel';
 
   const handleDrawerSave = async (form: any) => {
     try {
-     console.log('form', form);
+     //CONSOLE.log('form', form);
       const errors = validateProductLabel(form, isRTL);
       if (Object.keys(errors).length > 0) {
         setValidationErrors(errors);
@@ -84,7 +84,7 @@ import useProductLabel from '../../hooks/useProductLabel';
       setEditingSpec(null);
       setValidationErrors({});
     } catch (error) {
-      console.error('Error saving product label:', error);
+      //CONSOLE.error('Error saving product label:', error);
     }
   };
 

@@ -74,12 +74,12 @@ const Testimonial: React.FC = () => {
   };
   //------------------------------------------- handleDelete -------------------------------------------
   const handleDelete = (id: number) => {
-   console.log(id);
+   //CONSOLE.log(id);
     setModalOpen(false);
   };
   //------------------------------------------- handleSave -------------------------------------------
   const handleSave = (item: any) => {
-  console.log(item);
+  //CONSOLE.log(item);
     setModalOpen(false);
   };
   //------------------------------------------- filteredTestimonials -------------------------------------------

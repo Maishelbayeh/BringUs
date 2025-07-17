@@ -91,17 +91,17 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
 
   // دالة الحفظ المعدلة
   const handleSave = async () => {
-    console.log('handleSave called with form:', form);
+    //CONSOLE.log('handleSave called with form:', form);
     
     // تسطيح التصنيفات للـ validation
     const flattenedCategories = flattenCategoriesForValidation(allCategories || []);
-    console.log('Flattened categories for validation:', flattenedCategories);
+    //CONSOLE.log('Flattened categories for validation:', flattenedCategories);
     
     // تنفيذ الـ validation أولاً
     const validation = validateCategoryForm(form, isRTL, flattenedCategories);
     
     if (!validation.isValid) {
-      console.log('Validation errors:', validation.errors);
+      //CONSOLE.log('Validation errors:', validation.errors);
       // تعيين رسائل الخطأ في الحالة
       setValidationErrors(validation.errors);
       
@@ -114,7 +114,7 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
     // مسح رسائل الخطأ إذا كانت البيانات صحيحة
     setValidationErrors({});
     
-    console.log('Validation passed, proceeding with form submission');
+    //CONSOLE.log('Validation passed, proceeding with form submission');
     
     // تحقق من الحقول المطلوبة
     if (!form.nameAr || !form.nameEn) {

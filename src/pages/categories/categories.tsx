@@ -44,7 +44,7 @@ const CategoryCards: React.FC<{
             {/* صورة الفئة */}
             {(() => {
               const imageUrl = cat.image || '';
-              console.log('CATEGORY IMAGE URL:', imageUrl);
+              //CONSOLE.log('CATEGORY IMAGE URL:', imageUrl);
               return imageUrl ? (
                 <img src={imageUrl} alt={cat.nameAr} className="w-14 h-14 rounded-xl object-cover border-2 border-primary/30 shadow" />
               ) : (
@@ -156,9 +156,9 @@ const CategoriesPage: React.FC = () => {
     setShowForm(true);
   };
   const handleEdit = (cat: Category) => {
-    console.log('handleEdit - Original category:', cat);
-    console.log('handleEdit - cat.image:', cat.image);
-    console.log('handleEdit - cat.image type:', typeof cat.image);
+    //CONSOLE.log('handleEdit - Original category:', cat);
+    //CONSOLE.log('handleEdit - cat.image:', cat.image);
+    //CONSOLE.log('handleEdit - cat.image type:', typeof cat.image);
     
     const formData = {
       ...cat,
@@ -174,7 +174,7 @@ const CategoriesPage: React.FC = () => {
       icon: cat.icon || '',
     };
     
-    console.log('handleEdit - Final form data:', formData);
+    //CONSOLE.log('handleEdit - Final form data:', formData);
     setForm(formData);
     setEditId(cat.id || (cat as any)._id);
     setShowForm(true);
@@ -195,7 +195,7 @@ const CategoriesPage: React.FC = () => {
       setForm({ nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '', icon: '' });
       setEditId(null);
     } catch (error) {
-      console.error('Error in handleSave:', error);
+      //CONSOLE.error('Error in handleSave:', error);
       // الخطأ سيتم عرضه من خلال التوست في saveCategory
     }
   };

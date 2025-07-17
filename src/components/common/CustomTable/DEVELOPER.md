@@ -19,8 +19,8 @@ const MyComponent = () => {
     <CustomTable
       columns={columns}
       data={data}
-      onEdit={(item) => console.log('Edit:', item)}
-      onDelete={(item) => console.log('Delete:', item)}
+      onEdit={(item) => //CONSOLE.log('Edit:', item)}
+      onDelete={(item) => //CONSOLE.log('Delete:', item)}
     />
   );
 };

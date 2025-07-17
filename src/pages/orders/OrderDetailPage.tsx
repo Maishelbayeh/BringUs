@@ -51,7 +51,7 @@ const OrderDetailPage: React.FC = () => {
   const handleDeleteConfirm = () => {
     if (productToDelete) {
       // في التطبيق الحقيقي، هنا سيتم إرسال طلب حذف للخادم
-      console.log('Deleting product from order:', productToDelete);
+      //CONSOLE.log('Deleting product from order:', productToDelete);
       setProductToDelete(null);
     }
     setShowDeleteModal(false);

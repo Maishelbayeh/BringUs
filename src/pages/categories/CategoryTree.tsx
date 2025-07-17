@@ -20,7 +20,7 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, isRTL, onAdd, o
   const { i18n } = useTranslation();
   const lang = i18n.language;
   const navigate = useNavigate();
-  console.log(categories);
+  //CONSOLE.log(categories);
   const storeId = typeof window !== 'undefined' ? (localStorage.getItem(STORE_ID_KEY) || DEFAULT_STORE_ID) : DEFAULT_STORE_ID;
   const toggleExpand = (id: number) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));

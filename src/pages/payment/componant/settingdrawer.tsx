@@ -23,7 +23,7 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
   useEffect(() => {
     if (open) {
       // Don't reset to true, let the form validate itself
-      console.log('Payment modal opened');
+      //CONSOLE.log('Payment modal opened');
     }
   }, [open]);
   
@@ -31,23 +31,23 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
   const isRTL = language === 'ARABIC';
   
   const handleSave = () => {
-    console.log('Payment drawer save clicked, form valid:', isFormValid);
-    console.log('Form ref exists:', !!formRef.current);
+    //CONSOLE.log('Payment drawer save clicked, form valid:', isFormValid);
+    //CONSOLE.log('Form ref exists:', !!formRef.current);
     
     if (formRef.current) {
-      console.log('Calling payment form handleSubmit');
+      //CONSOLE.log('Calling payment form handleSubmit');
       try {
         formRef.current.handleSubmit();
       } catch (error) {
-        console.error('Error submitting payment form:', error);
+        //CONSOLE.error('Error submitting payment form:', error);
       }
     } else {
-      console.log('Payment form ref is null');
+      //CONSOLE.log('Payment form ref is null');
     }
   };
 
   const handleValidationChange = (isValid: boolean) => {
-    console.log('Payment validation changed:', isValid);
+    //CONSOLE.log('Payment validation changed:', isValid);
     setIsFormValid(isValid);
   };
   

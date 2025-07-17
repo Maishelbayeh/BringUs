@@ -39,7 +39,7 @@ const TermsConditionsPage = () => {
         setHtml(activeTerms.htmlContent);
       }
     } catch (error) {
-      console.error('Failed to load terms:', error);
+      //CONSOLE.error('Failed to load terms:', error);
     }
   };
 
@@ -66,7 +66,7 @@ const TermsConditionsPage = () => {
       // Reload terms after save (بدون toast)
       await getTermsByStore(false);
     } catch (error) {
-      console.error('Save failed:', error);
+      //CONSOLE.error('Save failed:', error);
       // Error message will be shown by the hook via toast
     } finally {
       setSaving(false);

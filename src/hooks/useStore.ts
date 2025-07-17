@@ -134,7 +134,7 @@ export const useStore = () => {
   const handleApiError = (err: any, defaultMessage: string): string => {
     const errorMessage = err.response?.data?.message || err.message || defaultMessage;
     setError(errorMessage);
-    console.error(`❌ ${defaultMessage}:`, errorMessage);
+    //CONSOLE.error(`❌ ${defaultMessage}:`, errorMessage);
     return errorMessage;
   };
 
@@ -163,7 +163,7 @@ export const useStore = () => {
     setError(null);
 
     try {
-      console.log('🆕 إنشاء متجر جديد:', storeData);
+      //CONSOLE.log('🆕 إنشاء متجر جديد:', storeData);
       
       const response = await axios.post<ApiResponse<StoreResponse>>(
         `${BASE_URL}stores`,
@@ -172,7 +172,7 @@ export const useStore = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم إنشاء المتجر بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم إنشاء المتجر بنجاح:', response.data.data);
         return response.data.data || null;
       } else {
         throw new Error(response.data.message || 'فشل في إنشاء المتجر');
@@ -194,7 +194,7 @@ export const useStore = () => {
     setError(null);
 
     try {
-      console.log('📋 جلب جميع المتاجر...');
+      //CONSOLE.log('📋 جلب جميع المتاجر...');
       
       const response = await axios.get<ApiResponse<StoreResponse[]>>(
         `${BASE_URL}stores`,
@@ -202,7 +202,7 @@ export const useStore = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم جلب المتاجر بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم جلب المتاجر بنجاح:', response.data.data);
         return response.data.data || [];
       } else {
         throw new Error(response.data.message || 'فشل في جلب المتاجر');
@@ -221,7 +221,7 @@ export const useStore = () => {
     setError(null);
 
     try {
-      console.log('🔍 جلب متجر واحد:', storeId);
+      //CONSOLE.log('🔍 جلب متجر واحد:', storeId);
       
       const response = await axios.get<ApiResponse<StoreResponse>>(
         `${BASE_URL}stores/${storeId}`,
@@ -230,7 +230,7 @@ export const useStore = () => {
 
       if (response.data.success) {
         const storeData = response.data.data;
-        console.log('✅ تم جلب المتجر بنجاح:', storeData);
+        //CONSOLE.log('✅ تم جلب المتجر بنجاح:', storeData);
         
         // تحديث البيانات في localStorage
         if (storeData) {
@@ -255,8 +255,8 @@ export const useStore = () => {
     setError(null);
 
     try {
-      console.log('🔄 تحديث متجر:', storeId);
-      console.log('📤 البيانات المراد تحديثها:', updateData);
+      //CONSOLE.log('🔄 تحديث متجر:', storeId);
+      //CONSOLE.log('📤 البيانات المراد تحديثها:', updateData);
       
       const response = await axios.put<ApiResponse<StoreResponse>>(
         `${BASE_URL}stores/${storeId}`,
@@ -266,7 +266,7 @@ export const useStore = () => {
 
       if (response.data.success) {
         const storeData = response.data.data;
-        console.log('✅ تم تحديث المتجر بنجاح:', storeData);
+        //CONSOLE.log('✅ تم تحديث المتجر بنجاح:', storeData);
         
         // تحديث البيانات في localStorage
         if (storeData) {
@@ -291,7 +291,7 @@ export const useStore = () => {
     setError(null);
 
     try {
-      console.log('🗑️ حذف متجر:', storeId);
+      //CONSOLE.log('🗑️ حذف متجر:', storeId);
       
       const response = await axios.delete<ApiResponse<null>>(
         `${BASE_URL}stores/${storeId}`,
@@ -299,7 +299,7 @@ export const useStore = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم حذف المتجر بنجاح');
+        //CONSOLE.log('✅ تم حذف المتجر بنجاح');
         return true;
       } else {
         throw new Error(response.data.message || 'فشل في حذف المتجر');
@@ -325,8 +325,8 @@ export const useStore = () => {
     setError(null);
 
     try {
-      console.log('📤 رفع لوجو المتجر:', file.name);
-      console.log('🏪 معرف المتجر:', storeId || 'غير محدد');
+      //CONSOLE.log('📤 رفع لوجو المتجر:', file.name);
+      //CONSOLE.log('🏪 معرف المتجر:', storeId || 'غير محدد');
       
       const token = localStorage.getItem('token');
       const formData = new FormData();
@@ -366,7 +366,7 @@ export const useStore = () => {
           url: uploadedImage.url
         };
         
-        console.log('✅ تم رفع لوجو المتجر بنجاح:', result);
+        //CONSOLE.log('✅ تم رفع لوجو المتجر بنجاح:', result);
         return result;
       } else {
         throw new Error(response.data.message || 'فشل في رفع لوجو المتجر');

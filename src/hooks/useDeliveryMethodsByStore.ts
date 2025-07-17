@@ -168,7 +168,7 @@ const useDeliveryMethodsByStore = (
           setDeliveryMethods(prev => [...prev, data.data as DelieveryMethod]);
         }
         const successMessage = t('deliveryDetails.success.createSuccess');
-        console.log('Create success, showing toast:', successMessage);
+        //CONSOLE.log('Create success, showing toast:', successMessage);
         showSuccessToast(successMessage);
         return data.data;
       } else {

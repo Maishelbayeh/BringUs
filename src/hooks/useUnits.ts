@@ -14,7 +14,7 @@ const useUnits = () => {
   // جلب جميع الوحدات
   const fetchUnits = useCallback(async (forceRefresh: boolean = false) => {
     if (hasLoaded && !forceRefresh && units.length > 0) {
-      // console.log('Units data already loaded, skipping API call');
+      // //CONSOLE.log('Units data already loaded, skipping API call');
       return units;
     }
 
@@ -22,13 +22,13 @@ const useUnits = () => {
       setLoading(true);
       const url = `${BASE_URL}meta/units?storeId=${STORE_ID}`;
       const res = await axios.get(url);
-      // console.log('FETCHED UNITS FROM API:', res.data);
+      // //CONSOLE.log('FETCHED UNITS FROM API:', res.data);
       const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
       setUnits(data);
       setHasLoaded(true);
       return data;
     } catch (err: any) {
-      console.error('Error fetching units:', err);
+      //CONSOLE.error('Error fetching units:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب الوحدات';
       showError(errorMessage);
       throw err;
@@ -39,7 +39,7 @@ const useUnits = () => {
 
   // إضافة أو تعديل وحدة
   const saveUnit = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
-    console.log('Saving unit with form:', form, 'editId:', editId, 'isRTL:', isRTL);
+    //CONSOLE.log('Saving unit with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
     const payload: any = {
       nameAr: form.nameAr?.trim() || '',
@@ -49,21 +49,21 @@ const useUnits = () => {
       isActive: form.isActive !== undefined ? form.isActive : true,
     };
 
-    console.log('Final payload to send:', payload);
+    //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
         const response = await axios.put(`${BASE_URL}meta/units/${editId}`, payload);
-        console.log('Unit updated successfully:', response.data);
+        //CONSOLE.log('Unit updated successfully:', response.data);
         showSuccess('تم تعديل الوحدة بنجاح', 'نجح التحديث');
       } else {
         const response = await axios.post(`${BASE_URL}meta/units`, payload);
-        console.log('Unit created successfully:', response.data);
+        //CONSOLE.log('Unit created successfully:', response.data);
         showSuccess('تم إضافة الوحدة بنجاح', 'نجح الإضافة');
       }
       await fetchUnits(true);
       return true;
     } catch (err: any) {
-      console.error('Error saving unit:', err);
+      //CONSOLE.error('Error saving unit:', err);
       
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
@@ -81,12 +81,12 @@ const useUnits = () => {
   const deleteUnit = async (unitId: string | number) => {
     try {
       const response = await axios.delete(`${BASE_URL}meta/units/${unitId}`);
-      console.log('Unit deleted successfully:', response.data);
+      //CONSOLE.log('Unit deleted successfully:', response.data);
       showSuccess('تم حذف الوحدة بنجاح', 'نجح الحذف');
       await fetchUnits(true);
       return true;
     } catch (err: any) {
-      console.error('Error deleting unit:', err);
+      //CONSOLE.error('Error deleting unit:', err);
       
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');

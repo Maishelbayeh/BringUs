@@ -400,7 +400,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         }
       }
     } catch (err) {
-      console.error('❌ خطأ في حفظ بيانات المتجر:', err);
+      //CONSOLE.error('❌ خطأ في حفظ بيانات المتجر:', err);
     }
   };
 
@@ -414,7 +414,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         setIsEditMode(true);
         
         try {
-          console.log('🔄 جلب بيانات المتجر مرة واحدة فقط...');
+          //CONSOLE.log('🔄 جلب بيانات المتجر مرة واحدة فقط...');
           const store = await getStore(storeId);
           if (store) {
             setStoreData(store);

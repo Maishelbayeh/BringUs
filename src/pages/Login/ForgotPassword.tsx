@@ -61,7 +61,7 @@ const ForgotPassword: React.FC = () => {
       // Show success message
       setIsSuccess(true);
     } catch (error) {
-      console.error('Forgot password error:', error);
+      //CONSOLE.error('Forgot password error:', error);
     } finally {
       setIsLoading(false);
     }

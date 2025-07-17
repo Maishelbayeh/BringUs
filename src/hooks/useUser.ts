@@ -80,7 +80,7 @@ export const useUser = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم إنشاء المستخدم بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم إنشاء المستخدم بنجاح:', response.data.data);
         return response.data.data || null;
       } else {
         throw new Error(response.data.message || 'فشل في إنشاء المستخدم');
@@ -88,7 +88,7 @@ export const useUser = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء إنشاء المستخدم';
       setError(errorMessage);
-      console.error('❌ خطأ في إنشاء المستخدم:', errorMessage);
+      //CONSOLE.error('❌ خطأ في إنشاء المستخدم:', errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -112,7 +112,7 @@ export const useUser = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم تسجيل الدخول بنجاح');
+        //CONSOLE.log('✅ تم تسجيل الدخول بنجاح');
         
         // حفظ التوكن في localStorage
         if (response.data.data?.token) {
@@ -127,7 +127,7 @@ export const useUser = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء تسجيل الدخول';
       setError(errorMessage);
-      console.error('❌ خطأ في تسجيل الدخول:', errorMessage);
+      //CONSOLE.error('❌ خطأ في تسجيل الدخول:', errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -138,7 +138,7 @@ export const useUser = () => {
   const logoutUser = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    console.log('✅ تم تسجيل الخروج بنجاح');
+    //CONSOLE.log('✅ تم تسجيل الخروج بنجاح');
   };
 
   // الحصول على معلومات المستخدم الحالي
@@ -150,7 +150,7 @@ export const useUser = () => {
       }
       return null;
     } catch (err) {
-      console.error('❌ خطأ في قراءة بيانات المستخدم:', err);
+      //CONSOLE.error('❌ خطأ في قراءة بيانات المستخدم:', err);
       return null;
     }
   };
@@ -180,7 +180,7 @@ export const useUser = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم تحديث المستخدم بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم تحديث المستخدم بنجاح:', response.data.data);
         
         // تحديث البيانات المحلية
         if (response.data.data) {
@@ -194,7 +194,7 @@ export const useUser = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء تحديث المستخدم';
       setError(errorMessage);
-      console.error('❌ خطأ في تحديث المستخدم:', errorMessage);
+      //CONSOLE.error('❌ خطأ في تحديث المستخدم:', errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -218,7 +218,7 @@ export const useUser = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم حذف المستخدم بنجاح');
+        //CONSOLE.log('✅ تم حذف المستخدم بنجاح');
         return true;
       } else {
         throw new Error(response.data.message || 'فشل في حذف المستخدم');
@@ -226,7 +226,7 @@ export const useUser = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء حذف المستخدم';
       setError(errorMessage);
-      console.error('❌ خطأ في حذف المستخدم:', errorMessage);
+      //CONSOLE.error('❌ خطأ في حذف المستخدم:', errorMessage);
       return false;
     } finally {
       setLoading(false);
@@ -250,7 +250,7 @@ export const useUser = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم إرسال رابط إعادة تعيين كلمة المرور');
+        //CONSOLE.log('✅ تم إرسال رابط إعادة تعيين كلمة المرور');
         return true;
       } else {
         throw new Error(response.data.message || 'فشل في إرسال رابط إعادة التعيين');
@@ -258,7 +258,7 @@ export const useUser = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء إرسال رابط إعادة التعيين';
       setError(errorMessage);
-      console.error('❌ خطأ في إرسال رابط إعادة التعيين:', errorMessage);
+      //CONSOLE.error('❌ خطأ في إرسال رابط إعادة التعيين:', errorMessage);
       return false;
     } finally {
       setLoading(false);
@@ -282,7 +282,7 @@ export const useUser = () => {
       );
 
       if (response.data.success) {
-        console.log('✅ تم جلب المستخدمين بنجاح:', response.data.data);
+        //CONSOLE.log('✅ تم جلب المستخدمين بنجاح:', response.data.data);
         return response.data.data || [];
       } else {
         throw new Error(response.data.message || 'فشل في جلب المستخدمين');
@@ -290,7 +290,7 @@ export const useUser = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء جلب المستخدمين';
       setError(errorMessage);
-      console.error('❌ خطأ في جلب المستخدمين:', errorMessage);
+      //CONSOLE.error('❌ خطأ في جلب المستخدمين:', errorMessage);
       return [];
     } finally {
       setLoading(false);
@@ -299,21 +299,21 @@ export const useUser = () => {
 
   // التحقق من وجود البريد الإلكتروني
   const checkEmailExists = async (email: string): Promise<boolean> => {
-    console.log('🔍 جاري التحقق من البريد الإلكتروني:', email);
+    //CONSOLE.log('🔍 جاري التحقق من البريد الإلكتروني:', email);
     
     try {
       const users = await getAllUsers();
       const emailExists = users.some(user => user.email.toLowerCase() === email.toLowerCase());
       
       if (emailExists) {
-        console.log('❌ البريد الإلكتروني مستخدم بالفعل:', email);
+        //CONSOLE.log('❌ البريد الإلكتروني مستخدم بالفعل:', email);
       } else {
-        console.log('✅ البريد الإلكتروني متاح:', email);
+        //CONSOLE.log('✅ البريد الإلكتروني متاح:', email);
       }
       
       return emailExists;
     } catch (error) {
-      console.error('❌ خطأ في التحقق من البريد الإلكتروني:', error);
+      //CONSOLE.error('❌ خطأ في التحقق من البريد الإلكتروني:', error);
       return false; // في حالة الخطأ، نعتبر أن البريد متاح
     }
   };
