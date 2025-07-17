@@ -308,7 +308,7 @@ const ProductSpecifications: React.FC = () => {
       <PermissionModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDeleteConfirm}
+        onConfirm={() => handleDelete(specToDelete)}
         title={t('products.deleteSpecConfirmTitle') || 'Confirm Delete Specification'}
         message={t('products.deleteSpecConfirmMessage') || 'Are you sure you want to delete this specification?'}
         itemName={specToDelete ? (isRTL ? specToDelete.titleAr : specToDelete.titleEn) : ''}

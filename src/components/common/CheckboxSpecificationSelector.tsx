@@ -31,26 +31,26 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
 
   // Initialize selected values from props
   useEffect(() => {
-    console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);
-    console.log('🔍 CheckboxSpecificationSelector - specifications:', specifications);
+    // console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);
+    // console.log('🔍 CheckboxSpecificationSelector - specifications:', specifications);
     
     if (Array.isArray(selectedSpecifications) && selectedSpecifications.length > 0) {
       const selectedIds = new Set(selectedSpecifications.map(spec => spec._id));
-      console.log('🔍 CheckboxSpecificationSelector - Setting selectedIds:', selectedIds);
-      console.log('🔍 CheckboxSpecificationSelector - Selected specs details:', selectedSpecifications.map(spec => ({
-        id: spec._id,
-        title: spec.title,
-        value: spec.value
-      })));
+      // console.log('🔍 CheckboxSpecificationSelector - Setting selectedIds:', selectedIds);
+      // console.log('🔍 CheckboxSpecificationSelector - Selected specs details:', selectedSpecifications.map(spec => ({
+      //   id: spec._id,
+      //   title: spec.title,
+      //   value: spec.value
+      // })));
       
       // تحقق من تطابق الـ IDs
       const availableIds = specifications.flatMap(s => s.values.map(v => v._id));
-      console.log('🔍 CheckboxSpecificationSelector - Available IDs:', availableIds);
-      console.log('🔍 CheckboxSpecificationSelector - Matching IDs:', selectedSpecifications.filter(spec => availableIds.includes(spec._id)));
+      // console.log('🔍 CheckboxSpecificationSelector - Available IDs:', availableIds);
+      // console.log('🔍 CheckboxSpecificationSelector - Matching IDs:', selectedSpecifications.filter(spec => availableIds.includes(spec._id)));
       
       setSelectedValues(selectedIds);
     } else {
-      console.log('🔍 CheckboxSpecificationSelector - No selectedSpecifications, clearing selectedValues');
+     // console.log('🔍 CheckboxSpecificationSelector - No selectedSpecifications, clearing selectedValues');
       setSelectedValues(new Set());
     }
   }, [selectedSpecifications]);

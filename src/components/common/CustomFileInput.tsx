@@ -83,11 +83,6 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
     setFileCount(updatedFiles.length);
     setFileNames(updatedFiles.map(file => file.name));
     onChange(multiple ? updatedFiles : updatedFiles[0]);
-    // استبدال الملفات القديمة بالجديدة (ليس إضافتها)
-    setSelectedFiles(newFiles);
-    setFileCount(newFiles.length);
-    setFileNames(newFiles.map(file => file.name));
-    onChange(multiple ? newFiles : newFiles[0]);
 
     // استبدال الصور الموجودة بالصور الجديدة
     const newPreviews: string[] = [];
@@ -116,7 +111,6 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
     //CONSOLE.log('🔍 CustomFileInput removeFile - selectedFiles before:', selectedFiles);
     
     const newFiles = selectedFiles.filter((_, i) => i !== index);
-  const removeImage = (index: number) => {
     const newPreviews = previews.filter((_, i) => i !== index);
     const newFileNames = fileNames.filter((_, i) => i !== index);
     
@@ -172,7 +166,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    removeImage(index);
+                    removeFile(index);
                   }}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 >

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import VariantsPopup from './VariantsPopup';
 import VariantEditDrawer from './VariantEditDrawer';
 import useProductSpecifications from '../../hooks/useProductSpecifications';
-import { useToastContext } from '../../contexts/ToastContext';
 
 interface VariantManagerProps {
   isOpen: boolean;
@@ -32,9 +31,6 @@ const VariantManager: React.FC<VariantManagerProps> = ({
 
   // استخدام hook لجلب مواصفات المنتجات
   const { specifications, fetchSpecifications } = useProductSpecifications();
-  
-  // استخدام hook للـ Toast
-  const { showSuccess, showError } = useToastContext();
 
   // جلب المواصفات عند فتح المكون
   React.useEffect(() => {
@@ -49,7 +45,7 @@ const VariantManager: React.FC<VariantManagerProps> = ({
   }, [variants]);
 
   const handleEditVariant = (variant: any) => {
-    console.log('🔍 handleEditVariant - Editing variant:', variant);
+ //   console.log('🔍 handleEditVariant - Editing variant:', variant);
     setEditingVariant(variant);
     setShowVariantEditDrawer(true);
   };
@@ -58,13 +54,13 @@ const VariantManager: React.FC<VariantManagerProps> = ({
     e.preventDefault();
     
     if (!editingVariant || !parentProduct) {
-      console.error('❌ No variant or parent product selected for editing');
+   //   console.error('❌ No variant or parent product selected for editing');
       return;
     }
 
     try {
       setIsLoading(true);
-      console.log('🔍 handleVariantEditSubmit - Submitting variant edit:', editingVariant);
+   //   console.log('🔍 handleVariantEditSubmit - Submitting variant edit:', editingVariant);
       
       // Prepare variant data for update
       const variantData = {
@@ -121,12 +117,6 @@ const VariantManager: React.FC<VariantManagerProps> = ({
         images: editingVariant.images || []
       };
 
-      console.log('🔍 handleVariantEditSubmit - Final variantData:', variantData);
-      console.log('🔍 handleVariantEditSubmit - specifications type:', typeof variantData.specifications);
-      console.log('🔍 handleVariantEditSubmit - specifications value:', variantData.specifications);
-      console.log('🔍 handleVariantEditSubmit - specificationValues type:', typeof variantData.specificationValues);
-      console.log('🔍 handleVariantEditSubmit - specificationValues value:', variantData.specificationValues);
-
       // Call the updateVariant API
       await onUpdateVariant(parentProduct._id, editingVariant._id, variantData);
       
@@ -140,16 +130,18 @@ const VariantManager: React.FC<VariantManagerProps> = ({
       setEditingVariant(null);
       
       // Show success message
-      showSuccess(
-        isRTL ? 'تم تحديث المتغير بنجاح' : 'Variant updated successfully',
-        isRTL ? 'نجح التحديث' : 'Update Success'
-      );
+      if (isRTL) {
+        alert('تم تحديث المتغير بنجاح');
+      } else {
+        alert('Variant updated successfully');
+      }
     } catch (error) {
-      console.error('❌ handleVariantEditSubmit - Error:', error);
-      showError(
-        isRTL ? 'حدث خطأ أثناء تحديث المتغير' : 'Error updating variant',
-        isRTL ? 'خطأ في التحديث' : 'Update Error'
-      );
+      //console.error('❌ handleVariantEditSubmit - Error:', error);
+      if (isRTL) {
+        alert('حدث خطأ أثناء تحديث المتغير');
+      } else {
+        alert('Error updating variant');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -188,16 +180,18 @@ const VariantManager: React.FC<VariantManagerProps> = ({
       setLocalVariants(prev => prev.filter(v => v._id !== variant._id));
       
       // Show success message
-      showSuccess(
-        isRTL ? 'تم حذف المتغير بنجاح' : 'Variant deleted successfully',
-        isRTL ? 'نجح الحذف' : 'Delete Success'
-      );
+      if (isRTL) {
+        alert('تم حذف المتغير بنجاح');
+      } else {
+        alert('Variant deleted successfully');
+      }
     } catch (error) {
-      console.error('❌ handleDeleteVariant - Error:', error);
-      showError(
-        isRTL ? 'حدث خطأ أثناء حذف المتغير' : 'Error deleting variant',
-        isRTL ? 'خطأ في الحذف' : 'Delete Error'
-      );
+ //     console.error('❌ handleDeleteVariant - Error:', error);
+      if (isRTL) {
+        alert('حدث خطأ أثناء حذف المتغير');
+      } else {
+        alert('Error deleting variant');
+      }
     }
   };
 

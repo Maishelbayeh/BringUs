@@ -48,7 +48,11 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, valu
     onChange({ target: { name, value: newVariants } } as any);
   };
 
-  const getCircleDivisionStyle = (colors: string[]) => {
+  const getCircleDivisionStyle = (colors: string[] = []) => {
+    if (!Array.isArray(colors) || colors.length === 0) {
+      return { background: '#eee' };
+    }
+
     if (colors.length === 1) {
       return { background: colors[0] };
     }
@@ -83,7 +87,7 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, valu
             <div key={variant.id} className="relative group">
               <div
                 className="w-12 h-12 rounded-full border-4 border-white shadow-lg transition-transform duration-200 group-hover:scale-110"
-                style={getCircleDivisionStyle(variant.colors)}
+                style={getCircleDivisionStyle(Array.isArray(variant.colors) ? variant.colors : [])}
               />
               <button
                 type="button"

@@ -709,8 +709,19 @@ const ProductsPage: React.FC = () => {
 
   //-------------------------------------------- handleEditVariant -------------------------------------------
   const handleEditVariant = (variant: any) => {
-    console.log('🔍 handleEditVariant - Editing variant:', variant);
-    // This function is now handled by VariantManager
+    setEditProduct(variant);
+    setDrawerMode('variant');
+    setForm({
+      ...initialForm,
+      ...variant,
+      // Ensure colors is always an array of {id, colors}
+      colors: Array.isArray(variant.colors) ? variant.colors : [],
+      // Ensure images is always an array
+      images: Array.isArray(variant.images) ? variant.images : [],
+      mainImage: variant.mainImage || null,
+      // Add any other fields you want to ensure are present
+    });
+    setShowDrawer(true);
   };
 
   //-------------------------------------------- handleDeleteVariant -------------------------------------------
@@ -986,9 +997,10 @@ const ProductsPage: React.FC = () => {
       //CONSOLE.log('🔍 handleSubmit - drawerMode:', drawerMode);
       
       if (drawerMode === 'variant') {
-        // إنشاء متغير جديد
-        //CONSOLE.log('🔍 handleSubmit - Creating variant for parent product:', editProduct);
-        await saveProduct(productData, null, isRTL); // إنشاء منتج جديد كمتغير
+        if (!editProduct?._id) {
+          throw new Error('Variant ID is missing');
+        }
+        await updateVariant(editProduct.parentProductId || editProduct.parent || editProduct.productId || editProduct._id, editProduct._id, form);
       } else {
         // تعديل أو إنشاء منتج عادي
         await saveProduct(productData, editId, isRTL);

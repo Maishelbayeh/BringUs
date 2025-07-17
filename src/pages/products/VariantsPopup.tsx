@@ -182,6 +182,55 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                           )}
                         </div>
 
+                        {/* Colors */}
+                        {Array.isArray(variant.colors) && variant.colors.length > 0 && (
+                          <div>
+                            <div className="text-sm font-semibold text-gray-700 mb-2 mt-4">
+                              <svg className="w-4 h-4 inline-block mr-1 rtl:ml-1 rtl:mr-0 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                              </svg>
+                              {isRTL ? 'الألوان' : 'Colors'}
+                            </div>
+                            <div className={`flex flex-wrap gap-1 mb-2 ${isRTL ? 'justify-end' : 'justify-start'}`} style={{ minHeight: 28 }}>
+                              {variant.colors.map((colorArr: any, idx: number) => {
+                                // معالجة: إذا كان العنصر سترينج فيه فاصلة، حوله لمصفوفة ألوان
+                                let arr: string[] = [];
+                                if (Array.isArray(colorArr)) {
+                                  if (typeof colorArr[0] === 'string' && colorArr[0].includes(',')) {
+                                    arr = colorArr[0].split(',').map(s => s.trim());
+                                  } else {
+                                    arr = colorArr;
+                                  }
+                                } else if (typeof colorArr === 'string' && colorArr.includes(',')) {
+                                  arr = colorArr.split(',').map(s => s.trim());
+                                } else if (typeof colorArr === 'string') {
+                                  arr = [colorArr];
+                                }
+                                let style = {};
+                                if (arr.length > 1) {
+                                  const step = 100 / arr.length;
+                                  const segments = arr.map((color, i) => {
+                                    const start = step * i;
+                                    const end = step * (i + 1);
+                                    return `${color} ${start}% ${end}%`;
+                                  }).join(', ');
+                                  style = { background: `conic-gradient(${segments})` };
+                                } else {
+                                  style = { background: arr[0] };
+                                }
+                                return (
+                                  <span
+                                    key={arr.join('-') + idx}
+                                    className="inline-block w-6 h-6 rounded-full border border-gray-300 shadow-sm hover:scale-110 transition-transform duration-150 cursor-pointer"
+                                    style={style}
+                                    title={arr.join(', ')}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
                         {/* Additional Images */}
                         {variant.images && variant.images.length > 0 && (
                           <div>

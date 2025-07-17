@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { CheckboxSpecificationSelector } from '../../components/common';
+import CustomColorPicker from '../../components/common/CustomColorPicker';
+import CustomInput from '../../components/common/CustomInput';
+import CustomTextArea from '../../components/common/CustomTextArea';
+import CustomFileInput from '../../components/common/CustomFileInput';
+import CustomSwitch from '../../components/common/CustomSwitch';
+import MultiSelect from '../../components/common/MultiSelect';
 
 interface VariantEditDrawerProps {
   isOpen: boolean;
@@ -24,6 +30,7 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
 }) => {
   // state للمواصفات المختارة
   const [selectedSpecifications, setSelectedSpecifications] = useState<any[]>([]);
+  const [variantColors, setVariantColors] = useState<{ id: string; colors: string[] }[]>(variant?.colors || []);
 
   // تحويل مواصفات المنتجات إلى التنسيق المطلوب للمكون
   const formattedSpecifications = Array.isArray(specifications) ? specifications.map((spec: any) => ({
@@ -51,12 +58,18 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
     })
   })) : [];
 
-  // تحويل البيانات من النموذج إلى التنسيق المطلوب
+  // إزالة جميع console.log من body الرئيسي للـ component
+  // نقل الطباعة إلى useEffect واحد فقط للديباغ عند تغيير variant أو formattedSpecifications
   useEffect(() => {
-    console.log('🔍 VariantEditDrawer - variant:', variant);
-    console.log('🔍 VariantEditDrawer - variant.specificationValues:', variant?.specificationValues);
-    console.log('🔍 VariantEditDrawer - formattedSpecifications:', formattedSpecifications);
-    
+    // يمكنك إبقاء هذا الجزء للديباغ عند الحاجة فقط
+    // إذا لم تعد بحاجة للطباعة، احذف هذا useEffect بالكامل
+    // console.log('🔍 VariantEditDrawer - variant:', variant);
+    // console.log('🔍 VariantEditDrawer - variant.specificationValues:', variant?.specificationValues);
+    // console.log('🔍 VariantEditDrawer - formattedSpecifications:', formattedSpecifications);
+  }, [variant, formattedSpecifications]);
+
+  // في useEffect الخاص بتحليل المواصفات، أبقي فقط الطباعة المهمة
+  useEffect(() => {
     if (variant && variant.specificationValues) {
       try {
         let parsed;
@@ -65,11 +78,9 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
         } else {
           parsed = variant.specificationValues;
         }
-        
-        console.log('🔍 VariantEditDrawer - parsed specificationValues:', parsed);
-        
+        // يمكنك إبقاء هذا للديباغ عند الحاجة فقط
+        // console.log('🔍 VariantEditDrawer - parsed specificationValues:', parsed);
         if (Array.isArray(parsed)) {
-          // Ensure each specification has the required fields and create proper _id for CheckboxSpecificationSelector
           const validSpecs = parsed
             .filter((spec: any) => 
               spec && 
@@ -79,25 +90,16 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
               spec.title
             )
             .map((spec: any) => {
-              // استخدام valueId من البيانات المخزنة مباشرة كـ _id
               return {
-                _id: spec.valueId, // استخدام valueId مباشرة
+                _id: spec.valueId,
                 specificationId: spec.specificationId,
                 valueId: spec.valueId,
                 value: spec.value,
                 title: spec.title
               };
             });
-          console.log('🔍 VariantEditDrawer - valid specs:', validSpecs);
-          console.log('🔍 VariantEditDrawer - formattedSpecifications values:', formattedSpecifications.flatMap(s => s.values.map((v: any) => ({ _id: v._id, value: v.value }))));
-          
-          // تحقق من تطابق الـ IDs
-          const selectedIds = validSpecs.map(s => s._id);
-          const availableIds = formattedSpecifications.flatMap(s => s.values.map((v: any) => v._id));
-          console.log('🔍 VariantEditDrawer - Selected IDs:', selectedIds);
-          console.log('🔍 VariantEditDrawer - Available IDs:', availableIds);
-          console.log('🔍 VariantEditDrawer - Matching IDs:', selectedIds.filter(id => availableIds.includes(id)));
-          
+          // يمكنك إبقاء هذا للديباغ عند الحاجة فقط
+          // console.log('🔍 VariantEditDrawer - valid specs:', validSpecs);
           setSelectedSpecifications(validSpecs);
         } else {
           setSelectedSpecifications([]);
@@ -111,9 +113,29 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
     }
   }, [variant, formattedSpecifications]);
 
+  // Helper: always ensure colors are array of objects {id, colors}
+  function normalizeColors(input: any): { id: string; colors: string[] }[] {
+    if (!Array.isArray(input)) return [];
+    return input.map((item: any, idx: number) => {
+      if (item && typeof item === 'object' && Array.isArray(item.colors)) {
+        return item;
+      } else if (Array.isArray(item)) {
+        return { id: String(idx) + '-' + Date.now(), colors: item };
+      } else {
+        return { id: String(idx) + '-' + Date.now(), colors: [] };
+      }
+    });
+  }
+
+  // عند فتح drawer أو تغيير variant، حول الألوان للشكل المطلوب
+  useEffect(() => {
+    setVariantColors(normalizeColors(variant?.colors));
+  }, [variant]);
+
   // معالج تغيير المواصفات
   const handleSpecificationChange = (selected: any[]) => {
-    console.log('🔍 VariantEditDrawer - handleSpecificationChange called with:', selected);
+    // يمكنك إبقاء هذا للديباغ عند الحاجة فقط
+    // console.log('🔍 VariantEditDrawer - handleSpecificationChange called with:', selected);
     
     // Transform the selected specifications to match the expected format
     const transformedSpecs = selected.map((spec: any) => {
@@ -134,7 +156,8 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
       };
     });
     
-    console.log('🔍 VariantEditDrawer - transformed specs:', transformedSpecs);
+    // يمكنك إبقاء هذا للديباغ عند الحاجة فقط
+    // console.log('🔍 VariantEditDrawer - transformed specs:', transformedSpecs);
     setSelectedSpecifications(transformedSpecs);
     
     // تحديث النموذج - إرسال المصفوفة مباشرة بدلاً من JSON string
@@ -154,168 +177,155 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
     } as any);
   };
 
+  const handleColorsChange = (e: React.ChangeEvent<{ name: string; value: { id: string; colors: string[] }[] }>) => {
+    setVariantColors(e.target.value);
+    onFormChange({
+      target: {
+        name: 'colors',
+        value: e.target.value
+      }
+    } as any);
+  };
+
   if (!isOpen || !variant) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex">
-      <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
-      <div className={`relative w-full max-w-md h-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${isRTL ? 'ml-auto' : 'mr-auto'} flex flex-col`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className={`relative w-full max-w-3xl h-[85vh] bg-white shadow-2xl rounded-2xl flex flex-col transition-all duration-300 p-0 ${isRTL ? 'text-right' : 'text-left'}`}
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-800">
+        <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4 rounded-t-2xl">
+          <h2 className="text-2xl font-bold text-primary">
             {isRTL ? 'تعديل المتغير' : 'Edit Variant'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-red-500 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            className="rounded-full p-2 bg-gray-100 hover:bg-primary/10 transition text-xl"
+            style={{ marginLeft: isRTL ? 0 : 8, marginRight: isRTL ? 8 : 0 }}
             title={isRTL ? 'إغلاق' : 'Close'}
           >
-            ×
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6">
+        <div className="flex-1 overflow-y-auto px-6 py-4 max-h-[70vh] space-y-6">
             <form onSubmit={onSubmit} className="space-y-6">
-              {/* Name Fields */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isRTL ? 'الاسم بالعربية' : 'Arabic Name'}
-                  </label>
-                  <input
-                    type="text"
+            {/* ==================== Basic Information Section ==================== */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {isRTL ? 'المعلومات الأساسية' : 'Basic Information'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CustomInput
+                  label={isRTL ? 'اسم المتغير بالعربية' : 'Variant Name (Arabic)'}
                     name="nameAr"
                     value={variant.nameAr || ''}
                     onChange={onFormChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isRTL ? 'الاسم بالإنجليزية' : 'English Name'}
-                  </label>
-                  <input
-                    type="text"
+                <CustomInput
+                  label={isRTL ? 'اسم المتغير بالإنجليزية' : 'Variant Name (English)'}
                     name="nameEn"
                     value={variant.nameEn || ''}
                     onChange={onFormChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
-                </div>
-              </div>
-
-              {/* Description Fields */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isRTL ? 'الوصف بالعربية' : 'Arabic Description'}
-                  </label>
-                  <textarea
+                <div className="md:col-span-2">
+                  <CustomTextArea
+                    label={isRTL ? 'وصف المتغير بالعربية' : 'Variant Description (Arabic)'}
                     name="descriptionAr"
                     value={variant.descriptionAr || ''}
                     onChange={onFormChange}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={2}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isRTL ? 'الوصف بالإنجليزية' : 'English Description'}
-                  </label>
-                  <textarea
+                <div className="md:col-span-2">
+                  <CustomTextArea
+                    label={isRTL ? 'وصف المتغير بالإنجليزية' : 'Variant Description (English)'}
                     name="descriptionEn"
                     value={variant.descriptionEn || ''}
                     onChange={onFormChange}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={2}
                   />
+                </div>
                 </div>
               </div>
 
-              {/* Price Fields */}
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isRTL ? 'السعر' : 'Price'}
-                  </label>
-                  <input
-                    type="number"
+            {/* ==================== Pricing Section ==================== */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+                {isRTL ? 'الأسعار' : 'Pricing'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <CustomInput
+                  label={isRTL ? 'السعر' : 'Price'}
                     name="price"
                     value={variant.price || ''}
                     onChange={onFormChange}
-                    step="0.01"
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type="number"
                     required
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isRTL ? 'سعر التكلفة' : 'Cost Price'}
-                  </label>
-                  <input
-                    type="number"
+                <CustomInput
+                  label={isRTL ? 'سعر التكلفة' : 'Cost Price'}
                     name="costPrice"
                     value={variant.costPrice || ''}
                     onChange={onFormChange}
-                    step="0.01"
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {isRTL ? 'سعر الجملة' : 'Wholesale Price'}
-                  </label>
-                  <input
-                    type="number"
+                  type="number"
+                />
+                <CustomInput
+                  label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
                     name="compareAtPrice"
                     value={variant.compareAtPrice || ''}
                     onChange={onFormChange}
-                    step="0.01"
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type="number"
                   />
                 </div>
               </div>
 
-              {/* Quantity */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            {/* ==================== Quantity Section ==================== */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 12a2 2 0 100-4 2 2 0 000 4zm1 2h-2a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2z" />
+                </svg>
                   {isRTL ? 'الكمية المتوفرة' : 'Available Quantity'}
-                </label>
-                <input
-                  type="number"
+              </h3>
+              <CustomInput
+                label={isRTL ? 'الكمية المتوفرة' : 'Available Quantity'}
                   name="availableQuantity"
                   value={variant.availableQuantity || ''}
                   onChange={onFormChange}
+                type="number"
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              {/* Specifications */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {isRTL ? 'المواصفات' : 'Specifications'}
-                </label>
+            {/* ==================== Specifications Section ==================== */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                {isRTL ? 'مواصفات المتغير' : 'Variant Specifications'}
+              </h3>
                 {formattedSpecifications.length > 0 ? (
-                  <div>
                     <CheckboxSpecificationSelector
                       specifications={formattedSpecifications}
                       selectedSpecifications={selectedSpecifications}
                       onSelectionChange={handleSpecificationChange}
                     />
-                    <div className="mt-2 text-xs text-gray-500">
-                      <p>Available specs: {formattedSpecifications.length}</p>
-                      <p>Selected specs: {selectedSpecifications.length}</p>
-                      <p>Selected IDs: {selectedSpecifications.map((s: any) => s._id).join(', ')}</p>
-                    </div>
-                  </div>
                 ) : (
                   <div className="text-center py-4 text-gray-500 border border-gray-200 rounded-lg">
                     <svg className="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -327,16 +337,104 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
                     </p>
                   </div>
                 )}
-                {/* Debug info */}
-              
+            </div>
+
+            {/* ==================== Colors Section ==================== */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                </svg>
+                {isRTL ? 'الألوان' : 'Colors'}
+              </h3>
+              <CustomColorPicker
+                label={isRTL ? 'الألوان' : 'Colors'}
+                name="colors"
+                value={variantColors}
+                onChange={handleColorsChange}
+                isRTL={isRTL}
+              />
+            </div>
+
+            {/* ==================== Media Section ==================== */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {isRTL ? 'الوسائط' : 'Media'}
+              </h3>
+              <div className="space-y-4">
+                <CustomFileInput
+                  label={isRTL ? 'الصورة الرئيسية' : 'Main Image'}
+                  id="mainImage"
+                  value={variant.mainImage ? [variant.mainImage] : []}
+                  onChange={file => onFormChange({ target: { name: 'mainImage', value: file } } as any)}
+                  multiple={false}
+                  isRTL={isRTL}
+                />
+                <CustomFileInput
+                  label={isRTL ? 'الصور الإضافية' : 'Additional Images'}
+                  id="images"
+                  value={variant.images || []}
+                  onChange={files => onFormChange({ target: { name: 'images', value: files } } as any)}
+                  multiple={true}
+                  isRTL={isRTL}
+                />
+                <CustomInput
+                  label={isRTL ? 'رابط فيديو المتغير' : 'Variant Video URL'}
+                  name="productVideo"
+                  value={variant.productVideo || ''}
+                  onChange={onFormChange}
+                />
+              </div>
+            </div>
+
+            {/* ==================== Barcode Section (Optional) ==================== */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                {isRTL ? 'الباركود' : 'Barcode'}
+              </h3>
+              <CustomInput
+                label={isRTL ? 'باركود المتغير' : 'Variant Barcode'}
+                name="barcode"
+                value={variant.barcode || ''}
+                onChange={onFormChange}
+              />
+            </div>
+
+            {/* ==================== Settings Section (Optional) ==================== */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {isRTL ? 'الإعدادات' : 'Settings'}
+              </h3>
+              <CustomSwitch
+                label={isRTL ? 'ظهور المتغير' : 'Variant Visibility'}
+                name="visibility"
+                checked={variant.visibility === 'Y'}
+                onChange={onFormChange}
+                isRTL={isRTL}
+              />
+              <CustomSwitch
+                label={isRTL ? 'تحكم بالمخزون' : 'Maintain Stock'}
+                name="maintainStock"
+                checked={variant.maintainStock === 'Y'}
+                onChange={onFormChange}
+                isRTL={isRTL}
+              />
               </div>
             </form>
-          </div>
         </div>
 
         {/* Footer with Buttons - Fixed at bottom */}
-        <div className="flex-shrink-0 border-t border-gray-200 p-6">
-          <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+        <div className="flex justify-between gap-3 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl sticky bottom-0">
             <button
               type="button"
               onClick={onClose}
@@ -344,6 +442,7 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
             >
               {isRTL ? 'إلغاء' : 'Cancel'}
             </button>
+          <div></div>
             <button
               type="submit"
               disabled={isLoading}
@@ -365,7 +464,6 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
               )}
               {isLoading ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ التغييرات' : 'Save Changes')}
             </button>
-          </div>
         </div>
       </div>
     </div>
