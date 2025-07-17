@@ -62,7 +62,7 @@ const useProductSpecifications = () => {
       payload.category = form.categoryId;
     }
     
-    console.log('📦 Final payload to send:', payload);
+    console.log(' Final payload to send:', payload);
     
     try {
       if (editId) {
