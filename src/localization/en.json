@@ -385,7 +385,11 @@
       "productVideo": "Product Video",
       "product": "product",
       "deleteConfirmTitle": "Confirm Delete Product",
-      "deleteConfirmMessage": "Are you sure you want to delete this product?"
+      "deleteConfirmMessage": "Are you sure you want to delete this product?",
+      "searchSpecifications": "Search specifications...",
+      "deleteSpecConfirmTitle": "Confirm Delete Specification",
+      "deleteSpecConfirmMessage": "Are you sure you want to delete this specification?",
+      "specification": "specification"
     },
   "subcategories": {
     "title": "Subcategories",
@@ -543,9 +547,22 @@
     "manage": "Edit Store Slider",
     "addButton": "Add Store Slider",
     "searchPlaceholder": "Search store slider...",
-    "deleteConfirmTitle": "Confirm Delete Product from Slider",
-    "deleteConfirmMessage": "Are you sure you want to delete this product from the slider?",
-    "product": "product"
+    "deleteConfirmTitle": "Confirm Delete Slider",
+    "deleteConfirmMessage": "Are you sure you want to delete this slider?",
+    "slider": "slider",
+    "title": "Title",
+    "description": "Description",
+    "type": "Type",
+    "image": "Image",
+    "video": "Video",
+    "videoUrl": "Video URL",
+    "order": "Order",
+    "active": "Active",
+    "inactive": "Inactive",
+    "views": "Views",
+    "clicks": "Clicks",
+    "activate": "Activate",
+    "deactivate": "Deactivate"
   },
   "storeVideos": {
     "title": "Store Videos",
@@ -886,8 +903,8 @@
     "save": "Save",
     "registerMerchant": "Register Merchant",
     "createStore": "Create Store",
-    "merchantStepDesc": "Step 1: Register your merchant account",
-    "storeStepDesc": "Step 2: Create your store",
+    "merchantStepDesc": "Step 2: Register your merchant account",
+    "storeStepDesc": "Step 1: Create your store",
     "merchantInfo": "Merchant Information",
     "merchantInfoDesc": "Please provide your personal information to create your merchant account",
     "storeInfo": "Store Information",
@@ -916,9 +933,7 @@
     "addNewStore": "Add New Store",
     "editModeDescription": "You can edit the current store information",
     "updateStore": "Update Store",
-    "currentLogo": "Current Logo",
-    "logoPreview": "Logo Preview",
-    "link": "Link"
+    "updateSuccess": "Store information updated successfully!"
   },
   "emailEnglishOnly": "Email must contain only English letters and numbers"
 }

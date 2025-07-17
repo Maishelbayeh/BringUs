@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CustomInput from '../../components/common/CustomInput';
-import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomNumberInput from '../../components/common/CustomNumberInput';
 import CustomPhoneInput from '../../components/common/CustomPhoneInput';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomButton from '../../components/common/CustomButton';
-
+import CircleLogoInput from '../../components/common/CircleLogoInput';
 import useLanguage from '@/hooks/useLanguage';
 import { useStore } from '@/hooks/useStore';
 import { useTranslation } from 'react-i18next';
@@ -33,8 +32,9 @@ const SOCIAL_MEDIA = [
 
 
 interface StoreGeneralInfoProps {
-  onSubmit?: (data: any) => void;      // دالة إرسال البيانات
+  onSubmit?: (data: any) => Promise<any> | void;      // دالة إرسال البيانات
   onValidate?: (isValid: boolean) => void; // دالة التحقق من صحة البيانات
+  onLogoFileChange?: (file: File | null) => void; // دالة تمرير ملف اللوجو
 }
 
 /**
@@ -49,18 +49,7 @@ interface ValidationErrors {
   whatsappNumber?: string;
 }
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
-/**
- * مكون معلومات المتجر العامة
- * يدعم إنشاء متجر جديد وتعديل متجر موجود
- */
-const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidate }) => {
-  // ========================================================================
-  // HOOKS & CONTEXT
-  // ========================================================================
+const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidate, onLogoFileChange }) => {
   
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
@@ -68,9 +57,6 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
   const { getStore, updateStore, uploadStoreLogo, loading, error } = useStore();
   const { getCurrentUser } = useAuth();
 
-  // ========================================================================
-  // STATE MANAGEMENT
-  // ========================================================================
   
   // الحصول على Store ID من localStorage أو من المستخدم الحالي
   const getCurrentStoreId = useCallback((): string | null => {
@@ -153,16 +139,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
   // أخطاء الفالديشن
   const [errors, setErrors] = useState<ValidationErrors>({});
 
-  // ========================================================================
-  // VALIDATION FUNCTIONS
-  // ========================================================================
-
-  /**
-   * التحقق من صحة حقل واحد
-   * @param name - اسم الحقل
-   * @param value - قيمة الحقل
-   * @returns رسالة الخطأ أو نص فارغ
-   */
+ 
   const validateField = (name: string, value: string): string => {
     let error = '';
     
@@ -199,13 +176,13 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         }
         break;
         
-      case 'phone':
-        if (!value.trim()) {
-          error = t('store.phoneRequired');
-        } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/\s/g, ''))) {
-          error = t('store.phoneInvalid');
-        }
-        break;
+      // case 'phone':
+      //   if (!value.trim()) {
+      //     error = t('store.phoneRequired');
+      //   } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/\s/g, ''))) {
+      //     error = t('store.phoneInvalid');
+      //   }
+      //   break;
         
       case 'whatsappNumber':
         if (value && !/^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/\s/g, ''))) {
@@ -217,10 +194,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     return error;
   };
 
-  /**
-   * التحقق من صحة النموذج بالكامل
-   * @returns true إذا كان النموذج صحيح
-   */
+  
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {};
     
@@ -229,7 +203,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     newErrors.nameEn = validateField('nameEn', form.nameEn);
     newErrors.slug = validateField('slug', form.slug);
     newErrors.email = validateField('email', form.contact.email);
-    newErrors.phone = validateField('phone', form.contact.phone);
+    // newErrors.phone = validateField('phone', form.contact.phone);
     newErrors.whatsappNumber = validateField('whatsappNumber', form.whatsappNumber);
     
     setErrors(newErrors);
@@ -248,10 +222,25 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    setForm(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm(prev => {
+      const newForm = {
+        ...prev,
+        [name]: value,
+      };
+      
+      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      if (onSubmit && !isEditMode) {
+        setTimeout(() => {
+          const formData = {
+            ...newForm,
+            logo: newForm.logo || { public_id: null, url: null }
+          };
+          onSubmit(formData);
+        }, 100);
+      }
+      
+      return newForm;
+    });
     
     // الفالديشن المباشر
     const error = validateField(name, value);
@@ -265,10 +254,25 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
    * معالجة تغيير الوصف
    */
   const handleDescriptionChange = (field: 'descriptionAr' | 'descriptionEn', e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setForm(prev => ({
-      ...prev,
-      [field]: e.target.value,
-    }));
+    setForm(prev => {
+      const newForm = {
+        ...prev,
+        [field]: e.target.value,
+      };
+      
+      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      if (onSubmit && !isEditMode) {
+        setTimeout(() => {
+          const formData = {
+            ...newForm,
+            logo: newForm.logo || { public_id: null, url: null }
+          };
+          onSubmit(formData);
+        }, 100);
+      }
+      
+      return newForm;
+    });
   };
 
   /**
@@ -286,9 +290,64 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     if (file) {
       setLogoFile(file);
       setLogoPreview(URL.createObjectURL(file));
+      
+      // تمرير ملف اللوجو للويزرد
+      if (onLogoFileChange) {
+        onLogoFileChange(file);
+      }
+      
+      // تحديث النموذج باللوجو الجديد (سيتم رفعه لاحقاً)
+      setForm(prev => {
+        const newForm = {
+          ...prev,
+          logo: {
+            public_id: null, // سيتم تحديثه بعد الرفع
+            url: URL.createObjectURL(file) // معاينة مؤقتة
+          }
+        };
+        
+        // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+        if (onSubmit && !isEditMode) {
+          setTimeout(() => {
+            const formData = {
+              ...newForm,
+              logo: newForm.logo || { public_id: null, url: null }
+            };
+            onSubmit(formData);
+          }, 100);
+        }
+        
+        return newForm;
+      });
     } else {
       setLogoFile(null);
       setLogoPreview(null);
+      
+      // تمرير null للويزرد
+      if (onLogoFileChange) {
+        onLogoFileChange(null);
+      }
+      
+      // إزالة اللوجو من النموذج
+      setForm(prev => {
+        const newForm = {
+          ...prev,
+          logo: { public_id: null, url: null }
+        };
+        
+        // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+        if (onSubmit && !isEditMode) {
+          setTimeout(() => {
+            const formData = {
+              ...newForm,
+              logo: newForm.logo || { public_id: null, url: null }
+            };
+            onSubmit(formData);
+          }, 100);
+        }
+        
+        return newForm;
+      });
     }
   };
 
@@ -296,60 +355,120 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
    * معالجة تغيير روابط السوشال ميديا
    */
   const handleSocialChange = (key: string, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      settings: {
-        ...prev.settings,
-        storeSocials: { ...prev.settings.storeSocials, [key]: value },
+    setForm(prev => {
+      const newForm = {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          storeSocials: { ...prev.settings.storeSocials, [key]: value },
+        }
+      };
+      
+      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      if (onSubmit && !isEditMode) {
+        setTimeout(() => {
+          const formData = {
+            ...newForm,
+            logo: newForm.logo || { public_id: null, url: null }
+          };
+          onSubmit(formData);
+        }, 100);
       }
-    }));
+      
+      return newForm;
+    });
   };
 
   /**
    * معالجة تغيير نسبة الضريبة
    */
   const handleTaxRateChange = (value: number) => {
-    setForm(prev => ({
-      ...prev,
-      settings: { ...prev.settings, taxRate: value }
-    }));
+    setForm(prev => {
+      const newForm = {
+        ...prev,
+        settings: { ...prev.settings, taxRate: value }
+      };
+      
+      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      if (onSubmit && !isEditMode) {
+        setTimeout(() => {
+          const formData = {
+            ...newForm,
+            logo: newForm.logo || { public_id: null, url: null }
+          };
+          onSubmit(formData);
+        }, 100);
+      }
+      
+      return newForm;
+    });
   };
 
   /**
    * معالجة تغيير نسبة الخصم
    */
   const handleDiscountChange = (value: number) => {
-    setForm(prev => ({
-      ...prev,
-      settings: { ...prev.settings, storeDiscount: value }
-    }));
+    setForm(prev => {
+      const newForm = {
+        ...prev,
+        settings: { ...prev.settings, storeDiscount: value }
+      };
+      
+      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      if (onSubmit && !isEditMode) {
+        setTimeout(() => {
+          const formData = {
+            ...newForm,
+            logo: newForm.logo || { public_id: null, url: null }
+          };
+          onSubmit(formData);
+        }, 100);
+      }
+      
+      return newForm;
+    });
   };
 
   /**
    * معالجة تغيير رقم الهاتف
    */
-  const handlePhoneChange = (value: string) => {
-    setForm(prev => ({
-      ...prev,
-      contact: { ...prev.contact, phone: value }
-    }));
+  // const handlePhoneChange = (value: string) => {
+  //   setForm(prev => ({
+  //     ...prev,
+  //     contact: { ...prev.contact, phone: value }
+  //   }));
     
-    // الفالديشن للهاتف
-    const error = validateField('phone', value);
-    setErrors(prev => ({
-      ...prev,
-      phone: error
-    }));
-  };
+  //   // الفالديشن للهاتف
+  //   const error = validateField('phone', value);
+  //   setErrors(prev => ({
+  //     ...prev,
+  //     phone: error
+  //   }));
+  // };
 
   /**
    * معالجة تغيير رقم الواتساب
    */
   const handleWhatsAppChange = (value: string) => {
-    setForm(prev => ({
-      ...prev,
-      whatsappNumber: value
-    }));
+    setForm(prev => {
+      const newForm = {
+        ...prev,
+        whatsappNumber: value
+      };
+      
+      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      if (onSubmit && !isEditMode) {
+        setTimeout(() => {
+          const formData = {
+            ...newForm,
+            logo: newForm.logo || { public_id: null, url: null }
+          };
+          onSubmit(formData);
+        }, 100);
+      }
+      
+      return newForm;
+    });
     
     // الفالديشن للواتساب
     const error = validateField('whatsappNumber', value);
@@ -368,35 +487,84 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     }
     
     // التحقق من صحة النموذج قبل الإرسال
-        if (!validateForm()) {
+    if (!validateForm()) {
       return;
     }
     
     try {
-      let updatedForm = { ...form };
-      
-      // رفع اللوجو إذا كان هناك ملف جديد
-              if (logoFile) {
+      if (isEditMode) {
+        // تحديث متجر موجود
+        let updatedForm = { ...form };
+        
+        // رفع اللوجو إذا كان هناك ملف جديد
+        if (logoFile) {
           const currentStoreId = getCurrentStoreId();
-          const logoResult = await uploadStoreLogo(logoFile, isEditMode ? currentStoreId || undefined : undefined);
+          const logoResult = await uploadStoreLogo(logoFile, currentStoreId || undefined);
           if (logoResult) {
             updatedForm.logo = logoResult;
           }
         }
-      
-              if (isEditMode) {
-          const currentStoreId = getCurrentStoreId();
-          if (currentStoreId) {
-            // تحديث المتجر الحالي
-            const result = await updateStore(currentStoreId, updatedForm);
-            if (result) {
-              setStoreData(result);
+        
+        const currentStoreId = getCurrentStoreId();
+        if (currentStoreId) {
+          const result = await updateStore(currentStoreId, updatedForm);
+          if (result) {
+            setStoreData(result);
+            console.log('✅ تم تحديث المتجر بنجاح، جاري تحديث البيانات المحلية...');
+            
+            // تحديث البيانات في localStorage
+            const currentStoreData = localStorage.getItem('storeData');
+            if (currentStoreData) {
+              const parsedStoreData = JSON.parse(currentStoreData);
+              const updatedStoreData = {
+                ...parsedStoreData,
+                nameAr: result.nameAr,
+                nameEn: result.nameEn,
+                logo: result.logo
+              };
+              localStorage.setItem('storeData', JSON.stringify(updatedStoreData));
+              console.log('✅ تم تحديث بيانات المتجر في localStorage');
             }
+            
+           
+            
+            // إرسال حدث مخصص لتحديث التوب ناف والسينبار
+            window.dispatchEvent(new CustomEvent('storeDataUpdated', {
+              detail: {
+                nameAr: result.nameAr,
+                nameEn: result.nameEn,
+                logo: result.logo
+              }
+            }));
           }
-        } else {
+        }
+      } else {
         // إنشاء متجر جديد
         if (onSubmit) {
-          onSubmit({ ...updatedForm, status: 'suspended' });
+          // إرسال بيانات المتجر بدون لوجو أولاً
+          const storeDataWithoutLogo = {
+            ...form,
+            status: 'suspended',
+            logo: { public_id: null, url: null } // بدون لوجو في البداية
+          };
+          
+          console.log('🔄 إرسال بيانات المتجر الجديد بدون لوجو');
+          const result = await onSubmit(storeDataWithoutLogo);
+          
+          // إذا كان هناك ملف لوجو، ارفعه للمتجر الجديد
+          if (logoFile && result && (result as any).id) {
+            console.log('🔄 رفع اللوجو للمتجر الجديد:', (result as any).id);
+            try {
+              const logoResult = await uploadStoreLogo(logoFile, (result as any).id);
+              if (logoResult) {
+                console.log('✅ تم رفع اللوجو بنجاح:', logoResult);
+                // تحديث المتجر باللوجو الجديد
+                await updateStore((result as any).id, { logo: logoResult });
+              }
+            } catch (logoError) {
+              console.error('❌ خطأ في رفع اللوجو:', logoError);
+            }
+          }
         }
       }
     } catch (err) {
@@ -486,19 +654,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     fetchStoreData();
   }, [isDataLoaded, getCurrentStoreId]); // إضافة getCurrentStoreId
 
-  /**
-   * حفظ البيانات تلقائياً عند أي تغيير
-   */
-  useEffect(() => {
-    if (onSubmit && Object.keys(form).length > 0) {
-      // تأخير بسيط لتجنب استدعاء onSubmit كثيراً
-      const timeoutId = setTimeout(() => {
-        onSubmit(form);
-      }, 100);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [form, onSubmit]);
+  
 
   /**
    * إرسال حالة الفالديشن للويزرد
@@ -511,7 +667,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         form.nameEn.trim() && 
         form.slug.trim() && 
         form.contact.email.trim() && 
-        form.contact.phone.trim()
+        form.whatsappNumber.trim()
       );
       
       const hasNoErrors = !Object.values(errors).some(error => !!error);
@@ -524,19 +680,19 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
       
       // التحقق من صحة رقم الهاتف
       const isPhoneValid = Boolean(
-        form.contact.phone.trim() && 
-        /^[\+]?[1-9][\d]{0,15}$/.test(form.contact.phone.replace(/\s/g, ''))
+        form.whatsappNumber.trim() && 
+        /^[\+]?[1-9][\d]{0,15}$/.test(form.whatsappNumber.replace(/\s/g, ''))
       );
       
       const isValid = hasRequiredFields && hasNoErrors && isEmailValid && isPhoneValid;
       
       onValidate(isValid);
     }
-  }, [errors, form, onValidate]);
+  }, [errors, form.nameAr, form.nameEn, form.slug, form.contact.email, form.whatsappNumber, onValidate]);
 
  
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} dir={isRTL ? 'rtl' : 'ltr'} className={`${isRTL ? 'text-right' : 'text-left'}`}>
       {/* عنوان الصفحة */}
       <div className="mb-6">
         <h2 className={`text-2xl font-bold text-primary ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -558,14 +714,14 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         </div>
       )}
 
-      {/* معلومات المتجر الأساسية */}
-      <div className="">
+         {/* معلومات المتجر الأساسية */}
+    
         <h3 className={`font-bold mb-6 text-primary ${isRTL ? 'text-right' : 'text-left'}`}>
           {t('store.basicInfo')}
         </h3>
-        
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* اسم المتجر بالعربي */}
-        <div className="mb-4">
+          <div className="mb-4">
           <CustomInput
             label={t('store.nameAr')}
             name="nameAr"
@@ -589,27 +745,30 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             error={errors.nameEn}
           />
         </div>
-
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* وصف المتجر بالعربي */}
-        <div className="mb-4">
+        <div className="">
           <CustomTextArea
             label={t('store.descriptionAr')}
             value={form.descriptionAr}
             onChange={(e) => handleDescriptionChange('descriptionAr', e)}
             placeholder={t('store.descriptionArPlaceholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
 
         {/* وصف المتجر بالإنجليزي */}
-        <div className="mb-4">
+        <div className="">
           <CustomTextArea
             label={t('store.descriptionEn')}
             value={form.descriptionEn}
             onChange={(e) => handleDescriptionChange('descriptionEn', e)}
             placeholder={t('store.descriptionEnPlaceholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
-
+</div>
         {/* رابط المتجر */}
         <div className="mb-4">
           <CustomInput
@@ -622,25 +781,32 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             error={errors.slug}
           />
         </div>
-      </div>
+      
 
       {/* لوجو المتجر */}
       <div className="mb-8 border-t border-gray-200 pt-8">
         <h3 className={`font-bold mb-6 text-primary ${isRTL ? 'text-right' : 'text-left'}`}>
           {t('store.logo')}
         </h3>
-        <CustomFileInput
-          label={t('store.uploadLogo')}
+        <CircleLogoInput
+          preview={logoPreview}
           onChange={handleLogoChange}
+          onRemove={() => {
+            setLogoFile(null);
+            setLogoPreview(null);
+            setForm(prev => ({
+              ...prev,
+              logo: { public_id: null, url: null }
+            }));
+          }}
+          alt="Store Logo"
+          helpText={t('store.logoHelpText')}
+          file={logoFile}
+          label={t('store.uploadLogo')}
+          isEditMode={isEditMode}
+          t={t}
+          currentLogoUrl={form.logo.url}
         />
-        {logoPreview && (
-          <div className="mt-2">
-            <img src={logoPreview} alt="Logo Preview" className="h-20 rounded-lg border" />
-            <p className="text-sm text-gray-500 mt-1">
-              {isEditMode ? t('store.currentLogo') : t('store.logoPreview')}
-            </p>
-          </div>
-        )}
       </div>
 
       {/* إعدادات المتجر */}
@@ -651,19 +817,34 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         
         {/* لون المتجر */}
         <div className="mb-4">
-          <div className="flex flex-col gap-2">
+          <div className={`flex flex-col gap-2`}>
             <label className="block mb-1 text-sm font-medium text-gray-900">
               {t('store.mainColor')}
             </label>
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-3 `}>
               <input
                 type="color"
                 value={form.settings.mainColor}
                 onChange={(e) => {
-                  setForm(prev => ({
-                    ...prev,
-                    settings: { ...prev.settings, mainColor: e.target.value }
-                  }));
+                  setForm(prev => {
+                    const newForm = {
+                      ...prev,
+                      settings: { ...prev.settings, mainColor: e.target.value }
+                    };
+                    
+                    // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+                    if (onSubmit && !isEditMode) {
+                      setTimeout(() => {
+                        const formData = {
+                          ...newForm,
+                          logo: newForm.logo || { public_id: null, url: null }
+                        };
+                        onSubmit(formData);
+                      }, 100);
+                    }
+                    
+                    return newForm;
+                  });
                 }}
                 className={`
                   w-12 h-12 rounded-full border-2 border-gray-300 shadow cursor-pointer
@@ -681,9 +862,9 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             </div>
           </div>
         </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* نسبة الخصم */}
-        <div className="mb-4">
+        <div className="">
           <CustomNumberInput
             label={t('store.discount')}
             value={form.settings.storeDiscount}
@@ -695,7 +876,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         </div>
 
         {/* الضريبة */}
-        <div className="mb-4">
+        <div className="">
           <CustomNumberInput
             label={t('store.taxRate')}
             value={form.settings.taxRate}
@@ -704,6 +885,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             max={100}
             placeholder={t('store.taxRatePlaceholder')}
           />
+        </div>
         </div>
       </div>
 
@@ -723,7 +905,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             error={errors.phone}
           />
         </div>*/}
-
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* رقم الواتساب */}
         <div className="mb-4">
           <CustomPhoneInput
@@ -744,10 +926,25 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             type="email"
             value={form.contact.email}
             onChange={(e) => {
-              setForm(prev => ({
-                ...prev,
-                contact: { ...prev.contact, email: e.target.value }
-              }));
+              setForm(prev => {
+                const newForm = {
+                  ...prev,
+                  contact: { ...prev.contact, email: e.target.value }
+                };
+                
+                // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+                if (onSubmit && !isEditMode) {
+                  setTimeout(() => {
+                    const formData = {
+                      ...newForm,
+                      logo: newForm.logo || { public_id: null, url: null }
+                    };
+                    onSubmit(formData);
+                  }, 100);
+                }
+                
+                return newForm;
+              });
               
               // الفالديشن للبريد الإلكتروني
               const error = validateField('email', e.target.value);
@@ -761,72 +958,147 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             error={errors.email}
           />
         </div>
-
+        </div>
         {/* حقول العنوان */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <CustomInput
             label={t('signup.street')}
             name="street"
             value={form.contact.address.street}
-            onChange={e => setForm(prev => ({
-              ...prev,
-              contact: {
-                ...prev.contact,
-                address: { ...prev.contact.address, street: e.target.value }
+            onChange={e => setForm(prev => {
+              const newForm = {
+                ...prev,
+                contact: {
+                  ...prev.contact,
+                  address: { ...prev.contact.address, street: e.target.value }
+                }
+              };
+              
+              // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+              if (onSubmit && !isEditMode) {
+                setTimeout(() => {
+                  const formData = {
+                    ...newForm,
+                    logo: newForm.logo || { public_id: null, url: null }
+                  };
+                  onSubmit(formData);
+                }, 100);
               }
-            }))}
+              
+              return newForm;
+            })}
             placeholder={t('signup.streetPlaceholder')}
           />
           <CustomInput
             label={t('signup.city')}
             name="city"
             value={form.contact.address.city}
-            onChange={e => setForm(prev => ({
-              ...prev,
-              contact: {
-                ...prev.contact,
-                address: { ...prev.contact.address, city: e.target.value }
+            onChange={e => setForm(prev => {
+              const newForm = {
+                ...prev,
+                contact: {
+                  ...prev.contact,
+                  address: { ...prev.contact.address, city: e.target.value }
+                }
+              };
+              
+              // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+              if (onSubmit && !isEditMode) {
+                setTimeout(() => {
+                  const formData = {
+                    ...newForm,
+                    logo: newForm.logo || { public_id: null, url: null }
+                  };
+                  onSubmit(formData);
+                }, 100);
               }
-            }))}
+              
+              return newForm;
+            })}
             placeholder={t('signup.cityPlaceholder')}
           />
           <CustomInput
             label={t('signup.state')}
             name="state"
             value={form.contact.address.state}
-            onChange={e => setForm(prev => ({
-              ...prev,
-              contact: {
-                ...prev.contact,
-                address: { ...prev.contact.address, state: e.target.value }
+            onChange={e => setForm(prev => {
+              const newForm = {
+                ...prev,
+                contact: {
+                  ...prev.contact,
+                  address: { ...prev.contact.address, state: e.target.value }
+                }
+              };
+              
+              // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+              if (onSubmit && !isEditMode) {
+                setTimeout(() => {
+                  const formData = {
+                    ...newForm,
+                    logo: newForm.logo || { public_id: null, url: null }
+                  };
+                  onSubmit(formData);
+                }, 100);
               }
-            }))}
+              
+              return newForm;
+            })}
             placeholder={t('signup.statePlaceholder')}
           />
           <CustomInput
             label={t('signup.zipCode')}
             name="zipCode"
             value={form.contact.address.zipCode}
-            onChange={e => setForm(prev => ({
-              ...prev,
-              contact: {
-                ...prev.contact,
-                address: { ...prev.contact.address, zipCode: e.target.value }
+            onChange={e => setForm(prev => {
+              const newForm = {
+                ...prev,
+                contact: {
+                  ...prev.contact,
+                  address: { ...prev.contact.address, zipCode: e.target.value }
+                }
+              };
+              
+              // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+              if (onSubmit && !isEditMode) {
+                setTimeout(() => {
+                  const formData = {
+                    ...newForm,
+                    logo: newForm.logo || { public_id: null, url: null }
+                  };
+                  onSubmit(formData);
+                }, 100);
               }
-            }))}
+              
+              return newForm;
+            })}
             placeholder={t('signup.zipCodePlaceholder')}
           />
           <CustomInput
             label={t('signup.country')}
             name="country"
             value={form.contact.address.country}
-            onChange={e => setForm(prev => ({
-              ...prev,
-              contact: {
-                ...prev.contact,
-                address: { ...prev.contact.address, country: e.target.value }
+            onChange={e => setForm(prev => {
+              const newForm = {
+                ...prev,
+                contact: {
+                  ...prev.contact,
+                  address: { ...prev.contact.address, country: e.target.value }
+                }
+              };
+              
+              // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+              if (onSubmit && !isEditMode) {
+                setTimeout(() => {
+                  const formData = {
+                    ...newForm,
+                    logo: newForm.logo || { public_id: null, url: null }
+                  };
+                  onSubmit(formData);
+                }, 100);
               }
-            }))}
+              
+              return newForm;
+            })}
             placeholder={t('signup.countryPlaceholder')}
           />
         </div>

@@ -13,15 +13,15 @@ interface CustomSwitchProps {
 
 const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onChange, labelAlign = 'left', isRTL, disabled }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newEvent = {
+    // إنشاء event جديد مع القيم المحدثة
+    const syntheticEvent = {
       ...event,
       target: {
         ...event.target,
-        name,
-        value: event.target.checked ? 'Y' : 'N'
+        checked: event.target.checked
       }
-    } as React.ChangeEvent<HTMLInputElement>;
-    onChange(newEvent);
+    };
+    onChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
   };
 
   return (

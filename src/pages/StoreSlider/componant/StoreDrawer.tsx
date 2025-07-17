@@ -11,14 +11,17 @@ interface StoreSliderDrawerProps {
   form: any;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFileChange: (file: File | null) => void;
+  errors: {[key: string]: string};
   isRTL: boolean;
   mode?: 'slider' | 'video';
   categories?: { id: number; name: string }[];
   subcategories?: { id: number; name: string }[];
   renderFooter?: React.ReactNode;
+  saving?: boolean;
 }
 
-const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, onSave, form, onFormChange, onImageChange, isRTL, mode = 'slider', renderFooter }) => {
+const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, onSave, form, onFormChange, onImageChange, onFileChange, errors, isRTL, mode = 'slider', renderFooter, saving = false }) => {
   const { t } = useTranslation();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -47,6 +50,8 @@ const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, on
             form={form}
             onFormChange={onFormChange}
             onImageChange={onImageChange}
+            onFileChange={onFileChange}
+            errors={errors}
             isRTL={isRTL}
             mode={mode}
           />
@@ -60,13 +65,18 @@ const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, on
               text={t('common.cancel')}
               action={onClose}
               bordercolor="primary"
+              disabled={saving}
             />
             <CustomButton
               color="primary"
               textColor="white"
-              text={t('common.save')}
+              text={saving ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : t('common.save')}
               type="submit"
               onClick={handleSubmit}
+              disabled={saving}
+              icon={saving ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              ) : undefined}
             />
           </div>
         )}

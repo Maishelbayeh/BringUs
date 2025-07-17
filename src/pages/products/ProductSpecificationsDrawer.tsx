@@ -3,8 +3,10 @@ import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomButton from '../../components/common/CustomButton';
 import CustomSelect from '../../components/common/CustomSelect';
 import CustomInput from '../../components/common/CustomInput';
+import CustomSwitch from '../../components/common/CustomSwitch';
 import { useTranslation } from 'react-i18next';
 import useCategories from '../../hooks/useCategories';
+import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface Props {
   open: boolean;
@@ -29,11 +31,15 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
   
   const [form, setForm] = useState({
     id: '',
-    descriptionAr: '',
-    descriptionEn: '',
+    titleAr: '',
+    titleEn: '',
     categoryId: '',
-    sortOrder: 0
+    sortOrder: 0,
+    isActive: true,
+    values: [] as Array<{ valueAr: string; valueEn: string; _id?: string }>
   });
+
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open && categories.length === 0) {
@@ -45,18 +51,26 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
     if (spec) {
       setForm({
         id: spec._id || spec.id || '',
-        descriptionAr: spec.descriptionAr || '',
-        descriptionEn: spec.descriptionEn || '',
+        titleAr: spec.titleAr || '',
+        titleEn: spec.titleEn || '',
         categoryId: spec.category?._id || spec.category || '',
-        sortOrder: spec.sortOrder || 0
+        sortOrder: spec.sortOrder || 0,
+        isActive: spec.isActive !== undefined ? spec.isActive : true,
+        values: spec.values?.map((value: any) => ({
+          valueAr: value.valueAr || '',
+          valueEn: value.valueEn || '',
+          _id: value._id
+        })) || []
       });
     } else {
       setForm({
         id: '',
-        descriptionAr: '',
-        descriptionEn: '',
+        titleAr: '',
+        titleEn: '',
         categoryId: '',
-        sortOrder: 0
+        sortOrder: 0,
+        isActive: true,
+        values: []
       });
     }
   }, [spec, open]);
@@ -68,9 +82,37 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleValueChange = (index: number, field: string, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      values: prev.values.map((val, i) => 
+        i === index ? { ...val, [field]: value } : val
+      )
+    }));
+  };
+
+  const addValue = () => {
+    setForm(prev => ({
+      ...prev,
+      values: [...prev.values, { valueAr: '', valueEn: '' }]
+    }));
+  };
+
+  const removeValue = (index: number) => {
+    setForm(prev => ({
+      ...prev,
+      values: prev.values.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(form);
+    setSaving(true);
+    try {
+      await onSave(form);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getErrorStyle = (field: string) => {
@@ -90,7 +132,7 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-2 relative flex flex-col max-h-[90vh] overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
+      <div className={`bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-2 relative flex flex-col max-h-[90vh] overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
         dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
@@ -103,36 +145,34 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col p-6 overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4">
-            {/* الوصف العربي */}
-            <div className="md:col-span-2">
-              <CustomTextArea
-                label={isRTL ? 'الوصف العربي' : 'Arabic Description'}
-                value={form.descriptionAr}
-                onChange={e => handleFormChange('descriptionAr', e.target.value)}
-                placeholder={isRTL ? 'أدخل الوصف العربي للمواصفة' : 'Enter Arabic description for specification'}
-                rows={3}
+            {/* العنوان العربي */}
+            <div>
+              <CustomInput
+                label={isRTL ? 'العنوان العربي' : 'Arabic Title'}
+                value={form.titleAr}
+                onChange={e => handleFormChange('titleAr', e.target.value)}
+                placeholder={isRTL ? 'أدخل العنوان العربي للمواصفة' : 'Enter Arabic title for specification'}
                 dir="rtl"
-                className={getErrorStyle('descriptionAr')}
+                className={getErrorStyle('titleAr')}
               />
-              {showError('descriptionAr')}
+              {showError('titleAr')}
             </div>
 
-            {/* الوصف الإنجليزي */}
-            <div className="md:col-span-2">
-              <CustomTextArea
-                label={isRTL ? 'الوصف الإنجليزي' : 'English Description'}
-                value={form.descriptionEn}
-                onChange={e => handleFormChange('descriptionEn', e.target.value)}
-                placeholder={isRTL ? 'أدخل الوصف الإنجليزي للمواصفة' : 'Enter English description for specification'}
-                rows={3}
+            {/* العنوان الإنجليزي */}
+            <div>
+              <CustomInput
+                label={isRTL ? 'العنوان الإنجليزي' : 'English Title'}
+                value={form.titleEn}
+                onChange={e => handleFormChange('titleEn', e.target.value)}
+                placeholder={isRTL ? 'أدخل العنوان الإنجليزي للمواصفة' : 'Enter English title for specification'}
                 dir="ltr"
-                className={getErrorStyle('descriptionEn')}
+                className={getErrorStyle('titleEn')}
               />
-              {showError('descriptionEn')}
+              {showError('titleEn')}
             </div>
 
             {/* التصنيف */}
-            {/* <div>
+            <div>
               <CustomSelect
                 label={isRTL ? 'التصنيف (اختياري)' : 'Category (Optional)'}
                 value={form.categoryId}
@@ -147,10 +187,10 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
                 className={getErrorStyle('categoryId')}
               />
               {showError('categoryId')}
-            </div> */}
+            </div>
 
             {/* ترتيب الفرز */}
-            {/* <div>
+            <div>
               <CustomInput
                 type="number"
                 label={isRTL ? 'ترتيب الفرز' : 'Sort Order'}
@@ -160,21 +200,91 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
                 className={getErrorStyle('sortOrder')}
               />
               {showError('sortOrder')}
-            </div> */}
+            </div>
 
             {/* التفعيل */}
-            {/* <div className="md:col-span-2">
-              <CustomInput
-                type="checkbox"
-                id="isActive"
+            <div className="md:col-span-2">
+              <CustomSwitch
+                label={isRTL ? 'مفعل' : 'Active'}
                 name="isActive"
                 checked={form.isActive}
                 onChange={e => handleFormChange('isActive', e.target.checked)}
-                label={isRTL ? 'مفعل' : 'Active'}
-                className={`w-5 h-5 text-primary accent-primary mt-6 ${getErrorStyle('isActive')}`}
               />
               {showError('isActive')}
-            </div> */}
+            </div>
+          </div>
+
+          {/* Values Section */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {isRTL ? 'قيم المواصفة' : 'Specification Values'}
+              </h3>
+              <CustomButton
+                color="primary"
+                textColor="white"
+                text={isRTL ? 'إضافة قيمة' : 'Add Value'}
+                action={addValue}
+                icon={<PlusIcon className="w-4 h-4" />}
+                size="sm"
+              />
+            </div>
+
+            {showError('values')}
+
+            <div className="space-y-4">
+              {form.values.map((value, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium text-gray-700">
+                      {isRTL ? `القيمة ${index + 1}` : `Value ${index + 1}`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeValue(index)}
+                      className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
+                      title={isRTL ? 'حذف القيمة' : 'Remove Value'}
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <CustomInput
+                        label={isRTL ? 'القيمة العربية' : 'Arabic Value'}
+                        value={value.valueAr}
+                        onChange={e => handleValueChange(index, 'valueAr', e.target.value)}
+                        placeholder={isRTL ? 'أدخل القيمة العربية' : 'Enter Arabic value'}
+                        dir="rtl"
+                        className={getErrorStyle(`values.${index}.valueAr`)}
+                      />
+                      {showError(`values.${index}.valueAr`)}
+                    </div>
+                    
+                    <div>
+                      <CustomInput
+                        label={isRTL ? 'القيمة الإنجليزية' : 'English Value'}
+                        value={value.valueEn}
+                        onChange={e => handleValueChange(index, 'valueEn', e.target.value)}
+                        placeholder={isRTL ? 'أدخل القيمة الإنجليزية' : 'Enter English value'}
+                        dir="ltr"
+                        className={getErrorStyle(`values.${index}.valueEn`)}
+                      />
+                      {showError(`values.${index}.valueEn`)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {form.values.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <div className="text-4xl mb-2">📝</div>
+                <p>{isRTL ? 'لا توجد قيم مضافة بعد' : 'No values added yet'}</p>
+                <p className="text-sm">{isRTL ? 'اضغط على "إضافة قيمة" لبدء إضافة القيم' : 'Click "Add Value" to start adding values'}</p>
+              </div>
+            )}
           </div>
         </form>
         
@@ -186,14 +296,24 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
             text={t('common.cancel') || 'إلغاء'}
             action={onClose}
             bordercolor="primary"
+            disabled={saving}
           />
-          <CustomButton
-            color="primary"
-            textColor="white"
-            text={t('common.save') || 'حفظ'}
-            type="submit"
-            onClick={handleSubmit}
-          />
+          <div className="flex gap-2">
+            {saving && (
+              <div className="flex items-center gap-2 text-primary">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                <span className="text-sm">{isRTL ? 'جاري الحفظ...' : 'Saving...'}</span>
+              </div>
+            )}
+            <CustomButton
+              color="primary"
+              textColor="white"
+              text={t('common.save') || 'حفظ'}
+              type="submit"
+              onClick={handleSubmit}
+              disabled={saving}
+            />
+          </div>
         </div>
       </div>
     </div>

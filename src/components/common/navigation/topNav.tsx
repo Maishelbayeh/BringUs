@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,8 +28,26 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
   const navigate = useNavigate();
   const { getStoreName, getStoreLogo } = useLocalStorage();
   
-  const storeName = getStoreName(language) || 'bring us';
-  const storeLogo = getStoreLogo();
+  const [storeName, setStoreName] = useState(getStoreName(language) || 'bring us');
+  const [storeLogo, setStoreLogo] = useState(getStoreLogo());
+
+  // الاستماع لتحديث بيانات المتجر
+  useEffect(() => {
+    const handleStoreDataUpdate = (event: CustomEvent) => {
+      const { nameAr, nameEn, logo } = event.detail;
+      const newStoreName = language === 'ARABIC' ? nameAr : nameEn;
+      setStoreName(newStoreName || 'bring us');
+      if (logo?.url) {
+        setStoreLogo(logo.url);
+      }
+    };
+
+    window.addEventListener('storeDataUpdated', handleStoreDataUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('storeDataUpdated', handleStoreDataUpdate as EventListener);
+    };
+  }, [language]);
 
   return (
     <header className={`w-full bg-white px-2 sm:px-4 py-2 sm:py-4 border-b border-primary/20 shadow-sm`}> 

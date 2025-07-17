@@ -15,7 +15,9 @@ const CustomInput: React.FC<CustomInputProps> = ({ label, error, errorColor = 't
   // const labelAlignClass = labelAlign === 'right' ? 'text-right' : labelAlign === 'center' ? 'text-center' : 'text-left';
   return (
     <div className="w-full">
-      <label htmlFor={id} className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+      <label htmlFor={id} className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white `}
+      style={{ direction: i18n.language === 'ARABIC' ? 'rtl' : 'ltr' }}
+      >
         {label}
         {props.required && <span className={`${i18n.language === 'ARABIC' ? 'mr-1' : 'ml-1'} text-red-500`}>*</span>}
       </label>
@@ -53,7 +55,7 @@ const CustomInput: React.FC<CustomInputProps> = ({ label, error, errorColor = 't
               ${error ? 'border-red-500' : ''} ${className}`}
           style={{ 
             direction: i18n.language === 'ARABIC' ? 'rtl' : 'ltr',
-            textAlign: i18n.language === 'ARABIC' ? 'right' : 'left'
+           
           }}
           {...props}
         />

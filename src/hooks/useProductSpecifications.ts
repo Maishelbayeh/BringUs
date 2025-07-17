@@ -45,11 +45,12 @@ const useProductSpecifications = () => {
     //CONSOLE.log('Saving specification with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
     const payload: any = {
-      titleAr: form.titleAr?.trim() || form.descriptionAr?.trim(),
-      titleEn: form.titleEn?.trim() || form.descriptionEn?.trim(),
+      titleAr: form.titleAr?.trim(),
+      titleEn: form.titleEn?.trim(),
       values: form.values || [],
-      storeId: STORE_ID,
       sortOrder: form.sortOrder || 0,
+      isActive: form.isActive !== undefined ? form.isActive : true, // إعادة تفعيل
+      storeId: STORE_ID, // إرسال storeId في كل الحالات
     };
     
     // إضافة التصنيف فقط إذا كان محدداً
@@ -60,10 +61,12 @@ const useProductSpecifications = () => {
     //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
+        console.log('🔄 Sending PUT request to:', `${BASE_URL}meta/product-specifications/${editId}`);
         const response = await axios.put(`${BASE_URL}meta/product-specifications/${editId}`, payload);
         //CONSOLE.log('Specification updated successfully:', response.data);
         showSuccess('تم تعديل مواصفة المنتج بنجاح', 'نجح التحديث');
       } else {
+        console.log('🔄 Sending POST request to:', `${BASE_URL}meta/product-specifications`);
         const response = await axios.post(`${BASE_URL}meta/product-specifications`, payload);
         //CONSOLE.log('Specification created successfully:', response.data);
         showSuccess('تم إضافة مواصفة المنتج بنجاح', 'نجح الإضافة');
@@ -117,7 +120,7 @@ const useProductSpecifications = () => {
     const errors: { [key: string]: string } = {};
 
     // التحقق من العنوان العربي
-    const titleAr = form.titleAr?.trim() || form.descriptionAr?.trim();
+    const titleAr = form.titleAr?.trim();
     if (!titleAr || titleAr === '') {
       errors.titleAr = isRTL ? 'العنوان العربي مطلوب' : 'Arabic title is required';
     } else if (titleAr.length > 100) {
@@ -125,7 +128,7 @@ const useProductSpecifications = () => {
     }
 
     // التحقق من العنوان الإنجليزي
-    const titleEn = form.titleEn?.trim() || form.descriptionEn?.trim();
+    const titleEn = form.titleEn?.trim();
     if (!titleEn || titleEn === '') {
       errors.titleEn = isRTL ? 'العنوان الإنجليزي مطلوب' : 'English title is required';
     } else if (titleEn.length > 100) {
@@ -149,7 +152,7 @@ const useProductSpecifications = () => {
 
     // التحقق من عدم تكرار العنوان في نفس المتجر
     const existingSpec = specifications.find(spec => 
-      spec._id !== form._id && 
+      spec._id !== form.id && 
       (spec.titleAr === titleAr || spec.titleEn === titleEn)
     );
     

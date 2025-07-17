@@ -471,7 +471,11 @@
     "productVideo": "رابط فيديو المنتج",
     "product": "منتج",
     "deleteConfirmTitle": "تأكيد حذف المنتج",
-    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج؟"
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج؟",
+    "searchSpecifications": "البحث في المواصفات...",
+    "deleteSpecConfirmTitle": "تأكيد حذف المواصفة",
+    "deleteSpecConfirmMessage": "هل أنت متأكد من حذف هذه المواصفة؟",
+    "specification": "مواصفة"
   },
   "subcategories": {
     "title": "الفئات الفرعية",
@@ -625,9 +629,22 @@
     "manage": "تعديل شريط المتجر",
     "addButton": "إضافة شريط متجر",
     "searchPlaceholder": "ابحث عن شريط المتجر...",
-    "deleteConfirmTitle": "تأكيد حذف المنتج من الشريط",
-    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج من الشريط؟",
-    "product": "المنتج"
+    "deleteConfirmTitle": "تأكيد حذف الشريط",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا الشريط؟",
+    "slider": "الشريط",
+    "title": "العنوان",
+    "description": "الوصف",
+    "type": "النوع",
+    "image": "الصورة",
+    "video": "الفيديو",
+    "videoUrl": "رابط الفيديو",
+    "order": "الترتيب",
+    "active": "مفعل",
+    "inactive": "غير مفعل",
+    "views": "المشاهدات",
+    "clicks": "النقرات",
+    "activate": "تفعيل",
+    "deactivate": "إلغاء التفعيل"
   },
   "storeVideos": {
     "title": "فيديوهات المتجر",
@@ -877,8 +894,8 @@
     "save": "حفظ",
     "registerMerchant": "تسجيل التاجر",
     "createStore": "إنشاء المتجر",
-    "merchantStepDesc": "الخطوة 1: تسجيل حساب التاجر",
-    "storeStepDesc": "الخطوة 2: إنشاء المتجر",
+    "merchantStepDesc": "الخطوة 2: تسجيل حساب التاجر",
+    "storeStepDesc": "الخطوة 1: إنشاء المتجر",
     "merchantInfo": "معلومات التاجر",
     "merchantInfoDesc": "يرجى تقديم معلوماتك الشخصية لإنشاء حساب التاجر",
     "storeInfo": "معلومات المتجر",
@@ -907,9 +924,16 @@
     "addNewStore": "إضافة متجر جديد",
     "editModeDescription": "يمكنك تعديل معلومات المتجر الحالي",
     "updateStore": "تحديث المتجر",
+    "updateSuccess": "تم تحديث معلومات المتجر بنجاح!",
     "currentLogo": "اللوجو الحالي",
     "logoPreview": "معاينة اللوجو",
-    "link": "رابط"
+    "link": "رابط",
+    "noLogoSelected": "لم يتم اختيار لوجو",
+    "selectLogo": "اختيار اللوجو",
+    "selectedFile": "الملف المختار",
+    "fileSize": "حجم الملف",
+    "removeLogo": "حذف اللوجو",
+    "logoHelpText": "انقر على اللوجو لتغييره. الصيغ المدعومة: PNG, JPG, JPEG. الحد الأقصى للحجم: 5 ميجابايت."
   },
   "emailEnglishOnly": "البريد الإلكتروني يجب أن يحتوي فقط على أحرف إنجليزية وأرقام"
 } 

@@ -83,9 +83,14 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
     setFileCount(updatedFiles.length);
     setFileNames(updatedFiles.map(file => file.name));
     onChange(multiple ? updatedFiles : updatedFiles[0]);
+    // استبدال الملفات القديمة بالجديدة (ليس إضافتها)
+    setSelectedFiles(newFiles);
+    setFileCount(newFiles.length);
+    setFileNames(newFiles.map(file => file.name));
+    onChange(multiple ? newFiles : newFiles[0]);
 
-    // Generate previews for new files
-    const newPreviews: string[] = [...previews];
+    // استبدال الصور الموجودة بالصور الجديدة
+    const newPreviews: string[] = [];
     newFiles.forEach(file => {
       const reader = new FileReader();
       reader.onload = e => {
@@ -111,6 +116,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
     //CONSOLE.log('🔍 CustomFileInput removeFile - selectedFiles before:', selectedFiles);
     
     const newFiles = selectedFiles.filter((_, i) => i !== index);
+  const removeImage = (index: number) => {
     const newPreviews = previews.filter((_, i) => i !== index);
     const newFileNames = fileNames.filter((_, i) => i !== index);
     
@@ -119,9 +125,19 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
     
     setSelectedFiles(newFiles);
     setPreviews(newPreviews);
-    setFileNames(newFileNames);
-    setFileCount(newFiles.length);
-    onChange(multiple ? newFiles : null);
+    setFileCount(newPreviews.length);
+    
+    // إذا كانت الصورة من الملفات المحددة حديثاً
+    if (index < selectedFiles.length) {
+      const newFiles = selectedFiles.filter((_, i) => i !== index);
+      const newFileNames = fileNames.filter((_, i) => i !== index);
+      setSelectedFiles(newFiles);
+      setFileNames(newFileNames);
+      onChange(multiple ? newFiles : null);
+    } else {
+      // إذا كانت الصورة موجودة مسبقاً
+      onChange(null);
+    }
   };
 
   return (
@@ -156,7 +172,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    removeFile(index);
+                    removeImage(index);
                   }}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
