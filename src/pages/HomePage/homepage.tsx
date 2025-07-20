@@ -1,4 +1,3 @@
-// src/pages/Homepage.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +5,6 @@ import useLanguage from '../../hooks/useLanguage';
 import useDashboardStats from '../../hooks/useDashboardStats';
 import DashboardStatCard from './components/DashboardStatCard';
 import RevenueChart from './components/RevenueChart';
-import RecentOrders from './components/RecentOrders';
 import TopCategories from './components/TopCategories';
 import { 
   ShoppingCartIcon, 
@@ -185,22 +183,14 @@ const Homepage: React.FC = () => {
             />
           </motion.div>
 
-          {/* Recent Orders */}
+          {/* Top Categories */}
           <motion.div variants={itemVariants}>
-            <RecentOrders 
-              orders={stats?.recentOrders || []} 
+            <TopCategories 
+              categories={stats?.topCategories || []} 
               isLoading={loading} 
             />
           </motion.div>
         </div>
-
-        {/* Top Categories */}
-        <motion.div variants={itemVariants} className="mt-8">
-          <TopCategories 
-            categories={stats?.topCategories || []} 
-            isLoading={loading} 
-          />
-        </motion.div>
       </motion.div>
     </div>
   );

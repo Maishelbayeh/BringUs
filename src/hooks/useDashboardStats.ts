@@ -26,7 +26,7 @@ interface DashboardStats {
     date: string;
   }>;
   revenueChart: Array<{
-    month: string;
+    date: string;
     revenue: number;
     orders: number;
   }>;
@@ -103,7 +103,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
         const monthlyOrders = Math.floor(Math.random() * 200) + 50;
         
         return {
-          month: monthName,
+          date: monthName,
           revenue: monthlyRevenue,
           orders: monthlyOrders
         };
