@@ -128,7 +128,7 @@ const CustomersPage: React.FC = () => {
     if (customerToDelete && storeId) {
       const success = await deleteCustomer(storeId, customerToDelete._id);
       if (success) {
-        console.log('Customer deleted successfully');
+        //CONSOLE.log('Customer deleted successfully');
       }
       setCustomerToDelete(null);
     }

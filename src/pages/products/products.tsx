@@ -7,6 +7,7 @@ import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import PermissionModal from '../../components/common/PermissionModal';
 import { CustomTable } from '../../components/common/CustomTable';
+import VariantManager from './VariantManager';
 import * as XLSX from 'xlsx';
 import { initialSubcategories } from '../subcategories/subcategories';
 import useProducts from '../../hooks/useProducts';
@@ -49,6 +50,7 @@ const initialForm: {
   selectedSpecifications: string;
   colors: ColorVariant[];
   images: string[];
+  mainImage: string | null;
   productVideo: string;
 } = {
   nameAr: '',
@@ -77,6 +79,7 @@ const initialForm: {
   selectedSpecifications: '',
   colors: [],
   images: [],
+  mainImage: null,
   productVideo: '',
 };
 //-------------------------------------------- ProductsPage -------------------------------------------
@@ -96,6 +99,9 @@ const ProductsPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<'table' | 'tree'>('table');
+  const [showVariantsPopup, setShowVariantsPopup] = useState(false);
+  const [selectedProductVariants, setSelectedProductVariants] = useState<any[]>([]);
+  const [selectedProductInfo, setSelectedProductInfo] = useState<any | null>(null);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
@@ -110,7 +116,11 @@ const ProductsPage: React.FC = () => {
     deleteProduct,
     uploadProductImage,
     uploadProductImages,
-    validateProduct
+    uploadMainImage,
+    validateProduct,
+    addVariant,
+    deleteVariant,
+    updateVariant
   } = useProducts();
 
   const {
@@ -165,29 +175,62 @@ const ProductsPage: React.FC = () => {
     if (subcategoryIdParam) setSelectedSubcategoryId(subcategoryIdParam);
   }, [categoryIdParam, subcategoryIdParam]);
   //-------------------------------------------- filteredProducts -------------------------------------------
-  // اجمع كل الـ _id للمتغيرات من جميع المنتجات
-  const allVariantIds = Array.isArray(products)
-    ? products.reduce((acc: string[], product: any) => {
-        if (Array.isArray(product.variants) && product.variants.length > 0) {
-          acc.push(...product.variants.map((v: any) => (typeof v === 'object' ? v._id || v.id : v)));
-        }
-        return acc;
-      }, [])
-    : [];
-
+  // فلترة المنتجات لعرض المنتجات الأساسية فقط (غير المتغيرات)
   let filteredProducts = Array.isArray(products)
     ? products.filter(product => {
-        // استبعد المنتجات التي هي متغيرات (أي الـ _id الخاص بها موجود في allVariantIds)
         const productId = product._id || product.id;
-        const isVariant = allVariantIds.includes(productId);
+        
+        // تحقق من أن هذا المنتج ليس متغير لأي منتج آخر
+        const isVariantOfAnotherProduct = products.some(otherProduct => {
+          if (otherProduct._id === productId) return false; // نفس المنتج
+          if (Array.isArray(otherProduct.variants)) {
+            return otherProduct.variants.some((variant: any) => {
+              const variantId = typeof variant === 'object' ? variant._id || variant.id : variant;
+              return variantId === productId;
+            });
+          }
+          return false;
+        });
+        
         // فلترة حسب البحث والفئة
         const matchesCategory = selectedCategoryId ? product.category?._id === selectedCategoryId : true;
         const matchesSearch = isRTL
           ? product.nameAr.toLowerCase().includes(search.toLowerCase())
           : product.nameEn.toLowerCase().includes(search.toLowerCase());
-        return !isVariant && matchesCategory && matchesSearch;
+        
+        // عرض المنتج فقط إذا لم يكن متغير
+        const shouldShow = !isVariantOfAnotherProduct && matchesCategory && matchesSearch;
+        
+        // تحقق إضافي: تأكد من أن المنتج ليس متغير
+        // المنتج يعتبر متغير إذا كان موجود في قائمة variants لأي منتج آخر
+        
+        // تحقق إضافي: إذا كان المنتج لديه isParent: false، فهو متغير
+        // لكن المنتجات العادية (بدون متغيرات) لديها أيضاً isParent: false
+        // لذا نتحقق من أن المنتج ليس متغير لأي منتج آخر
+        const isVariantByParentFlag = product.isParent === false && isVariantOfAnotherProduct;
+        
+        // تحقق إضافي: المنتج يعتبر متغير إذا كان موجود في قائمة variants لأي منتج آخر
+        // أو إذا كان isParent: false وليس منتج عادي (hasVariants: false)
+        const isDefinitelyVariant = isVariantOfAnotherProduct || (product.isParent === false && product.hasVariants !== false);
+        
+        // Log for debugging
+        if (isVariantOfAnotherProduct) {
+          console.log(`🔍 Filtered out variant: ${product.nameEn} (${productId}) - found in variants list`);
+        }
+        if (isDefinitelyVariant) {
+          console.log(`🔍 Filtered out variant: ${product.nameEn} (${productId}) - isParent: ${product.isParent}, hasVariants: ${product.hasVariants}`);
+        }
+        
+        return shouldShow && !isDefinitelyVariant;
       })
     : [];
+  
+  // Log filtered results
+  console.log(`🔍 Total products: ${products?.length || 0}`);
+  console.log(`🔍 Filtered products: ${filteredProducts.length}`);
+  console.log(`🔍 Filtered product names:`, filteredProducts.map(p => p.nameEn));
+  console.log(`🔍 Products with variants:`, products?.filter(p => p.hasVariants).map(p => p.nameEn));
+  console.log(`🔍 Variant products:`, products?.filter(p => p.isParent === false).map(p => p.nameEn));
   if (sort === 'alpha') {
     filteredProducts = [...filteredProducts].sort((a, b) => (isRTL ? a.nameAr.localeCompare(b.nameAr) : a.nameEn.localeCompare(b.nameEn)));
   } else if (sort === 'newest') {
@@ -214,13 +257,14 @@ const ProductsPage: React.FC = () => {
   //-------------------------------------------- tableData -------------------------------------------
   const tableData = Array.isArray(filteredProducts) ? filteredProducts.map((product, index) => {
     // Log barcodes for debugging
-    console.log(`🔍 tableData - Product ${index + 1} barcodes:`, product.barcodes);
-    console.log(`🔍 tableData - Product ${index + 1} barcodes type:`, typeof product.barcodes);
-    console.log(`🔍 tableData - Product ${index + 1} barcodes is array:`, Array.isArray(product.barcodes));
+    //CONSOLE.log(`🔍 tableData - Product ${index + 1} barcodes:`, product.barcodes);
+    //CONSOLE.log(`🔍 tableData - Product ${index + 1} barcodes type:`, typeof product.barcodes);
+    //CONSOLE.log(`🔍 tableData - Product ${index + 1} barcodes is array:`, Array.isArray(product.barcodes));
     
     return {
       id: product._id || product.id,
-      image: product.mainImage || (product.images && product.images.length > 0 ? product.images[0] : DEFAULT_PRODUCT_IMAGE),
+      mainImage: product.mainImage || (product.images && product.images.length > 0 ? product.images[0] : DEFAULT_PRODUCT_IMAGE),
+      images: product.images || [],
       nameAr: product.nameAr,
       nameEn: product.nameEn,
     category: product.category ? (isRTL ? product.category.nameAr : product.category.nameEn) : '',
@@ -280,19 +324,66 @@ const ProductsPage: React.FC = () => {
           }
         }).join(', ');
       })(),
-    images: product.mainImage ? 1 : (product.images?.length || 0),
     colors: product.colors?.length || 0,
     originalProduct: product,
     };
   }) : [];
-  //-------------------------------------------- renderImage -------------------------------------------
-  const renderImage = (value: any, item: any) => {
+  //-------------------------------------------- renderMainImage -------------------------------------------
+  const renderMainImage = (value: any, item: any) => {
+    const mainImage = item.mainImage || (item.images && item.images.length > 0 ? item.images[0] : DEFAULT_PRODUCT_IMAGE);
     return (
-      <TableImage
-        src={value}
-        alt={isRTL ? item.nameAr : item.nameEn}
-        size="md"
-      />
+      <div className="flex justify-center">
+        <TableImage
+          src={mainImage}
+          alt={isRTL ? item.nameAr : item.nameEn}
+          size="md"
+        />
+      </div>
+    );
+  };
+
+  //-------------------------------------------- renderImages -------------------------------------------
+  const renderImages = (value: any, item: any) => {
+    const images = item.images || [];
+    const mainImage = item.mainImage;
+    
+    // فلترة الصور الإضافية فقط (بدون الصورة الرئيسية)
+    const additionalImages = images.filter((img: string) => 
+      img && img !== null && img !== undefined && img !== mainImage
+    );
+    
+    if (additionalImages.length === 0) {
+      return (
+        <div className="text-center text-gray-500 text-sm">
+          {isRTL ? 'لا توجد صور إضافية' : 'No Additional Images'}
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full">
+        <div className="grid grid-cols-3 gap-1">
+          {additionalImages.slice(0, 6).map((image: string, index: number) => (
+            <div key={index} className="relative group">
+              <img 
+                src={image} 
+                alt={`${isRTL ? 'صورة إضافية' : 'Additional Image'} ${index + 1}`}
+                className="w-12 h-12 object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer"
+                onClick={() => {
+                  // يمكن إضافة modal لعرض الصورة بحجم أكبر
+                  window.open(image, '_blank');
+                }}
+                title={isRTL ? 'انقر لعرض الصورة' : 'Click to view image'}
+              />
+            </div>
+          ))}
+        </div>
+        {additionalImages.length > 6 && (
+          <div className="text-center text-xs text-gray-500 mt-1">
+            +{additionalImages.length - 6} {isRTL ? 'أخرى' : 'more'}
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -361,9 +452,9 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- renderBarcode -------------------------------------------
   const renderBarcode = (value: any, item: any) => {
-    console.log('🔍 renderBarcode - value:', value);
-    console.log('🔍 renderBarcode - value type:', typeof value);
-    console.log('🔍 renderBarcode - value is array:', Array.isArray(value));
+    //CONSOLE.log('🔍 renderBarcode - value:', value);
+    //CONSOLE.log('🔍 renderBarcode - value type:', typeof value);
+    //CONSOLE.log('🔍 renderBarcode - value is array:', Array.isArray(value));
     
     if (!value || value.length === 0) {
       return (
@@ -516,6 +607,7 @@ const ProductsPage: React.FC = () => {
       descriptionAr: originalProduct.descriptionAr || '',
       descriptionEn: originalProduct.descriptionEn || '',
       maintainStock,
+      
       unitId: unitId ? String(unitId) : '',
       categoryId: categoryId ? String(categoryId) : '',
       subcategoryId: subcategoryId ? String(subcategoryId) : '',
@@ -539,8 +631,8 @@ const ProductsPage: React.FC = () => {
       stock: 0,
     };
     
-    console.log('🔍 handleAddVariant - Creating variant form:', newForm);
-    console.log('🔍 handleAddVariant - Parent product ID:', originalProduct._id);
+    //CONSOLE.log('🔍 handleAddVariant - Creating variant form:', newForm);
+    //CONSOLE.log('🔍 handleAddVariant - Parent product ID:', originalProduct._id);
     
     // تعيين المنتج الأصلي كـ parent product للمتغير
     setEditProduct(originalProduct);
@@ -600,10 +692,93 @@ const ProductsPage: React.FC = () => {
     }
   };
 
+  //-------------------------------------------- handleShowVariants -------------------------------------------
+  const handleShowVariants = (item: any) => {
+    // جلب بيانات المنتج الأصلية
+    const product = item.originalProduct || item;
+    setSelectedProductInfo(product);
+
+    // المتغيرات (variants) قد تكون مصفوفة أو فارغة
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      setSelectedProductVariants(product.variants);
+    } else {
+      setSelectedProductVariants([]);
+    }
+    setShowVariantsPopup(true);
+  };
+
+  //-------------------------------------------- handleEditVariant -------------------------------------------
+  const handleEditVariant = (variant: any) => {
+    setEditProduct(variant);
+    setDrawerMode('variant');
+    setForm({
+      ...initialForm,
+      ...variant,
+      // Ensure colors is always an array of {id, colors}
+      colors: Array.isArray(variant.colors) ? variant.colors : [],
+      // Ensure images is always an array
+      images: Array.isArray(variant.images) ? variant.images : [],
+      mainImage: variant.mainImage || null,
+      // Add any other fields you want to ensure are present
+    });
+    setShowDrawer(true);
+  };
+
+  //-------------------------------------------- handleDeleteVariant -------------------------------------------
+  const handleDeleteVariant = async (variant: any) => {
+    try {
+      if (!selectedProductInfo) {
+        console.error('❌ No parent product selected');
+        return;
+      }
+
+      const confirmed = window.confirm(
+        isRTL 
+          ? `هل أنت متأكد من حذف المتغير "${variant.nameAr || variant.nameEn}"؟`
+          : `Are you sure you want to delete the variant "${variant.nameAr || variant.nameEn}"?`
+      );
+
+      if (!confirmed) return;
+
+      console.log('🔍 handleDeleteVariant - Deleting variant:', variant._id, 'from product:', selectedProductInfo._id);
+      
+      await deleteVariant(selectedProductInfo._id, variant._id);
+      
+      // Update the variants list
+      setSelectedProductVariants(prev => prev.filter(v => v._id !== variant._id));
+      
+      // Show success message
+      if (isRTL) {
+        alert('تم حذف المتغير بنجاح');
+      } else {
+        alert('Variant deleted successfully');
+      }
+    } catch (error) {
+      console.error('❌ handleDeleteVariant - Error:', error);
+      if (isRTL) {
+        alert('حدث خطأ أثناء حذف المتغير');
+      } else {
+        alert('Error deleting variant');
+      }
+    }
+  };
+
+  //-------------------------------------------- renderProductId -------------------------------------------
+  const renderProductId = (value: any, item: any) => (
+    <button
+      className="text-blue-600 underline hover:text-blue-800 cursor-pointer"
+      onClick={() => handleShowVariants(item)}
+      title={isRTL ? 'عرض متغيرات المنتج' : 'Show Product Variants'}
+    >
+      {value}
+    </button>
+  );
+
   //-------------------------------------------- columns -------------------------------------------
   const columns = [
-    { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const },
-    { key: 'image', label: { ar: 'الصورة', en: 'Image' }, type: 'image' as const, render: renderImage },
+    { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const, render: renderProductId },
+    { key: 'mainImage', label: { ar: 'الصورة الرئيسية', en: 'Main Image' }, type: 'image' as const, render: renderMainImage },
+    { key: 'images', label: { ar: 'الصور الإضافية', en: 'Additional Images' }, type: 'text' as const, render: renderImages },
     { key: isRTL ? 'nameAr' : 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
     { key: isRTL ? 'descriptionAr' : 'descriptionEn', label: { ar: 'الوصف', en: 'Description' }, type: 'text' as const },
     { key: 'category', label: { ar: 'الفئة', en: 'Category' }, type: 'text' as const },
@@ -618,13 +793,12 @@ const ProductsPage: React.FC = () => {
     { key: 'specifications', label: { ar: 'المواصفات', en: 'Specifications' }, type: 'text' as const, render: renderSpecifications },
     { key: 'barcodes', label: { ar: 'الباركود', en: 'Barcode' }, type: 'text' as const, render: renderBarcode },
     { key: 'variantStatus', label: { ar: 'النوع', en: 'Type' }, type: 'text' as const, render: renderVariantStatus },
-    { key: 'images', label: { ar: 'عدد الصور', en: 'Images Count' }, type: 'number' as const },
     { key: 'colors', label: { ar: 'عدد الألوان', en: 'Colors Count' }, type: 'number' as const },
     { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text' as const, render: renderActions, showControls: false },
   ];
   //-------------------------------------------- handleFormChange -------------------------------------------
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    console.log('🔍 handleFormChange:', { name: e.target.name, value: e.target.value });
+    //CONSOLE.log('🔍 handleFormChange:', { name: e.target.name, value: e.target.value });
     
     if (e.target.name === 'maintainStock') {
       if (e.target.value === 'N') {
@@ -665,7 +839,18 @@ const ProductsPage: React.FC = () => {
       const barcodesArray = Array.isArray(barcodesValue) ? barcodesValue : [barcodesValue];
       
       const newForm = { ...form, barcodes: barcodesArray };
-      console.log('🔍 handleFormChange - Updated barcodes:', newForm.barcodes);
+      //CONSOLE.log('🔍 handleFormChange - Updated barcodes:', newForm.barcodes);
+      setForm(newForm);
+    } else if (e.target.name === 'mainImage') {
+      // التعامل مع الصورة الأساسية
+      //CONSOLE.log('🔍 handleFormChange - Updating mainImage:', e.target.value);
+      //CONSOLE.log('🔍 handleFormChange - mainImage type:', typeof e.target.value);
+      //CONSOLE.log('🔍 handleFormChange - mainImage === null:', e.target.value === null);
+      //CONSOLE.log('🔍 handleFormChange - mainImage === undefined:', e.target.value === undefined);
+      //CONSOLE.log('🔍 handleFormChange - mainImage === empty string:', e.target.value === '');
+      const newForm = { ...form, mainImage: e.target.value };
+      //CONSOLE.log('🔍 handleFormChange - Updated mainImage:', newForm.mainImage);
+      //CONSOLE.log('🔍 handleFormChange - Updated mainImage type:', typeof newForm.mainImage);
       setForm(newForm);
     } else {
       // التعامل مع الحقول الأخرى
@@ -676,17 +861,17 @@ const ProductsPage: React.FC = () => {
 
   //-------------------------------------------- handleProductLabelsChange -------------------------------------------
   const handleTagsChange = (values: string[]) => {
-    console.log('🔍 handleTagsChange:', values);
+    //CONSOLE.log('🔍 handleTagsChange:', values);
     const newForm = { ...form, tags: values };
-    console.log('🔍 handleTagsChange - newForm.barcodes:', newForm.barcodes);
+    //CONSOLE.log('🔍 handleTagsChange - newForm.barcodes:', newForm.barcodes);
     setForm(newForm);
   };
   //-------------------------------------------- handleImageChange -------------------------------------------
   const handleImageChange = async (files: File | File[] | null) => {
-    console.log('🔍 handleImageChange:', files);
+    //CONSOLE.log('🔍 handleImageChange:', files);
     if (!files) {
       const newForm = { ...form, images: [] };
-      console.log('🔍 handleImageChange (no files) - newForm.barcodes:', newForm.barcodes);
+      //CONSOLE.log('🔍 handleImageChange (no files) - newForm.barcodes:', newForm.barcodes);
       setForm(newForm);
       return;
     }
@@ -699,17 +884,50 @@ const ProductsPage: React.FC = () => {
       
       // تحديث النموذج بالروابط الجديدة
       const newForm = { ...form, images: uploadedUrls };
-      console.log('🔍 handleImageChange - newForm.barcodes:', newForm.barcodes);
+      //CONSOLE.log('🔍 handleImageChange - newForm.barcodes:', newForm.barcodes);
       setForm(newForm);
       
-      console.log('✅ Images uploaded to Cloudflare:', uploadedUrls);
+      //CONSOLE.log('✅ Images uploaded to Cloudflare:', uploadedUrls);
     } catch (error) {
-      console.error('❌ Error uploading images:', error);
+      //CONSOLE.error('❌ Error uploading images:', error);
       // في حالة الخطأ، نستخدم الروابط المحلية كـ fallback
       const fileArray = Array.isArray(files) ? files : [files];
       const imageUrls = fileArray.map(file => URL.createObjectURL(file));
       const newForm = { ...form, images: imageUrls };
-      console.log('🔍 handleImageChange (fallback) - newForm.barcodes:', newForm.barcodes);
+      //CONSOLE.log('🔍 handleImageChange (fallback) - newForm.barcodes:', newForm.barcodes);
+      setForm(newForm);
+    }
+  };
+
+  //-------------------------------------------- handleMainImageChange -------------------------------------------
+  const handleMainImageChange = async (file: File | null) => {
+    console.log('🔍 handleMainImageChange called with file:', file);
+    if (!file) {
+      console.log("no files");
+      const newForm = { ...form, mainImage: null };
+      console.log('🔍 handleMainImageChange (no file) - newForm:', newForm);
+      setForm(newForm);
+      return;
+    }
+
+    try {
+      console.log('🔍 Starting main image upload...');
+      // رفع الصورة الرئيسية إلى Cloudflare
+      const uploadedUrl = await uploadMainImage(file);
+      console.log('🔍 Upload successful, URL:', uploadedUrl);
+      
+      // تحديث النموذج بالرابط الجديد
+      const newForm = { ...form, mainImage: uploadedUrl };
+      console.log('🔍 handleMainImageChange - Updated form:', newForm);
+      setForm(newForm);
+      
+      console.log('✅ Main image uploaded to Cloudflare:', uploadedUrl);
+    } catch (error) {
+      console.error('❌ Error uploading main image:', error);
+      // في حالة الخطأ، نستخدم الرابط المحلي كـ fallback
+      const imageUrl = URL.createObjectURL(file);
+      const newForm = { ...form, mainImage: imageUrl };
+      console.log('🔍 handleMainImageChange (fallback) - newForm:', newForm);
       setForm(newForm);
     }
   };
@@ -717,10 +935,10 @@ const ProductsPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('🔍 handleSubmit - form data:', form);
-    console.log('🔍 handleSubmit - form.barcodes:', form.barcodes);
-    console.log('🔍 handleSubmit - form.barcodes type:', typeof form.barcodes);
-    console.log('🔍 handleSubmit - form.barcodes is array:', Array.isArray(form.barcodes));
+    //CONSOLE.log('🔍 handleSubmit - form data:', form);
+    //CONSOLE.log('🔍 handleSubmit - form.barcodes:', form.barcodes);
+    //CONSOLE.log('🔍 handleSubmit - form.barcodes type:', typeof form.barcodes);
+    //CONSOLE.log('🔍 handleSubmit - form.barcodes is array:', Array.isArray(form.barcodes));
     
     try {
      
@@ -748,37 +966,41 @@ const ProductsPage: React.FC = () => {
           ? form.colors.map((variant: any) => Array.isArray(variant.colors) ? variant.colors : [])
           : [],
         images: form.images || [],
+        mainImage: form.mainImage || null,
         isActive: true,
       };
 
-      console.log('🔍 handleSubmit - productData:', productData);
-      console.log('🔍 handleSubmit - productData.barcodes:', productData.barcodes);
-      console.log('🔍 handleSubmit - productData.barcodes type:', typeof productData.barcodes);
-      console.log('🔍 handleSubmit - productData.barcodes is array:', Array.isArray(productData.barcodes));
-      console.log('🔍 handleSubmit - productData.barcodes length:', Array.isArray(productData.barcodes) ? productData.barcodes.length : 'N/A');
+      //CONSOLE.log('🔍 handleSubmit - productData:', productData);
+      //CONSOLE.log('🔍 handleSubmit - productData.mainImage:', productData.mainImage);
+      //CONSOLE.log('🔍 handleSubmit - productData.mainImage type:', typeof productData.mainImage);
+      //CONSOLE.log('🔍 handleSubmit - productData.barcodes:', productData.barcodes);
+      //CONSOLE.log('🔍 handleSubmit - productData.barcodes type:', typeof productData.barcodes);
+      //CONSOLE.log('🔍 handleSubmit - productData.barcodes is array:', Array.isArray(productData.barcodes));
+      //CONSOLE.log('🔍 handleSubmit - productData.barcodes length:', Array.isArray(productData.barcodes) ? productData.barcodes.length : 'N/A');
 
       // Debug: طباعة معلومات editProduct
-      console.log('🔍 handleSubmit - editProduct:', editProduct);
-      console.log('🔍 handleSubmit - editProduct._id:', editProduct?._id);
-      console.log('🔍 handleSubmit - editProduct.id:', editProduct?.id);
-      console.log('🔍 handleSubmit - editId for validation:', editProduct?._id || editProduct?.id);
+      //CONSOLE.log('🔍 handleSubmit - editProduct:', editProduct);
+      //CONSOLE.log('🔍 handleSubmit - editProduct._id:', editProduct?._id);
+      //CONSOLE.log('🔍 handleSubmit - editProduct.id:', editProduct?.id);
+      //CONSOLE.log('🔍 handleSubmit - editId for validation:', editProduct?._id || editProduct?.id);
       
       // التحقق من صحة البيانات
       const errors = validateProduct(productData, isRTL, editProduct?._id || editProduct?.id);
       if (Object.keys(errors).length > 0) {
-        console.error('Validation errors:', errors);
+        //CONSOLE.error('Validation errors:', errors);
         return;
       }
 
       // حفظ المنتج
       const editId = editProduct?._id || editProduct?.id;
-      console.log('🔍 handleSubmit - editId:', editId);
-      console.log('🔍 handleSubmit - drawerMode:', drawerMode);
+      //CONSOLE.log('🔍 handleSubmit - editId:', editId);
+      //CONSOLE.log('🔍 handleSubmit - drawerMode:', drawerMode);
       
       if (drawerMode === 'variant') {
-        // إنشاء متغير جديد
-        console.log('🔍 handleSubmit - Creating variant for parent product:', editProduct);
-        await saveProduct(productData, null, isRTL); // إنشاء منتج جديد كمتغير
+        if (!editProduct?._id) {
+          throw new Error('Variant ID is missing');
+        }
+        await updateVariant(editProduct.parentProductId || editProduct.parent || editProduct.productId || editProduct._id, editProduct._id, form);
       } else {
         // تعديل أو إنشاء منتج عادي
         await saveProduct(productData, editId, isRTL);
@@ -787,11 +1009,11 @@ const ProductsPage: React.FC = () => {
       setShowDrawer(false);
       setEditProduct(null);
       setDrawerMode('add');
-      console.log('🔍 handleSubmit - Resetting form to initialForm');
-      console.log('🔍 handleSubmit - Setting form with initialForm.barcodes:', initialForm.barcodes);
+      //CONSOLE.log('🔍 handleSubmit - Resetting form to initialForm');
+      //CONSOLE.log('🔍 handleSubmit - Setting form with initialForm.barcodes:', initialForm.barcodes);
       setForm(initialForm);
     } catch (error) {
-      console.error('Error saving product:', error);
+      //CONSOLE.error('Error saving product:', error);
     }
   };
   //-------------------------------------------- handleEdit -------------------------------------------
@@ -832,12 +1054,14 @@ const ProductsPage: React.FC = () => {
     const specificationValues = originalProduct.specificationValues || [];
     
     // استخدام قيم المواصفات المختارة إذا كانت موجودة
-    console.log('🔍 handleEdit - specificationValues:', specificationValues);
-    console.log('🔍 handleEdit - specifications:', specifications);
-    console.log('🔍 handleEdit - loaded specifications from hook:', specifications);
-    console.log('🔍 handleEdit - originalProduct.barcodes:', originalProduct.barcodes);
-    console.log('🔍 handleEdit - originalProduct.barcodes type:', typeof originalProduct.barcodes);
-    console.log('🔍 handleEdit - originalProduct.barcodes is array:', Array.isArray(originalProduct.barcodes));
+    //CONSOLE.log('🔍 handleEdit - specificationValues:', specificationValues);
+    //CONSOLE.log('🔍 handleEdit - specifications:', specifications);
+    //CONSOLE.log('🔍 handleEdit - loaded specifications from hook:', specifications);
+    //CONSOLE.log('🔍 handleEdit - originalProduct.mainImage:', originalProduct.mainImage);
+    //CONSOLE.log('🔍 handleEdit - originalProduct.mainImage type:', typeof originalProduct.mainImage);
+    //CONSOLE.log('🔍 handleEdit - originalProduct.barcodes:', originalProduct.barcodes);
+    //CONSOLE.log('🔍 handleEdit - originalProduct.barcodes type:', typeof originalProduct.barcodes);
+    //CONSOLE.log('🔍 handleEdit - originalProduct.barcodes is array:', Array.isArray(originalProduct.barcodes));
     
     const selectedSpecifications = Array.isArray(specificationValues) && specificationValues.length > 0
       ? specificationValues.map((spec: any) => {
@@ -889,7 +1113,7 @@ const ProductsPage: React.FC = () => {
           })
         : [];
     
-    console.log('🔍 handleEdit - Final selectedSpecifications:', selectedSpecifications);
+    //CONSOLE.log('🔍 handleEdit - Final selectedSpecifications:', selectedSpecifications);
     
     const newForm = {
       ...originalProduct,
@@ -914,24 +1138,29 @@ const ProductsPage: React.FC = () => {
       newBarcode: '',
     };
     
-    console.log('🔍 newForm.barcodes:', newForm.barcodes);
-    console.log('🔍 newForm.barcodes type:', typeof newForm.barcodes);
-    console.log('🔍 newForm.barcodes is array:', Array.isArray(newForm.barcodes));
+    //CONSOLE.log('🔍 newForm.barcodes:', newForm.barcodes);
+    //CONSOLE.log('🔍 newForm.barcodes type:', typeof newForm.barcodes);
+    //CONSOLE.log('🔍 newForm.barcodes is array:', Array.isArray(newForm.barcodes));
+    //CONSOLE.log('🔍 newForm.mainImage:', newForm.mainImage);
+    //CONSOLE.log('🔍 newForm.mainImage type:', typeof newForm.mainImage);
+    //CONSOLE.log('🔍 newForm.mainImage === null:', newForm.mainImage === null);
     
-    console.log('🔍 Edit Form Data:', {
-      colors: formColors,
-      productLabels: productLabelIds,
-      specifications: selectedSpecifications,
-      selectedSpecificationsJSON: JSON.stringify(selectedSpecifications),
-      images: originalProduct.images,
-      mainImage: originalProduct.mainImage,
-      barcodes: originalProduct.barcodes,
-      barcodesType: typeof originalProduct.barcodes,
-      barcodesIsArray: Array.isArray(originalProduct.barcodes),
-      barcodesLength: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.length : 'N/A'
-    });
+    // //CONSOLE.log('🔍 Edit Form Data:', {
+    //   colors: formColors,
+    //   productLabels: productLabelIds,
+    //   specifications: selectedSpecifications,
+    //   selectedSpecificationsJSON: JSON.stringify(selectedSpecifications),
+    //   images: originalProduct.images,
+    //   mainImage: originalProduct.mainImage,
+    //   mainImageType: typeof originalProduct.mainImage,
+    //   mainImageIsNull: originalProduct.mainImage === null,
+    //   barcodes: originalProduct.barcodes,
+    //   barcodesType: typeof originalProduct.barcodes,
+    //   barcodesIsArray: Array.isArray(originalProduct.barcodes),
+    //   barcodesLength: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.length : 'N/A'
+    // });
     
-    console.log('🔍 handleEdit - Setting form with newForm.barcodes:', newForm.barcodes);
+    //CONSOLE.log('🔍 handleEdit - Setting form with newForm.barcodes:', newForm.barcodes);
     setForm(newForm);
     setEditProduct(originalProduct);
     setDrawerMode('edit');
@@ -939,7 +1168,7 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- handleAddClick -------------------------------------------
   const handleAddClick = () => {
-    console.log('🔍 handleAddClick - initialForm.barcodes:', initialForm.barcodes);
+    //CONSOLE.log('🔍 handleAddClick - initialForm.barcodes:', initialForm.barcodes);
     setForm(initialForm);
     setEditProduct(null);
     setDrawerMode('add');
@@ -947,11 +1176,11 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- handleDrawerClose -------------------------------------------
   const handleDrawerClose = () => {
-    console.log('🔍 handleDrawerClose - Resetting form');
+    //CONSOLE.log('🔍 handleDrawerClose - Resetting form');
     setShowDrawer(false);
     setEditProduct(null);
     setDrawerMode('add');
-    console.log('🔍 handleDrawerClose - Setting form with initialForm.barcodes:', initialForm.barcodes);
+    //CONSOLE.log('🔍 handleDrawerClose - Setting form with initialForm.barcodes:', initialForm.barcodes);
     setForm(initialForm);
   };
   //-------------------------------------------- handleDelete -------------------------------------------
@@ -968,7 +1197,7 @@ const ProductsPage: React.FC = () => {
         await deleteProduct(productId);
         setSelectedProduct(null);
       } catch (error) {
-        console.error('Error deleting product:', error);
+        //CONSOLE.error('Error deleting product:', error);
       }
     }
     setShowDeleteModal(false);
@@ -1058,7 +1287,7 @@ const ProductsPage: React.FC = () => {
           onEdit={handleEdit}
           onAddVariant={handleAddVariant}
           onDelete={handleDelete}
-          renderImage={renderImage}
+          renderImage={renderMainImage}
           renderPrice={renderPrice}
           renderStock={renderStock}
           renderVisibility={renderVisibility}
@@ -1087,6 +1316,8 @@ const ProductsPage: React.FC = () => {
         onFormChange={handleFormChange}
         onTagsChange={handleTagsChange}
         onImageChange={handleImageChange}
+        onMainImageChange={handleMainImageChange}
+        uploadMainImage={uploadMainImage}
         onSubmit={handleSubmit}
         categories={categories as any}
         tags={productLabels}
@@ -1105,6 +1336,21 @@ const ProductsPage: React.FC = () => {
         itemType={t('products.product') || 'product'}
         isRTL={isRTL}
         severity="danger"
+      />
+
+      {/* ------------------------------------------- Variant Manager ------------------------------------------- */}
+      <VariantManager
+        isOpen={showVariantsPopup}
+        onClose={() => setShowVariantsPopup(false)}
+        variants={selectedProductVariants}
+        parentProduct={selectedProductInfo}
+        onDeleteVariant={handleDeleteVariant}
+        onUpdateVariant={updateVariant}
+        onAddVariant={() => {
+          // TODO: Implement add variant functionality
+          console.log('🔍 Add variant clicked for product:', selectedProductInfo?._id);
+        }}
+        isRTL={isRTL}
       />
     </div>
   );

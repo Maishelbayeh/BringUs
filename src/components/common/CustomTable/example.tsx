@@ -101,19 +101,19 @@ const ExampleTable = () => {
   ];
 
   const handleFilteredDataChange = (filteredData: any[]) => {
-    console.log('Filtered data changed:', filteredData);
+    //CONSOLE.log('Filtered data changed:', filteredData);
   };
 
   const handleColumnsChange = (updatedColumns: any[]) => {
-    console.log('Columns changed:', updatedColumns);
+    //CONSOLE.log('Columns changed:', updatedColumns);
   };
 
   const handleEdit = (item: any) => {
-    console.log('Edit item:', item);
+    //CONSOLE.log('Edit item:', item);
   };
 
   const handleDelete = (item: any) => {
-    console.log('Delete item:', item);
+    //CONSOLE.log('Delete item:', item);
   };
 
   return (

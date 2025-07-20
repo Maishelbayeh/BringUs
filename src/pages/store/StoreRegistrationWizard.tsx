@@ -211,7 +211,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
               }));
             }
           } catch (error) {
-            console.error('Error checking email:', error);
+            //CONSOLE.error('Error checking email:', error);
           } finally {
             setIsCheckingEmail(false);
           }
@@ -297,7 +297,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   const handleStoreSubmit = async () => {
     // التحقق من صحة نموذج المتجر
     if (!storeData || !isStoreValid) {
-      console.log('❌ نموذج المتجر يحتوي على أخطاء، لا يمكن الانتقال للخطوة التالية');
+      //CONSOLE.log('❌ نموذج المتجر يحتوي على أخطاء، لا يمكن الانتقال للخطوة التالية');
       return;
     }
     
@@ -318,7 +318,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       const store = await createStore(storeDataWithoutLogo);
       
       if (!store) {
-        console.error('❌ فشل في إنشاء المتجر');
+        //CONSOLE.error('❌ فشل في إنشاء المتجر');
+      
         return;
       }
       
@@ -351,7 +352,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       setCurrentStep(2);
       
     } catch (error) {
-      console.error('❌ خطأ في إنشاء المتجر:', error);
+      //CONSOLE.error('❌ خطأ في إنشاء المتجر:', error);
+     
     }
   };
 
@@ -414,11 +416,11 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
     const isValid = validateMerchantForm();
     
     if (!isValid) {
-      console.log('❌ نموذج المالك يحتوي على أخطاء، لا يمكن إكمال التسجيل');
+      //CONSOLE.log('❌ نموذج المالك يحتوي على أخطاء، لا يمكن إكمال التسجيل');
       return;
     }
     
-    console.log('✅ نموذج المالك صحيح، جاري إكمال التسجيل...');
+    //CONSOLE.log('✅ نموذج المالك صحيح، جاري إكمال التسجيل...');
     
     // إكمال العملية
     await handleFinalSubmit();
@@ -451,33 +453,33 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         }
       };
 
-      console.log('Created Store:', storeData.createdStore);
-      console.log('Store ID being sent:', storeData.createdStore.id || storeData.createdStore._id);
-      console.log('Merchant Data with Store ID:', merchantDataForBackend);
+      //CONSOLE.log('Created Store:', storeData.createdStore);
+      //CONSOLE.log('Store ID being sent:', storeData.createdStore.id || storeData.createdStore._id);
+      //CONSOLE.log('Merchant Data with Store ID:', merchantDataForBackend);
 
       // 1. تسجيل المستخدم مع store ID
-      console.log('🔄 جاري تسجيل المستخدم مع store ID...');
+      //CONSOLE.log('🔄 جاري تسجيل المستخدم مع store ID...');
       const user = await createUser(merchantDataForBackend);
       
       if (!user) {
-        console.error('❌ فشل في تسجيل المستخدم');
+        //CONSOLE.error('❌ فشل في تسجيل المستخدم');
         return;
       }
 
       // 2. ربط المستخدم بالمتجر كمالك
-      console.log('🔄 جاري ربط المستخدم بالمتجر...');
+      //CONSOLE.log('🔄 جاري ربط المستخدم بالمتجر...');
       
       // التأكد من استخدام الـ ID الصحيح
       const userId = user.id;
       const storeId = storeData.createdStore.id || storeData.createdStore._id;
       
-      console.log('🔍 User ID:', { id: user.id, finalId: userId });
-      console.log('🔍 Store ID:', { id: storeData.createdStore.id, finalId: storeId });
+      //CONSOLE.log('🔍 User ID:', { id: user.id, finalId: userId });
+      //CONSOLE.log('🔍 Store ID:', { id: storeData.createdStore.id, finalId: storeId });
       
       if (!userId || !storeId) {
-        console.error('❌ خطأ: لم يتم العثور على ID للمستخدم أو المتجر');
-        console.error('User:', user);
-        console.error('Store:', storeData.createdStore);
+        //CONSOLE.error('❌ خطأ: لم يتم العثور على ID للمستخدم أو المتجر');
+        //CONSOLE.error('User:', user);
+        //CONSOLE.error('Store:', storeData.createdStore);
         alert('خطأ في البيانات. يرجى المحاولة مرة أخرى.');
         return;
       }
@@ -502,18 +504,18 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       const owner = await createOwner(ownerData);
       
       if (!owner) {
-        console.error('❌ فشل في ربط المستخدم بالمتجر');
+        //CONSOLE.error('❌ فشل في ربط المستخدم بالمتجر');
         alert('فشل في ربط المستخدم بالمتجر. يرجى المحاولة مرة أخرى.');
         return;
       }
       
-      console.log('✅ تم ربط المستخدم بالمتجر بنجاح:', owner);
+      //CONSOLE.log('✅ تم ربط المستخدم بالمتجر بنجاح:', owner);
 
       // نجاح العملية
-      console.log('🎉 تم التسجيل الكامل بنجاح!');
-      console.log('User:', user);
-      console.log('Store:', storeData.createdStore);
-      console.log('Owner:', owner);
+      //CONSOLE.log('🎉 تم التسجيل الكامل بنجاح!');
+      //CONSOLE.log('User:', user);
+      //CONSOLE.log('Store:', storeData.createdStore);
+      //CONSOLE.log('Owner:', owner);
       
       alert('تم التسجيل بنجاح!');
       
@@ -542,7 +544,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       setMerchantErrors({});
       setStoreData(null);
     } catch (error) {
-      console.error('❌ خطأ في التسجيل:', error);
+      //CONSOLE.error('❌ خطأ في التسجيل:', error);
       alert('حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.');
     }
   };

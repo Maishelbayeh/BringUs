@@ -54,7 +54,7 @@ const DeliveryMethodsExample: React.FC = () => {
         });
       }
     } catch (err) {
-      console.error('Error creating delivery method:', err);
+      //CONSOLE.error('Error creating delivery method:', err);
     }
   };
 

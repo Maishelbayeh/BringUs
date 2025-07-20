@@ -66,9 +66,9 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit,  lang
   // Expose handleSubmit function to parent
   useImperativeHandle(ref, () => ({
     handleSubmit: () => {
-      console.log('PaymentForm handleSubmit called');
+      //CONSOLE.log('PaymentForm handleSubmit called');
       if (validateForm()) {
-        console.log('PaymentForm validation passed, submitting...');
+        //CONSOLE.log('PaymentForm validation passed, submitting...');
         const logoUrl = file ? URL.createObjectURL(file) : method?.logoUrl;
         
         const newMethod: PaymentMethod = {
@@ -91,10 +91,10 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit,  lang
           updatedAt: new Date().toISOString(),
         };
 
-        console.log('Submitting payment method:', newMethod);
+        //CONSOLE.log('Submitting payment method:', newMethod);
         onSubmit(newMethod);
       } else {
-        console.log('PaymentForm validation failed');
+        //CONSOLE.log('PaymentForm validation failed');
       }
     }
   }));
@@ -174,22 +174,22 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit,  lang
   // Validate form whenever formData changes
   useEffect(() => {
     const isValid = validateForm();
-    console.log('PaymentForm useEffect - validation result:', isValid);
+    //CONSOLE.log('PaymentForm useEffect - validation result:', isValid);
   }, [formData, file]);
 
   // Initial validation when component mounts or method changes
   useEffect(() => {
-    console.log('PaymentForm initial validation');
+    //CONSOLE.log('PaymentForm initial validation');
     const isValid = validateForm();
     
     // For edit mode, if we have a method, the form should be valid by default
     if (isEditMode && method) {
-      console.log('Edit mode with method - setting form as valid');
+      //CONSOLE.log('Edit mode with method - setting form as valid');
       if (onValidationChange) {
         onValidationChange(true);
       }
     } else {
-      console.log('New mode or no method - validation result:', isValid);
+      //CONSOLE.log('New mode or no method - validation result:', isValid);
       if (onValidationChange) {
         onValidationChange(isValid);
       }
@@ -218,7 +218,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit,  lang
     
     const isValid = Object.keys(validationErrors).length === 0;
     
-    console.log('PaymentForm validation result:', isValid, validationErrors);
+    //CONSOLE.log('PaymentForm validation result:', isValid, validationErrors);
     
     if (onValidationChange) {
       onValidationChange(isValid);

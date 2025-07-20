@@ -126,7 +126,7 @@ export const useCustomers = (): UseCustomersReturn => {
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
-      console.error('Error fetching customers:', err);
+      //CONSOLE.error('Error fetching customers:', err);
     } finally {
       setLoading(false);
     }
@@ -145,7 +145,7 @@ export const useCustomers = (): UseCustomersReturn => {
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
-      console.error('Error deleting customer:', err);
+      //CONSOLE.error('Error deleting customer:', err);
       return false;
     }
   };
@@ -165,7 +165,7 @@ export const useCustomers = (): UseCustomersReturn => {
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
-      console.error('Error updating customer:', err);
+      //CONSOLE.error('Error updating customer:', err);
       return false;
     }
   };
@@ -183,7 +183,7 @@ export const useCustomers = (): UseCustomersReturn => {
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
-      console.error('Error creating customer:', err);
+      //CONSOLE.error('Error creating customer:', err);
       return false;
     }
   };

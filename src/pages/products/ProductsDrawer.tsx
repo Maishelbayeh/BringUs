@@ -34,18 +34,21 @@ interface ProductsDrawerProps {
     productSpecifications: string[];
     colors: ColorVariant[];
     images: string[];
+    mainImage: string | null;
     productVideo: string;
   };
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onTagsChange: (values: string[]) => void;
   onImageChange: (files: File | File[] | null) => void;
+  onMainImageChange: (file: File | null) => void;
+  uploadMainImage?: (file: File) => Promise<string>;
   onSubmit: (e: React.FormEvent) => void;
   categories?: { id: number; nameAr: string; nameEn: string }[];
   tags?: any[];
   units?: any[];
   specifications?: any[];
 }
-const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onSubmit, categories = [], tags = [], units = [], specifications = [] }) => {
+const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onMainImageChange, uploadMainImage, onSubmit, categories = [], tags = [], units = [], specifications = [] }) => {
   if (!open) return null;
   
   //-------------------------------------------- return ------------------------------------------- 
@@ -87,6 +90,8 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               onFormChange={onFormChange}
               onTagsChange={onTagsChange}
               onImageChange={onImageChange}
+              onMainImageChange={onMainImageChange}
+              uploadMainImage={uploadMainImage}
               categories={categories}
               tags={tags}
               units={units}

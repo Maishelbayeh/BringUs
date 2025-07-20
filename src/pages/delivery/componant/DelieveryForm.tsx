@@ -60,14 +60,14 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel,
   };
 
   const handleSubmit = () => {
-    console.log('Form handleSubmit called');
-    console.log('Form data:', { locationAr, locationEn, price, whatsappNumber });
+    //CONSOLE.log('Form handleSubmit called');
+    //CONSOLE.log('Form data:', { locationAr, locationEn, price, whatsappNumber });
     
     const isValid = validateForm();
-    console.log('Form validation result:', isValid);
+    //CONSOLE.log('Form validation result:', isValid);
     
     if (isValid) {
-      console.log('Form is valid, calling onSubmit');
+      //CONSOLE.log('Form is valid, calling onSubmit');
       // Submit form
       onSubmit({
         id: area?.id || Date.now(),
@@ -77,7 +77,7 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel,
         whatsappNumber,
       });
     } else {
-      console.log('Form is invalid, not submitting');
+      //CONSOLE.log('Form is invalid, not submitting');
     }
   };
 

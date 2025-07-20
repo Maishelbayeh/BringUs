@@ -36,30 +36,53 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
 
   // تحميل الصور الموجودة مسبقاً
   useEffect(() => {
-    console.log('🔍 CustomFileInput - value:', value);
-    if (value) {
+    //CONSOLE.log('🔍 CustomFileInput useEffect - value:', value);
+    //CONSOLE.log('🔍 CustomFileInput useEffect - value type:', typeof value);
+    //CONSOLE.log('🔍 CustomFileInput useEffect - value is array:', Array.isArray(value));
+    
+    if (value && value !== null && value !== undefined) {
       const imageUrls = Array.isArray(value) ? value : [value];
-      const validUrls = imageUrls.filter(url => url && typeof url === 'string');
+      const validUrls = imageUrls.filter(url => url && typeof url === 'string' && url.trim() !== '');
+      
+      //CONSOLE.log('🔍 CustomFileInput useEffect - imageUrls:', imageUrls);
+      //CONSOLE.log('🔍 CustomFileInput useEffect - validUrls:', validUrls);
       
       if (validUrls.length > 0) {
         setPreviews(validUrls);
         setFileCount(validUrls.length);
         setFileNames(validUrls.map(url => url.split('/').pop() || 'image'));
+      } else {
+        setPreviews([]);
+        setFileCount(0);
+        setFileNames([]);
       }
+    } else {
+      //CONSOLE.log('🔍 CustomFileInput useEffect - Setting empty state');
+      setPreviews([]);
+      setFileCount(0);
+      setFileNames([]);
     }
   }, [value]);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
+    console.log('🔍 CustomFileInput handleFileChange - files:', files);
+    console.log('🔍 CustomFileInput handleFileChange - files length:', files?.length);
+    
     if (!files || files.length === 0) {
+      console.log('🔍 CustomFileInput handleFileChange - No files selected');
       return;
     }
 
     const newFiles = Array.from(files);
-    // استبدال الملفات القديمة بالجديدة (ليس إضافتها)
-    setSelectedFiles(newFiles);
-    setFileCount(newFiles.length);
-    setFileNames(newFiles.map(file => file.name));
-    onChange(multiple ? newFiles : newFiles[0]);
+    const updatedFiles = multiple ? [...selectedFiles, ...newFiles] : newFiles;
+    console.log('🔍 CustomFileInput handleFileChange - updatedFiles:', updatedFiles);
+    console.log('🔍 CustomFileInput handleFileChange - multiple:', multiple);
+    console.log('🔍 CustomFileInput handleFileChange - calling onChange with:', multiple ? updatedFiles : updatedFiles[0]);
+    
+    setSelectedFiles(updatedFiles);
+    setFileCount(updatedFiles.length);
+    setFileNames(updatedFiles.map(file => file.name));
+    onChange(multiple ? updatedFiles : updatedFiles[0]);
 
     // استبدال الصور الموجودة بالصور الجديدة
     const newPreviews: string[] = [];
@@ -76,14 +99,25 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   };
 
   const handleClick = () => {
+    //CONSOLE.log('🔍 CustomFileInput handleClick - Opening file dialog');
     if (fileRef.current) {
       fileRef.current.value = ''; // Reset input value to allow selecting the same file again
       fileRef.current.click();
     }
   };
 
-  const removeImage = (index: number) => {
+  const removeFile = (index: number) => {
+    //CONSOLE.log('🔍 CustomFileInput removeFile - index:', index);
+    //CONSOLE.log('🔍 CustomFileInput removeFile - selectedFiles before:', selectedFiles);
+    
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
     const newPreviews = previews.filter((_, i) => i !== index);
+    const newFileNames = fileNames.filter((_, i) => i !== index);
+    
+    //CONSOLE.log('🔍 CustomFileInput removeFile - newFiles:', newFiles);
+    //CONSOLE.log('🔍 CustomFileInput removeFile - calling onChange with:', multiple ? newFiles : null);
+    
+    setSelectedFiles(newFiles);
     setPreviews(newPreviews);
     setFileCount(newPreviews.length);
     
@@ -132,7 +166,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    removeImage(index);
+                    removeFile(index);
                   }}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 >

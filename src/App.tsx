@@ -26,7 +26,7 @@ const AppContent: React.FC = () => {
     activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();
 
   const handleItemClick = (path: string) => {
-    console.log('path', path);
+    //CONSOLE.log('path', path);
   };
 
   // If on auth pages, render only the router without navigation

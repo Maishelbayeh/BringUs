@@ -49,7 +49,7 @@ const CheckboxSpecificationTest: React.FC = () => {
 
   const handleSelectionChange = (selected: any[]) => {
     setSelectedSpecifications(selected);
-    console.log('Selected specifications:', selected);
+    //CONSOLE.log('Selected specifications:', selected);
   };
 
   return (

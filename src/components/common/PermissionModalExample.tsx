@@ -55,7 +55,7 @@ const PermissionModalExample: React.FC = () => {
   };
 
   const handleConfirm = () => {
-    console.log('Action confirmed!');
+    //CONSOLE.log('Action confirmed!');
     setModalConfig(prev => ({ ...prev, isOpen: false }));
   };
 

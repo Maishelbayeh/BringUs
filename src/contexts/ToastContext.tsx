@@ -22,7 +22,7 @@ interface ToastProviderProps {
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const toast = useToast();
   
-  // console.log('ToastProvider rendered with toast functions:', {
+  // //CONSOLE.log('ToastProvider rendered with toast functions:', {
   //   showSuccess: typeof toast.showSuccess,
   //   showError: typeof toast.showError,
   //   toastsCount: toast.toasts.length
@@ -38,10 +38,10 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 
 export const useToastContext = () => {
   const context = useContext(ToastContext);
-  // console.log('useToastContext called, context:', context);
+  // //CONSOLE.log('useToastContext called, context:', context);
   
   if (context === undefined) {
-    console.error('useToastContext must be used within a ToastProvider');
+    //CONSOLE.error('useToastContext must be used within a ToastProvider');
     throw new Error('useToastContext must be used within a ToastProvider');
   }
   return context;

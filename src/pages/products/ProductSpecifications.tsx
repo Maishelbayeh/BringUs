@@ -44,20 +44,11 @@ const ProductSpecifications: React.FC = () => {
            categoryName.includes(searchTerm);
   });
 
-  const handleDelete = (spec: any) => {
-    setSpecToDelete(spec);
-    setShowDeleteModal(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (specToDelete) {
-      try {
-        await deleteSpecification(specToDelete._id);
-        setShowDeleteModal(false);
-        setSpecToDelete(null);
-      } catch (error) {
-        console.error('Error deleting specification:', error);
-      }
+  const handleDelete = async (item: any) => {
+    try {
+      await deleteSpecification(item._id || item.id);
+    } catch (error) {
+      //CONSOLE.error('Error deleting specification:', error);
     }
   };
 
@@ -102,7 +93,7 @@ const ProductSpecifications: React.FC = () => {
       setEditingSpec(null);
       setValidationErrors({});
     } catch (error) {
-      console.error('❌ Error saving specification:', error);
+      //CONSOLE.error('Error saving specification:', error);
     }
   };
 
@@ -324,7 +315,7 @@ const ProductSpecifications: React.FC = () => {
       <PermissionModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDeleteConfirm}
+        onConfirm={() => handleDelete(specToDelete)}
         title={t('products.deleteSpecConfirmTitle') || 'Confirm Delete Specification'}
         message={t('products.deleteSpecConfirmMessage') || 'Are you sure you want to delete this specification?'}
         itemName={specToDelete ? (isRTL ? specToDelete.titleAr : specToDelete.titleEn) : ''}

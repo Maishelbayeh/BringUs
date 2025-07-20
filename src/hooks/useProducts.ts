@@ -17,26 +17,26 @@ const useProducts = () => {
   const fetchProducts = useCallback(async (forceRefresh: boolean = false) => {
     // إذا كان هناك خطأ سابق ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasError && !forceRefresh) {
-      console.log('Previous error occurred, skipping API call. Use forceRefresh to retry.');
+      //CONSOLE.log('Previous error occurred, skipping API call. Use forceRefresh to retry.');
       return products;
     }
 
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasLoaded && !forceRefresh && Array.isArray(products) && products.length > 0) {
-      console.log('Products data already loaded, skipping API call');
+      //CONSOLE.log('Products data already loaded, skipping API call');
       return products;
     }
 
     // منع الاستدعاءات المتكررة أثناء التحميل
     if (loading) {
-      console.log('Already loading products, skipping duplicate call');
+      //CONSOLE.log('Already loading products, skipping duplicate call');
       return products;
     }
 
     // منع الاستدعاءات المتكررة خلال 5 ثوانٍ
     const now = Date.now();
     if (!forceRefresh && hasLoaded && (now - lastFetchTime) < 5000) {
-      console.log('Products fetched recently, skipping API call');
+      //CONSOLE.log('Products fetched recently, skipping API call');
       return products;
     }
 
@@ -45,15 +45,15 @@ const useProducts = () => {
       setHasError(false); // إعادة تعيين حالة الخطأ عند بدء محاولة جديدة
       const url = `${BASE_URL}meta/products`;
       const res = await axios.get(url);
-      console.log('FETCHED PRODUCTS FROM API:', res.data);
+      //CONSOLE.log('FETCHED PRODUCTS FROM API:', res.data);
       
       // Log barcodes for debugging
       const productsData = res.data.data || res.data;
       if (Array.isArray(productsData)) {
         productsData.forEach((product: any, index: number) => {
-          console.log(`🔍 Product ${index + 1} barcodes:`, product.barcodes);
-          console.log(`🔍 Product ${index + 1} barcodes type:`, typeof product.barcodes);
-          console.log(`🔍 Product ${index + 1} barcodes is array:`, Array.isArray(product.barcodes));
+          //CONSOLE.log(`🔍 Product ${index + 1} barcodes:`, product.barcodes);
+          //CONSOLE.log(`🔍 Product ${index + 1} barcodes type:`, typeof product.barcodes);
+          //CONSOLE.log(`🔍 Product ${index + 1} barcodes is array:`, Array.isArray(product.barcodes));
         });
       }
       
@@ -63,7 +63,7 @@ const useProducts = () => {
       setHasError(false); // تأكيد عدم وجود خطأ
       return res.data.data || res.data;
     } catch (err: any) {
-      console.error('Error fetching products:', err);
+      //CONSOLE.error('Error fetching products:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب المنتجات';
       showError(errorMessage);
       // تعيين حالة الخطأ لمنع الاستدعاءات المتكررة
@@ -78,11 +78,11 @@ const useProducts = () => {
 
   // إضافة أو تعديل منتج
   const saveProduct = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
-    console.log('Saving product with form:', form, 'editId:', editId, 'isRTL:', isRTL);
-    console.log('Store ID from form:', form.storeId);
-    console.log('Form barcodes:', form.barcodes);
-    console.log('Form barcodes type:', typeof form.barcodes);
-    console.log('Form barcodes is array:', Array.isArray(form.barcodes));
+    //CONSOLE.log('Saving product with form:', form, 'editId:', editId, 'isRTL:', isRTL);
+    //CONSOLE.log('Store ID from form:', form.storeId);
+    //CONSOLE.log('Form barcodes:', form.barcodes);
+    //CONSOLE.log('Form barcodes type:', typeof form.barcodes);
+    //CONSOLE.log('Form barcodes is array:', Array.isArray(form.barcodes));
     
     const payload: any = {
       nameAr: form.nameAr?.trim() || '',
@@ -92,21 +92,21 @@ const useProducts = () => {
       price: parseFloat(form.price) || 0,
       compareAtPrice: parseFloat(form.compareAtPrice) || 0,
       barcodes: (() => {
-        console.log('🔍 Processing barcodes from form:', form.barcodes);
+        //CONSOLE.log('🔍 Processing barcodes from form:', form.barcodes);
         if (Array.isArray(form.barcodes)) {
-          console.log('🔍 Barcodes is array:', form.barcodes);
+          //CONSOLE.log('🔍 Barcodes is array:', form.barcodes);
           return form.barcodes;
         } else if (typeof form.barcodes === 'string') {
           try {
             const parsed = JSON.parse(form.barcodes);
-            console.log('🔍 Parsed barcodes from string:', parsed);
+            //CONSOLE.log('🔍 Parsed barcodes from string:', parsed);
             return Array.isArray(parsed) ? parsed : [];
           } catch (error) {
-            console.error('🔍 Error parsing barcodes string:', error);
+            //CONSOLE.error('🔍 Error parsing barcodes string:', error);
             return [];
           }
         }
-        console.log('🔍 Barcodes is not array or string, returning empty array');
+        //CONSOLE.log('🔍 Barcodes is not array or string, returning empty array');
         return [];
       })(),
       costPrice: parseFloat(form.costPrice) || 0,
@@ -153,11 +153,11 @@ const useProducts = () => {
             if (Array.isArray(parsed)) {
               // استخراج IDs المواصفات فقط (بدون القيم)
               const specificationIds = [...new Set(parsed.map((spec: any) => spec._id.split('_')[0]))];
-              console.log('Specification IDs:', specificationIds);
+              //CONSOLE.log('Specification IDs:', specificationIds);
               return specificationIds;
             }
           } catch (error) {
-            console.error('Error parsing selectedSpecifications:', error);
+            //CONSOLE.error('Error parsing selectedSpecifications:', error);
           }
         }
         // إذا كانت المواصفات موجودة في form.productSpecifications
@@ -184,11 +184,11 @@ const useProducts = () => {
                   title: spec.title  // عنوان المواصفة (مثل: "اللون"، "الحجم")
                 };
               });
-              console.log('Specification values:', formattedSpecs);
+              //CONSOLE.log('Specification values:', formattedSpecs);
               return formattedSpecs;
             }
           } catch (error) {
-            console.error('Error parsing selectedSpecifications:', error);
+            //CONSOLE.error('Error parsing selectedSpecifications:', error);
           }
         }
         return [];
@@ -196,45 +196,48 @@ const useProducts = () => {
       storeId: form.storeId || STORE_ID,
     };
 
-    console.log('🔍 Final payload barcodes:', payload.barcodes);
-    console.log('🔍 Final payload barcodes type:', typeof payload.barcodes);
-    console.log('🔍 Final payload barcodes is array:', Array.isArray(payload.barcodes));
+    //CONSOLE.log('🔍 Final payload barcodes:', payload.barcodes);
+    //CONSOLE.log('🔍 Final payload barcodes type:', typeof payload.barcodes);
+    //CONSOLE.log('🔍 Final payload barcodes is array:', Array.isArray(payload.barcodes));
 
-                console.log('Final payload to send:', payload);
-      console.log('Barcodes in payload:', payload.barcodes);
-      console.log('Barcodes type:', typeof payload.barcodes);
-      console.log('Barcodes is array:', Array.isArray(payload.barcodes));
-      console.log('Barcodes length:', Array.isArray(payload.barcodes) ? payload.barcodes.length : 'N/A');
-          console.log('Specifications in payload:', payload.specifications);
-          console.log('Specifications type:', typeof payload.specifications);
-          console.log('Specifications is array:', Array.isArray(payload.specifications));
-          console.log('Specification values in payload:', payload.specificationValues);
-          console.log('Specification values type:', typeof payload.specificationValues);
-          console.log('Specification values is array:', Array.isArray(payload.specificationValues));
-          console.log('Images in payload:', payload.images);
+                //CONSOLE.log('Final payload to send:', payload);
+      //CONSOLE.log('Barcodes in payload:', payload.barcodes);
+      //CONSOLE.log('Barcodes type:', typeof payload.barcodes);
+      //CONSOLE.log('Barcodes is array:', Array.isArray(payload.barcodes));
+      //CONSOLE.log('Barcodes length:', Array.isArray(payload.barcodes) ? payload.barcodes.length : 'N/A');
+          //CONSOLE.log('Specifications in payload:', payload.specifications);
+          //CONSOLE.log('Specifications type:', typeof payload.specifications);
+          //CONSOLE.log('Specifications is array:', Array.isArray(payload.specifications));
+          //CONSOLE.log('Specification values in payload:', payload.specificationValues);
+          //CONSOLE.log('Specification values type:', typeof payload.specificationValues);
+          //CONSOLE.log('Specification values is array:', Array.isArray(payload.specificationValues));
+          //CONSOLE.log('Images in payload:', payload.images);
+          //CONSOLE.log('Main image in payload:', payload.mainImage);
+          //CONSOLE.log('Main image type:', typeof payload.mainImage);
+          //CONSOLE.log('Main image === null:', payload.mainImage === null);
 
-      console.log('Store field in payload:', payload.store);
+      //CONSOLE.log('Store field in payload:', payload.store);
     try {
       if (editId) {
-        console.log('🔍 Updating product with ID:', editId);
-        console.log('🔍 Update URL:', `${BASE_URL}meta/products/${editId}`);
+        //CONSOLE.log('🔍 Updating product with ID:', editId);
+        //CONSOLE.log('🔍 Update URL:', `${BASE_URL}meta/products/${editId}`);
         const response = await axios.put(`${BASE_URL}meta/products/${editId}`, payload);
-        console.log('Product updated successfully:', response.data);
+        //CONSOLE.log('Product updated successfully:', response.data);
         showSuccess('تم تعديل المنتج بنجاح', 'نجح التحديث');
       } else {
-        console.log('🔍 Creating new product');
-        console.log('🔍 Create URL:', `${BASE_URL}products`);
+        //CONSOLE.log('🔍 Creating new product');
+        //CONSOLE.log('🔍 Create URL:', `${BASE_URL}products`);
         const response = await axios.post(`${BASE_URL}products`, payload);
-        console.log('Product created successfully:', response.data);
+        //CONSOLE.log('Product created successfully:', response.data);
         showSuccess('تم إضافة المنتج بنجاح', 'نجح الإضافة');
       }
       // تحديث القائمة فقط
       await fetchProducts(true);
       return true;
     } catch (err: any) {
-      console.error('Error saving product:', err);
-      console.error('Request payload:', payload);
-      console.error('Response data:', err?.response?.data);
+      //CONSOLE.error('Error saving product:', err);
+      //CONSOLE.error('Request payload:', payload);
+      //CONSOLE.error('Response data:', err?.response?.data);
       
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
@@ -253,13 +256,13 @@ const useProducts = () => {
   const deleteProduct = async (productId: string | number) => {
     try {
       const response = await axios.delete(`${BASE_URL}meta/products/${productId}?storeId=${STORE_ID}`);
-      console.log('Product deleted successfully:', response.data);
+      //CONSOLE.log('Product deleted successfully:', response.data);
       showSuccess('تم حذف المنتج بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
       await fetchProducts(true);
       return true;
     } catch (err: any) {
-      console.error('Error deleting product:', err);
+      //CONSOLE.error('Error deleting product:', err);
       
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
@@ -280,18 +283,18 @@ const useProducts = () => {
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
-      formData.append('folder', 'products');
 
-      const response = await axios.post(`${BASE_URL}stores/upload-image`, formData, {
+      const response = await axios.post(`${BASE_URL}products/upload-single-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log('Image uploaded successfully:', response.data);
-      return response.data.data.url;
+      //CONSOLE.log('Image uploaded successfully:', response.data);
+      // API يعيد imageUrl مباشرة، وليس في data.url
+      return response.data.imageUrl || response.data.data?.url;
     } catch (err: any) {
-      console.error('Error uploading product image:', err);
+      //CONSOLE.error('Error uploading product image:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة';
       showError(errorMessage, 'خطأ في رفع الصورة');
       throw err;
@@ -306,18 +309,19 @@ const useProducts = () => {
         formData.append('images', file);
       });
       formData.append('storeId', STORE_ID);
-      formData.append('folder', 'products');
 
-      const response = await axios.post(`${BASE_URL}stores/upload-multiple-images`, formData, {
+      const response = await axios.post(`${BASE_URL}products/upload-gallery-images`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log('Images uploaded successfully:', response.data);
-      return response.data.data.map((img: any) => img.url);
+      //CONSOLE.log('Images uploaded successfully:', response.data);
+      // API يعيد images array مباشرة، وليس في data
+      const images = response.data.images || response.data.data?.images || [];
+      return images.map((img: any) => img.imageUrl || img.url);
     } catch (err: any) {
-      console.error('Error uploading product images:', err);
+      //CONSOLE.error('Error uploading product images:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصور';
       showError(errorMessage, 'خطأ في رفع الصور');
       throw err;
@@ -330,20 +334,62 @@ const useProducts = () => {
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
-      formData.append('folder', 'products');
 
-      const response = await axios.post(`${BASE_URL}stores/upload-image`, formData, {
+      const response = await axios.post(`${BASE_URL}products/upload-single-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log('Single image uploaded successfully:', response.data);
-      return response.data.data.url;
+      //CONSOLE.log('Single image uploaded successfully:', response.data);
+      // API يعيد imageUrl مباشرة، وليس في data.url
+      return response.data.imageUrl || response.data.data?.url;
     } catch (err: any) {
-      console.error('Error uploading single image:', err);
+      //CONSOLE.error('Error uploading single image:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة';
       showError(errorMessage, 'خطأ في رفع الصورة');
+      throw err;
+    }
+  };
+
+  // رفع الصورة الأساسية
+  const uploadMainImage = async (file: File): Promise<string> => {
+    console.log('🔍 uploadMainImage called with file:', file);
+    console.log('🔍 STORE_ID:', STORE_ID);
+    console.log('🔍 BASE_URL:', BASE_URL);
+    
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('storeId', STORE_ID);
+
+      console.log('🔍 Sending request to:', `${BASE_URL}products/upload-main-image`);
+      console.log('🔍 FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        console.log('🔍', key, ':', value);
+      }
+
+      const response = await axios.post(`${BASE_URL}products/upload-main-image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('🔍 Main image uploaded successfully:', response.data);
+      console.log('🔍 Response status:', response.status);
+      console.log('🔍 Response headers:', response.headers);
+      
+      // API يعيد imageUrl مباشرة، وليس في data.url
+      const imageUrl = response.data.imageUrl || response.data.data?.url;
+      console.log('🔍 Extracted imageUrl:', imageUrl);
+      
+      return imageUrl;
+    } catch (err: any) {
+      console.error('🔍 Error uploading main image:', err);
+      console.error('🔍 Error response:', err?.response?.data);
+      console.error('🔍 Error status:', err?.response?.status);
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة الأساسية';
+      showError(errorMessage, 'خطأ في رفع الصورة الأساسية');
       throw err;
     }
   };
@@ -403,23 +449,23 @@ const useProducts = () => {
     }) : null;
     
     // Debug: طباعة معلومات التحقق
-    console.log('🔍 Validation Debug:');
-    console.log('🔍 Current Product ID:', currentProductId);
-    console.log('🔍 Form nameAr:', form.nameAr.trim());
-    console.log('🔍 Form nameEn:', form.nameEn.trim());
-    console.log('🔍 Total products in array:', products.length);
-    console.log('🔍 Products sample:', products.slice(0, 3).map(p => ({ id: p._id || p.id, nameAr: p.nameAr, nameEn: p.nameEn })));
-    console.log('🔍 Existing Product Ar:', existingProductAr);
-    console.log('🔍 Existing Product En:', existingProductEn);
+    //CONSOLE.log('🔍 Validation Debug:');
+    //CONSOLE.log('🔍 Current Product ID:', currentProductId);
+    //CONSOLE.log('🔍 Form nameAr:', form.nameAr.trim());
+    //CONSOLE.log('🔍 Form nameEn:', form.nameEn.trim());
+    //CONSOLE.log('🔍 Total products in array:', products.length);
+    //CONSOLE.log('🔍 Products sample:', products.slice(0, 3).map(p => ({ id: p._id || p.id, nameAr: p.nameAr, nameEn: p.nameEn })));
+    //CONSOLE.log('🔍 Existing Product Ar:', existingProductAr);
+    //CONSOLE.log('🔍 Existing Product En:', existingProductEn);
     
     if (existingProductAr) {
       errors.nameAr = isRTL ? 'الاسم العربي موجود مسبقاً' : 'Arabic name already exists';
-      console.log('🔍 Arabic name validation failed');
+      //CONSOLE.log('🔍 Arabic name validation failed');
     }
     
     if (existingProductEn) {
       errors.nameEn = isRTL ? 'الاسم الإنجليزي موجود مسبقاً' : 'English name already exists';
-      console.log('🔍 English name validation failed');
+      //CONSOLE.log('🔍 English name validation failed');
     }
 
     return errors;
@@ -439,6 +485,180 @@ const useProducts = () => {
     return await fetchProducts(true);
   }, [fetchProducts]);
 
+  // Add new variant to existing product
+  const addVariant = async (productId: string, variantData: any): Promise<any> => {
+    try {
+      console.log('🔍 addVariant - Starting to add variant for product:', productId);
+      
+      // حذف specifications إذا كانت مصفوفة فارغة
+      if (Array.isArray(variantData.specifications) && variantData.specifications.length === 0) {
+        delete variantData.specifications;
+      }
+
+      const formData = new FormData();
+      
+      // Add all variant data to formData
+      Object.keys(variantData).forEach(key => {
+        if (key === 'images' && Array.isArray(variantData[key])) {
+          // Handle multiple images
+          variantData[key].forEach((file: File) => {
+            formData.append('images', file);
+          });
+        } else if (key === 'mainImage' && variantData[key] instanceof File) {
+          // Handle main image
+          formData.append('mainImage', variantData[key]);
+        } else if (key === 'barcodes' && Array.isArray(variantData[key])) {
+          // Handle barcodes array
+          formData.append('barcodes', JSON.stringify(variantData[key]));
+        } else if (key === 'specifications' && Array.isArray(variantData[key])) {
+          // فقط إذا فيها عناصر أرسلها كسلسلة IDs
+          if (variantData[key].length > 0) {
+            formData.append('specifications', JSON.stringify(variantData[key]));
+          }
+        } else if (key === 'specificationValues' && Array.isArray(variantData[key])) {
+          // Handle specification values array
+          formData.append('specificationValues', JSON.stringify(variantData[key]));
+        } else {
+          // Handle other fields
+          formData.append(key, variantData[key]);
+        }
+      });
+      
+      // Get store ID from localStorage
+      const storeId = localStorage.getItem('storeId');
+      if (!storeId) {
+        throw new Error('Store ID not found');
+      }
+      formData.append('storeId', storeId);
+      
+      const response = await fetch(`${BASE_URL}products/${productId}/add-variant`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ addVariant - API Error:', errorData);
+        throw new Error(errorData.message || 'Failed to add variant');
+      }
+      
+      const data = await response.json();
+      console.log('✅ addVariant - Variant added successfully:', data);
+      
+      // Refresh products list
+      await fetchProducts(true);
+      
+      return data;
+    } catch (error) {
+      console.error('❌ addVariant - Error:', error);
+      throw error;
+    }
+  };
+
+  // Delete variant
+  const deleteVariant = async (productId: string, variantId: string): Promise<any> => {
+    try {
+      console.log('🔍 deleteVariant - Starting to delete variant:', variantId, 'from product:', productId);
+      
+      // Get store ID from localStorage
+      const storeId = localStorage.getItem('storeId');
+      if (!storeId) {
+        throw new Error('Store ID not found');
+      }
+      
+      const response = await fetch(`${BASE_URL}products/${productId}/variants/${variantId}?storeId=${storeId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ deleteVariant - API Error:', errorData);
+        throw new Error(errorData.message || 'Failed to delete variant');
+      }
+      
+      const data = await response.json();
+      console.log('✅ deleteVariant - Variant deleted successfully:', data);
+      
+      // Refresh products list
+      await fetchProducts(true);
+      
+      return data;
+    } catch (error) {
+      console.error('❌ deleteVariant - Error:', error);
+      throw error;
+    }
+  };
+
+  // Update variant
+  const updateVariant = async (productId: string, variantId: string, variantData: any): Promise<any> => {
+    try {
+      console.log('🔍 updateVariant - Starting to update variant:', variantId, 'for product:', productId);
+      
+      // حذف specifications إذا كانت مصفوفة فارغة
+      if (Array.isArray(variantData.specifications) && variantData.specifications.length === 0) {
+        delete variantData.specifications;
+      }
+
+      const formData = new FormData();
+      
+      // Add all variant data to formData
+      Object.keys(variantData).forEach(key => {
+        if (key === 'images' && Array.isArray(variantData[key])) {
+          // Handle multiple images
+          variantData[key].forEach((file: File) => {
+            formData.append('images', file);
+          });
+        } else if (key === 'mainImage' && variantData[key] instanceof File) {
+          // Handle main image
+          formData.append('mainImage', variantData[key]);
+        } else if (key === 'barcodes' && Array.isArray(variantData[key])) {
+          // Handle barcodes array
+          formData.append('barcodes', JSON.stringify(variantData[key]));
+        } else if (key === 'specifications' && Array.isArray(variantData[key])) {
+          // فقط إذا فيها عناصر أرسلها كسلسلة IDs
+          if (variantData[key].length > 0) {
+            formData.append('specifications', JSON.stringify(variantData[key]));
+          }
+        } else if (key === 'specificationValues' && Array.isArray(variantData[key])) {
+          // Handle specification values array
+          formData.append('specificationValues', JSON.stringify(variantData[key]));
+        } else {
+          // Handle other fields
+          formData.append(key, variantData[key]);
+        }
+      });
+      
+      // Get store ID from localStorage
+      const storeId = localStorage.getItem('storeId');
+      if (!storeId) {
+        throw new Error('Store ID not found');
+      }
+      formData.append('storeId', storeId);
+      
+      const response = await fetch(`${BASE_URL}products/${productId}/variants/${variantId}`, {
+        method: 'PUT',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ updateVariant - API Error:', errorData);
+        throw new Error(errorData.message || 'Failed to update variant');
+      }
+      
+      const data = await response.json();
+      console.log('✅ updateVariant - Variant updated successfully:', data);
+      
+      // Refresh products list
+      await fetchProducts(true);
+      
+      return data;
+    } catch (error) {
+      console.error('❌ updateVariant - Error:', error);
+      throw error;
+    }
+  };
+
   return {
     products,
     setProducts,
@@ -450,9 +670,13 @@ const useProducts = () => {
     uploadProductImage,
     uploadProductImages,
     uploadSingleImage,
+    uploadMainImage,
     validateProduct,
     resetLoadingState,
     retryFetch,
+    addVariant,
+    deleteVariant,
+    updateVariant,
   };
 };
 

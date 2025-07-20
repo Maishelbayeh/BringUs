@@ -26,17 +26,17 @@ const DeliveryAreaModal: React.FC<Props> = ({ open, onClose, area, onSave, langu
   const isRTL = language === 'ARABIC';
 
   const handleDrawerSubmit = () => {
-    console.log('Drawer submit clicked');
+    //CONSOLE.log('Drawer submit clicked');
     if (formRef.current) {
-      console.log('Calling form handleSubmit');
+      //CONSOLE.log('Calling form handleSubmit');
       formRef.current.handleSubmit();
     } else {
-      console.log('Form ref is null');
+      //CONSOLE.log('Form ref is null');
     }
   };
 
   const handleValidationChange = (isValid: boolean) => {
-    console.log('Validation changed:', isValid);
+    //CONSOLE.log('Validation changed:', isValid);
     setIsFormValid(isValid);
   };
 

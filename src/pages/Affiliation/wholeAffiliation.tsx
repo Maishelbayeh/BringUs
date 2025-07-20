@@ -67,7 +67,7 @@ const AffiliationPage = () => {
 //------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (item: any) => {
     setForm(item);
-   console.log(item);
+   //CONSOLE.log(item);
     setDrawerOpen(true);
   };
 //------------------------------------------- handleDelete -------------------------------------------
@@ -86,7 +86,7 @@ const AffiliationPage = () => {
 //------------------------------------------- handleSubmit -------------------------------------------  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(form);
+    //CONSOLE.log(form);
     if (editIndex !== null) {
       setData(prev => prev.map((d, idx) => idx === editIndex ? { ...form, id: d.id, percent: Number(form.percent), status: form.status === 'Active' || form.status === t('affiliation.active') ? 'Active' : 'Inactive' } : d));
       setEditIndex(null);

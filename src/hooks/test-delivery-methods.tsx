@@ -65,7 +65,7 @@ const TestDeliveryMethods: React.FC = () => {
         });
       }
     } catch (err) {
-      console.error('Error creating delivery method:', err);
+      //CONSOLE.error('Error creating delivery method:', err);
     }
   };
 
@@ -76,7 +76,7 @@ const TestDeliveryMethods: React.FC = () => {
         alert('✅ Status toggled successfully!');
       }
     } catch (err) {
-      console.error('Error toggling status:', err);
+      //CONSOLE.error('Error toggling status:', err);
     }
   };
 
@@ -87,7 +87,7 @@ const TestDeliveryMethods: React.FC = () => {
         alert('✅ Set as default successfully!');
       }
     } catch (err) {
-      console.error('Error setting default:', err);
+      //CONSOLE.error('Error setting default:', err);
     }
   };
 
@@ -99,7 +99,7 @@ const TestDeliveryMethods: React.FC = () => {
           alert('✅ Deleted successfully!');
         }
       } catch (err) {
-        console.error('Error deleting delivery method:', err);
+        //CONSOLE.error('Error deleting delivery method:', err);
       }
     }
   };
@@ -126,7 +126,7 @@ const TestDeliveryMethods: React.FC = () => {
         setSelectedMethodId('');
       }
     } catch (err) {
-      console.error('Error updating delivery method:', err);
+      //CONSOLE.error('Error updating delivery method:', err);
     }
   };
 

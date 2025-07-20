@@ -15,10 +15,10 @@ const useToast = () => {
       isVisible: true,
     };
 
-    console.log('Adding toast:', toast);
+    //CONSOLE.log('Adding toast:', toast);
     setToasts(prev => {
       const newToasts = [...prev, toast];
-      console.log('Updated toasts array:', newToasts);
+      //CONSOLE.log('Updated toasts array:', newToasts);
       return newToasts;
     });
 
@@ -33,10 +33,10 @@ const useToast = () => {
   }, []);
 
   const removeToast = useCallback((id: string) => {
-    // console.log('Removing toast with id:', id);
+    // //CONSOLE.log('Removing toast with id:', id);
     setToasts(prev => {
       const newToasts = prev.filter(toast => toast.id !== id);
-      // console.log('Toasts after removal:', newToasts);
+      // //CONSOLE.log('Toasts after removal:', newToasts);
       return newToasts;
     });
   }, []);
@@ -46,12 +46,12 @@ const useToast = () => {
   }, []);
 
   const showSuccess = useCallback((message: string, title?: string, duration?: number) => {
-    console.log('showSuccess called with:', { message, title, duration });
+    //CONSOLE.log('showSuccess called with:', { message, title, duration });
     return addToast({ type: 'success', title, message, duration });
   }, [addToast]);
 
   const showError = useCallback((message: string, title?: string, duration?: number) => {
-    console.log('showError called with:', { message, title, duration });
+    //CONSOLE.log('showError called with:', { message, title, duration });
     return addToast({ type: 'error', title, message, duration });
   }, [addToast]);
 

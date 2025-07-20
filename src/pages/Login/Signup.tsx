@@ -131,7 +131,7 @@ const Signup: React.FC = () => {
       // Navigate to dashboard on success
       navigate('/');
     } catch (error) {
-      console.error('Signup error:', error);
+      //CONSOLE.error('Signup error:', error);
     } finally {
       setIsLoading(false);
     }

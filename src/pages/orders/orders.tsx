@@ -165,7 +165,7 @@ const OrdersPage: React.FC = () => {
   const handleDeleteConfirm = () => {
     if (orderToDelete) {
       // في التطبيق الحقيقي، هنا سيتم إرسال طلب حذف للخادم
-      console.log('Deleting order:', orderToDelete);
+      //CONSOLE.log('Deleting order:', orderToDelete);
       setOrderToDelete(null);
     }
     setShowDeleteModal(false);
@@ -182,7 +182,7 @@ const OrdersPage: React.FC = () => {
   const handleStatusUpdate = () => {
     if (orderToUpdateStatus) {
       // في التطبيق الحقيقي، هنا سيتم إرسال طلب تحديث للخادم
-      console.log('Updating order status:', orderToUpdateStatus.id, 'to:', newStatus);
+      //CONSOLE.log('Updating order status:', orderToUpdateStatus.id, 'to:', newStatus);
       
       // Note: In a real application, you would send an API request here
       // For now, we'll just log the status change

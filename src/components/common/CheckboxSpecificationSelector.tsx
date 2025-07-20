@@ -31,20 +31,26 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
 
   // Initialize selected values from props
   useEffect(() => {
-    console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);
-    console.log('🔍 CheckboxSpecificationSelector - specifications:', specifications);
+    // console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);
+    // console.log('🔍 CheckboxSpecificationSelector - specifications:', specifications);
     
     if (Array.isArray(selectedSpecifications) && selectedSpecifications.length > 0) {
       const selectedIds = new Set(selectedSpecifications.map(spec => spec._id));
-      console.log('🔍 CheckboxSpecificationSelector - Setting selectedIds:', selectedIds);
-      console.log('🔍 CheckboxSpecificationSelector - Selected specs details:', selectedSpecifications.map(spec => ({
-        id: spec._id,
-        title: spec.title,
-        value: spec.value
-      })));
+      // console.log('🔍 CheckboxSpecificationSelector - Setting selectedIds:', selectedIds);
+      // console.log('🔍 CheckboxSpecificationSelector - Selected specs details:', selectedSpecifications.map(spec => ({
+      //   id: spec._id,
+      //   title: spec.title,
+      //   value: spec.value
+      // })));
+      
+      // تحقق من تطابق الـ IDs
+      const availableIds = specifications.flatMap(s => s.values.map(v => v._id));
+      // console.log('🔍 CheckboxSpecificationSelector - Available IDs:', availableIds);
+      // console.log('🔍 CheckboxSpecificationSelector - Matching IDs:', selectedSpecifications.filter(spec => availableIds.includes(spec._id)));
+      
       setSelectedValues(selectedIds);
     } else {
-      console.log('🔍 CheckboxSpecificationSelector - No selectedSpecifications, clearing selectedValues');
+     // console.log('🔍 CheckboxSpecificationSelector - No selectedSpecifications, clearing selectedValues');
       setSelectedValues(new Set());
     }
   }, [selectedSpecifications]);
@@ -60,8 +66,8 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
   };
 
   const toggleValue = (value: SpecificationValue) => {
-    console.log('🔍 toggleValue - value:', value);
-    console.log('🔍 toggleValue - current selectedValues:', selectedValues);
+    // console.log('🔍 toggleValue - value:', value);
+    // console.log('🔍 toggleValue - current selectedValues:', selectedValues);
     
     const newSelected = new Set(selectedValues);
     if (newSelected.has(value._id)) {
@@ -76,7 +82,7 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
       .flatMap(spec => spec.values)
       .filter(val => newSelected.has(val._id));
     
-    console.log('🔍 toggleValue - updatedSelection:', updatedSelection);
+    //  console.log('🔍 toggleValue - updatedSelection:', updatedSelection);
     onSelectionChange(updatedSelection);
   };
 
@@ -94,7 +100,7 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
 
   const isTitleSelected = (title: SpecificationTitle) => {
     const selected = title.values.some(value => selectedValues.has(value._id));
-    console.log(`🔍 Title ${title.title} selected: ${selected}`);
+    // console.log(`🔍 Title ${title.title} selected: ${selected}`);
     return selected;
   };
 
@@ -102,8 +108,8 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
     return title.values.filter(value => selectedValues.has(value._id)).length;
   };
 
-  console.log('🔍 CheckboxSpecificationSelector - Rendering with specifications:', specifications);
-  console.log('🔍 CheckboxSpecificationSelector - Rendering with selectedSpecifications:', selectedSpecifications);
+  // console.log('🔍 CheckboxSpecificationSelector - Rendering with specifications:', specifications);
+  // console.log('🔍 CheckboxSpecificationSelector - Rendering with selectedSpecifications:', selectedSpecifications);
   
   return (
     <div className={`space-y-4 ${className}`}>
@@ -147,7 +153,28 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
                 <input
                   type="checkbox"
                   checked={isTitleSelected(title)}
-                  onChange={() => toggleTitle(title._id)}
+                  onChange={() => {
+                    // Toggle all values for this title
+                    const titleValues = title.values;
+                    const allSelected = titleValues.every(value => selectedValues.has(value._id));
+                    
+                    const newSelected = new Set(selectedValues);
+                    titleValues.forEach(value => {
+                      if (allSelected) {
+                        newSelected.delete(value._id);
+                      } else {
+                        newSelected.add(value._id);
+                      }
+                    });
+                    
+                    setSelectedValues(newSelected);
+                    
+                    // Update parent component
+                    const updatedSelection = specifications
+                      .flatMap(spec => spec.values)
+                      .filter(val => newSelected.has(val._id));
+                    onSelectionChange(updatedSelection);
+                  }}
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <span className="font-medium text-gray-900">{title.title}</span>
@@ -200,13 +227,13 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
         </div>
       )}
       
-      {/* Debug info */}
-      <div className="mt-4 p-2 bg-yellow-100 rounded text-xs">
+      {/* Debug info - Commented out for production */}
+      {/* <div className="mt-4 p-2 bg-yellow-100 rounded text-xs">
         <p><strong>Debug:</strong></p>
         <p>Specifications count: {specifications.length}</p>
         <p>Selected count: {selectedSpecifications.length}</p>
         <p>Expanded titles: {Array.from(expandedTitles).join(', ')}</p>
-      </div>
+      </div> */}
     </div>
   );
 };

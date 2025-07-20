@@ -21,14 +21,14 @@ const AdminRoute: React.FC<AdminRouteProps> = ({
 
   // التحقق من تسجيل الدخول
   if (!isAuthenticated()) {
-    console.log('🚫 المستخدم غير مسجل دخول، التوجيه لصفحة تسجيل الدخول');
+    //CONSOLE.log('🚫 المستخدم غير مسجل دخول، التوجيه لصفحة تسجيل الدخول');
     return <Navigate to={fallbackPath} replace />;
   }
 
   // التحقق من دور admin
   if (!isAuthenticatedAdmin()) {
     const user = getCurrentUser();
-    console.log('🚫 المستخدم ليس admin، الدور الحالي:', user?.role);
+    //CONSOLE.log('🚫 المستخدم ليس admin، الدور الحالي:', user?.role);
     
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -66,7 +66,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({
   }
 
   // المستخدم مسجل دخول ودوره admin
-  console.log('✅ المستخدم مسجل دخول ودوره admin، السماح بالوصول');
+  //CONSOLE.log('✅ المستخدم مسجل دخول ودوره admin، السماح بالوصول');
   return <>{children}</>;
 };
 

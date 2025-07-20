@@ -138,7 +138,7 @@ const PaymentVariants: React.FC = () => {
   };
 
   const handleValidationChange = (isValid: boolean) => {
-    console.log('PaymentVariants validation changed:', isValid);
+    //CONSOLE.log('PaymentVariants validation changed:', isValid);
     setIsFormValid(isValid);
   };
 

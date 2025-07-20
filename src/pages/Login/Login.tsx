@@ -74,7 +74,7 @@ const Login: React.FC = () => {
       navigate('/');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      //CONSOLE.error('Login error:', error);
     }
   };
 

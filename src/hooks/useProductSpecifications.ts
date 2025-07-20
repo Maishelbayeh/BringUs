@@ -15,25 +15,23 @@ const useProductSpecifications = () => {
   const fetchSpecifications = useCallback(async (forceRefresh: boolean = false) => {
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasLoaded && !forceRefresh && specifications.length > 0) {
-      // console.log('Data already loaded, skipping API call');
+      // //CONSOLE.log('Data already loaded, skipping API call');
       return specifications;
     }
 
     try {
       setLoading(true);
       const url = `${BASE_URL}meta/product-specifications/by-store?storeId=${STORE_ID}`;
-      console.log('🔍 Fetching specifications from:', url);
+      //CONSOLE.log('🔍 Fetching specifications from:', url);
       const res = await axios.get(url);
-      console.log('🔍 Raw API response:', res.data);
-      
-      // التعامل مع الـ response الجديد
-      const data = res.data.success ? (res.data.data || []) : (Array.isArray(res.data) ? res.data : []);
-      console.log('🔍 Processed specifications data:', data);
+      //CONSOLE.log('🔍 Raw API response:', res.data);
+      const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
+      //CONSOLE.log('🔍 Processed specifications data:', data);
       setSpecifications(data);
       setHasLoaded(true); // تم تحميل البيانات
       return data;
     } catch (err: any) {
-      console.error('Error fetching specifications:', err);
+      //CONSOLE.error('Error fetching specifications:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب مواصفات المنتجات';
       showError(errorMessage);
       throw err;
@@ -62,27 +60,24 @@ const useProductSpecifications = () => {
       payload.category = form.categoryId;
     }
     
-    console.log(' Final payload to send:', payload);
-    
+    //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
         console.log('🔄 Sending PUT request to:', `${BASE_URL}meta/product-specifications/${editId}`);
         const response = await axios.put(`${BASE_URL}meta/product-specifications/${editId}`, payload);
-        console.log('✅ Specification updated successfully:', response.data);
+        //CONSOLE.log('Specification updated successfully:', response.data);
         showSuccess('تم تعديل مواصفة المنتج بنجاح', 'نجح التحديث');
       } else {
         console.log('🔄 Sending POST request to:', `${BASE_URL}meta/product-specifications`);
         const response = await axios.post(`${BASE_URL}meta/product-specifications`, payload);
-        console.log('✅ Specification created successfully:', response.data);
+        //CONSOLE.log('Specification created successfully:', response.data);
         showSuccess('تم إضافة مواصفة المنتج بنجاح', 'نجح الإضافة');
       }
       // تحديث القائمة فقط
       await fetchSpecifications(true);
       return true;
     } catch (err: any) {
-      console.error('❌ Error saving specification:', err);
-      console.error('❌ Error response:', err?.response?.data);
-      console.error('❌ Error status:', err?.response?.status);
+      //CONSOLE.error('Error saving specification:', err);
       
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
@@ -101,13 +96,13 @@ const useProductSpecifications = () => {
   const deleteSpecification = async (specificationId: string | number) => {
     try {
       const response = await axios.delete(`${BASE_URL}meta/product-specifications/${specificationId}`);
-      console.log('Specification deleted successfully:', response.data);
+      //CONSOLE.log('Specification deleted successfully:', response.data);
       showSuccess('تم حذف مواصفة المنتج بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
       await fetchSpecifications(true);
       return true;
     } catch (err: any) {
-      console.error('Error deleting specification:', err);
+      //CONSOLE.error('Error deleting specification:', err);
       
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {

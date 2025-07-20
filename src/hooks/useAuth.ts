@@ -92,11 +92,11 @@ export const useAuth = () => {
              updateStoreData(fullStoreData);
             }
           } catch (error) {
-            console.error('❌ خطأ في جلب بيانات المتجر الكاملة:', error);
+            //CONSOLE.error('❌ خطأ في جلب بيانات المتجر الكاملة:', error);
           }
         }
         
-        console.log('✅ تم تسجيل الدخول بنجاح:', data.user);
+        //CONSOLE.log('✅ تم تسجيل الدخول بنجاح:', data.user);
         return data;
       } else {
         throw new Error(data.message || 'فشل في تسجيل الدخول');
@@ -104,7 +104,7 @@ export const useAuth = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
       setError(errorMessage);
-      console.error('❌ خطأ في تسجيل الدخول:', errorMessage);
+      //CONSOLE.error('❌ خطأ في تسجيل الدخول:', errorMessage);
       return null;
     } finally {
       setIsLoading(false);
