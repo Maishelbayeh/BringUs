@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog } from '@mui/material';
-import { CogIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
@@ -47,7 +47,6 @@ const StoreVideoPage: React.FC = () => {
     createStoreSlider,
     updateStoreSlider,
     deleteStoreSlider,
-    toggleActiveStatus
   } = useStoreSlider();
 
   // Filter videos only (type === 'video')
@@ -221,9 +220,6 @@ const StoreVideoPage: React.FC = () => {
     }
   };
 
-  const handleToggleActive = async (video: StoreSlider) => {
-    await toggleActiveStatus(video._id);
-  };
 
   // دالة validation للفورم
   const validateForm = (): boolean => {
@@ -344,18 +340,18 @@ const StoreVideoPage: React.FC = () => {
                 {/* زر الإعدادات دائماً ظاهر */}
                 <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
                   <button
-                    className="bg-primary/90 hover:bg-primary text-white rounded-full p-2 shadow hover:scale-110 transition-transform duration-200"
+                    className="bg-primary/90 hover:bg-primary text-white rounded-full p-1.5 shadow hover:scale-110 transition-transform duration-200"
                     onClick={e => { e.stopPropagation(); handleEdit(video); }}
                     title={t('storeVideos.edit')}
                   >
-                    <CogIcon className="w-6 h-6" />
+                    <PencilSquareIcon className="w-4 h-4" />
                   </button>
                   <button
-                    className="bg-red-500/90 hover:bg-red-500 text-white rounded-full p-2 shadow hover:scale-110 transition-transform duration-200"
+                    className="bg-red-500/90 hover:bg-red-500 text-white rounded-full p-1.5 shadow hover:scale-110 transition-transform duration-200"
                     onClick={e => { e.stopPropagation(); handleDelete(video); }}
                     title={t('common.delete')}
                   >
-                    <TrashIcon className="w-6 h-6" />
+                    <TrashIcon className="w-4 h-4" />
                   </button>
                 </div>
                 

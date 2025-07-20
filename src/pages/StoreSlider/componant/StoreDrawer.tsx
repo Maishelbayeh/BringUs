@@ -33,10 +33,10 @@ const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className={`bg-white rounded-2xl shadow-xl w-full max-w-md mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
+      <div className={`max-h-[85vh] bg-white rounded-2xl shadow-xl w-full max-w-md mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
         dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
+        <div className=" flex items-center justify-between border-b border-primary/20 px-6 py-4">
           <span className="text-xl font-bold text-primary">
             {mode === 'video'
               ? t('storeSlider.addVideo', 'إضافة فيديو')
@@ -45,7 +45,7 @@ const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, on
           <button onClick={onClose} className="text-primary hover:text-red-500 text-2xl">×</button>
         </div>
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-4 flex-1 flex flex-col">
+        <form onSubmit={handleSubmit} className=" max-h-[85vh] overflow-y-auto p-4 flex-1 flex flex-col">
           <StoreSliderForm
             form={form}
             onFormChange={onFormChange}

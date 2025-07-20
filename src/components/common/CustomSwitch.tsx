@@ -11,7 +11,7 @@ interface CustomSwitchProps {
   disabled?: boolean;
 }
 
-const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onChange, labelAlign = 'left', isRTL, disabled }) => {
+const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onChange, isRTL, disabled }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // إنشاء event جديد مع القيم المحدثة
     const syntheticEvent = {
@@ -26,7 +26,7 @@ const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onCha
 
   return (
     <div className="w-full mb-4">
-      <label className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${isRTL || labelAlign === 'right' ? 'text-right' : 'text-left'}`}>{label}</label>
+      <label className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{label}</label>
       <div
         className={`flex items-center  transition-all duration-200
         

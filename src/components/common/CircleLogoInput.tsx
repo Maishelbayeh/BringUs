@@ -1,5 +1,5 @@
 
-import useLanguage from '@/hooks/useLanguage';
+
 import React from 'react';
 
 interface CircleLogoInputProps {
@@ -30,7 +30,7 @@ const CircleLogoInput: React.FC<CircleLogoInputProps> = ({
  
 }) => {
 
-    const { isRTL } = useLanguage();    
+      
   return (
     <div className="mb-4">
       {label && (

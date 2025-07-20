@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomButton from '../../components/common/CustomButton';
 import CustomSelect from '../../components/common/CustomSelect';
@@ -40,6 +40,8 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
   });
 
   const [saving, setSaving] = useState(false);
+  const valuesEndRef = useRef<HTMLDivElement>(null);
+  const [lastAddedIndex, setLastAddedIndex] = useState<number>(-1);
 
   useEffect(() => {
     if (open && categories.length === 0) {
@@ -92,11 +94,34 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
   };
 
   const addValue = () => {
-    setForm(prev => ({
-      ...prev,
-      values: [...prev.values, { valueAr: '', valueEn: '' }]
-    }));
+    setForm(prev => {
+      const newIndex = prev.values.length;
+      setLastAddedIndex(newIndex);
+      return {
+        ...prev,
+        values: [...prev.values, { valueAr: '', valueEn: '' }]
+      };
+    });
   };
+
+  // Scroll to bottom and focus on new value when added
+  useEffect(() => {
+    if (lastAddedIndex >= 0 && valuesEndRef.current) {
+      // Scroll to the new value
+      valuesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      
+      // Focus on the Arabic input of the new value after a short delay
+      setTimeout(() => {
+        const arabicInput = document.querySelector(`input[name="valueAr-${lastAddedIndex}"]`) as HTMLInputElement;
+        if (arabicInput) {
+          arabicInput.focus();
+        }
+      }, 100);
+      
+      // Reset the last added index
+      setLastAddedIndex(-1);
+    }
+  }, [lastAddedIndex]);
 
   const removeValue = (index: number) => {
     setForm(prev => ({
@@ -209,6 +234,7 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
                 name="isActive"
                 checked={form.isActive}
                 onChange={e => handleFormChange('isActive', e.target.checked)}
+                isRTL={isRTL}
               />
               {showError('isActive')}
             </div>
@@ -252,6 +278,7 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <CustomInput
+                        name={`valueAr-${index}`}
                         label={isRTL ? 'القيمة العربية' : 'Arabic Value'}
                         value={value.valueAr}
                         onChange={e => handleValueChange(index, 'valueAr', e.target.value)}
@@ -264,6 +291,7 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
                     
                     <div>
                       <CustomInput
+                        name={`valueEn-${index}`}
                         label={isRTL ? 'القيمة الإنجليزية' : 'English Value'}
                         value={value.valueEn}
                         onChange={e => handleValueChange(index, 'valueEn', e.target.value)}
@@ -276,6 +304,8 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
                   </div>
                 </div>
               ))}
+              {/* Invisible div for scroll target */}
+              <div ref={valuesEndRef} />
             </div>
 
             {form.values.length === 0 && (

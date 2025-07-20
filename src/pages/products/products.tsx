@@ -554,7 +554,7 @@ const ProductsPage: React.FC = () => {
     <div className="flex justify-center space-x-2">
       <button
         onClick={() => handleEdit(item)}
-        className="text-blue-600 hover:text-blue-900 p-1"
+        className="text-blue-600 hover:text-blue-900 p-1.5"
         title={isRTL ? 'تعديل المنتج' : 'Edit Product'}
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -563,7 +563,7 @@ const ProductsPage: React.FC = () => {
       </button>
       <button
         onClick={() => handleAddVariant(item)}
-        className="text-green-600 hover:text-green-900 p-1"
+        className="text-green-600 hover:text-green-900 p-1.5"
         title={isRTL ? 'إضافة متغير' : 'Add Variant'}
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -572,7 +572,7 @@ const ProductsPage: React.FC = () => {
       </button>
       <button
         onClick={() => handleDelete(item)}
-        className="text-red-600 hover:text-red-900 p-1"
+        className="text-red-600 hover:text-red-900 p-1.5"
         title={isRTL ? 'حذف المنتج' : 'Delete Product'}
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

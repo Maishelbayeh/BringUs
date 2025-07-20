@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { 
   Close, 
   ArrowBack, 
-  ArrowForward,
   Store, 
   Person,
   CheckCircle,
