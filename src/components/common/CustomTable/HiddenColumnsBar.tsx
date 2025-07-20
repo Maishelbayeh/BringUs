@@ -14,7 +14,7 @@ const HiddenColumnsBar: React.FC<HiddenColumnsBarProps> = ({
   onColumnToggle
 }) => {
   const { i18n } = useTranslation();
-
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   // الأعمدة المخفية فقط
   const hiddenColumns = columns.filter(col => 
     col.hideable !== false && !columnVisibility[col.key]
@@ -25,7 +25,7 @@ const HiddenColumnsBar: React.FC<HiddenColumnsBarProps> = ({
   }
 
   return (
-    <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+    <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="flex items-center gap-2 mb-2">
         <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />

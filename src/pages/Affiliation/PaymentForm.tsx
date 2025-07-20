@@ -14,7 +14,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ form, setForm, onClose }) => 
   const { t } = useTranslation();
   return (
     <form className="p-4 flex-1">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 pb-4">
         <CustomInput
           label={t('affiliation.totalSale')}
           value={form.totalSale.toLocaleString()}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Switch } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface CustomSwitchProps {
   label: string;
@@ -7,11 +8,11 @@ interface CustomSwitchProps {
   checked: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   labelAlign?: 'left' | 'right';
-  isRTL?: boolean;
+ 
   disabled?: boolean;
 }
 
-const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onChange, isRTL, disabled }) => {
+const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onChange, disabled }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // إنشاء event جديد مع القيم المحدثة
     const syntheticEvent = {
@@ -23,12 +24,14 @@ const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onCha
     };
     onChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
   };
-
+const { i18n } = useTranslation();
+const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   return (
     <div className="w-full mb-4">
       <label className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{label}</label>
       <div
-        className={`flex items-center  transition-all duration-200
+        className={`${isRTL ? 'rotate-180 flex-row-reverse' : ''}
+          flex items-center  transition-all duration-200
         
           
         `}

@@ -13,7 +13,7 @@ interface AffiliationFormProps {
 const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, isRTL }) => {
   const { t } = useTranslation();
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
      
       <CustomInput
         label={t('affiliation.firstName')}

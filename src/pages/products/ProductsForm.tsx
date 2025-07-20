@@ -61,7 +61,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   specifications = []
 }) => {
   const { i18n } = useTranslation();
-  const isRtl = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   
   // استخدام hook لجلب مواصفات المنتجات من API
   const { specifications: apiSpecifications, fetchSpecifications } = useProductSpecifications();
@@ -138,22 +138,22 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   // تحويل مواصفات المنتجات إلى التنسيق المطلوب للمكون الجديد
   const formattedSpecifications = Array.isArray(apiSpecifications) ? apiSpecifications.map((spec: ProductSpecification) => ({
     _id: spec._id,
-    title: isRtl ? spec.titleAr : spec.titleEn,
+    title: isRTL ? spec.titleAr : spec.titleEn,
     values: spec.values.map((value, index) => ({
       _id: `${spec._id}_${index}`,
-      value: isRtl ? value.valueAr : value.valueEn,
-      title: isRtl ? spec.titleAr : spec.titleEn
+      value: isRTL ? value.valueAr : value.valueEn,
+      title: isRTL ? spec.titleAr : spec.titleEn
     }))
   })) : [];
 
   // تحويل specifications prop إلى التنسيق المطلوب إذا كانت موجودة
   const formattedSpecificationsProp = Array.isArray(specifications) ? specifications.map((spec: any) => ({
     _id: spec._id,
-    title: isRtl ? spec.titleAr : spec.titleEn,
+    title: isRTL ? spec.titleAr : spec.titleEn,
     values: spec.values.map((value: any, index: number) => ({
       _id: `${spec._id}_${index}`,
-      value: isRtl ? value.valueAr : value.valueEn,
-      title: isRtl ? spec.titleAr : spec.titleEn
+      value: isRTL ? value.valueAr : value.valueEn,
+      title: isRTL ? spec.titleAr : spec.titleEn
     }))
   })) : [];
 
@@ -252,7 +252,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       // التحقق من عدم تكرار الباركود
       if (currentBarcodes.includes(localNewBarcode.trim())) {
         //CONSOLE.log('🔍 Barcode already exists');
-        alert(isRtl ? 'الباركود موجود مسبقاً!' : 'Barcode already exists!');
+        alert(isRTL ? 'الباركود موجود مسبقاً!' : 'Barcode already exists!');
         return;
       }
       
@@ -277,7 +277,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       //CONSOLE.log('🔍 Barcode added successfully');
     } else {
       //CONSOLE.log('🔍 No barcode to add - empty or whitespace');
-      alert(isRtl ? 'يرجى إدخال باركود!' : 'Please enter a barcode!');
+      alert(isRTL ? 'يرجى إدخال باركود!' : 'Please enter a barcode!');
     }
   };
 
@@ -331,7 +331,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       
     } catch (error) {
       console.error('🔍 Error uploading main image:', error);
-      alert(isRtl ? 'فشل في رفع الصورة الأساسية' : 'Failed to upload main image');
+      alert(isRTL ? 'فشل في رفع الصورة الأساسية' : 'Failed to upload main image');
       handleInputChange('mainImage', null as any);
       setShowMainImageSuccess(false);
     } finally {
@@ -346,22 +346,22 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       {/* ==================== Basic Information Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-5 h-5  text-blue-500 ${isRTL ? 'ml-2' :'mr-2' }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          {isRtl ? 'المعلومات الأساسية' : 'Basic Information'}
+          {isRTL ? 'المعلومات الأساسية' : 'Basic Information'}
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <CustomInput
-            label={isRtl ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'}
+            label={isRTL ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'}
             name="nameAr"
             value={form.nameAr || ''}
             onChange={(e) => handleInputChange('nameAr', e.target.value)}
             required
           />
           <CustomInput
-            label={isRtl ? 'اسم المنتج (إنجليزي)' : 'Product Name (English)'}
+              label={isRTL ? 'اسم المنتج (إنجليزي)' : 'Product Name (English)'}
             name="nameEn"
             value={form.nameEn || ''}
             onChange={(e) => handleInputChange('nameEn', e.target.value)}
@@ -369,7 +369,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
           />
           <div className="md:col-span-2">
             <CustomTextArea
-              label={isRtl ? 'الوصف (عربي)' : 'Description (Arabic)'}
+              label={isRTL ? 'الوصف (عربي)' : 'Description (Arabic)'}
               name="descriptionAr"
               value={form.descriptionAr || ''}
               onChange={(e) => handleInputChange('descriptionAr', e.target.value)}
@@ -377,7 +377,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
           </div>
           <div className="md:col-span-2">
             <CustomTextArea
-              label={isRtl ? 'الوصف (إنجليزي)' : 'Description (English)'}
+              label={isRTL ? 'الوصف (إنجليزي)' : 'Description (English)'}
               name="descriptionEn"
               value={form.descriptionEn || ''}
               onChange={(e) => handleInputChange('descriptionEn', e.target.value)}
@@ -389,34 +389,34 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       {/* ==================== Category & Unit Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-green-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
-          {isRtl ? 'التصنيف والوحدة' : 'Category & Unit'}
+          {isRTL ? 'التصنيف والوحدة' : 'Category & Unit'}
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <CustomSelect
-            label={isRtl ? t('products.category') : 'Category'}
+            label={isRTL ? t('products.category') : 'Category'}
             value={form.categoryId || ''}
             onChange={(e) => handleSelectChange('categoryId', e.target.value)}
             options={[
-              { value: '', label: isRtl ? t('products.selectCategory') : 'Select Category' },
+              { value: '', label: isRTL ? t('products.selectCategory') : 'Select Category' },
               ...(Array.isArray(categories) ? categories.map((cat: any) => ({ 
                 value: String(cat._id || cat.id), 
-                label: isRtl ? cat.nameAr : cat.nameEn 
+                label: isRTL ? cat.nameAr : cat.nameEn 
               })) : [])
             ]}
           />
           <CustomSelect
-            label={isRtl ? t('products.unit') : 'Unit'}
+            label={isRTL ? t('products.unit') : 'Unit'}
             value={form.unitId || ''}
             onChange={(e) => handleSelectChange('unitId', e.target.value)}
             options={[
-              { value: '', label: isRtl ? t('products.selectUnit') : 'Select Unit' },
+              { value: '', label: isRTL ? t('products.selectUnit') : 'Select Unit' },
               ...(Array.isArray(units) ? units.map((u: any) => ({ 
                 value: String(u._id || u.id), 
-                label: isRtl ? u.nameAr : u.nameEn 
+                label: isRTL ? u.nameAr : u.nameEn 
               })) : [])
             ]}
           />
@@ -426,15 +426,15 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       {/* ==================== Pricing Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-yellow-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
           </svg>
-          {isRtl ? 'الأسعار' : 'Pricing'}
+          {isRTL ? 'الأسعار' : 'Pricing'}
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <CustomInput
-            label={isRtl ? t('products.price') : 'Price'}
+                  label={isRTL ? t('products.price') : 'Price'}
             name="price"
             value={form.price || ''}
             onChange={(e) => handleInputChange('price', e.target.value)}
@@ -442,14 +442,14 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
             required
           />
           <CustomInput
-            label={isRtl ? 'سعر التكلفة' : 'Cost Price'}
+            label={isRTL ? 'سعر التكلفة' : 'Cost Price'}
             name="costPrice"
             value={form.costPrice || ''}
             onChange={(e) => handleInputChange('costPrice', e.target.value)}
             type="number"
           />
           <CustomInput
-            label={isRtl ? 'سعر الجملة' : 'Wholesale Price'}
+            label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
             name="compareAtPrice"
             value={form.compareAtPrice || ''}
             onChange={(e) => handleInputChange('compareAtPrice', e.target.value)}
@@ -461,18 +461,18 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       {/* ==================== Barcode Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-purple-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          {isRtl ? 'الباركود' : 'Barcodes'}
+          {isRTL ? 'الباركود' : 'Barcodes'}
         </h3>
         
         <div className="space-y-3">
           <div className="relative">
             <input
               type="text"
-              className={`w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${isRtl ? 'text-right pr-12' : 'text-left pl-12'}`}
-              placeholder={isRtl ? 'أدخل الباركود واضغط Enter أو انقر على +' : 'Enter barcode and press Enter or click +'}
+              className={`w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${isRTL ? 'text-right pr-12' : 'text-left pl-12'}`}
+              placeholder={isRTL ? 'أدخل الباركود واضغط Enter أو انقر على +' : 'Enter barcode and press Enter or click +'}
               value={localNewBarcode}
               onChange={(e) => {
                 //CONSOLE.log('🔍 Input onChange:', e.target.value);
@@ -493,7 +493,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
                 localNewBarcode && localNewBarcode.trim() 
                   ? 'bg-purple-500 hover:bg-purple-600 cursor-pointer' 
                   : 'bg-gray-300 cursor-not-allowed'
-              } ${isRtl ? 'right-2' : 'left-2'}`}
+              } ${isRTL ? 'right-2' : 'left-2'}`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -507,7 +507,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              {isRtl ? 'تم إضافة الباركود بنجاح!' : 'Barcode added successfully!'}
+              {isRTL ? 'تم إضافة الباركود بنجاح!' : 'Barcode added successfully!'}
             </div>
           )}
           
@@ -524,7 +524,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
                     type="button"
                     onClick={() => removeBarcode(index)}
                     className="w-5 h-5 bg-purple-200 hover:bg-purple-300 rounded-full flex items-center justify-center transition-colors"
-                    title={isRtl ? 'حذف الباركود' : 'Remove barcode'}
+                    title={isRTL ? 'حذف الباركود' : 'Remove barcode'}
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -535,7 +535,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
             </div>
           ) : (
             <div className="text-gray-500 text-sm">
-              {isRtl ? 'لا توجد باركود مضافة' : 'No barcodes added'}
+              {isRTL ? 'لا توجد باركود مضافة' : 'No barcodes added'}
             </div>
           )}
         </div>
@@ -544,24 +544,24 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       {/* ==================== Settings Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-gray-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          {isRtl ? 'الإعدادات' : 'Settings'}
+          {isRTL ? 'الإعدادات' : 'Settings'}
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <CustomSwitch
-              label={isRtl ? t('products.visibility') : 'Visibility'}
+              label={isRTL ? t('products.visibility') : 'Visibility'}
               name="visibility"
               checked={form.visibility === 'Y'}
               onChange={onFormChange}
-              isRTL={isRtl}
+                  
             />
             <CustomSwitch
-              label={isRtl ? t('products.maintainStock') : 'Maintain Stock'}
+              label={isRTL ? t('products.maintainStock') : 'Maintain Stock'}
               name="maintainStock"
               checked={form.maintainStock === 'Y'}
               onChange={e => {
@@ -570,13 +570,13 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
                   handleInputChange('availableQuantity', '');
                 }
               }}
-              isRTL={isRtl}
+              
             />
           </div>
           
           <div className="space-y-4">
             <CustomInput
-              label={isRtl ? t('products.availableQuantity') : 'Available Quantity'}
+              label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
               name="availableQuantity"
               value={form.availableQuantity || ''}
               onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
@@ -584,16 +584,16 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
               disabled={form.maintainStock !== 'Y'}
             />
             <MultiSelect
-              label={isRtl ? t('products.productLabel') : 'Product Label'}
+              label={isRTL ? t('products.productLabel') : 'Product Label'}
               value={Array.isArray(form.tags) ? form.tags : []}
               onChange={handleTagsChange}
               options={[
                 ...(Array.isArray(tags) ? tags.map((opt: any) => ({
                   value: String(opt._id || opt.id),
-                  label: isRtl ? opt.nameAr : opt.nameEn
+                  label: isRTL ? opt.nameAr : opt.nameEn
                 })) : [])
               ]}
-              placeholder={isRtl ? 'اختر علامات المنتج' : 'Select product labels'}
+              placeholder={isRTL ? 'اختر علامات المنتج' : 'Select product labels'}
             />
           </div>
         </div>
@@ -602,10 +602,10 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       {/* ==================== Specifications Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-indigo-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          {isRtl ? 'مواصفات المنتج' : 'Product Specifications'}
+          {isRTL ? 'مواصفات المنتج' : 'Product Specifications'}
         </h3>
         
         {formattedSpecificationsProp.length > 0 || formattedSpecifications.length > 0 ? (
@@ -623,8 +623,8 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
             <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <p className="text-lg font-medium">{isRtl ? 'لا توجد مواصفات متاحة' : 'No specifications available'}</p>
-            <p className="text-sm">{isRtl ? 'قم بإضافة مواصفات المنتجات أولاً' : 'Please add product specifications first'}</p>
+                <p className="text-lg font-medium">{isRTL ? 'لا توجد مواصفات متاحة' : 'No specifications available'}</p>
+            <p className="text-sm">{isRTL ? 'قم بإضافة مواصفات المنتجات أولاً' : 'Please add product specifications first'}</p>
             <p className="text-xs mt-2 text-gray-400">
               API: {apiSpecifications.length}, Prop: {specifications.length}
             </p>
@@ -647,45 +647,45 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       {/* ==================== Colors Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-pink-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
           </svg>
-          {isRtl ? t('products.colors') : 'Colors'}
+          {isRTL ? t('products.colors') : 'Colors'}
         </h3>
         
         <CustomColorPicker
-          label={isRtl ? t('products.colors') : 'Colors'}
+          label={isRTL ? t('products.colors') : 'Colors'}
           name="colors"
           value={form.colors || []}
           onChange={handleColorChange}
-          isRTL={isRtl}
+          isRTL={isRTL}
         />
       </div>
 
       {/* ==================== Media Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-red-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          {isRtl ? 'الوسائط' : 'Media'}
+          {isRTL ? 'الوسائط' : 'Media'}
         </h3>
         
         <div className="space-y-6">
           {/* الصورة الأساسية */}
           <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
             <h4 className="text-md font-medium text-gray-800 mb-3 flex items-center">
-              <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} text-blue-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
-              {isRtl ? 'الصورة الأساسية' : 'Main Image'}
+              {isRTL ? 'الصورة الأساسية' : 'Main Image'}
             </h4>
             <p className="text-sm text-gray-600 mb-3">
-              {isRtl ? 'الصورة الرئيسية التي ستظهر في قائمة المنتجات' : 'Main image that will appear in product listings'}
+              {isRTL ? 'الصورة الرئيسية التي ستظهر في قائمة المنتجات' : 'Main image that will appear in product listings'}
             </p>
             
             <CustomFileInput
-              label={isRtl ? 'اختر الصورة الأساسية' : 'Select Main Image'}
+              label={isRTL ? 'اختر الصورة الأساسية' : 'Select Main Image'}
               id="mainImage"
               value={form.mainImage && form.mainImage !== null ? [form.mainImage] : []}
               onChange={files => {
@@ -713,7 +713,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
               <div className="mt-3 flex items-center justify-center p-3 bg-blue-50 rounded-lg">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-2"></div>
                 <span className="text-blue-600 text-sm">
-                  {isRtl ? 'جاري رفع الصورة الأساسية...' : 'Uploading main image...'}
+                  {isRTL ? 'جاري رفع الصورة الأساسية...' : 'Uploading main image...'}
                 </span>
               </div>
             )}
@@ -724,7 +724,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                {isRtl ? 'تم رفع الصورة الأساسية بنجاح!' : 'Main image uploaded successfully!'}
+                {isRTL ? 'تم رفع الصورة الأساسية بنجاح!' : 'Main image uploaded successfully!'}
               </div>
             )}
             
@@ -732,12 +732,12 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
             {form.mainImage && form.mainImage !== null && (
               <div className="mt-3">
                 <h5 className="text-sm font-medium text-gray-700 mb-2">
-                  {isRtl ? 'الصورة الحالية:' : 'Current Image:'}
+                  {isRTL ? 'الصورة الحالية:' : 'Current Image:'}
                 </h5>
                 <div className="relative inline-block">
                   <img 
                     src={form.mainImage} 
-                    alt={isRtl ? 'الصورة الأساسية' : 'Main Image'}
+                      alt={isRTL ? 'الصورة الأساسية' : 'Main Image'}
                     className="w-24 h-24 object-cover rounded-lg border border-gray-300"
                   />
                   <button
@@ -747,7 +747,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
                       setShowMainImageSuccess(false); // إزالة رسالة النجاح عند الحذف
                     }}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                    title={isRtl ? 'حذف الصورة' : 'Remove Image'}
+                    title={isRTL ? 'حذف الصورة' : 'Remove Image'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -763,17 +763,17 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
           {/* الصور الإضافية */}
           <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
             <h4 className="text-md font-medium text-gray-800 mb-3 flex items-center">
-              <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} text-green-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              {isRtl ? 'الصور الإضافية' : 'Additional Images'}
+              {isRTL ? 'الصور الإضافية' : 'Additional Images'}
             </h4>
             <p className="text-sm text-gray-600 mb-3">
-              {isRtl ? 'صور إضافية للمنتج (اختياري)' : 'Additional product images (optional)'}
+              {isRTL ? 'صور إضافية للمنتج (اختياري)' : 'Additional product images (optional)'}
             </p>
             
             <CustomFileInput
-              label={isRtl ? 'اختر الصور الإضافية' : 'Select Additional Images'}
+              label={isRTL ? 'اختر الصور الإضافية' : 'Select Additional Images'}
               id="images"
               value={form.images || []}
               onChange={files => onImageChange(files)}
@@ -784,14 +784,14 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
             {Array.isArray(form.images) && form.images.length > 0 && form.images.some((img: any) => img && img !== null) && (
               <div className="mt-3">
                 <h5 className="text-sm font-medium text-gray-700 mb-2">
-                  {isRtl ? 'الصور الحالية:' : 'Current Images:'}
+                  {isRTL ? 'الصور الحالية:' : 'Current Images:'}
                 </h5>
                 <div className="flex flex-wrap gap-2">
                   {form.images.filter((img: any) => img && img !== null).map((image: string, index: number) => (
                     <div key={index} className="relative">
                       <img 
                         src={image} 
-                        alt={`${isRtl ? 'صورة' : 'Image'} ${index + 1}`}
+                        alt={`${isRTL ? 'صورة' : 'Image'} ${index + 1}`}
                         className="w-20 h-20 object-cover rounded-lg border border-gray-300"
                       />
                       <button
@@ -802,7 +802,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
                           handleInputChange('images', newImages);
                         }}
                         className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors text-xs"
-                        title={isRtl ? 'حذف الصورة' : 'Remove Image'}
+                        title={isRTL ? 'حذف الصورة' : 'Remove Image'}
                       >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -820,21 +820,21 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
           {/* رابط الفيديو */}
           <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
             <h4 className="text-md font-medium text-gray-800 mb-3 flex items-center">
-              <svg className="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} text-purple-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
-              {isRtl ? 'فيديو المنتج' : 'Product Video'}
+              {isRTL ? 'فيديو المنتج' : 'Product Video'}
             </h4>
             <p className="text-sm text-gray-600 mb-3">
-              {isRtl ? 'رابط فيديو تعريفي للمنتج (اختياري)' : 'Product video URL (optional)'}
+              {isRTL ? 'رابط فيديو تعريفي للمنتج (اختياري)' : 'Product video URL (optional)'}
             </p>
             
             <CustomInput
-              label={isRtl ? 'رابط الفيديو' : 'Video URL'}
+              label={isRTL ? 'رابط الفيديو' : 'Video URL'}
               name="productVideo"
               value={form.productVideo || ''}
               onChange={(e) => handleInputChange('productVideo', e.target.value)}
-              placeholder={isRtl ? 'https://example.com/video.mp4' : 'https://example.com/video.mp4'}
+              placeholder={isRTL ? 'https://example.com/video.mp4' : 'https://example.com/video.mp4'}
             />
           </div>
         </div>

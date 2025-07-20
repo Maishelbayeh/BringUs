@@ -1241,35 +1241,6 @@ const ProductsPage: React.FC = () => {
         count={visibleTableData.length}
       />
 
-      {/* ------------------------------------------- View Mode Toggle ------------------------------------------- */}
-      <div className="mb-4 flex justify-between items-center">
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setViewMode('table')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              viewMode === 'table'
-                ? 'bg-primary text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {isRTL ? 'عرض الجدول' : 'Table View'}
-          </button>
-          <button
-            onClick={() => setViewMode('tree')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              viewMode === 'tree'
-                ? 'bg-primary text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {isRTL ? 'عرض الشجرة' : 'Tree View'}
-          </button>
-        </div>
-        <div className="text-sm text-gray-600">
-          {isRTL ? 'إجمالي المنتجات:' : 'Total Products:'} {visibleTableData.length}
-        </div>
-      </div>
-
       {/* ------------------------------------------- Content ------------------------------------------- */}
       {viewMode === 'table' ? (
         <div className="overflow-x-auto">

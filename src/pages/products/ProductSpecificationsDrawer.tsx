@@ -234,7 +234,7 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
                 name="isActive"
                 checked={form.isActive}
                 onChange={e => handleFormChange('isActive', e.target.checked)}
-                isRTL={isRTL}
+               
               />
               {showError('isActive')}
             </div>
