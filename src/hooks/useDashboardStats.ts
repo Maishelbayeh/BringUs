@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
+import { getStoreId } from '../utils/storeUtils';
 
 interface DashboardStats {
   totalOrders: number;
@@ -49,9 +50,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getStoreId = () => {
-    return localStorage.getItem('storeId') || '687505893fbf3098648bfe16';
-  };
+
 
   const fetchStats = useCallback(async () => {
     setLoading(true);

@@ -3,7 +3,8 @@ import axios from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 
-const STORE_ID = '687505893fbf3098648bfe16'; // ثابت للاختبار، يمكن تعديله لاحقاً
+// Import the store utility function
+import { getStoreId } from '../utils/storeUtils';
 
 const useProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -193,7 +194,7 @@ const useProducts = () => {
         }
         return [];
       })(),
-      storeId: form.storeId || STORE_ID,
+              storeId: form.storeId || getStoreId(),
     };
 
     //CONSOLE.log('🔍 Final payload barcodes:', payload.barcodes);
@@ -255,7 +256,7 @@ const useProducts = () => {
   // حذف منتج
   const deleteProduct = async (productId: string | number) => {
     try {
-      const response = await axios.delete(`${BASE_URL}meta/products/${productId}?storeId=${STORE_ID}`);
+      const response = await axios.delete(`${BASE_URL}meta/products/${productId}?storeId=${getStoreId()}`);
       //CONSOLE.log('Product deleted successfully:', response.data);
       showSuccess('تم حذف المنتج بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
@@ -282,7 +283,7 @@ const useProducts = () => {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      formData.append('storeId', STORE_ID);
+      formData.append('storeId', getStoreId());
 
       const response = await axios.post(`${BASE_URL}products/upload-single-image`, formData, {
         headers: {
@@ -308,7 +309,7 @@ const useProducts = () => {
       files.forEach(file => {
         formData.append('images', file);
       });
-      formData.append('storeId', STORE_ID);
+      formData.append('storeId', getStoreId());
 
       const response = await axios.post(`${BASE_URL}products/upload-gallery-images`, formData, {
         headers: {
@@ -333,7 +334,7 @@ const useProducts = () => {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      formData.append('storeId', STORE_ID);
+      formData.append('storeId', getStoreId());
 
       const response = await axios.post(`${BASE_URL}products/upload-single-image`, formData, {
         headers: {
@@ -355,13 +356,13 @@ const useProducts = () => {
   // رفع الصورة الأساسية
   const uploadMainImage = async (file: File): Promise<string> => {
     console.log('🔍 uploadMainImage called with file:', file);
-    console.log('🔍 STORE_ID:', STORE_ID);
+    console.log('🔍 STORE_ID:', getStoreId());
     console.log('🔍 BASE_URL:', BASE_URL);
     
     try {
       const formData = new FormData();
       formData.append('image', file);
-      formData.append('storeId', STORE_ID);
+      formData.append('storeId', getStoreId());
 
       console.log('🔍 Sending request to:', `${BASE_URL}products/upload-main-image`);
       console.log('🔍 FormData contents:');
@@ -526,7 +527,7 @@ const useProducts = () => {
           // skip
         } else if (key === 'storeId') {
           // Only set ONCE, as a string, and do NOT append 'store'
-          formData.set('storeId', variantData[key] || STORE_ID);
+          formData.set('storeId', variantData[key] || storeId);
         } else if (key === 'store') {
           // Do NOT append 'store' at all
           // skip
@@ -537,7 +538,7 @@ const useProducts = () => {
       
       // Get store ID from localStorage
       const storeId = localStorage.getItem('storeId');
-      if (!STORE_ID) {
+      if (!storeId) {
         throw new Error('Store ID not found');
       }
       // The following line is causing storeId to be sent as an array. DELETE IT:

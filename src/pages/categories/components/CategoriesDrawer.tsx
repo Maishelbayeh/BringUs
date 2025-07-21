@@ -1,10 +1,12 @@
 import React from 'react';
 import CustomButton from '../../../components/common/CustomButton';
-import CategoriesForm, { validateCategoryForm } from './CategoriesForm';
+import CategoriesForm from './CategoriesForm';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
 import useCategories from '@/hooks/useCategories';
 import { useToastContext } from '../../../contexts/ToastContext';
+import { useValidation } from '../../../hooks/useValidation';
+import { categoryValidationSchema, CategoryFormData, validateCategoryWithDuplicates } from '../../../validation/categoryValidation';
+import { getStoreId } from '../../../utils/storeUtils';
 
 interface CategoriesDrawerProps {
   open: boolean;
@@ -20,26 +22,27 @@ interface CategoriesDrawerProps {
   allCategories?: any[]; // قائمة التصنيفات الكاملة للـ validation
 }
 
-const STORE_ID_KEY = 'storeId';
-const DEFAULT_STORE_ID = '687505893fbf3098648bfe16';
-
 const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onImageChange, onSubmit, isSubcategory, categories, allCategories }) => {
   const { t } = useTranslation();
   const { uploadCategoryImage } = useCategories();
   const { showError } = useToastContext();
   
-  // حالة رسائل الخطأ
-  const [validationErrors, setValidationErrors] = React.useState<{ [key: string]: string }>({});
+  // استخدام النظام العام للفالديشين
+  const {
+    errors,
+    validateForm: validateFormData,
+    validateUnique,
+    clearAllErrors,
+    setErrors,
+  } = useValidation({
+    schema: categoryValidationSchema,
+    onValidationChange: (isValid) => {
+      // يمكن إضافة منطق إضافي هنا
+    },
+  });
 
-  // حفظ storeId في localStorage إذا لم يكن موجوداً
-  React.useEffect(() => {
-    if (!localStorage.getItem(STORE_ID_KEY)) {
-      localStorage.setItem(STORE_ID_KEY, DEFAULT_STORE_ID);
-    }
-  }, []);
-
-  // جلب storeId من localStorage
-  const storeId = localStorage.getItem(STORE_ID_KEY) || DEFAULT_STORE_ID;
+  // جلب storeId باستخدام الدالة المساعدة
+  const storeId = getStoreId();
 
   // دالة رفع الصورة: ترفع دائماً إلى Cloudflare وتخزن الرابط الناتج
   const onImageChangeLocal = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,34 +96,36 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
   const handleSave = async () => {
     //CONSOLE.log('handleSave called with form:', form);
     
-    // تسطيح التصنيفات للـ validation
-    const flattenedCategories = flattenCategoriesForValidation(allCategories || []);
-    //CONSOLE.log('Flattened categories for validation:', flattenedCategories);
+    // تحضير بيانات الفورم للفالديشين
+    const formData = {
+      nameAr: form.nameAr || '',
+      nameEn: form.nameEn || '',
+      descriptionAr: form.descriptionAr || undefined,
+      descriptionEn: form.descriptionEn || undefined,
+      image: form.image || undefined,
+      order: form.order ? parseInt(form.order) : undefined,
+      parentId: form.parentId,
+      isActive: form.isActive !== undefined ? form.isActive : true,
+      id: form.id || form._id,
+    };
     
-    // تنفيذ الـ validation أولاً
-    const validation = validateCategoryForm(form, isRTL, flattenedCategories);
+    // تسطيح التصنيفات للفالديشين
+    const flattenedCategories = flattenCategoriesForValidation(allCategories || []);
+    
+    // تنفيذ الفالديشين الشامل مع التحقق من التكرار
+    const validation = validateCategoryWithDuplicates(formData, flattenedCategories, t);
     
     if (!validation.isValid) {
-      //CONSOLE.log('Validation errors:', validation.errors);
-      // تعيين رسائل الخطأ في الحالة
-      setValidationErrors(validation.errors);
-      
-      // عرض رسالة توست إضافية
-      const errorMessages = Object.values(validation.errors).join(', ');
-      showError(errorMessages, isRTL ? 'خطأ في البيانات' : 'Data Error');
+      // عرض الأخطاء في الحقول مباشرة عبر النظام الجديد
+      console.log('Validation errors:', validation.errors);
+      setErrors(validation.errors);
       return;
     }
     
-    // مسح رسائل الخطأ إذا كانت البيانات صحيحة
-    setValidationErrors({});
+    // مسح الأخطاء إذا كان الفالديشين ناجح
+    clearAllErrors();
     
     //CONSOLE.log('Validation passed, proceeding with form submission');
-    
-    // تحقق من الحقول المطلوبة
-    if (!form.nameAr || !form.nameEn) {
-      showError(isRTL ? 'يجب إدخال اسم الفئة بالعربية والإنجليزية' : 'Category name in Arabic and English is required', isRTL ? 'خطأ في البيانات' : 'Data Error');
-      return;
-    }
     
     // استخدام onSubmit callback بدلاً من إعادة تحميل الصفحة
     const formEvent = new Event('submit') as any;
@@ -129,24 +134,44 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
 
   // دالة لمسح رسائل الخطأ عند تغيير الحقول
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name } = e.target;
+    const { name, value } = e.target;
     
-    // مسح رسالة الخطأ للحقل الذي تم تغييره
-    if (validationErrors[name]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-    
-    // استدعاء الدالة الأصلية
+    // استدعاء الدالة الأصلية أولاً
     onFormChange(e);
+    
+    // تنفيذ فالديشين real-time للحقل المحدد
+    const updatedForm = { ...form, [name]: value };
+    const formData = {
+      nameAr: updatedForm.nameAr || '',
+      nameEn: updatedForm.nameEn || '',
+      descriptionAr: updatedForm.descriptionAr || undefined,
+      descriptionEn: updatedForm.descriptionEn || undefined,
+      image: updatedForm.image || undefined,
+      order: updatedForm.order ? parseInt(updatedForm.order) : undefined,
+      parentId: updatedForm.parentId,
+      isActive: updatedForm.isActive !== undefined ? updatedForm.isActive : true,
+      id: updatedForm.id || updatedForm._id,
+    };
+    
+    // تنفيذ فالديشين سريع
+    const flattenedCategories = flattenCategoriesForValidation(allCategories || []);
+    const validation = validateCategoryWithDuplicates(formData, flattenedCategories, t);
+    
+    // تحديث أخطاء الحقل المحدد فقط
+    if (validation.errors[name]) {
+      console.log(`Field ${name} validation error:`, validation.errors[name]);
+      setErrors({ ...errors, [name]: validation.errors[name] });
+    } else {
+      console.log(`Field ${name} validation passed`);
+      const newErrors = { ...errors };
+      delete newErrors[name];
+      setErrors(newErrors);
+    }
   };
 
   // دالة إغلاق الدراور مع مسح رسائل الخطأ
   const handleClose = () => {
-    setValidationErrors({});
+    clearAllErrors();
     onClose();
   };
 
@@ -174,7 +199,7 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
               isSubcategory={isSubcategory}
               isRTL={isRTL}
               categories={categories}
-              validationErrors={validationErrors}
+              validationErrors={errors}
             />
           </form>
         </div>

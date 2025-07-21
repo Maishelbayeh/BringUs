@@ -7,28 +7,32 @@ import CustomSwitch from '../../components/common/CustomSwitch';
 import { useTranslation } from 'react-i18next';
 import useCategories from '../../hooks/useCategories';
 import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useValidation } from '../../hooks/useValidation';
+import useProductSpecifications from '../../hooks/useProductSpecifications';
+import { specificationValidationSchema, validateSpecificationWithDuplicates } from '../../validation/specificationsValidation';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSave: (spec: any) => void;
+  onSaveSuccess: () => void; // Changed from onSave
   spec: any;
-  validationErrors?: { [key: string]: string };
-  onFieldChange?: (field: string) => void;
 }
 
 const ProductSpecificationsDrawer: React.FC<Props> = ({ 
   open, 
   onClose, 
-  onSave, 
+  onSaveSuccess, // Changed from onSave
   spec, 
-  validationErrors = {},
-  onFieldChange 
 }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ARABIC' || i18n.language === 'ar';
   const { categories, fetchCategories } = useCategories();
+  const { specifications, saveSpecification } = useProductSpecifications(); // Get save function
   
+  const { errors, setErrors, clearAllErrors } = useValidation({
+    schema: specificationValidationSchema
+  });
+
   const [form, setForm] = useState({
     id: '',
     titleAr: '',
@@ -78,9 +82,21 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
   }, [spec, open]);
 
   const handleFormChange = (field: string, value: any) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    if (onFieldChange) {
-      onFieldChange(field);
+    const newForm = { ...form, [field]: value };
+    setForm(newForm);
+    // Real-time validation
+    const validationResult = validateSpecificationWithDuplicates(
+      { ...newForm, id: spec?._id },
+      specifications,
+      t
+    );
+    // Only update errors for the field that changed to avoid flickering
+    if (validationResult.errors[field]) {
+      setErrors({ ...errors, [field]: validationResult.errors[field] });
+    } else {
+      const newErrors = { ...errors };
+      delete newErrors[field];
+      setErrors(newErrors);
     }
   };
 
@@ -133,22 +149,39 @@ const ProductSpecificationsDrawer: React.FC<Props> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+
+    const validationResult = validateSpecificationWithDuplicates(
+      { ...form, id: spec?._id },
+      specifications,
+      t
+    );
+
+    if (!validationResult.isValid) {
+      setErrors(validationResult.errors);
+      setSaving(false);
+      return;
+    }
+    
     try {
-      await onSave(form);
+      await saveSpecification(form, spec?._id);
+      clearAllErrors();
+      onSaveSuccess(); // Call the success callback
+    } catch(error) {
+      // Error is already handled by the toast in the hook
+      console.error("Save failed:", error);
     } finally {
       setSaving(false);
     }
   };
 
   const getErrorStyle = (field: string) => {
-    return validationErrors[field] ? 'border-red-500 focus:border-red-500' : '';
+    return errors[field] ? 'border-red-500 focus:border-red-500' : '';
   };
 
   const showError = (field: string) => {
-    return validationErrors[field] ? (
-      <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-        <span>⚠</span>
-        <span>{validationErrors[field]}</span>
+    return errors[field] ? (
+      <div className="text-red-500 text-xs mt-1">
+        <span>{errors[field]}</span>
       </div>
     ) : null;
   };

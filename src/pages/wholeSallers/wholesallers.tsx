@@ -69,14 +69,15 @@ const WholesallersPage = () => {
 
   //-------------------------------------------- handleDrawerOpen -------------------------------------------
   const handleDrawerOpen = () => {
-    setForm(initialForm);
+    // No need to set form here, Drawer will handle its own state
     setEditId(null);
     setDrawerOpen(true);
   };
 
   //-------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (item: any) => {
-    setForm({ ...item, status: item.status === 'Active' ? 'Active' : 'Inactive' });
+    // Pass the whole item to the Drawer
+    setForm(item); // Keep this to pass initial data
     setEditId(item._id);
     setDrawerOpen(true);
   };
@@ -110,6 +111,12 @@ const WholesallersPage = () => {
     setEditId(null);
   };
 
+  const handleSaveSuccess = async () => {
+    await getWholesalers();
+    setDrawerOpen(false);
+    setEditId(null);
+  };
+
   //-------------------------------------------- return -------------------------------------------
   return (
     <div className="sm:p-4">
@@ -137,10 +144,9 @@ const WholesallersPage = () => {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         isRTL={isRTL}
-        title={t('wholesalers.add')}
-        form={form}
-        onFormChange={handleFormChange}
-        onSubmit={handleSubmit}
+        title={editId ? t('wholesalers.edit') : t('wholesalers.add')}
+        initialData={editId ? form : undefined} // Pass initial data for editing
+        onSaveSuccess={handleSaveSuccess}
         isEdit={!!editId}
       />
       {/* ------------------------------------------- PermissionModal ------------------------------------------- */}

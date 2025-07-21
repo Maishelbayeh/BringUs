@@ -42,6 +42,7 @@ const initialForm: {
   productOrder: string;
   maintainStock: string;
   availableQuantity: number;
+  lowStockThreshold: number;
   
   descriptionAr: string;
   descriptionEn: string;
@@ -71,6 +72,7 @@ const initialForm: {
   productOrder: '',
   maintainStock: 'Y',
   availableQuantity: 0,
+  lowStockThreshold: 10,
   
   descriptionAr: '',
   descriptionEn: '',

@@ -2,14 +2,15 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
+import { getStoreId } from '../utils/storeUtils';
 
-const STORE_ID = '687505893fbf3098648bfe16'; // Store ID الجديد
 
 const useProductSpecifications = () => {
   const [specifications, setSpecifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
+ 
 
   // جلب جميع مواصفات المنتجات
   const fetchSpecifications = useCallback(async (forceRefresh: boolean = false) => {
@@ -21,7 +22,7 @@ const useProductSpecifications = () => {
 
     try {
       setLoading(true);
-      const url = `${BASE_URL}meta/product-specifications/by-store?storeId=${STORE_ID}`;
+      const url = `${BASE_URL}meta/product-specifications/by-store?storeId=${getStoreId()}`;
       //CONSOLE.log('🔍 Fetching specifications from:', url);
       const res = await axios.get(url);
       //CONSOLE.log('🔍 Raw API response:', res.data);
@@ -52,7 +53,7 @@ const useProductSpecifications = () => {
       values: form.values || [],
       sortOrder: form.sortOrder || 0,
       isActive: form.isActive !== undefined ? form.isActive : true, // إعادة تفعيل
-      storeId: STORE_ID, // إرسال storeId في كل الحالات
+              storeId: getStoreId(), // إرسال storeId في كل الحالات
     };
     
     // إضافة التصنيف فقط إذا كان محدداً
@@ -117,55 +118,6 @@ const useProductSpecifications = () => {
     }
   };
 
-  // دالة التحقق من صحة البيانات
-  const validateSpecification = (form: any, isRTL: boolean = false) => {
-    const errors: { [key: string]: string } = {};
-
-    // التحقق من العنوان العربي
-    const titleAr = form.titleAr?.trim();
-    if (!titleAr || titleAr === '') {
-      errors.titleAr = isRTL ? 'العنوان العربي مطلوب' : 'Arabic title is required';
-    } else if (titleAr.length > 100) {
-      errors.titleAr = isRTL ? 'العنوان العربي لا يمكن أن يتجاوز 100 حرف' : 'Arabic title cannot exceed 100 characters';
-    }
-
-    // التحقق من العنوان الإنجليزي
-    const titleEn = form.titleEn?.trim();
-    if (!titleEn || titleEn === '') {
-      errors.titleEn = isRTL ? 'العنوان الإنجليزي مطلوب' : 'English title is required';
-    } else if (titleEn.length > 100) {
-      errors.titleEn = isRTL ? 'العنوان الإنجليزي لا يمكن أن يتجاوز 100 حرف' : 'English title cannot exceed 100 characters';
-    }
-
-    // التحقق من القيم
-    if (!form.values || !Array.isArray(form.values) || form.values.length === 0) {
-      errors.values = isRTL ? 'يجب إضافة قيم للمواصفة' : 'Values are required for specification';
-    } else {
-      // التحقق من كل قيمة
-      form.values.forEach((value: any, index: number) => {
-        if (!value.valueAr || value.valueAr.trim() === '') {
-          errors[`values.${index}.valueAr`] = isRTL ? 'القيمة العربية مطلوبة' : 'Arabic value is required';
-        }
-        if (!value.valueEn || value.valueEn.trim() === '') {
-          errors[`values.${index}.valueEn`] = isRTL ? 'القيمة الإنجليزية مطلوبة' : 'English value is required';
-        }
-      });
-    }
-
-    // التحقق من عدم تكرار العنوان في نفس المتجر
-    const existingSpec = specifications.find(spec => 
-      spec._id !== form.id && 
-      (spec.titleAr === titleAr || spec.titleEn === titleEn)
-    );
-    
-    if (existingSpec) {
-      errors.titleAr = isRTL ? 'هذه المواصفة موجودة مسبقاً' : 'This specification already exists';
-      errors.titleEn = isRTL ? 'هذه المواصفة موجودة مسبقاً' : 'This specification already exists';
-    }
-
-    return errors;
-  };
-
   return {
     specifications,
     setSpecifications,
@@ -173,7 +125,6 @@ const useProductSpecifications = () => {
     fetchSpecifications,
     saveSpecification,
     deleteSpecification,
-    validateSpecification,
   };
 };
 

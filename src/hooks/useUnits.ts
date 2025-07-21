@@ -2,8 +2,7 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
-
-const STORE_ID = '687505893fbf3098648bfe16'; // ثابت للاختبار، يمكن تعديله لاحقاً
+import { getStoreId } from '../utils/storeUtils';
 
 const useUnits = () => {
   const [units, setUnits] = useState<any[]>([]);
@@ -20,7 +19,7 @@ const useUnits = () => {
 
     try {
       setLoading(true);
-      const url = `${BASE_URL}meta/units?storeId=${STORE_ID}`;
+      const url = `${BASE_URL}meta/stores/${getStoreId()}/units`;
       const res = await axios.get(url);
       // //CONSOLE.log('FETCHED UNITS FROM API:', res.data);
       const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
@@ -39,25 +38,29 @@ const useUnits = () => {
 
   // إضافة أو تعديل وحدة
   const saveUnit = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
-    //CONSOLE.log('Saving unit with form:', form, 'editId:', editId, 'isRTL:', isRTL);
+    const storeId = getStoreId();
+    if (!storeId) {
+      showError('Store ID is missing. Cannot save unit.');
+      return;
+    }
     
     const payload: any = {
       nameAr: form.nameAr?.trim() || '',
       nameEn: form.nameEn?.trim() || '',
       symbol: form.symbol?.trim() || '',
-      storeId: STORE_ID,
       isActive: form.isActive !== undefined ? form.isActive : true,
+     store:storeId
     };
 
-    //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
-        const response = await axios.put(`${BASE_URL}meta/units/${editId}`, payload);
-        //CONSOLE.log('Unit updated successfully:', response.data);
+        // For PUT, backend might expect storeId in payload or might get it from URL/auth
+        const updatePayload = { ...payload, storeId };
+        const response = await axios.put(`${BASE_URL}meta/units/${editId}`, updatePayload);
         showSuccess('تم تعديل الوحدة بنجاح', 'نجح التحديث');
       } else {
+        // For POST, send storeId in the URL
         const response = await axios.post(`${BASE_URL}meta/units`, payload);
-        //CONSOLE.log('Unit created successfully:', response.data);
         showSuccess('تم إضافة الوحدة بنجاح', 'نجح الإضافة');
       }
       await fetchUnits(true);

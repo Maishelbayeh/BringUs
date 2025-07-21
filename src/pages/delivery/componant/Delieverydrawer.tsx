@@ -69,7 +69,7 @@ const DeliveryAreaModal: React.FC<Props> = ({ open, onClose, area, onSave, langu
         </div>
         
         {/* Footer */}
-        <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl`}>
+        <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl flex-row-reverse`}>
           <CustomButton
             color="primary"
             textColor="white"

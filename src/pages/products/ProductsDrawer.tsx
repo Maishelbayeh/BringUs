@@ -28,6 +28,7 @@ interface ProductsDrawerProps {
     // productOrder: string;
     maintainStock: string;
     availableQuantity: number;
+    lowStockThreshold: number;
     descriptionAr: string;
     descriptionEn: string;
     barcodes: string[];

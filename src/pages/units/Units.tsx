@@ -6,13 +6,14 @@ import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
 import UnitsDrawer from './UnitsDrawer';
 import PermissionModal from '../../components/common/PermissionModal';
+// import { validateUnitsWithDuplicates, UnitsFormData } from '../../validation/unitsValidation'; // No longer needed here
 
-        const Units: React.FC = () => {
-        const { t, i18n } = useTranslation();
+const Units: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ARABIC' || i18n.language === 'ar';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingSpec, setEditingSpec] = useState<any>(null);
-  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
+  // const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({}); // No longer needed here
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<any>(null);
 
@@ -21,8 +22,7 @@ import PermissionModal from '../../components/common/PermissionModal';
     loading,
     fetchUnits,
     saveUnit,
-    deleteUnit,
-    validateUnit
+    deleteUnit
   } = useUnits();
 
   // جلب البيانات عند تحميل الصفحة (مرة واحدة فقط)
@@ -53,49 +53,22 @@ import PermissionModal from '../../components/common/PermissionModal';
   const handleEdit = (item: any) => {
     setEditingSpec(item);
     setDrawerOpen(true);
-    setValidationErrors({});
   };
 
   const handleAdd = () => {
     setEditingSpec(null);
     setDrawerOpen(true);
-    setValidationErrors({});
   };
 
   const handleDrawerClose = () => {
     setDrawerOpen(false);
     setEditingSpec(null);
-    setValidationErrors({});
   };
 
-  const handleDrawerSave = async (form: any) => {
-    try {
-      // التحقق من صحة البيانات
-      const errors = validateUnit(form, isRTL);
-      if (Object.keys(errors).length > 0) {
-        setValidationErrors(errors);
-        return;
-      }
-
-      // حفظ البيانات
-      const editId = editingSpec?._id || editingSpec?.id;
-      await saveUnit(form, editId, isRTL);
-      setDrawerOpen(false);
-      setEditingSpec(null);
-      setValidationErrors({});
-    } catch (error) {
-      //CONSOLE.error('Error saving unit:', error);
-    }
-  };
-
-  const handleFieldChange = (field: string) => {
-    if (validationErrors[field]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
+  const handleSaveSuccess = () => {
+    setDrawerOpen(false);
+    setEditingSpec(null);
+    fetchUnits(true); // Re-fetch data
   };
 
   const columns = [
@@ -167,10 +140,8 @@ import PermissionModal from '../../components/common/PermissionModal';
       <UnitsDrawer 
         open={drawerOpen} 
         onClose={handleDrawerClose} 
-        onSave={handleDrawerSave} 
+        onSaveSuccess={handleSaveSuccess}
         spec={editingSpec}
-        validationErrors={validationErrors}
-        onFieldChange={handleFieldChange}
       />
 
       {/* PermissionModal for delete confirmation */}

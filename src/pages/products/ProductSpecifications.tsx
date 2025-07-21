@@ -7,13 +7,14 @@ import HeaderWithAction from '../../components/common/HeaderWithAction';
 import { PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import CustomButton from '../../components/common/CustomButton';
 import PermissionModal from '../../components/common/PermissionModal';
+// import { validateSpecificationWithDuplicates } from '../../validation/specificationsValidation'; // No longer needed here
 
 const ProductSpecifications: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ARABIC' || i18n.language === 'ar';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingSpec, setEditingSpec] = useState<any>(null);
-  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
+  // const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({}); // No longer needed here
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [specToDelete, setSpecToDelete] = useState<any>(null);
   const [search, setSearch] = useState('');
@@ -22,9 +23,8 @@ const ProductSpecifications: React.FC = () => {
     specifications,
     loading,
     fetchSpecifications,
-    saveSpecification,
+    // saveSpecification, // Will be called from the Drawer
     deleteSpecification,
-    validateSpecification
   } = useProductSpecifications();
 
   // جلب البيانات عند تحميل الصفحة
@@ -55,56 +55,22 @@ const ProductSpecifications: React.FC = () => {
   const handleEdit = (spec: any) => {
     setEditingSpec(spec);
     setDrawerOpen(true);
-    setValidationErrors({});
   };
 
   const handleAdd = () => {
     setEditingSpec(null);
     setDrawerOpen(true);
-    setValidationErrors({});
   };
 
   const handleDrawerClose = () => {
     setDrawerOpen(false);
     setEditingSpec(null);
-    setValidationErrors({});
   };
 
-  const handleDrawerSave = async (form: any) => {
-    try {
-      console.log('🔄 Starting save process...');
-      console.log('📝 Form data:', form);
-      
-      // التحقق من صحة البيانات
-      const errors = validateSpecification(form, isRTL);
-      if (Object.keys(errors).length > 0) {
-        console.log('❌ Validation errors:', errors);
-        setValidationErrors(errors);
-        return;
-      }
-
-      console.log('✅ Validation passed, saving...');
-      
-      // حفظ البيانات
-      await saveSpecification(form, editingSpec?._id);
-      console.log('✅ Save completed successfully');
-      
-      setDrawerOpen(false);
-      setEditingSpec(null);
-      setValidationErrors({});
-    } catch (error) {
-      //CONSOLE.error('Error saving specification:', error);
-    }
-  };
-
-  const handleFieldChange = (field: string) => {
-    if (validationErrors[field]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
+  const handleSaveSuccess = () => {
+    setDrawerOpen(false);
+    setEditingSpec(null);
+    fetchSpecifications(true); // Re-fetch data after saving
   };
 
   // Breadcrumb
@@ -286,30 +252,22 @@ const ProductSpecifications: React.FC = () => {
       {/* Empty State */}
       {!loading && filteredSpecifications.length === 0 && (
         <div className="bg-white rounded-2xl p-8 text-center">
-          <div className="text-gray-400 text-6xl mb-4">📋</div>
+         
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             {isRTL ? 'لا توجد مواصفات منتجات' : 'No Product Specifications'}
           </h3>
           <p className="text-gray-600 mb-6">
             {isRTL ? 'ابدأ بإضافة مواصفات المنتجات لتنظيم منتجاتك بشكل أفضل' : 'Start by adding product specifications to better organize your products'}
           </p>
-          <CustomButton
-            color="primary"
-            textColor="white"
-            text={isRTL ? 'إضافة مواصفة جديدة' : 'Add New Specification'}
-            action={handleAdd}
-            icon={<PlusIcon className="w-5 h-5" />}
-          />
+         
         </div>
       )}
       
       <ProductSpecificationsDrawer 
         open={drawerOpen} 
         onClose={handleDrawerClose} 
-        onSave={handleDrawerSave} 
+        onSaveSuccess={handleSaveSuccess} 
         spec={editingSpec}
-        validationErrors={validationErrors}
-        onFieldChange={handleFieldChange}
       />
 
       <PermissionModal

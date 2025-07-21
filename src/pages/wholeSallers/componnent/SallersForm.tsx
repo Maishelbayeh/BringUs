@@ -1,82 +1,87 @@
 import React from 'react';
-import CustomInput from '../../../components/common/CustomInput';
-import CustomRadioGroup from '../../../components/common/CustomRadioGroup';
-import CustomTextArea from '../../../components/common/CustomTextArea';
 import { useTranslation } from 'react-i18next';
+import CustomInput from '../../../components/common/CustomInput';
+import CustomTextArea from '../../../components/common/CustomTextArea';
 
 interface SallersFormProps {
   form: any;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   isRTL: boolean;
-  isEdit?: boolean;
+  isEdit: boolean;
+  errors: { [key: string]: string };
 }
 
-const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL, isEdit = false }) => {
+const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL, isEdit, errors }) => {
   const { t } = useTranslation();
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+        {/* First Name */}
+        <CustomInput
+          label={t('wholesalers.firstName')}
+          name="firstName"
+          value={form.firstName || ''}
+          onChange={onFormChange}
+          error={errors.firstName}
+          required
+        />
+        
+        {/* Last Name */}
+        <CustomInput
+          label={t('wholesalers.lastName')}
+          name="lastName"
+          value={form.lastName || ''}
+          onChange={onFormChange}
+          error={errors.lastName}
+          required
+        />
+      </div>
+
+      {/* Email */}
       <CustomInput
         label={t('wholesalers.email')}
         name="email"
         type="email"
-        value={form.email}
+        value={form.email || ''}
         onChange={onFormChange}
-        required 
+        error={errors.email}
+        required
       />
 
-      <CustomInput
-        label={t('wholesalers.firstName')}
-        name="firstName"
-        value={form.firstName}
-        onChange={onFormChange}
-        required
-        
-      />
-      <CustomInput
-        label={t('wholesalers.lastName')}
-        name="lastName"
-        value={form.lastName}
-        onChange={onFormChange}
-        required
-        
-      />
+      {/* Mobile */}
       <CustomInput
         label={t('wholesalers.mobile')}
         name="mobile"
-        value={form.mobile}
+        type="tel"
+        value={form.mobile || ''}
         onChange={onFormChange}
+        error={errors.mobile}
         required
-       
+        placeholder="+972xxxxxxxxx"
       />
+
+      {/* Discount */}
       <CustomInput
         label={t('wholesalers.discount')}
         name="discount"
         type="number"
-        value={form.discount}
+        value={form.discount || 0}
         onChange={onFormChange}
+        error={errors.discount}
         required
-        
+        min="0"
+        max="100"
       />
-      {isEdit && (
-        <CustomRadioGroup
-          label={t('wholesalers.status')}
-          name="status"
-          value={form.status}
-          onChange={onFormChange}
-          options={[
-            { value: 'Active', label: t('wholesalers.active') },
-            { value: 'Inactive', label: t('wholesalers.inactive') },
-            // { value: 'Suspended', label: t('wholesalers.suspended') || 'Suspended' },
-            // { value: 'Pending', label: t('wholesalers.pending') || 'Pending' },
-          ]}
-        />
-      )}
+
+      {/* Address */}
       <CustomTextArea
         label={t('wholesalers.address')}
         name="address"
-        value={form.address}
-        onChange={e => onFormChange(e as any)}
-        
+        value={form.address || ''}
+        onChange={onFormChange}
+        error={errors.address}
+        required
         dir={isRTL ? 'rtl' : 'ltr'}
       />
     </div>
