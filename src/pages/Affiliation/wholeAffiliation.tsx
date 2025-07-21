@@ -2,35 +2,25 @@ import React, { useState } from 'react';
 import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import AffiliationDrawer from './component/AffiliationDrawer';
-import HeaderWithAction from '@/components/common/HeaderWithAction';
+import HeaderWithAction from '../../components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import PermissionModal from '../../components/common/PermissionModal';
 import { mockAffiliates } from '../../data/mockAffiliates';
 import AffiliatePaymentDrawer from './AffiliatePaymentDrawer';
-//------------------------------------------- initialForm -------------------------------------------
-const initialForm = {
-  email: '',
-  password: '',
-  firstName: '',
-  lastName: '',
-  mobile: '',
-  percent: '',
-  status: 'Active',
-  link: '', 
-  address: '',
-};
+
 //------------------------------------------- AffiliationPage -------------------------------------------
 const AffiliationPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [data, setData] = useState(mockAffiliates);
-  const [form, setForm] = useState(initialForm);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editingAffiliate, setEditingAffiliate] = useState<any>(null);
+  const [isEdit, setIsEdit] = useState(false);
   const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false);
   const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [affiliateToDelete, setAffiliateToDelete] = useState<any | null>(null);
+
 //------------------------------------------- columns -------------------------------------------
   const columns = [
     {
@@ -52,29 +42,28 @@ const AffiliationPage = () => {
     { key: 'link', label: { en: t('affiliation.link'), ar: t('affiliation.link') }, type: 'link' },
     {key: 'status',label: { en: t('affiliation.status'), ar: t('affiliation.status') },type: 'status',},
     { key: 'address', label: { en: t('affiliation.address'), ar: t('affiliation.address') } },
-   
   ];
-//------------------------------------------- handleFormChange -------------------------------------------
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
+
 //------------------------------------------- handleDrawerOpen -------------------------------------------
   const handleDrawerOpen = () => {
-    setForm(initialForm);
+    setEditingAffiliate(null);
+    setIsEdit(false);
     setDrawerOpen(true);
   };
+
 //------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (item: any) => {
-    setForm(item);
-   //CONSOLE.log(item);
+    setEditingAffiliate(item);
+    setIsEdit(true);
     setDrawerOpen(true);
   };
+
 //------------------------------------------- handleDelete -------------------------------------------
   const handleDelete = (item: any) => {
     setAffiliateToDelete(item);
     setShowDeleteModal(true);
   };
+
 //------------------------------------------- handleDeleteConfirm -------------------------------------------
   const handleDeleteConfirm = () => {
     if (affiliateToDelete) {
@@ -83,40 +72,31 @@ const AffiliationPage = () => {
     }
     setShowDeleteModal(false);
   };
-//------------------------------------------- handleSubmit -------------------------------------------  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    //CONSOLE.log(form);
-    if (editIndex !== null) {
-      setData(prev => prev.map((d, idx) => idx === editIndex ? { ...form, id: d.id, percent: Number(form.percent), status: form.status === 'Active' || form.status === t('affiliation.active') ? 'Active' : 'Inactive' } : d));
-      setEditIndex(null);
-    } else {
-      setData(prev => [
-        ...prev,
-        {
-          ...form,
-          id: prev.length + 1,
-          percent: Number(form.percent),
-          status: form.status === 'Active' || form.status === t('affiliation.active') ? 'Active' : 'Inactive',
-        }
-      ]);
-    }
+
+//------------------------------------------- handleSaveSuccess -------------------------------------------  
+  const handleSaveSuccess = () => {
+    // This function will be called from AffiliationDrawer after successful validation
+    // Here you would normally make an API call to save the data
+    // For now, we'll just close the drawer
     setDrawerOpen(false);
+    // You can add your save logic here
   };
-//------------------------------------------- return -------------------------------------------
+
   return (
-    <div className="sm:p-4" >
-      <CustomBreadcrumb items={[
-        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
-        { name: t('affiliation.title') || 'Affiliation', href: '/affiliation' }
-      ]} isRtl={isRTL} />
+    <div className="p-4 bg-white">
+      {/* ------------------------------------------- CustomBreadcrumb ------------------------------------------- */}
+      <CustomBreadcrumb
+        items={[
+          { name: t('affiliation.affiliates'), href: '#' },
+        ]}
+        isRtl={isRTL}
+      />
       {/* ------------------------------------------- HeaderWithAction ------------------------------------------- */}
       <HeaderWithAction
-        title={t('affiliation.title') || 'Affiliation'}
-        addLabel={t('common.add') || 'Add'}
+        title={t('affiliation.affiliates')}
+        addLabel={t('affiliation.add')}
         onAdd={handleDrawerOpen}
-        isRtl={i18n.language === 'ARABIC'}
-        count={data.length}
+        isRtl={isRTL}
       />
       {/* ------------------------------------------- CustomTable ------------------------------------------- */}
       <CustomTable
@@ -130,10 +110,11 @@ const AffiliationPage = () => {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         isRTL={isRTL}
-        title={t('affiliation.add')}
-        form={form}
-        onFormChange={handleFormChange}
-        onSubmit={handleSubmit}
+        title={isEdit ? t('affiliation.edit') : t('affiliation.add')}
+        initialData={editingAffiliate}
+        onSaveSuccess={handleSaveSuccess}
+        isEdit={isEdit}
+        affiliates={data}
       />
       {/* ------------------------------------------- AffiliatePaymentDrawer ------------------------------------------- */}
       <AffiliatePaymentDrawer

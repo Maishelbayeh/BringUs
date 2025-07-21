@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
-import { getStoreId } from './useLocalStorage';
+import { getStoreId } from '../utils/storeUtils';
+import categoryImage from '../assets/category.jpg';
 
 function buildCategoryTree(flatCategories: any[]): any[] {
   if (!Array.isArray(flatCategories)) return [];
@@ -66,6 +67,11 @@ const STORE_ID = getStoreId() || '';
   const saveCategory = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
     //CONSOLE.log('Saving category with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
+    // صورة افتراضية للكاتيجوري
+    const DEFAULT_CATEGORY_IMAGE = categoryImage;
+    
+    console.log('Category image:', form.image ? 'User uploaded' : 'Using default', form.image || DEFAULT_CATEGORY_IMAGE);
+    
     // توليد slug تلقائياً من الاسم الإنجليزي إذا لم يكن موجوداً
     const slug = form.slug && form.slug.trim() !== ''
       ? form.slug.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')
@@ -80,7 +86,7 @@ const STORE_ID = getStoreId() || '';
       descriptionEn: form.descriptionEn ? form.descriptionEn.trim() : '',
       storeId: STORE_ID,
       icon: form.icon || '',
-      image: form.image || '',
+      image: form.image || DEFAULT_CATEGORY_IMAGE, // استخدام الصورة الافتراضية إذا لم يرفع المستخدم صورة
       isActive: form.visible !== undefined ? form.visible : true,
       sortOrder: form.order || 1,
     };

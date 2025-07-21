@@ -86,7 +86,7 @@ const ProductsLabelsDrawer: React.FC<Props> = ({
 
   const showError = (field: string) => {
     return validationErrors[field] ? (
-      <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
+      <div className="text-red-500 text-xs mt-1 flex items-center gap-1">
         {/* <span>⚠</span> */}
         <span>{validationErrors[field]}</span>
       </div>

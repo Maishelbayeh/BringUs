@@ -42,7 +42,8 @@ export const useStoreSlider = () => {
 
   // Get Store ID from localStorage
   const getStoreId = useCallback(() => {
-    return localStorage.getItem('storeId') || '687505893fbf3098648bfe16';
+    const storeId = localStorage.getItem('storeId');
+    return storeId || '';
   }, []);
 
   // Get all store sliders

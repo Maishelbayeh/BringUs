@@ -5,27 +5,31 @@ import CustomInput from '../../components/common/CustomInput';
 import CustomSwitch from '../../components/common/CustomSwitch';
 import { useTranslation } from 'react-i18next';
 import useCategories from '../../hooks/useCategories';
+import useUnits from '../../hooks/useUnits';
+import { useValidation } from '../../hooks/useValidation';
+import { unitsValidationSchema, validateUnitsWithDuplicates } from '../../validation/unitsValidation';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSave: (spec: any) => void;
+  onSaveSuccess: () => void;
   spec: any;
-  validationErrors?: { [key: string]: string };
-  onFieldChange?: (field: string) => void;
 }
 
 const UnitsDrawer: React.FC<Props> = ({ 
   open, 
   onClose, 
-  onSave, 
+  onSaveSuccess,
   spec, 
-  validationErrors = {},
-  onFieldChange 
 }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ARABIC' || i18n.language === 'ar';
   const { categories, fetchCategories } = useCategories();
+  const { units, saveUnit } = useUnits();
+  
+  const { errors, setErrors, clearAllErrors } = useValidation({
+    schema: unitsValidationSchema
+  });
   
   const [form, setForm] = useState({
     id: '',
@@ -73,26 +77,48 @@ const UnitsDrawer: React.FC<Props> = ({
   }, [spec, open]);
 
   const handleFormChange = (field: string, value: any) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    if (onFieldChange) {
-      onFieldChange(field);
+    const newForm = { ...form, [field]: value };
+    setForm(newForm);
+    
+    // Real-time validation
+    const validationResult = validateUnitsWithDuplicates(
+      { ...newForm, id: spec?._id },
+      units,
+      t
+    );
+    setErrors(validationResult.errors);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const validationResult = validateUnitsWithDuplicates(
+      { ...form, id: spec?._id },
+      units,
+      t
+    );
+
+    if (!validationResult.isValid) {
+      setErrors(validationResult.errors);
+      return;
+    }
+
+    try {
+      await saveUnit(form, spec?._id);
+      clearAllErrors();
+      onSaveSuccess();
+    } catch (error) {
+      console.error('Save failed:', error);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(form);
-  };
-
   const getErrorStyle = (field: string) => {
-    return validationErrors[field] ? 'border-red-500 focus:border-red-500' : '';
+    return errors[field] ? 'border-red-500 focus:border-red-500' : '';
   };
 
   const showError = (field: string) => {
-    return validationErrors[field] ? (
-      <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-        {/* <span>⚠</span> */}
-        <span>{validationErrors[field]}</span>
+    return errors[field] ? (
+      <div className="text-red-500 text-sm mt-1">
+        <span>{errors[field]}</span>
       </div>
     ) : null;
   };
@@ -194,7 +220,7 @@ const UnitsDrawer: React.FC<Props> = ({
                   name="isActive"
                   checked={form.isActive}
                   onChange={e => handleFormChange('isActive', e.target.checked)}
-                  isRTL={isRTL}
+                  
                 />
               </div>
             )}

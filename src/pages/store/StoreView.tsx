@@ -188,7 +188,7 @@ const StoreView: React.FC = () => {
             {/* قسم المعلومات الأساسية */}
             <CollapsibleSection
               title={isRTL ? 'المعلومات الأساسية' : 'Basic Information'}
-              icon="📋"
+              icon=""
               isCollapsed={collapsedSections.basic}
               onToggle={() => toggleSection('basic')}
               isRTL={isRTL}

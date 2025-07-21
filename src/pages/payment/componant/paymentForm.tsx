@@ -126,7 +126,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit,  lang
 
   // Currency options
   const CURRENCIES = [
-    { value: 'ILS', label: 'ILS - Israeli Shekel' },
+    { value: 'ILS', label: 'ILS -   Shekel' },
     { value: 'USD', label: 'USD - US Dollar' },
     { value: 'EUR', label: 'EUR - Euro' },
     { value: 'GBP', label: 'GBP - British Pound' },
@@ -386,7 +386,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit,  lang
 
         {/* File validation error */}
         {errors.file && (
-          <div className="text-red-500 text-sm mt-1">
+          <div className="text-red-500 text-xs mt-1">
             {errors.file}
           </div>
         )}

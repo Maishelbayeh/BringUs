@@ -71,24 +71,24 @@ export const validateDeliveryForm = (
   //       errors.whatsappNumber = t('validation.invalidWhatsApp', 'Please enter a valid Palestinian WhatsApp number');
   //     }
   //   }
-  //   // Check for Israeli numbers (+972) - including 1948 territories
+  //   // Check for   numbers (+972) - including 1948 territories
   //   else if (cleanNumber.startsWith('972') || cleanNumber.startsWith('+972')) {
-  //     // Israeli mobile numbers can start with 50, 51, 52, 53, 54, 55, 58
-  //     const israeliPattern = /^(\+972|972)[5][0-8][0-9]{7}$/;
-  //     if (!israeliPattern.test(cleanNumber)) {
-  //       errors.whatsappNumber = t('validation.invalidWhatsApp', 'Please enter a valid Israeli WhatsApp number');
+  //     //   mobile numbers can start with 50, 51, 52, 53, 54, 55, 58
+  //     const  Pattern = /^(\+972|972)[5][0-8][0-9]{7}$/;
+  //     if (! Pattern.test(cleanNumber)) {
+  //       errors.whatsappNumber = t('validation.invalidWhatsApp', 'Please enter a valid   WhatsApp number');
   //     }
   //   }
-  //   // Check for local Israeli numbers (starting with 0)
+  //   // Check for local   numbers (starting with 0)
   //   else if (cleanNumber.startsWith('0') && cleanNumber.length === 10) {
-  //     // Local Israeli mobile numbers: 050, 051, 052, 053, 054, 055, 058
+  //     // Local   mobile numbers: 050, 051, 052, 053, 054, 055, 058
   //     if (!/^0[5][0-8][0-9]{7}$/.test(cleanNumber)) {
-  //       errors.whatsappNumber = t('validation.invalidWhatsApp', 'Please enter a valid Israeli WhatsApp number');
+  //       errors.whatsappNumber = t('validation.invalidWhatsApp', 'Please enter a valid   WhatsApp number');
   //     }
   //   }
   //   // Invalid format
   //   else {
-  //     errors.whatsappNumber = t('validation.invalidWhatsApp', 'Please enter a valid Palestinian or Israeli WhatsApp number');
+  //     errors.whatsappNumber = t('validation.invalidWhatsApp', 'Please enter a valid Palestinian or   WhatsApp number');
   //   }
     
   //   if (cleanNumber.length < 9 || cleanNumber.length > 12) {
@@ -164,24 +164,24 @@ export const validateWhatsAppNumber = (value: string, t: any): string | undefine
       return t('validation.invalidWhatsApp', 'Please enter a valid Palestinian WhatsApp number');
     }
   }
-  // Check for Israeli numbers (+972) - including 1948 territories
+  // Check for   numbers (+972) - including 1948 territories
   else if (cleanNumber.startsWith('972') || cleanNumber.startsWith('+972')) {
-    // Israeli mobile numbers can start with 50, 51, 52, 53, 54, 55, 58
-    const israeliPattern = /^(\+972|972)[5][0-8][0-9]{7}$/;
-    if (!israeliPattern.test(cleanNumber)) {
-      return t('validation.invalidWhatsApp', 'Please enter a valid Israeli WhatsApp number');
+    //   mobile numbers can start with 50, 51, 52, 53, 54, 55, 58
+    const  Pattern = /^(\+972|972)[5][0-8][0-9]{7}$/;
+    if (! Pattern.test(cleanNumber)) {
+      return t('validation.invalidWhatsApp', 'Please enter a valid   WhatsApp number');
     }
   }
-  // Check for local Israeli numbers (starting with 0)
+  // Check for local   numbers (starting with 0)
   else if (cleanNumber.startsWith('0') && cleanNumber.length === 10) {
-    // Local Israeli mobile numbers: 050, 051, 052, 053, 054, 055, 058
+    // Local   mobile numbers: 050, 051, 052, 053, 054, 055, 058
     if (!/^0[5][0-8][0-9]{7}$/.test(cleanNumber)) {
-      return t('validation.invalidWhatsApp', 'Please enter a valid Israeli WhatsApp number');
+      return t('validation.invalidWhatsApp', 'Please enter a valid   WhatsApp number');
     }
   }
   // Invalid format
   else {
-    return t('validation.invalidWhatsApp', 'Please enter a valid Palestinian or Israeli WhatsApp number');
+    return t('validation.invalidWhatsApp', 'Please enter a valid Palestinian or   WhatsApp number');
   }
   
   if (cleanNumber.length < 9 || cleanNumber.length > 12) {

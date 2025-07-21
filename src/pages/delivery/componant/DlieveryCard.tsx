@@ -71,7 +71,7 @@ const DeliveryAreaCard: React.FC<Props> = ({
             {isRTL ? area.locationAr || area.location : area.locationEn || area.location}
           </span>
           <span className="text-sm text-gray-500">{area.whatsappNumber}</span>
-          <div className="flex gap-1 mt-1">
+          <div className={`flex gap-1 mt-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
             <span
               className={`px-2 py-0.5 text-xs rounded font-medium ${
                 area.isActive

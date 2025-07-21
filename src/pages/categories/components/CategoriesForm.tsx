@@ -2,7 +2,7 @@ import React from 'react';
 import CustomInput from '../../../components/common/CustomInput';
 import CustomFileInput from '../../../components/common/CustomFileInput';
 import CustomTextArea from '../../../components/common/CustomTextArea';
-import CustomSelect from '../../../components/common/CustomSelect';
+
 
 interface CategoriesFormProps {
   form: any;
@@ -14,111 +14,7 @@ interface CategoriesFormProps {
   validationErrors?: { [key: string]: string }; // رسائل أخطاء الـ validation
 }
 
-// دالة مساعدة للتحقق من تكرار الاسم
-export const checkDuplicateName = (name: string, categories: any[], currentId?: string | number | null, parentId?: string | number | null) => {
-  if (!name || name.trim() === '') return false;
-  
-  return categories.some(cat => {
-    // تجاهل الفئة الحالية عند التعديل
-    if (currentId && (cat.id === currentId || cat._id === currentId)) {
-      return false;
-    }
-    
-    // التحقق من نفس المستوى (نفس parentId)
-    const catParentId = cat.parentId || (cat.parent && cat.parent.id) || null;
-    if (catParentId !== parentId) {
-      return false;
-    }
-    
-    // التحقق من الاسم العربي والإنجليزي (حساسية لحالة الأحرف)
-    return (cat.nameAr && cat.nameAr.trim().toLowerCase() === name.trim().toLowerCase()) || 
-           (cat.nameEn && cat.nameEn.trim().toLowerCase() === name.trim().toLowerCase());
-  });
-};
-
-// دالة التحقق من صحة البيانات
-export const validateCategoryForm = (form: any, isRTL: boolean, categories: any[] = []) => {
-  const errors: { [key: string]: string } = {};
-
-  // التحقق من الاسم العربي
-  if (!form.nameAr || form.nameAr.trim() === '') {
-    errors.nameAr = isRTL ? 'اسم الفئة بالعربية مطلوب' : 'Category name in Arabic is required';
-  } else if (form.nameAr.trim().length < 2) {
-    errors.nameAr = isRTL ? 'اسم الفئة بالعربية يجب أن يكون على الأقل حرفين' : 'Category name in Arabic must be at least 2 characters';
-  } else if (form.nameAr.trim().length > 50) {
-    errors.nameAr = isRTL ? 'اسم الفئة بالعربية يجب أن لا يتجاوز 50 حرف' : 'Category name in Arabic must not exceed 50 characters';
-  } else if (!/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/.test(form.nameAr.trim())) {
-    errors.nameAr = isRTL ? 'اسم الفئة بالعربية يجب أن يحتوي على أحرف عربية فقط' : 'Category name in Arabic must contain only Arabic characters';
-  } else if (/^\s+$/.test(form.nameAr.trim())) {
-    errors.nameAr = isRTL ? 'اسم الفئة بالعربية لا يمكن أن يكون مسافات فقط' : 'Category name in Arabic cannot be only spaces';
-  }
-
-  // التحقق من الاسم الإنجليزي
-  if (!form.nameEn || form.nameEn.trim() === '') {
-    errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية مطلوب' : 'Category name in English is required';
-  } else if (form.nameEn.trim().length < 2) {
-    errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية يجب أن يكون على الأقل حرفين' : 'Category name in English must be at least 2 characters';
-  } else if (form.nameEn.trim().length > 50) {
-    errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية يجب أن لا يتجاوز 50 حرف' : 'Category name in English must not exceed 50 characters';
-  } else if (!/^[a-zA-Z\s\d\.,!?;:()\-_’—]+$/.test(form.nameEn.trim())) {
-    errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية يجب أن يحتوي على أحرف إنجليزية فقط' : 'Category name in English must contain only English characters';
-  } else if (/^\s+$/.test(form.nameEn.trim())) {
-    errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية لا يمكن أن يكون مسافات فقط' : 'Category name in English cannot be only spaces';
-  }
-
-  // التحقق من الوصف العربي (اختياري)
-  if (form.descriptionAr && form.descriptionAr.trim() !== '') {
-    if (form.descriptionAr.trim().length > 500) {
-      errors.descriptionAr = isRTL ? 'الوصف بالعربية يجب أن لا يتجاوز 500 حرف' : 'Description in Arabic must not exceed 500 characters';
-    } else if (!/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s\d\.,!?;:()\-_]+$/.test(form.descriptionAr.trim())) {
-      errors.descriptionAr = isRTL ? 'الوصف بالعربية يجب أن يحتوي على أحرف عربية وأرقام وعلامات ترقيم فقط' : 'Description in Arabic must contain only Arabic characters, numbers, and punctuation';
-    }
-  }
-
-  // التحقق من الوصف الإنجليزي (اختياري)
-  if (form.descriptionEn && form.descriptionEn.trim() !== '') {
-    if (form.descriptionEn.trim().length > 500) {
-      errors.descriptionEn = isRTL ? 'الوصف بالإنجليزية يجب أن لا يتجاوز 500 حرف' : 'Description in English must not exceed 500 characters';
-    } else if (!/^[a-zA-Z\s\d\.,!?;:()\-_’—]+$/.test(form.descriptionEn.trim())) {
-      errors.descriptionEn = isRTL ? 'الوصف بالإنجليزية يجب أن يحتوي على أحرف إنجليزية وأرقام وعلامات ترقيم فقط' : 'Description in English must contain only English characters, numbers, and punctuation';
-    }
-  }
-
-  // التحقق من الصورة (اختياري)
-  if (form.image) {
-    const imageUrl = typeof form.image === 'string' ? form.image : (form.image && typeof form.image === 'object' && (form.image as any).url ? (form.image as any).url : '');
-    if (imageUrl && !imageUrl.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
-      errors.image = isRTL ? 'يجب أن تكون الصورة رابط صحيح بصيغة jpg, jpeg, png, gif, webp, أو svg' : 'Image must be a valid URL with jpg, jpeg, png, gif, webp, or svg format';
-    }
-  }
-
-  // التحقق من الترتيب
-  if (form.order !== undefined && form.order !== null) {
-    const order = parseInt(form.order);
-    if (isNaN(order) || order < 1 || order > 999) {
-      errors.order = isRTL ? 'الترتيب يجب أن يكون رقم بين 1 و 999' : 'Order must be a number between 1 and 999';
-    }
-  }
-
-  // التحقق من الفئة الرئيسية (لا يمكن أن تكون نفس الفئة)
-  if (form.parentId && form.id && form.parentId === form.id) {
-    errors.parentId = isRTL ? 'لا يمكن أن تكون الفئة الرئيسية هي نفس الفئة' : 'Parent category cannot be the same as the current category';
-  }
-
-  // التحقق من عدم تكرار الاسم في نفس المستوى
-  if (checkDuplicateName(form.nameAr, categories, form.id, form.parentId)) {
-    errors.nameAr = isRTL ? 'اسم الفئة بالعربية يجب أن يكون مميزاً في نفس المستوى' : 'Category name in Arabic must be unique within the same level';
-  }
-  
-  if (checkDuplicateName(form.nameEn, categories, form.id, form.parentId)) {
-    errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية يجب أن يكون مميزاً في نفس المستوى' : 'Category name in English must be unique within the same level';
-  }
-
-  return {
-    isValid: Object.keys(errors).length === 0,
-    errors
-  };
-};
+// تم نقل جميع دوال الفالديشين إلى نظام الفالديشين العام في src/validation/categoryValidation.ts
 
 const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onImageChange, isSubcategory, isRTL, categories, validationErrors = {} }) => {
   // Debug: طباعة قيمة الصورة
@@ -134,13 +30,11 @@ const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onI
   // دالة لعرض رسالة الخطأ
   const showError = (fieldName: string) => {
     const error = validationErrors[fieldName];
+    console.log(`Showing error for field ${fieldName}:`, error);
     if (!error) return null;
     
     return (
       <div className={`text-red-500 text-xs mt-1 flex items-center gap-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-        <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-        </svg>
         <span>{error}</span>
       </div>
     );

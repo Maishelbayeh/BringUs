@@ -4,7 +4,8 @@ import { DeliveryArea } from '../../../Types';
 
 import CustomInput from '../../../components/common/CustomInput';
 import { useTranslation } from 'react-i18next';
-import { validateDeliveryForm } from '../validation/deliveryValidation';
+import { useValidation } from '../../../hooks/useValidation';
+import { deliveryValidationSchema, DeliveryFormData } from '../../../validation/deliveryValidation';
 
 interface Props {
   area: DeliveryArea | null;
@@ -12,13 +13,6 @@ interface Props {
   onCancel: () => void;
   language: 'ENGLISH' | 'ARABIC';
   onValidationChange?: (isValid: boolean) => void;
-}
-
-interface ValidationErrors {
-  locationAr?: string;
-  locationEn?: string;
-  price?: string;
-  whatsappNumber?: string;
 }
 
 export interface FormRef {
@@ -30,33 +24,47 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel,
   const [locationEn, setLocationEn] = useState(area?.locationEn || '');
   const [price, setPrice] = useState(area?.price !== undefined ? area.price.toString() : '');
   const [whatsappNumber, setWhatsappNumber] = useState(area?.whatsappNumber || '');
-  const [errors, setErrors] = useState<ValidationErrors>({});
   const { t } = useTranslation();
+
+  // استخدام النظام الجديد للفالديشين
+  const {
+    errors,
+    validateForm: validateFormData,
+    validateWhatsApp,
+    clearError,
+  } = useValidation({
+    schema: deliveryValidationSchema,
+    onValidationChange,
+  });
 
   useEffect(() => {
     setLocationAr(area?.locationAr || '');
     setLocationEn(area?.locationEn || '');
     setPrice(area?.price !== undefined ? area.price.toString() : '');
     setWhatsappNumber(area?.whatsappNumber || '');
-    setErrors({});
+    // مسح الأخطاء عند تحديث البيانات
+    // clearAllErrors(); // سيتم مسح الأخطاء تلقائياً مع التحديث
   }, [area]);
 
   const validateForm = () => {
-    const validationErrors = validateDeliveryForm({
+    const formData: DeliveryFormData = {
       locationAr,
       locationEn,
       price,
       whatsappNumber
-    }, t);
+    };
 
-    setErrors(validationErrors);
-    const isValid = Object.keys(validationErrors).length === 0;
+    const result = validateFormData(formData);
     
-    if (onValidationChange) {
-      onValidationChange(isValid);
+    // التحقق من رقم الواتساب منفصلاً
+    const whatsappError = validateWhatsApp(whatsappNumber);
+    if (whatsappError) {
+      // إضافة خطأ الواتساب إلى النتيجة
+      result.errors.whatsappNumber = whatsappError;
+      result.isValid = false;
     }
     
-    return isValid;
+    return result.isValid;
   };
 
   const handleSubmit = () => {
@@ -81,10 +89,9 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel,
     }
   };
 
-  const clearError = (field: keyof ValidationErrors) => {
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
+  // دالة مسح الخطأ (تم استبدالها بـ clearError من الـ hook)
+  const clearFieldError = (field: string) => {
+    clearError(field);
   };
 
   // Expose handleSubmit to parent component
@@ -93,14 +100,14 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel,
   }));
 
   return (
-    <div className="flex flex-col p-4">
+    <div className="flex flex-col p-4 gap-4">
       <CustomInput
         label={t("deliveryDetails.locationAr")}
         id="location_ar"
         value={locationAr}
         onChange={e => {
           setLocationAr(e.target.value);
-          clearError('locationAr');
+          clearFieldError('locationAr');
         }}
         required
         placeholder={t("deliveryDetails.locationArPlaceholder")}
@@ -115,7 +122,7 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel,
         value={locationEn}
         onChange={e => {
           setLocationEn(e.target.value);
-          clearError('locationEn');
+          clearFieldError('locationEn');
         }}
         required
         placeholder={t("deliveryDetails.locationEnPlaceholder")}
@@ -130,7 +137,7 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel,
         value={price}
         onChange={e => {
           setPrice(e.target.value);
-          clearError('price');
+          clearFieldError('price');
         }}
         required
         placeholder={t("deliveryDetails.pricePlaceholder")}
@@ -146,7 +153,7 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel,
         value={whatsappNumber}
         onChange={e => {
           setWhatsappNumber(e.target.value);
-          clearError('whatsappNumber');
+          clearFieldError('whatsappNumber');
         }}
         required
         placeholder={t("deliveryDetails.whatsappNumberPlaceholder")}

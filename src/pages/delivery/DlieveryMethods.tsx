@@ -10,13 +10,14 @@ import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import PermissionModal from '../../components/common/PermissionModal';
 import useDeliveryMethods from '../../hooks/useDeliveryMethods';
 import { useToastContext } from '../../contexts/ToastContext';
+import { getStoreId } from '../../utils/storeUtils';
 
 const DeliveryMethods: React.FC = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { showSuccess, showError, showInfo, showWarning } = useToastContext();
   
-  // Use the delivery methods hook with store ID
+  // Use the delivery methods hook with dynamic store ID
   const {
     deliveryMethods: areas,
     loading,
@@ -34,7 +35,7 @@ const DeliveryMethods: React.FC = () => {
     clearError,
     clearRateLimit
   } = useDeliveryMethods({
-    storeId: '687505893fbf3098648bfe16'
+    storeId: getStoreId()
   });
 
   const [drawerOpen, setDrawerOpen] = useState(false);
