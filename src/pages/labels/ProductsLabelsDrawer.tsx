@@ -171,7 +171,7 @@ const ProductsLabelsDrawer: React.FC<Props> = ({
                   name="isActive"
                   checked={form.isActive}
                   onChange={e => handleFormChange('isActive', e.target.checked)}
-                  isRTL={isRTL}
+                
                 />
               </div>
             )}

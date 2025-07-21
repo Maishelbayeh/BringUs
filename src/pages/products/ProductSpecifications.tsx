@@ -4,7 +4,7 @@ import useProductSpecifications from '../../hooks/useProductSpecifications';
 import ProductSpecificationsDrawer from './ProductSpecificationsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
-import { CogIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import CustomButton from '../../components/common/CustomButton';
 import PermissionModal from '../../components/common/PermissionModal';
 
@@ -86,7 +86,7 @@ const ProductSpecifications: React.FC = () => {
       console.log('✅ Validation passed, saving...');
       
       // حفظ البيانات
-      await saveSpecification(form, editingSpec?._id, isRTL);
+      await saveSpecification(form, editingSpec?._id);
       console.log('✅ Save completed successfully');
       
       setDrawerOpen(false);
@@ -133,7 +133,11 @@ const ProductSpecifications: React.FC = () => {
 
       {/* Loading State */}
       {loading ? (
-        <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div 
+          className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+         style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
+        >
+    
           {Array.from({ length: 10 }).map((_, index) => (
             <div
               key={index}
@@ -180,7 +184,10 @@ const ProductSpecifications: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div 
+          className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+          style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
+        >
           {filteredSpecifications.map((spec) => (
             <div
               key={spec._id}
@@ -203,18 +210,18 @@ const ProductSpecifications: React.FC = () => {
                   {/* Action Buttons */}
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <button
-                      className="p-1 text-gray-400 hover:text-primary hover:bg-primary/10 rounded transition-colors"
+                      className="bg-primary/90 hover:bg-primary text-white rounded-full p-1.5 shadow hover:scale-110 transition-transform duration-200"
                       onClick={e => { e.stopPropagation(); handleEdit(spec); }}
                       title={t('common.edit')}
                     >
-                      <CogIcon className="w-3 h-3" />
+                      <PencilSquareIcon className="w-4 h-4" />
                     </button>
                     <button
-                      className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                      className="bg-red-500/90 hover:bg-red-500 text-white rounded-full p-1.5 shadow hover:scale-110 transition-transform duration-200"
                       onClick={e => { e.stopPropagation(); handleDelete(spec); }}
                       title={t('common.delete')}
                     >
-                      <TrashIcon className="w-3 h-3" />
+                      <TrashIcon className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

@@ -60,7 +60,7 @@ export const validateCategoryForm = (form: any, isRTL: boolean, categories: any[
     errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية يجب أن يكون على الأقل حرفين' : 'Category name in English must be at least 2 characters';
   } else if (form.nameEn.trim().length > 50) {
     errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية يجب أن لا يتجاوز 50 حرف' : 'Category name in English must not exceed 50 characters';
-  } else if (!/^[a-zA-Z\s]+$/.test(form.nameEn.trim())) {
+  } else if (!/^[a-zA-Z\s\d\.,!?;:()\-_’—]+$/.test(form.nameEn.trim())) {
     errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية يجب أن يحتوي على أحرف إنجليزية فقط' : 'Category name in English must contain only English characters';
   } else if (/^\s+$/.test(form.nameEn.trim())) {
     errors.nameEn = isRTL ? 'اسم الفئة بالإنجليزية لا يمكن أن يكون مسافات فقط' : 'Category name in English cannot be only spaces';
@@ -79,7 +79,7 @@ export const validateCategoryForm = (form: any, isRTL: boolean, categories: any[
   if (form.descriptionEn && form.descriptionEn.trim() !== '') {
     if (form.descriptionEn.trim().length > 500) {
       errors.descriptionEn = isRTL ? 'الوصف بالإنجليزية يجب أن لا يتجاوز 500 حرف' : 'Description in English must not exceed 500 characters';
-    } else if (!/^[a-zA-Z\s\d\.,!?;:()\-_]+$/.test(form.descriptionEn.trim())) {
+    } else if (!/^[a-zA-Z\s\d\.,!?;:()\-_’—]+$/.test(form.descriptionEn.trim())) {
       errors.descriptionEn = isRTL ? 'الوصف بالإنجليزية يجب أن يحتوي على أحرف إنجليزية وأرقام وعلامات ترقيم فقط' : 'Description in English must contain only English characters, numbers, and punctuation';
     }
   }

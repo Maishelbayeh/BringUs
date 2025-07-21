@@ -83,7 +83,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
         
         {/* ------------------------------------------- Form ------------------------------------------- */}
         
-        <form id="product-form" onSubmit={onSubmit} className="flex-1 overflow-hidden">
+        <form id="product-form" onSubmit={onSubmit} className="flex-1 ">
           <div className="h-full overflow-y-auto">
             <ProductsForm
               form={form}

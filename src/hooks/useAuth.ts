@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BASE_URL, LOGIN } from '@/constants/api';
-import { useLocalStorage } from './useLocalStorage';
+import { updateUserData, updateStoreData, updateStoreId } from './useLocalStorage';
 import { useStore } from './useStore';
 
 interface LoginResponse {
@@ -48,7 +48,6 @@ interface LoginCredentials {
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { updateUserData, updateStoreData, updateStoreId } = useLocalStorage();
   const { getStore } = useStore();
 // -----------------------------------------------login---------------------------------------------------------
   const login = async (credentials: LoginCredentials): Promise<LoginResponse | null> => {

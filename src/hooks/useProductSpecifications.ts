@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 
@@ -41,8 +41,10 @@ const useProductSpecifications = () => {
   }, [hasLoaded, specifications.length, showError]);
 
   // إضافة أو تعديل مواصفة منتج
-  const saveSpecification = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
-    //CONSOLE.log('Saving specification with form:', form, 'editId:', editId, 'isRTL:', isRTL);
+  const saveSpecification = async (form: any, editId?: string | number | null) => {
+    console.log('🔄 Starting saveSpecification...');
+    console.log('📝 Form data:', form);
+    console.log('🔧 Edit ID:', editId);
     
     const payload: any = {
       titleAr: form.titleAr?.trim(),

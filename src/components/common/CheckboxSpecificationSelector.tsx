@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+
 
 interface SpecificationValue {
   _id: string;
@@ -28,7 +31,8 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
 }) => {
   const [expandedTitles, setExpandedTitles] = useState<Set<string>>(new Set());
   const [selectedValues, setSelectedValues] = useState<Set<string>>(new Set());
-
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   // Initialize selected values from props
   useEffect(() => {
     // console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);
@@ -121,14 +125,14 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
             {selectedSpecifications.map((spec) => (
               <span
                 key={spec._id}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
               >
-                <span className="text-xs text-blue-600">{spec.title}:</span>
+                <span className="text-xs text-primary">{spec.title}:</span>
                 <span className="font-medium">{spec.value}</span>
                 <button
                   type="button"
                   onClick={() => removeValue(spec._id)}
-                  className="ml-1 text-blue-600 hover:text-blue-800"
+                  className="ml-1 text-primary hover:text-primary/80"
                 >
                   <X size={14} />
                 </button>
@@ -149,7 +153,7 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
           {specifications.map((title) => (
           <div key={title._id} className="border rounded-lg p-3">
             <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex items-center   cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isTitleSelected(title)}
@@ -177,9 +181,9 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
                   }}
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="font-medium text-gray-900">{title.title}</span>
+                <span className={`font-medium text-gray-900 mx-2`}>{title.title}</span>
                 {getSelectedCountForTitle(title) > 0 && (
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                     {getSelectedCountForTitle(title)} مختار
                   </span>
                 )}
@@ -189,7 +193,7 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
                 onClick={() => toggleTitle(title._id)}
                 className="text-gray-500 hover:text-gray-700"
               >
-                {expandedTitles.has(title._id) ? '▼' : '▶'}
+                {expandedTitles.has(title._id) ? <ChevronDownIcon className="h-5 w-5" /> : <ChevronRightIcon className="h-5 w-5" />}
               </button>
             </div>
 
@@ -200,14 +204,14 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
                   const isChecked = selectedValues.has(value._id);
                   console.log(`🔍 Checkbox for ${value._id}: ${value.value} - checked: ${isChecked}`);
                   return (
-                    <label key={value._id} className="flex items-center space-x-2 cursor-pointer">
+                    <label key={value._id} className="flex items-center   cursor-pointer">
                       <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => toggleValue(value)}
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
-                      <span className="text-gray-700">{value.value}</span>
+                      <span className={`text-gray-700 mx-2`}>{value.value}</span>
                     </label>
                   );
                 })}

@@ -206,7 +206,7 @@ export function useWholesalers(storeId: string, token: string) {
         method: 'DELETE',
         body: JSON.stringify({ wholesalerIds }),
       });
-      showSuccess(`${wholesalerIds.length} wholesalers deleted successfully`);
+      showSuccess(`${wholesalerIds.length}  wholesalers deleted successfully`);
       return data.data;
     } catch (err: any) {
       showError(err.message || 'Failed to bulk delete wholesalers');

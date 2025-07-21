@@ -21,12 +21,12 @@ const CustomNumberInput: React.FC<CustomNumberInputProps> = ({
   labelAlign = 'left',
   ...props
 }) => {
-  const labelAlignClass = labelAlign === 'right' ? 'text-right' : labelAlign === 'center' ? 'text-center' : 'text-left';
+  // const labelAlignClass = labelAlign === 'right' ? 'text-right' : labelAlign === 'center' ? 'text-center' : 'text-left';
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
   return (
     <div className="mb-4 w-full">
-      <label htmlFor={id} className={`${isRTL ? 'text-right' : 'text-left'} block mb-2 text-sm font-medium text-gray-900 dark:text-white ${labelAlignClass}`}>
+      <label htmlFor={id} className={`${isRTL ? 'text-right' : 'text-left'} block mb-2 text-sm font-medium text-gray-900 dark:text-white `}>
         {label}
       </label>
       <input

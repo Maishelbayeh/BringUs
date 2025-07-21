@@ -1,7 +1,6 @@
 import CustomFileInput from '@/components/common/CustomFileInput';
 import CustomTextArea from '@/components/common/CustomTextArea';
 import CustomInput from '@/components/common/CustomInput';
-import CustomSelect from '@/components/common/CustomSelect';
 import CustomNumberInput from '@/components/common/CustomNumberInput';
 import CustomSwitch from '@/components/common/CustomSwitch';
 import React from 'react';
@@ -16,7 +15,7 @@ interface StoreSliderFormProps {
   mode?: 'slider' | 'video';
 }
 
-const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, onImageChange, onFileChange, errors, isRTL, mode = 'slider' }) => {
+const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, onFileChange, errors, isRTL}) => {
   console.log('StoreSliderForm render - form.type:', form.type);
   console.log('StoreSliderForm render - form:', form);
   
@@ -101,10 +100,10 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
       <CustomSwitch
         label={isRTL ? 'مفعل' : 'Active'}
         name="isActive"
+        isRTL={isRTL}
         checked={safeForm.isActive}
         onChange={(e) => {
-          const isChecked = e.target.value === 'Y';
-          onFormChange({ target: { name: 'isActive', value: isChecked } } as any);
+          onFormChange({ target: { name: 'isActive', value: e.target.checked } } as any);
         }}
       />
     </div>

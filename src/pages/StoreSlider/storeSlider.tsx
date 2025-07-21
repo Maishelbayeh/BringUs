@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
-import { TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import React, { useState, useEffect } from 'react';
+import { TrashIcon } from '@heroicons/react/24/outline'
 import StoreSliderDrawer from './componant/StoreDrawer';
 import { useTranslation } from 'react-i18next';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
@@ -42,11 +41,10 @@ const StoreSliderPage: React.FC = () => {
     loading,
     error,
     storeSliders,
-    getAllStoreSliders,
     createStoreSlider,
     updateStoreSlider,
     deleteStoreSlider,
-    toggleActiveStatus
+
   } = useStoreSlider();
 
   // Filter sliders only (type === 'slider') based on search
@@ -220,9 +218,6 @@ const StoreSliderPage: React.FC = () => {
     }
   };
 
-  const handleToggleActive = async (slider: StoreSlider) => {
-    await toggleActiveStatus(slider._id);
-  };
 
   // دالة validation للفورم
   const validateForm = (): boolean => {
@@ -284,14 +279,15 @@ const StoreSliderPage: React.FC = () => {
       
 
       
-      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-6">
+      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-6"
+      style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}>
         {loading ? (
           // Skeleton loading cards
           Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
               className="group cursor-pointer bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-2xl shadow-lg border border-gray-200 hover:shadow-2xl transition flex flex-col items-stretch min-h-[320px] animate-pulse"
-              dir={isRTL ? 'rtl' : 'ltr'}
+              style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
             >
               <div className="relative w-full h-48 rounded-t-2xl overflow-hidden flex items-center justify-center bg-gray-300">
                 {/* Skeleton for image */}
@@ -321,12 +317,12 @@ const StoreSliderPage: React.FC = () => {
               key={slider._id}
               className="group cursor-pointer bg-gradient-to-br from-primary/5 via-white to-gray-100 rounded-2xl shadow-lg border border-primary/10 hover:shadow-2xl transition flex flex-col items-stretch min-h-[320px]"
               onClick={() => handleEdit(slider)}
-              dir={isRTL ? 'rtl' : 'ltr'}
+                style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
             >
               <div className="relative w-full h-48 rounded-t-2xl overflow-hidden flex items-center justify-center bg-gray-100">
                 {/* أيقونة الحذف */}
                 <button
-                  className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 bg-red-500/90 hover:bg-red-500 text-white rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110`}
+                  className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 bg-red-500/90 hover:bg-red-500 text-white rounded-full p-1.5 shadow opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110`}
                   onClick={e => { e.stopPropagation(); handleDelete(slider); }}
                   title={t('common.delete')}
                 >
