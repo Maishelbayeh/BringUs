@@ -63,55 +63,55 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
   useEffect(() => {
     // يمكنك إبقاء هذا الجزء للديباغ عند الحاجة فقط
     // إذا لم تعد بحاجة للطباعة، احذف هذا useEffect بالكامل
-    // console.log('🔍 VariantEditDrawer - variant:', variant);
-    // console.log('🔍 VariantEditDrawer - variant.specificationValues:', variant?.specificationValues);
-    // console.log('🔍 VariantEditDrawer - formattedSpecifications:', formattedSpecifications);
+    console.log('🔍 VariantEditDrawer - variant:', variant);
+    console.log('🔍 VariantEditDrawer - variant.specificationValues:', variant?.specificationValues);
+    console.log('🔍 VariantEditDrawer - formattedSpecifications:', formattedSpecifications);
   }, [variant, formattedSpecifications]);
 
   // في useEffect الخاص بتحليل المواصفات، أبقي فقط الطباعة المهمة
-  useEffect(() => {
-    if (variant && variant.specificationValues) {
-      try {
-        let parsed;
-        if (typeof variant.specificationValues === 'string') {
-          parsed = JSON.parse(variant.specificationValues);
-        } else {
-          parsed = variant.specificationValues;
-        }
-        // يمكنك إبقاء هذا للديباغ عند الحاجة فقط
-        // console.log('🔍 VariantEditDrawer - parsed specificationValues:', parsed);
-        if (Array.isArray(parsed)) {
-          const validSpecs = parsed
-            .filter((spec: any) => 
-              spec && 
-              spec.specificationId && 
-              spec.valueId && 
-              spec.value && 
-              spec.title
-            )
-            .map((spec: any) => {
-              return {
-                _id: spec.valueId,
-                specificationId: spec.specificationId,
-                valueId: spec.valueId,
-                value: spec.value,
-                title: spec.title
-              };
-            });
-          // يمكنك إبقاء هذا للديباغ عند الحاجة فقط
-          // console.log('🔍 VariantEditDrawer - valid specs:', validSpecs);
-          setSelectedSpecifications(validSpecs);
-        } else {
-          setSelectedSpecifications([]);
-        }
-      } catch (error) {
-        console.error('Error parsing specificationValues:', error);
-        setSelectedSpecifications([]);
-      }
-    } else {
-      setSelectedSpecifications([]);
-    }
-  }, [variant, formattedSpecifications]);
+  // useEffect(() => {
+  //   if (variant && variant.specificationValues) {
+  //     try {
+  //       let parsed;
+  //       if (typeof variant.specificationValues === 'string') {
+  //         parsed = JSON.parse(variant.specificationValues);
+  //       } else {
+  //         parsed = variant.specificationValues;
+  //       }
+  //       // يمكنك إبقاء هذا للديباغ عند الحاجة فقط
+  //       // console.log('🔍 VariantEditDrawer - parsed specificationValues:', parsed);
+  //       if (Array.isArray(parsed)) {
+  //         const validSpecs = parsed
+  //           .filter((spec: any) => 
+  //             spec && 
+  //             spec.specificationId && 
+  //             spec.valueId && 
+  //             spec.value && 
+  //             spec.title
+  //           )
+  //           .map((spec: any) => {
+  //             return {
+  //               _id: spec.valueId,
+  //               specificationId: spec.specificationId,
+  //               valueId: spec.valueId,
+  //               value: spec.value,
+  //               title: spec.title
+  //             };
+  //           });
+  //         // يمكنك إبقاء هذا للديباغ عند الحاجة فقط
+  //         // console.log('🔍 VariantEditDrawer - valid specs:', validSpecs);
+  //         setSelectedSpecifications(validSpecs);
+  //       } else {
+  //         setSelectedSpecifications([]);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error parsing specificationValues:', error);
+  //       setSelectedSpecifications([]);
+  //     }
+  //   } else {
+  //     setSelectedSpecifications([]);
+  //   }
+  // }, [variant, formattedSpecifications]);
 
   // Helper: always ensure colors are array of objects {id, colors}
   function normalizeColors(input: any): { id: string; colors: string[] }[] {

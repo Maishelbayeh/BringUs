@@ -501,36 +501,48 @@ const useProducts = () => {
       // Add all variant data to formData
       Object.keys(variantData).forEach(key => {
         if (key === 'images' && Array.isArray(variantData[key])) {
-          // Handle multiple images
           variantData[key].forEach((file: File) => {
             formData.append('images', file);
           });
         } else if (key === 'mainImage' && variantData[key] instanceof File) {
-          // Handle main image
           formData.append('mainImage', variantData[key]);
         } else if (key === 'barcodes' && Array.isArray(variantData[key])) {
-          // Handle barcodes array
           formData.append('barcodes', JSON.stringify(variantData[key]));
         } else if (key === 'specifications' && Array.isArray(variantData[key])) {
-          // فقط إذا فيها عناصر أرسلها كسلسلة IDs
           if (variantData[key].length > 0) {
             formData.append('specifications', JSON.stringify(variantData[key]));
           }
         } else if (key === 'specificationValues' && Array.isArray(variantData[key])) {
-          // Handle specification values array
           formData.append('specificationValues', JSON.stringify(variantData[key]));
+        } else if (key === 'productLabels' && Array.isArray(variantData[key])) {
+          variantData[key].forEach((label: any) => {
+            formData.append('productLabels', typeof label === 'object' ? label._id || label.id : label);
+          });
+        } else if (key === 'visibility') {
+          formData.append('visibility', variantData[key] === 'Y' || variantData[key] === true ? 'true' : 'false');
+        } else if (key === 'attributes' && Array.isArray(variantData[key]) && variantData[key].length > 0) {
+          formData.append('attributes', JSON.stringify(variantData[key]));
+        } else if (key === 'attributes') {
+          // لا ترسل attributes إذا لم تكن مصفوفة غير فارغة
+          // skip
+        } else if (key === 'storeId') {
+          // Only set ONCE, as a string, and do NOT append 'store'
+          formData.set('storeId', variantData[key] || STORE_ID);
+        } else if (key === 'store') {
+          // Do NOT append 'store' at all
+          // skip
         } else {
-          // Handle other fields
           formData.append(key, variantData[key]);
         }
       });
       
       // Get store ID from localStorage
       const storeId = localStorage.getItem('storeId');
-      if (!storeId) {
+      if (!STORE_ID) {
         throw new Error('Store ID not found');
       }
-      formData.append('storeId', storeId);
+      // The following line is causing storeId to be sent as an array. DELETE IT:
+      // formData.append('storeId', STORE_ID);
       
       const response = await fetch(`${BASE_URL}products/${productId}/add-variant`, {
         method: 'POST',

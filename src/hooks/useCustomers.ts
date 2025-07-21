@@ -89,6 +89,7 @@ export const useCustomers = (): UseCustomersReturn => {
     limit = 10,
     search = ''
   ) => {
+    console.log('Fetching customers...'); // Debug: to see when API is called
     if (hasLoaded && !forceRefresh && customers.length > 0) {
       return customers;
     }
@@ -130,7 +131,7 @@ export const useCustomers = (): UseCustomersReturn => {
     } finally {
       setLoading(false);
     }
-  }, [hasLoaded, customers]);
+  }, [hasLoaded]);
 
   const deleteCustomer = async (storeId: string, id: string): Promise<boolean> => {
     try {

@@ -60,7 +60,7 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
               <p className="text-gray-500 mb-6">
                 {isRTL ? 'لا يوجد تصنيفات لهذا المنتج' : 'No variants available for this product'}
               </p>
-              <button
+              {/* <button
                 onClick={onAddVariant}
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
@@ -68,13 +68,13 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 {isRTL ? 'إضافة متغير جديد' : 'Add New Variant'}
-              </button>
+              </button> */}
             </div>
           ) : (
             <div className="space-y-6">
               {/* Add New Variant Button */}
               <div className="flex justify-end">
-                <button
+                {/* <button
                   onClick={onAddVariant}
                   className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
@@ -82,7 +82,7 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                   {isRTL ? 'إضافة متغير جديد' : 'Add New Variant'}
-                </button>
+                </button> */}
               </div>
               
               {/* Variants List */}

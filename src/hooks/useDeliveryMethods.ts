@@ -321,7 +321,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
       }
 
       // Get storeId from localStorage if not provided
-      const finalStoreId = storeId || localStorage.getItem('storeId');
+      const finalStoreId = storeId || "687505893fbf3098648bfe16";
       
       if (!finalStoreId) {
         setError(t('deliveryDetails.errors.storeIdRequired'));
