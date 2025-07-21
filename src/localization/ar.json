@@ -503,6 +503,7 @@
     },
     "maintainStock": "إدارة المخزون",
     "availableQuantity": "الكمية المتوفرة",
+    "lowStockThreshold": "الحد الأدنى للمخزون (تنبيه)",
     "edit": "تعديل المنتج",
     "productName": "اسم المنتج",
     "description": "الوصف",

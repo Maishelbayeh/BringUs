@@ -583,6 +583,27 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
               type="number"
               disabled={form.maintainStock !== 'Y'}
             />
+            
+            <div className="space-y-1">
+              <CustomInput
+                label={isRTL ? t('products.lowStockThreshold') : 'Low Stock Alert Threshold'}
+                name="lowStockThreshold"
+                value={form.lowStockThreshold || '10'}
+                onChange={(e) => handleInputChange('lowStockThreshold', e.target.value)}
+                type="number"
+                min="1"
+                max="1000"
+                placeholder={isRTL ? 'أدخل الحد الأدنى للمخزون (مثال: 10)' : 'Enter minimum stock level (e.g., 10)'}
+                disabled={form.maintainStock !== 'Y'}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {isRTL 
+                  ? 'سيتم تنبيهك عندما تصل الكمية إلى هذا الرقم أو أقل' 
+                  : 'You will be alerted when stock reaches this number or below'
+                }
+              </p>
+            </div>
+            
             <MultiSelect
               label={isRTL ? t('products.productLabel') : 'Product Label'}
               value={Array.isArray(form.tags) ? form.tags : []}

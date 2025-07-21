@@ -22,11 +22,11 @@ const TableCell: React.FC<TableCellProps> = ({
     if (!src || src === '-') return '-';
     
     return (
-      <div className="table-image-container w-16 h-16 cursor-pointer">
+      <div className="table-image-container w-16 h-16 cursor-pointer flex items-center justify-center">
         <img 
           src={src} 
           alt={alt || 'Product'} 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover rounded-md"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = '/placeholder-image.png';

@@ -527,7 +527,7 @@ const useProducts = () => {
           // skip
         } else if (key === 'storeId') {
           // Only set ONCE, as a string, and do NOT append 'store'
-          formData.set('storeId', variantData[key] || STORE_ID);
+          formData.set('storeId', variantData[key] || storeId);
         } else if (key === 'store') {
           // Do NOT append 'store' at all
           // skip
@@ -538,7 +538,7 @@ const useProducts = () => {
       
       // Get store ID from localStorage
       const storeId = localStorage.getItem('storeId');
-      if (!STORE_ID) {
+      if (!storeId) {
         throw new Error('Store ID not found');
       }
       // The following line is causing storeId to be sent as an array. DELETE IT:

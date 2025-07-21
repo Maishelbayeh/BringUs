@@ -391,6 +391,7 @@
       "notAvailable": "Not Available",
       "maintainStock": "Maintain Stock",
       "availableQuantity": "Available Quantity",
+    "lowStockThreshold": "Low Stock Alert Threshold",
      "edit":"Edit Product",
      "productName": "Product Name",
      "description": "Description",
