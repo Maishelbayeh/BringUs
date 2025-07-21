@@ -10,8 +10,6 @@ export interface Testimonial {
   comment: string;
   active: boolean;
   store: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export const useTestimonials = () => {
@@ -20,7 +18,7 @@ export const useTestimonials = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
   const getToken = () => localStorage.getItem('token');
-  const getStoreId = () => localStorage.getItem('storeId') || '687505893fbf3098648bfe16';
+  const getStoreId = () => localStorage.getItem('storeId');
 
   // Get all testimonials
   const getAllTestimonials = useCallback(async () => {
@@ -28,7 +26,8 @@ export const useTestimonials = () => {
     setError(null);
     try {
       const token = getToken();
-      const response = await fetch(`${BASE_URL}social-comments`, {
+      const storeId = getStoreId();
+      const response = await fetch(`${BASE_URL}social-comments/by-store/${storeId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -50,13 +49,13 @@ export const useTestimonials = () => {
   }, []);
 
   // Create new testimonial
-  const createTestimonial = useCallback(async (testimonialData: Omit<Testimonial, '_id' | 'store' | 'createdAt' | 'updatedAt'>) => {
+  const createTestimonial = useCallback(async (testimonialData: Omit<Testimonial, '_id' | 'store'>) => {
     setLoading(true);
     setError(null);
     try {
       const token = getToken();
-      const storeId = getStoreId();
-
+      const storeId = localStorage.getItem('storeId');
+      console.log(storeId);
       const response = await fetch(`${BASE_URL}social-comments`, {
         method: 'POST',
         headers: {
@@ -73,7 +72,7 @@ export const useTestimonials = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to create testimonial');
       }
-
+        console.log(response);
       const data = await response.json();
       setTestimonials(prev => [...prev, data.data]);
       return data.data;

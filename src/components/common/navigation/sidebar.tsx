@@ -13,7 +13,7 @@ import { MenuItem } from '../../../Types';
 import logo from '../../../assets/bringus.svg';
 import { FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '../../../hooks/useAuth';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { getStoreName, getStoreLogo, getUserAvatar } from '../../../hooks/useLocalStorage';
 
 interface SidebarProps {
   userName: string;
@@ -52,7 +52,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isDialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   const { getCurrentUser } = useAuth();
-  const { getStoreName, getStoreLogo, getUserAvatar } = useLocalStorage();
   
   // الحصول على بيانات المستخدم والمتجر
   const user = getCurrentUser();

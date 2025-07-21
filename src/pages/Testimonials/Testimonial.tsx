@@ -18,13 +18,13 @@ export const socialIcons = {
 };
 
 export const platformOptions = [
-  { value: 'FACEBOOK', label: 'Facebook' },
-  { value: 'INSTAGRAM', label: 'Instagram' },
-  { value: 'TWITTER', label: 'Twitter' },
-  { value: 'WHATSAPP', label: 'WhatsApp' },
-  { value: 'YOUTUBE', label: 'YouTube' },
-  { value: 'LINKEDIN', label: 'LinkedIn' },
-  { value: 'TIKTOK', label: 'TikTok' },
+  { value: 'Facebook', label: 'Facebook' },
+  { value: 'Instagram', label: 'Instagram' },
+  { value: 'Twitter', label: 'Twitter' },
+  { value: 'WhatsApp', label: 'WhatsApp' },
+  { value: 'YouTube', label: 'YouTube' },
+  { value: 'LinkedIn', label: 'LinkedIn' },
+  { value: 'TikTok', label: 'TikTok' },
 ];
 const Testimonial: React.FC = () => {
   const { t, i18n } = useTranslation();

@@ -2,15 +2,14 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
-
-const STORE_ID = '687505893fbf3098648bfe16'; // ثابت للاختبار، يمكن تعديله لاحقاً
+import { getStoreId } from './useLocalStorage';
 
 const useProductLabel = () => {
   const [productLabels, setProductLabels] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
-
+  const STORE_ID = getStoreId() || '';
   // جلب جميع مواصفات المنتجات
   const fetchProductLabels = useCallback(async (forceRefresh: boolean = false) => {
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API

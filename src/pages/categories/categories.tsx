@@ -5,10 +5,9 @@ import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CategoriesDrawer from './components/CategoriesDrawer';
 import PermissionModal from '../../components/common/PermissionModal';
-import axios, { AxiosResponse } from 'axios';
 
 import CategoryTree from './CategoryTree';
-import { initialCategories } from '../../data/initialCategories';
+
 import useCategories from '@/hooks/useCategories';
 
 // تعريف نوع الفئة المتداخلة
@@ -149,6 +148,30 @@ const CategoriesPage: React.FC = () => {
     // eslint-disable-next-line
   }, []);
 
+  const filterCategories = (categories: any[], searchTerm: string): any[] => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+
+    return categories.map(category => {
+      // Check if the category itself matches
+      const selfMatch = (isRTL ? category.nameAr : category.nameEn).toLowerCase().includes(lowerCaseSearchTerm);
+
+      // Recursively filter children
+      const filteredChildren = category.children ? filterCategories(category.children, searchTerm) : [];
+
+      // If the category itself matches or has matching children, include it
+      if (selfMatch || filteredChildren.length > 0) {
+        return {
+          ...category,
+          children: filteredChildren,
+        };
+      }
+
+      return null;
+    }).filter(category => category !== null);
+  };
+
+  const filteredCategories = search ? filterCategories(categories, search) : categories;
+
   // إدارة الإضافة والتعديل
   const handleAdd = (parentId?: string | number | null) => {
     setForm({ nameAr: '', nameEn: '', parentId: parentId !== undefined ? parentId : null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '', icon: '' });
@@ -190,7 +213,7 @@ const CategoriesPage: React.FC = () => {
     if (!form.nameAr.trim() && !form.nameEn.trim()) return;
     
     try {
-      await saveCategory(form, editId, isRTL);
+      await saveCategory(form, editId);
       setShowForm(false);
       setForm({ nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '', icon: '' });
       setEditId(null);
@@ -256,7 +279,7 @@ const CategoriesPage: React.FC = () => {
       {/* شجرة الفئات */}
       <div className="">
         <CategoryTree
-          categories={categories}
+          categories={filteredCategories}
           isRTL={isRTL}
           onAdd={handleAdd}
           onEdit={handleEdit}

@@ -232,13 +232,13 @@ const CustomersPage: React.FC = () => {
       )}
 
       {/* Customers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
         {filteredCustomers.map((customer) => {
           const orderCount = ordersData.filter(order => order.customerId === parseInt(customer._id.slice(-1))).length;
           return (
             <div
               key={customer._id}
-              className={`border bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 flex items-center gap-6 group relative cursor-pointer ${language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}
+              className={`border bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 flex items-center gap-6 group relative cursor-pointer `}
               onClick={() => setSelectedCustomer(customer)}
             >
               <div className="relative">
@@ -268,7 +268,7 @@ const CustomersPage: React.FC = () => {
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <div className={`flex items-center gap-2 mb-1 ${language === 'ARABIC' ? 'justify-end' : ''}`}> 
+                <div className={`flex items-center gap-2 mb-1 `}> 
                   <h2 className={`text-xl font-bold text-primary truncate ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
                     {getCustomerDisplayName(customer)}
                   </h2>

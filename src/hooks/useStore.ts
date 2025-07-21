@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
-import { useLocalStorage } from './useLocalStorage';
+import { updateStoreData } from './useLocalStorage';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -122,7 +122,6 @@ export const useStore = () => {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { updateStoreData } = useLocalStorage();
 
   // ========================================================================
   // UTILITY FUNCTIONS

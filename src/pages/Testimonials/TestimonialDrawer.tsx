@@ -112,7 +112,7 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
                 value={formData.personTitle}
                 onChange={e => handleFormChange('personTitle', e.target.value)}
                 placeholder={t('testimonials.enterPersonTitle') || 'Enter person title'}
-                required
+               
               />
             </div>
             

@@ -9,7 +9,7 @@ import { GlobeAltIcon } from '@heroicons/react/24/outline';
 
 import logo from '../../../assets/bringus.svg';
 
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { getStoreName, getStoreLogo } from '../../../hooks/useLocalStorage';
 type TopNavbarProps = {
   // userName: string;
   userPosition: string;
@@ -26,7 +26,6 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { getStoreName, getStoreLogo } = useLocalStorage();
   
   const [storeName, setStoreName] = useState(getStoreName(language) || 'bring us');
   const [storeLogo, setStoreLogo] = useState(getStoreLogo());

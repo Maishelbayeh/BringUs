@@ -1,8 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
-
-const STORE_ID = '687505893fbf3098648bfe16'; // ثابت للاختبار، يمكن تعديله لاحقاً
+import { getStoreId } from './useLocalStorage';
 
 function buildCategoryTree(flatCategories: any[]): any[] {
   if (!Array.isArray(flatCategories)) return [];
@@ -26,6 +25,9 @@ const useCategories = () => {
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
   
+
+const STORE_ID = getStoreId() || '';
+
   // //CONSOLE.log('useCategories hook initialized with toast functions:', { 
   //   showSuccess: typeof showSuccess, 
   //   showError: typeof showError,
