@@ -17,6 +17,7 @@ import useUnits from '../../hooks/useUnits';
 import useProductSpecifications from '../../hooks/useProductSpecifications';
 import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 import TableImage from '../../components/common/TableImage';
+import useToast from '../../hooks/useToast';
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
@@ -144,6 +145,8 @@ const ProductsPage: React.FC = () => {
     fetchSpecifications
   } = useProductSpecifications();
 
+  const { showError } = useToast();
+
   // جلب البيانات عند تحميل الصفحة
   useEffect(() => {
     fetchProducts();
@@ -151,8 +154,7 @@ const ProductsPage: React.FC = () => {
     fetchCategories();
     fetchUnits();
     fetchSpecifications();
-  }, [fetchProducts, fetchProductLabels, fetchCategories, fetchUnits, fetchSpecifications]);
-
+  }, []);
   // دالة لتحديث البيانات
   const refreshData = useCallback(() => {
     fetchProducts(true); // force refresh
@@ -630,10 +632,7 @@ const ProductsPage: React.FC = () => {
       // إفراغ المخزون
       stock: 0,
     };
-    
-    //CONSOLE.log('🔍 handleAddVariant - Creating variant form:', newForm);
-    //CONSOLE.log('🔍 handleAddVariant - Parent product ID:', originalProduct._id);
-    
+    delete newForm._id; // Ensure no _id for new variant
     // تعيين المنتج الأصلي كـ parent product للمتغير
     setEditProduct(originalProduct);
     setDrawerMode('variant'); // وضع جديد للمتغيرات
@@ -934,7 +933,7 @@ const ProductsPage: React.FC = () => {
   //-------------------------------------------- handleSubmit -------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    console.log('🔍 handleSubmit called. drawerMode:', drawerMode, 'editProduct:', editProduct, 'form:', form);
     //CONSOLE.log('🔍 handleSubmit - form data:', form);
     //CONSOLE.log('🔍 handleSubmit - form.barcodes:', form.barcodes);
     //CONSOLE.log('🔍 handleSubmit - form.barcodes type:', typeof form.barcodes);
@@ -987,7 +986,11 @@ const ProductsPage: React.FC = () => {
       // التحقق من صحة البيانات
       const errors = validateProduct(productData, isRTL, editProduct?._id || editProduct?.id);
       if (Object.keys(errors).length > 0) {
-        //CONSOLE.error('Validation errors:', errors);
+        console.log('❌ Validation errors:', errors, JSON.stringify(errors, null, 2));
+        showError(
+          Object.values(errors).join(' | ') || 'حدث خطأ في التحقق من البيانات',
+          isRTL ? 'خطأ في التحقق' : 'Validation Error'
+        );
         return;
       }
 
@@ -997,10 +1000,19 @@ const ProductsPage: React.FC = () => {
       //CONSOLE.log('🔍 handleSubmit - drawerMode:', drawerMode);
       
       if (drawerMode === 'variant') {
-        if (!editProduct?._id) {
-          throw new Error('Variant ID is missing');
+        // If the form has no _id, it's a new variant
+        const formWithId = form as any;
+        if (!formWithId._id) {
+          // Add new variant
+          await addVariant(editProduct._id, form);
+        } else {
+          // Update existing variant
+          await updateVariant(
+            editProduct.parentProductId || editProduct.parent || editProduct.productId || editProduct._id,
+            formWithId._id,
+            form
+          );
         }
-        await updateVariant(editProduct.parentProductId || editProduct.parent || editProduct.productId || editProduct._id, editProduct._id, form);
       } else {
         // تعديل أو إنشاء منتج عادي
         await saveProduct(productData, editId, isRTL);
@@ -1054,18 +1066,8 @@ const ProductsPage: React.FC = () => {
     const specificationValues = originalProduct.specificationValues || [];
     
     // استخدام قيم المواصفات المختارة إذا كانت موجودة
-    //CONSOLE.log('🔍 handleEdit - specificationValues:', specificationValues);
-    //CONSOLE.log('🔍 handleEdit - specifications:', specifications);
-    //CONSOLE.log('🔍 handleEdit - loaded specifications from hook:', specifications);
-    //CONSOLE.log('🔍 handleEdit - originalProduct.mainImage:', originalProduct.mainImage);
-    //CONSOLE.log('🔍 handleEdit - originalProduct.mainImage type:', typeof originalProduct.mainImage);
-    //CONSOLE.log('🔍 handleEdit - originalProduct.barcodes:', originalProduct.barcodes);
-    //CONSOLE.log('🔍 handleEdit - originalProduct.barcodes type:', typeof originalProduct.barcodes);
-    //CONSOLE.log('🔍 handleEdit - originalProduct.barcodes is array:', Array.isArray(originalProduct.barcodes));
-    
     const selectedSpecifications = Array.isArray(specificationValues) && specificationValues.length > 0
       ? specificationValues.map((spec: any) => {
-          // ابحث عن المواصفة في المواصفات المحملة
           const foundSpec = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec.specificationId) : null;
           let valueText = spec.value;
           let valueIndex = -1;
@@ -1085,24 +1087,19 @@ const ProductsPage: React.FC = () => {
         })
       : Array.isArray(specifications) && specifications.length > 0
         ? specifications.map((spec: any) => {
-            // التنسيق الجديد: { specificationId, valueId, value, title }
             if (typeof spec === 'object' && spec.value && spec.title) {
               return {
                 _id: spec.valueId || `${spec.specificationId}_${Date.now()}`,
                 value: spec.value,
                 title: spec.title
               };
-            }
-            // التنسيق القديم: populated objects
-            else if (typeof spec === 'object' && spec.titleAr && spec.titleEn) {
+            } else if (typeof spec === 'object' && spec.titleAr && spec.titleEn) {
               return {
                 _id: spec._id || spec.id,
                 value: isRTL ? spec.titleAr : spec.titleEn,
                 title: isRTL ? spec.titleAr : spec.titleEn
               };
-            }
-            // إذا كانت مجرد ID
-            else {
+            } else {
               const specData = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec || s.id === spec) : null;
               return {
                 _id: spec,
@@ -1113,11 +1110,11 @@ const ProductsPage: React.FC = () => {
           })
         : [];
     
-    //CONSOLE.log('🔍 handleEdit - Final selectedSpecifications:', selectedSpecifications);
-    
+    // Always include all fields from initialForm, and ensure arrays/strings are correct
     const newForm = {
+      ...initialForm,
       ...originalProduct,
-      colors: formColors,
+      colors: Array.isArray(formColors) ? formColors : [],
       nameAr: originalProduct.nameAr || '',
       nameEn: originalProduct.nameEn || '',
       descriptionAr: originalProduct.descriptionAr || '',
@@ -1127,40 +1124,16 @@ const ProductsPage: React.FC = () => {
       categoryId: categoryId ? String(categoryId) : '',
       subcategoryId: subcategoryId ? String(subcategoryId) : '',
       storeId: storeId ? String(storeId) : '',
-      tags: productLabelIds, // Use the extracted productLabel IDs
-      selectedSpecifications: JSON.stringify(selectedSpecifications), // Use the extracted specifications in JSON format
-      images: originalProduct.images || [], // إضافة الصور
-      mainImage: originalProduct.mainImage || null, // إضافة الصورة الرئيسية
+      tags: Array.isArray(productLabelIds) ? productLabelIds : [],
+      selectedSpecifications: typeof selectedSpecifications === 'string' ? selectedSpecifications : JSON.stringify(selectedSpecifications),
+      images: Array.isArray(originalProduct.images) ? originalProduct.images : [],
+      mainImage: originalProduct.mainImage || null,
       visibility: originalProduct.visibility ? 'Y' : 'N',
       costPrice: originalProduct.costPrice || '',
       compareAtPrice: originalProduct.compareAtPrice || '',
       barcodes: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [],
       newBarcode: '',
     };
-    
-    //CONSOLE.log('🔍 newForm.barcodes:', newForm.barcodes);
-    //CONSOLE.log('🔍 newForm.barcodes type:', typeof newForm.barcodes);
-    //CONSOLE.log('🔍 newForm.barcodes is array:', Array.isArray(newForm.barcodes));
-    //CONSOLE.log('🔍 newForm.mainImage:', newForm.mainImage);
-    //CONSOLE.log('🔍 newForm.mainImage type:', typeof newForm.mainImage);
-    //CONSOLE.log('🔍 newForm.mainImage === null:', newForm.mainImage === null);
-    
-    // //CONSOLE.log('🔍 Edit Form Data:', {
-    //   colors: formColors,
-    //   productLabels: productLabelIds,
-    //   specifications: selectedSpecifications,
-    //   selectedSpecificationsJSON: JSON.stringify(selectedSpecifications),
-    //   images: originalProduct.images,
-    //   mainImage: originalProduct.mainImage,
-    //   mainImageType: typeof originalProduct.mainImage,
-    //   mainImageIsNull: originalProduct.mainImage === null,
-    //   barcodes: originalProduct.barcodes,
-    //   barcodesType: typeof originalProduct.barcodes,
-    //   barcodesIsArray: Array.isArray(originalProduct.barcodes),
-    //   barcodesLength: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.length : 'N/A'
-    // });
-    
-    //CONSOLE.log('🔍 handleEdit - Setting form with newForm.barcodes:', newForm.barcodes);
     setForm(newForm);
     setEditProduct(originalProduct);
     setDrawerMode('edit');
@@ -1242,33 +1215,7 @@ const ProductsPage: React.FC = () => {
       />
 
       {/* ------------------------------------------- View Mode Toggle ------------------------------------------- */}
-      <div className="mb-4 flex justify-between items-center">
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setViewMode('table')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              viewMode === 'table'
-                ? 'bg-primary text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {isRTL ? 'عرض الجدول' : 'Table View'}
-          </button>
-          <button
-            onClick={() => setViewMode('tree')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              viewMode === 'tree'
-                ? 'bg-primary text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {isRTL ? 'عرض الشجرة' : 'Tree View'}
-          </button>
-        </div>
-        <div className="text-sm text-gray-600">
-          {isRTL ? 'إجمالي المنتجات:' : 'Total Products:'} {visibleTableData.length}
-        </div>
-      </div>
+    
 
       {/* ------------------------------------------- Content ------------------------------------------- */}
       {viewMode === 'table' ? (
