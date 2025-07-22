@@ -4,6 +4,7 @@ import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
 import PermissionModal from '../../components/common/PermissionModal';
+import { useOrder } from '../../hooks/useOrder';
 
 //-------------------------------------------- Types -------------------------------------------
 type Column = {
@@ -25,44 +26,26 @@ const OrdersPage: React.FC = () => {
   const [orderToUpdateStatus, setOrderToUpdateStatus] = useState<any | null>(null);
   const [newStatus, setNewStatus] = useState<OrderStatus>('pending');
 
-//-------------------------------------------- tableData -------------------------------------------
-  const tableData = ordersDataRaw.map(order => {
-    const customer = customersData.find(c => c.id === order.customerId);
-    const area = deliveryAreas.find(a => a.id === order.deliveryAreaId);
-    const affiliate = affiliates.find(a => a.id === order.affiliateId);
-    const currency = currencies.find(cur => cur.id === order.currencyId);
-    
-    // Enhanced order status - using existing properties or defaulting
-    const getOrderStatus = (order: any) => {
-      // Since the mock data doesn't have status fields, we'll create a simple status based on date and paid status
-      const orderDate = new Date(order.date);
-      const today = new Date();
-      const daysDiff = Math.floor((today.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (!order.paid) return 'pending';
-      if (daysDiff > 30) return 'delivered';
-      if (daysDiff > 15) return 'shipped';
-      if (daysDiff > 7) return 'processing';
-      return 'confirmed';
-    };
+  const storeId = '687505893fbf3098648bfe16';
+  const { data: orders, isLoading, error, refetch } = useOrder(storeId);
 
-    return {
-      id: order.id,
-      customer: customer && i18n.language === 'ARABIC' ? customer.nameAr : customer && i18n.language === 'ENGLISH' ? customer.nameEn : '-',
-      phone: customer ? customer.phone : '-',
-      email: '-', // Customers don't have email in mock data
-      deliveryArea: area && i18n.language === 'ARABIC' ? area.labelAr : area && i18n.language === 'ENGLISH' ? area.labelEn : '-',
-      affiliate: affiliate && i18n.language === 'ARABIC' ? affiliate.nameAr : affiliate && i18n.language === 'ENGLISH' ? affiliate.nameEn : '-',
-      currency: currency && i18n.language === 'ARABIC' ? currency.labelAr : currency && i18n.language === 'ENGLISH' ? currency.labelEn : '-',
-      price: order.price,
-      date: order.date,
-      status: getOrderStatus(order),
-      paymentStatus: order.paid ? 'paid' : 'unpaid',
-      itemsCount: order.products?.length || 0,
-      notes: '', // Orders don't have notes in mock data
-      originalOrder: order, // Keep original data for status updates
-    };
-  });
+//-------------------------------------------- tableData -------------------------------------------
+  const tableData = orders.map(order => ({
+    id: order.id,
+    customer: order.customer,
+    phone: order.customerPhone,
+    email: order.customerEmail || '-',
+    deliveryArea: order.deliveryArea?.locationEn || '-',
+    affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
+    currency: order.currency,
+    price: order.items && order.items.length > 0 ? order.items[0].total : '-',
+    date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
+    status: order.status,
+    paymentStatus: order.paid ? 'paid' : 'unpaid',
+    itemsCount: order.itemsCount,
+    notes: order.notes,
+    originalOrder: order,
+  }));
 
 //-------------------------------------------- Status Renderer -------------------------------------------
   const renderStatus = (status: string) => {
@@ -149,7 +132,7 @@ const OrdersPage: React.FC = () => {
     { key: 'paymentStatus', label: { ar: 'حالة الدفع', en: 'Payment Status' }, type: 'status', render: renderPaymentStatus},
     { key: 'itemsCount', label: { ar: 'عدد المنتجات', en: 'Items Count' }, type: 'number'},
     { key: 'notes', label: { ar: 'ملاحظات', en: 'Notes' }, type: 'text'},
-    { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text', render: renderActions},
+    // { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text', render: renderActions},
   ];
 
 //-------------------------------------------- visibleTableData -------------------------------------------     
@@ -194,6 +177,9 @@ const OrdersPage: React.FC = () => {
   };
 
 //-------------------------------------------- return -------------------------------------------
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="sm:p-4 w-full">
      <HeaderWithAction
