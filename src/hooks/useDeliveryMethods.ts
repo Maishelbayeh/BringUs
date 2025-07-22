@@ -167,7 +167,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
         storeId: fetchOptions.storeId || options.storeId,
       });
 
-      const response = await makeRequest(`${BASE_URL}delivery-methods?${queryParams}`, {
+      const response = await makeRequest(`${BASE_URL}delivery-methods/store/687505893fbf3098648bfe16`, {
         method: 'GET',
         headers: getAuthHeaders(),
       });

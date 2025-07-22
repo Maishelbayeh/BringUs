@@ -4,6 +4,8 @@
 /**
  * دالة للحصول على معرف المتجر من localStorage أو بيانات المستخدم
  */
+const storeId = '687505893fbf3098648bfe16';
+localStorage.setItem('storeId', storeId);
 export const getStoreId = (): string => {
   // أولاً: البحث في localStorage
   const storedStoreId = localStorage.getItem('storeId');
