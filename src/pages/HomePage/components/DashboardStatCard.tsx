@@ -1,17 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
-import { 
-  ShoppingCartIcon, 
-  CurrencyDollarIcon, 
-  UsersIcon, 
-  CubeIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon
-} from '@heroicons/react/24/outline';
+
 import useLanguage from '../../../hooks/useLanguage';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardStatCardProps {
   title: string;
@@ -26,6 +18,7 @@ interface DashboardStatCardProps {
     isPositive: boolean;
   };
   isLoading?: boolean;
+  link?: string;
 }
 
 const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
@@ -37,11 +30,12 @@ const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
   color,
   bgColor,
   trend,
-  isLoading = false
+  isLoading = false,
+  link
 }) => {
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
-
+  const navigate = useNavigate();
   if (isLoading) {
     return (
       <motion.div
@@ -67,8 +61,13 @@ const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      onClick={() => {
+        if (link) {
+          navigate(link);
+        }
+      }}
       className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 group"
-    >
+     >
       <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <h3 className={`text-sm font-medium text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}>
           {title}
