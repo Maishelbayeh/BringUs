@@ -3,7 +3,6 @@ import CustomInput from '../../components/common/CustomInput';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomSelect from '../../components/common/CustomSelect';
 import CustomSwitch from '../../components/common/CustomSwitch';
-import CustomShuttle from '../../components/common/CustomShuttle';
 import CustomColorPicker from '../../components/common/CustomColorPicker';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import { CheckboxSpecificationSelector } from '../../components/common';
@@ -12,6 +11,7 @@ import { t } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import MultiSelect from '@/components/common/MultiSelect';
 import useProductSpecifications from '@/hooks/useProductSpecifications';
+import { createCategorySelectOptions, type CategoryNode } from '@/utils/categoryUtils';
 
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
@@ -396,18 +396,25 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomSelect
-            label={isRTL ? t('products.category') : 'Category'}
-            value={form.categoryId || ''}
-            onChange={(e) => handleSelectChange('categoryId', e.target.value)}
-            options={[
-              { value: '', label: isRTL ? t('products.selectCategory') : 'Select Category' },
-              ...(Array.isArray(categories) ? categories.map((cat: any) => ({ 
-                value: String(cat._id || cat.id), 
-                label: isRTL ? cat.nameAr : cat.nameEn 
-              })) : [])
-            ]}
-          />
+          <div>
+            <CustomSelect
+              label={isRTL ? t('products.category') : 'Category'}
+              value={form.categoryId || ''}
+              onChange={(e) => handleSelectChange('categoryId', e.target.value)}
+              options={createCategorySelectOptions(
+                categories as CategoryNode[] || [],
+                isRTL,
+                true,
+                isRTL ? t('products.selectCategory') : 'Select Category'
+              )}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {isRTL 
+                ? '❖ فئات أساسية | › فئات فرعية | » فئات فرعية متقدمة' 
+                : '❖ Main categories | › Subcategories | » Sub-subcategories'
+              }
+            </p>
+          </div>
           <CustomSelect
             label={isRTL ? t('products.unit') : 'Unit'}
             value={form.unitId || ''}

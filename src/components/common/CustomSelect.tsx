@@ -66,7 +66,17 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             <option value="">{t('common.selectOption', 'Select an option')}</option>
           )}
           {options.map(opt => (
-            <option key={opt.value} value={opt.value}>
+            <option 
+              key={opt.value} 
+              value={opt.value}
+              disabled={opt.value.startsWith('separator-')}
+              style={{
+                fontFamily: opt.value.startsWith('separator-') ? 'monospace' : 'inherit',
+                color: opt.value.startsWith('separator-') ? '#6b7280' : 'inherit',
+                fontSize: opt.value.startsWith('separator-') ? '0.75rem' : 'inherit',
+                backgroundColor: opt.value.startsWith('separator-') ? '#f9fafb' : 'inherit'
+              }}
+            >
               {opt.label}
             </option>
           ))}
