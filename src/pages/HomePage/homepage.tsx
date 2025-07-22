@@ -16,6 +16,7 @@ import {
   XCircleIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
+import { WarningAmber } from '@mui/icons-material';
 
 const Homepage: React.FC = () => {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ const Homepage: React.FC = () => {
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-xl shadow-lg p-8 text-center max-w-md"
         >
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <div className="text-red-500 text-6xl mb-4"><WarningAmber className='text-red-500' /></div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             {t('dashboard.errorLoadingData')}
           </h3>
@@ -90,6 +91,7 @@ const Homepage: React.FC = () => {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
         >
           <DashboardStatCard
+           link={`/orders`}
             title={t('dashboard.totalOrders')}
             value={stats?.totalOrders || 0}
             icon={ShoppingCartIcon}
@@ -111,6 +113,7 @@ const Homepage: React.FC = () => {
           />
           
           <DashboardStatCard
+          link={`/customers`}
             title={t('dashboard.totalCustomers')}
             value={stats?.totalCustomers || 0}
             icon={UsersIcon}
@@ -121,6 +124,7 @@ const Homepage: React.FC = () => {
           />
           
           <DashboardStatCard
+          link={`/products`}
             title={t('dashboard.totalProducts')}
             value={stats?.totalProducts || 0}
             icon={CubeIcon}
@@ -137,6 +141,7 @@ const Homepage: React.FC = () => {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
         >
           <DashboardStatCard
+          link={`/orders`}
             title={t('dashboard.pendingOrders')}
             value={stats?.pendingOrders || 0}
             icon={ClockIcon}
@@ -146,6 +151,7 @@ const Homepage: React.FC = () => {
           />
           
           <DashboardStatCard
+          link={`/orders`}
             title={t('dashboard.completedOrders')}
             value={stats?.completedOrders || 0}
             icon={CheckCircleIcon}
@@ -155,6 +161,7 @@ const Homepage: React.FC = () => {
           />
           
           <DashboardStatCard
+          link={`/orders`}
             title={t('dashboard.cancelledOrders')}
             value={stats?.cancelledOrders || 0}
             icon={XCircleIcon}
@@ -164,6 +171,7 @@ const Homepage: React.FC = () => {
           />
           
           <DashboardStatCard
+          link={`/stock-preview`}
             title={t('dashboard.lowStockItems')}
             value={stats?.productStats?.lowStock || 0}
             icon={ExclamationTriangleIcon}
