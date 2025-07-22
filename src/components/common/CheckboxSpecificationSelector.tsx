@@ -127,8 +127,12 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
                 key={spec._id}
                 className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
               >
-                <span className="text-xs text-primary">{spec.title}:</span>
-                <span className="font-medium">{spec.value}</span>
+                <span className="text-xs text-primary">
+                  {typeof spec.title === 'string' ? spec.title : JSON.stringify(spec.title)}:
+                </span>
+                <span className="font-medium">
+                  {typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)}
+                </span>
                 <button
                   type="button"
                   onClick={() => removeValue(spec._id)}

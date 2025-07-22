@@ -48,8 +48,12 @@ interface ProductsDrawerProps {
   tags?: any[];
   units?: any[];
   specifications?: any[];
+  // إضافة خصائص التحقق من صحة البيانات
+  validationErrors?: { [key: string]: string };
+  onFieldValidation?: (fieldName: string, value: any) => void;
+  showValidation?: boolean;
 }
-const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onMainImageChange, uploadMainImage, onSubmit, categories = [], tags = [], units = [], specifications = [] }) => {
+const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onMainImageChange, uploadMainImage, onSubmit, categories = [], tags = [], units = [], specifications = [], validationErrors = {}, onFieldValidation, showValidation = true }) => {
   if (!open) return null;
   
   //-------------------------------------------- return ------------------------------------------- 
@@ -97,6 +101,9 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               tags={tags}
               units={units}
               specifications={specifications}
+              validationErrors={validationErrors}
+              onFieldValidation={onFieldValidation}
+              showValidation={showValidation}
             />
           </div>
         </form>

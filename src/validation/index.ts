@@ -19,6 +19,7 @@ import { DeliverySchemas } from './deliveryValidation';
 import { PaymentSchemas } from './paymentValidation';
 import { CategorySchemas } from './categoryValidation';
 import { UnitsSchemas } from './unitsValidation';
+import { ProductSchemas } from './productValidation';
 import { specificationValidationSchema } from './specificationsValidation';
 import { wholesalerValidationSchema } from './wholesalerValidation';
 import { affiliateValidationSchema } from './affiliateValidation';
@@ -33,6 +34,7 @@ export const AllSchemas = {
   payment: PaymentSchemas,
   category: CategorySchemas,
   units: UnitsSchemas,
+  products: ProductSchemas,
   specifications: specificationValidationSchema,
   wholesaler: wholesalerValidationSchema,
   affiliate: affiliateValidationSchema,

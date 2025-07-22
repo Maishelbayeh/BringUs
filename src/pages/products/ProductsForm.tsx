@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import MultiSelect from '@/components/common/MultiSelect';
 import useProductSpecifications from '@/hooks/useProductSpecifications';
 import { createCategorySelectOptions, type CategoryNode } from '@/utils/categoryUtils';
+import { useValidation } from '@/hooks/useValidation';
+import { productValidationSchema, validateBarcode, ProductFormData } from '@/validation/productValidation';
 
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
@@ -45,6 +47,10 @@ interface ProductsFormProps {
   tags?: any[];
   units?: any[];
   specifications?: any[];
+  // إضافة خصائص التحقق من صحة البيانات
+  validationErrors?: { [key: string]: string };
+  onFieldValidation?: (fieldName: string, value: any) => void;
+  showValidation?: boolean;
 }
 
 //-------------------------------------------- ProductsForm -------------------------------------------
@@ -58,10 +64,29 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   categories = [], 
   tags = [], 
   units = [],
-  specifications = []
+  specifications = [],
+  validationErrors = {},
+  onFieldValidation,
+  showValidation = true
 }) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+
+  // نظام التحقق من صحة البيانات
+  const {
+    errors: internalErrors,
+    validateField,
+    clearError,
+    setError,
+    hasError
+  } = useValidation({
+    schema: productValidationSchema,
+    validateOnChange: true,
+    validateOnBlur: true
+  });
+
+  // دمج الأخطاء الداخلية مع الأخطاء الخارجية
+  const allErrors = { ...internalErrors, ...validationErrors };
   
   // استخدام hook لجلب مواصفات المنتجات من API
   const { specifications: apiSpecifications, fetchSpecifications } = useProductSpecifications();
@@ -94,12 +119,15 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
         } else {
           parsed = form.selectedSpecifications;
         }
-        
         if (Array.isArray(parsed)) {
-          //CONSOLE.log('🔍 ProductsForm - Setting selectedSpecifications:', parsed);
-          setSelectedSpecifications(parsed);
+          // تنظيف الداتا هنا أيضًا
+          const cleaned = parsed.map(spec => ({
+            _id: spec._id,
+            title: typeof spec.title === 'string' ? spec.title : JSON.stringify(spec.title),
+            value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
+          }));
+          setSelectedSpecifications(cleaned);
         } else {
-          //CONSOLE.log('🔍 ProductsForm - parsed is not array:', parsed);
           setSelectedSpecifications([]);
         }
       } catch (error) {
@@ -157,10 +185,30 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
     }))
   })) : [];
 
-  // //CONSOLE.log('🔍 ProductsForm - formattedSpecifications:', formattedSpecifications);
-  // //CONSOLE.log('🔍 ProductsForm - formattedSpecificationsProp:', formattedSpecificationsProp);
-  // //CONSOLE.log('🔍 ProductsForm - selectedSpecifications:', selectedSpecifications);
-  // //CONSOLE.log('🔍 ProductsForm - apiSpecifications raw:', apiSpecifications);
+
+  // دالة مساعدة لعرض رسائل الخطأ
+  const renderFieldError = (fieldName: string) => {
+    if (!showValidation) return null;
+    
+    const error = allErrors[fieldName];
+    if (!error) return null;
+    
+    return (
+      <div className={`text-red-500 text-xs mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+        {error}
+      </div>
+    );
+  };
+
+  // دالة للتحقق من وجود خطأ في حقل معين
+  const hasFieldError = (fieldName: string): boolean => {
+    return !!allErrors[fieldName];
+  };
+
+  // دالة للحصول على كلاس الخطأ للحقل
+  const getFieldErrorClass = (fieldName: string): string => {
+    return hasFieldError(fieldName) ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : '';
+  };
 
   //-------------------------------------------- handleShuttleChange -------------------------------------------
   const handleShuttleChange = (e: React.ChangeEvent<{ name: string; value: string[] }>) => {
@@ -187,17 +235,19 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   //-------------------------------------------- handleInputChange -------------------------------------------
   const handleInputChange = (name: string, value: string | any[]) => {
     //CONSOLE.log('🔍 ProductsForm - handleInputChange:', { name, value });
-    if (name === 'barcodes') {
-      //CONSOLE.log('🔍 ProductsForm - Updating barcodes:', value);
-      //CONSOLE.log('🔍 ProductsForm - barcodes type:', typeof value);
-      //CONSOLE.log('🔍 ProductsForm - barcodes is array:', Array.isArray(value));
-      //CONSOLE.log('🔍 ProductsForm - barcodes length:', Array.isArray(value) ? value.length : 'N/A');
-    }
     
-    if (name === 'mainImage') {
-      //CONSOLE.log('🔍 ProductsForm - Updating mainImage:', value);
-      //CONSOLE.log('🔍 ProductsForm - mainImage type:', typeof value);
-      //CONSOLE.log('🔍 ProductsForm - mainImage === null:', value === null);
+    // التحقق من صحة البيانات للحقل المحدث
+    if (showValidation) {
+      // مسح الخطأ الحالي أولاً
+      clearError(name);
+      
+      // التحقق من صحة القيمة الجديدة
+      const fieldError = validateField(name, value);
+      
+      // إذا كان هناك دالة للتحقق الخارجي، استدعاؤها
+      if (onFieldValidation) {
+        onFieldValidation(name, value);
+      }
     }
     
     // إنشاء event object
@@ -208,16 +258,6 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       }
     } as any;
     
-    if (name === 'barcodes') {
-      //CONSOLE.log('🔍 ProductsForm - handleInputChange - Sending event:', event);
-      //CONSOLE.log('🔍 ProductsForm - handleInputChange - Event value:', event.target.value);
-    }
-    
-    if (name === 'mainImage') {
-      //CONSOLE.log('🔍 ProductsForm - handleInputChange - Sending mainImage event:', event);
-      //CONSOLE.log('🔍 ProductsForm - handleInputChange - MainImage event value:', event.target.value);
-    }
-    
     // إرسال الحدث إلى onFormChange
     onFormChange(event);
   };
@@ -225,6 +265,21 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
   //-------------------------------------------- handleSelectChange -------------------------------------------
   const handleSelectChange = (name: string, value: string) => {
     //CONSOLE.log('🔍 ProductsForm - handleSelectChange:', { name, value });
+    
+    // التحقق من صحة البيانات للحقل المحدث
+    if (showValidation) {
+      // مسح الخطأ الحالي أولاً
+      clearError(name);
+      
+      // التحقق من صحة القيمة الجديدة
+      const fieldError = validateField(name, value);
+      
+      // إذا كان هناك دالة للتحقق الخارجي، استدعاؤها
+      if (onFieldValidation) {
+        onFieldValidation(name, value);
+      }
+    }
+    
     onFormChange({
       target: {
         name,
@@ -241,23 +296,23 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
 
   // دالة إضافة باركود جديد
   const addBarcode = () => {
-    //CONSOLE.log('🔍 addBarcode called');
-    //CONSOLE.log('🔍 localNewBarcode:', localNewBarcode);
-    //CONSOLE.log('🔍 form.barcodes before:', form.barcodes);
-    
     if (localNewBarcode && localNewBarcode.trim()) {
+      // التحقق من صحة الباركود أولاً
+      const barcodeError = validateBarcode(localNewBarcode.trim(), t);
+      if (barcodeError) {
+        alert(barcodeError);
+        return;
+      }
+      
       const currentBarcodes = Array.isArray(form.barcodes) ? form.barcodes : [];
-      //CONSOLE.log('🔍 currentBarcodes:', currentBarcodes);
       
       // التحقق من عدم تكرار الباركود
       if (currentBarcodes.includes(localNewBarcode.trim())) {
-        //CONSOLE.log('🔍 Barcode already exists');
         alert(isRTL ? 'الباركود موجود مسبقاً!' : 'Barcode already exists!');
         return;
       }
       
       const newBarcodes = [...currentBarcodes, localNewBarcode.trim()];
-      //CONSOLE.log('🔍 newBarcodes:', newBarcodes);
       
       // تحديث الباركود مباشرة باستخدام onFormChange
       onFormChange({
@@ -273,10 +328,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       // إظهار رسالة النجاح
       setShowBarcodeSuccess(true);
       setTimeout(() => setShowBarcodeSuccess(false), 2000);
-      
-      //CONSOLE.log('🔍 Barcode added successfully');
     } else {
-      //CONSOLE.log('🔍 No barcode to add - empty or whitespace');
       alert(isRTL ? 'يرجى إدخال باركود!' : 'Please enter a barcode!');
     }
   };
@@ -353,27 +405,37 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomInput
-            label={isRTL ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'}
-            name="nameAr"
-            value={form.nameAr || ''}
-            onChange={(e) => handleInputChange('nameAr', e.target.value)}
-            required
-          />
-          <CustomInput
+          <div>
+            <CustomInput
+              label={isRTL ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'}
+              name="nameAr"
+              value={form.nameAr || ''}
+              onChange={(e) => handleInputChange('nameAr', e.target.value)}
+              className={getFieldErrorClass('nameAr')}
+             required
+            />
+            {renderFieldError('nameAr')}
+          </div>
+          <div>
+            <CustomInput
               label={isRTL ? 'اسم المنتج (إنجليزي)' : 'Product Name (English)'}
-            name="nameEn"
-            value={form.nameEn || ''}
-            onChange={(e) => handleInputChange('nameEn', e.target.value)}
-            required
-          />
+              name="nameEn"
+              value={form.nameEn || ''}
+              onChange={(e) => handleInputChange('nameEn', e.target.value)}
+              className={getFieldErrorClass('nameEn')}
+              required
+            />
+            {renderFieldError('nameEn')}
+          </div>
           <div className="md:col-span-2">
             <CustomTextArea
               label={isRTL ? 'الوصف (عربي)' : 'Description (Arabic)'}
               name="descriptionAr"
               value={form.descriptionAr || ''}
               onChange={(e) => handleInputChange('descriptionAr', e.target.value)}
+              className={getFieldErrorClass('descriptionAr')}
             />
+            {renderFieldError('descriptionAr')}
           </div>
           <div className="md:col-span-2">
             <CustomTextArea
@@ -381,7 +443,9 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
               name="descriptionEn"
               value={form.descriptionEn || ''}
               onChange={(e) => handleInputChange('descriptionEn', e.target.value)}
+              className={getFieldErrorClass('descriptionEn')}
             />
+            {renderFieldError('descriptionEn')}
           </div>
         </div>
       </div>
@@ -401,6 +465,7 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
               label={isRTL ? t('products.category') : 'Category'}
               value={form.categoryId || ''}
               onChange={(e) => handleSelectChange('categoryId', e.target.value)}
+              className={getFieldErrorClass('categoryId')}
               options={createCategorySelectOptions(
                 categories as CategoryNode[] || [],
                 isRTL,
@@ -414,19 +479,24 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
                 : '❖ Main categories | › Subcategories | » Sub-subcategories'
               }
             </p>
+            {renderFieldError('categoryId')}
           </div>
-          <CustomSelect
-            label={isRTL ? t('products.unit') : 'Unit'}
-            value={form.unitId || ''}
-            onChange={(e) => handleSelectChange('unitId', e.target.value)}
-            options={[
-              { value: '', label: isRTL ? t('products.selectUnit') : 'Select Unit' },
-              ...(Array.isArray(units) ? units.map((u: any) => ({ 
-                value: String(u._id || u.id), 
-                label: isRTL ? u.nameAr : u.nameEn 
-              })) : [])
-            ]}
-          />
+          <div>
+            <CustomSelect
+              label={isRTL ? t('products.unit') : 'Unit'}
+              value={form.unitId || ''}
+              onChange={(e) => handleSelectChange('unitId', e.target.value)}
+              className={getFieldErrorClass('unitId')}
+              options={[
+                { value: '', label: isRTL ? t('products.selectUnit') : 'Select Unit' },
+                ...(Array.isArray(units) ? units.map((u: any) => ({ 
+                  value: String(u._id || u.id), 
+                  label: isRTL ? u.nameAr : u.nameEn 
+                })) : [])
+              ]}
+            />
+            {renderFieldError('unitId')}
+          </div>
         </div>
       </div>
 
@@ -440,28 +510,40 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <CustomInput
-                  label={isRTL ? t('products.price') : 'Price'}
-            name="price"
-            value={form.price || ''}
-            onChange={(e) => handleInputChange('price', e.target.value)}
-            type="number"
-            required
-          />
-          <CustomInput
-            label={isRTL ? 'سعر التكلفة' : 'Cost Price'}
-            name="costPrice"
-            value={form.costPrice || ''}
-            onChange={(e) => handleInputChange('costPrice', e.target.value)}
-            type="number"
-          />
-          <CustomInput
-            label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
-            name="compareAtPrice"
-            value={form.compareAtPrice || ''}
-            onChange={(e) => handleInputChange('compareAtPrice', e.target.value)}
-            type="number"
-          />
+          <div>
+            <CustomInput
+              label={isRTL ? t('products.price') : 'Price'}
+              name="price"
+              value={form.price || ''}
+              onChange={(e) => handleInputChange('price', e.target.value)}
+              className={getFieldErrorClass('price')}
+              type="number"
+              required
+            />
+            {renderFieldError('price')}
+          </div>
+          <div>
+            <CustomInput
+              label={isRTL ? 'سعر التكلفة' : 'Cost Price'}
+              name="costPrice"
+              value={form.costPrice || ''}
+              onChange={(e) => handleInputChange('costPrice', e.target.value)}
+              className={getFieldErrorClass('costPrice')}
+              type="number"
+            />
+            {renderFieldError('costPrice')}
+          </div>
+          <div>
+            <CustomInput
+              label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
+              name="compareAtPrice"
+              value={form.compareAtPrice || ''}
+              onChange={(e) => handleInputChange('compareAtPrice', e.target.value)}
+              className={getFieldErrorClass('compareAtPrice')}
+              type="number"
+            />
+            {renderFieldError('compareAtPrice')}
+          </div>
         </div>
       </div>
 
@@ -582,14 +664,18 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
           </div>
           
           <div className="space-y-4">
-            <CustomInput
-              label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
-              name="availableQuantity"
-              value={form.availableQuantity || ''}
-              onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
-              type="number"
-              disabled={form.maintainStock !== 'Y'}
-            />
+            <div>
+              <CustomInput
+                label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
+                name="availableQuantity"
+                value={form.availableQuantity || ''}
+                onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
+                className={getFieldErrorClass('availableQuantity')}
+                type="number"
+                disabled={form.maintainStock !== 'Y'}
+              />
+              {renderFieldError('availableQuantity')}
+            </div>
             
             <div className="space-y-1">
               <CustomInput
@@ -597,12 +683,14 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
                 name="lowStockThreshold"
                 value={form.lowStockThreshold || '10'}
                 onChange={(e) => handleInputChange('lowStockThreshold', e.target.value)}
+                className={getFieldErrorClass('lowStockThreshold')}
                 type="number"
                 min="1"
                 max="1000"
                 placeholder={isRTL ? 'أدخل الحد الأدنى للمخزون (مثال: 10)' : 'Enter minimum stock level (e.g., 10)'}
                 disabled={form.maintainStock !== 'Y'}
               />
+              {renderFieldError('lowStockThreshold')}
               <p className="text-xs text-gray-500 mt-1">
                 {isRTL 
                   ? 'سيتم تنبيهك عندما تصل الكمية إلى هذا الرقم أو أقل' 
@@ -641,9 +729,14 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
             specifications={formattedSpecificationsProp.length > 0 ? formattedSpecificationsProp : formattedSpecifications}
             selectedSpecifications={selectedSpecifications}
             onSelectionChange={(selected) => {
-              //CONSOLE.log('🔍 ProductsForm - onSelectionChange called with:', selected);
-              setSelectedSpecifications(selected);
-              handleInputChange('selectedSpecifications', JSON.stringify(selected));
+              // تنظيف المواصفات المختارة قبل حفظها
+              const cleaned = selected.map(spec => ({
+                _id: spec._id,
+                title: typeof spec.title === 'string' ? spec.title : JSON.stringify(spec.title),
+                value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
+              }));
+              setSelectedSpecifications(cleaned);
+              handleInputChange('selectedSpecifications', JSON.stringify(cleaned));
             }}
           />
         ) : (
