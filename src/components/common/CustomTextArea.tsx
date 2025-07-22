@@ -31,7 +31,7 @@ const CustomTextArea: React.FC<CustomTextAreaProps> = ({
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
   return (
-    <div className={` mb-4 w-full ${className}`} dir={dir}>
+    <div className={` w-full ${className}`} dir={dir}>
       {label && (
         <label className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${currentLanguage === 'ARABIC' ? 'text-right' : 'text-left'}`}>{label} {required && <span className="text-red-500">*</span>}</label>
       )}

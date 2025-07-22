@@ -18,6 +18,8 @@ import useProductSpecifications from '../../hooks/useProductSpecifications';
 import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 import TableImage from '../../components/common/TableImage';
 import useToast from '../../hooks/useToast';
+import { useValidation } from '../../hooks/useValidation';
+import { validateProductWithDuplicates, ProductFormData } from '../../validation/productValidation';
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
@@ -148,6 +150,38 @@ const ProductsPage: React.FC = () => {
   } = useProductSpecifications();
 
   const { showError } = useToast();
+
+  // نظام التحقق من صحة البيانات للمنتجات
+  const [productValidationErrors, setProductValidationErrors] = useState<{ [key: string]: string }>({});
+
+  // دالة للتحقق من صحة المنتج مع التحقق من التكرار
+  const validateProductForm = useCallback((formData: any) => {
+    const result = validateProductWithDuplicates(
+      { ...formData, id: editProduct?._id || editProduct?.id },
+      products,
+      t
+    );
+    setProductValidationErrors(result.errors);
+    return result;
+  }, [products, editProduct, t]);
+
+  // دالة للتحقق من صحة حقل واحد
+  const handleFieldValidation = useCallback((fieldName: string, value: any) => {
+    // مسح الخطأ الحالي للحقل
+    setProductValidationErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[fieldName];
+      return newErrors;
+    });
+    
+    // إجراء التحقق الكامل للنموذج إذا كان الحقل مهماً
+    if (['nameAr', 'nameEn', 'price', 'categoryId', 'unitId'].includes(fieldName)) {
+      // تأخير التحقق قليلاً لتجنب التحقق المستمر أثناء الكتابة
+      setTimeout(() => {
+        validateProductForm({ ...form, [fieldName]: value });
+      }, 500);
+    }
+  }, [form, validateProductForm]);
 
   // جلب البيانات عند تحميل الصفحة
   useEffect(() => {
@@ -519,7 +553,7 @@ const ProductsPage: React.FC = () => {
   const handleAddVariant = (product: any) => {
     // Use originalProduct data which contains the raw API data
     const originalProduct = product.originalProduct || product;
-    
+    console.log('🔍 hhhhhhhhhhhhhhhhhhhhhhhhhhhh:', originalProduct);
     // Handle colors from original product data
     const productColors = originalProduct.colors || [];
     const formColors = Array.isArray(productColors) && productColors.length > 0
@@ -985,12 +1019,12 @@ const ProductsPage: React.FC = () => {
       //CONSOLE.log('🔍 handleSubmit - editProduct.id:', editProduct?.id);
       //CONSOLE.log('🔍 handleSubmit - editId for validation:', editProduct?._id || editProduct?.id);
       
-      // التحقق من صحة البيانات
-      const errors = validateProduct(productData, isRTL, editProduct?._id || editProduct?.id);
-      if (Object.keys(errors).length > 0) {
-        console.log('❌ Validation errors:', errors, JSON.stringify(errors, null, 2));
+      // التحقق من صحة البيانات باستخدام النظام الجديد
+      const validationResult = validateProductForm(productData);
+      if (!validationResult.isValid) {
+        console.log('❌ Validation errors:', validationResult.errors);
         showError(
-          Object.values(errors).join(' | ') || 'حدث خطأ في التحقق من البيانات',
+          Object.values(validationResult.errors).join(' | ') || 'حدث خطأ في التحقق من البيانات',
           isRTL ? 'خطأ في التحقق' : 'Validation Error'
         );
         return;
@@ -1143,11 +1177,13 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- handleAddClick -------------------------------------------
   const handleAddClick = () => {
-    //CONSOLE.log('🔍 handleAddClick - initialForm.barcodes:', initialForm.barcodes);
     setForm(initialForm);
     setEditProduct(null);
     setDrawerMode('add');
     setShowDrawer(true);
+    // تفعيل الفالديشين مباشرة عند فتح الفورم
+    const result = validateProductWithDuplicates(initialForm, products, t);
+    setProductValidationErrors(result.errors);
   };
   //-------------------------------------------- handleDrawerClose -------------------------------------------
   const handleDrawerClose = () => {
@@ -1272,6 +1308,9 @@ const ProductsPage: React.FC = () => {
         tags={productLabels}
         units={units}
         specifications={specifications}
+        validationErrors={productValidationErrors}
+        onFieldValidation={handleFieldValidation}
+        showValidation={true}
       />
 
       {/* ------------------------------------------- PermissionModal ------------------------------------------- */}
