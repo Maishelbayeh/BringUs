@@ -4,6 +4,8 @@ import CustomButton from '../../../components/common/CustomButton';
 import AffiliationForm from './AffiliationForm';
 import { useValidation } from '../../../hooks/useValidation';
 import { affiliateValidationSchema, validateAffiliateWithDuplicates } from '../../../validation/affiliateValidation';
+import useAffiliations from '../../../hooks/useAffiliations';
+import { getStoreId, generateAffiliateLink, isAffiliateLinkUnique } from '../../../utils/storeUtils';
 
 interface AffiliationDrawerProps {
   open: boolean;
@@ -25,7 +27,19 @@ interface Affiliate {
   percent: number;
   status: string;
   address: string;
-  link: string;
+  affiliateLink: string;
+  bankInfo: {
+    bankName: string;
+    accountNumber: string;
+    iban: string;
+    swiftCode: string;
+  };
+  settings: {
+    autoPayment: boolean;
+    paymentThreshold: number;
+    paymentMethod: string;
+  };
+  notes: string;
 }
 
 const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({ 
@@ -39,6 +53,7 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
   affiliates 
 }) => {
   const { t } = useTranslation();
+  const { createAffiliate, updateAffiliate } = useAffiliations();
   
   const { errors, setErrors, clearAllErrors } = useValidation({
     schema: affiliateValidationSchema
@@ -53,14 +68,63 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
     percent: 0,
     status: 'Active',
     address: '',
-    link: ''
+    affiliateLink: '',
+    bankInfo: {
+      bankName: '',
+      accountNumber: '',
+      iban: '',
+      swiftCode: ''
+    },
+    settings: {
+      autoPayment: false,
+      paymentThreshold: 100,
+      paymentMethod: 'bank_transfer'
+    },
+    notes: ''
   });
 
   useEffect(() => {
     if (open) {
       if (initialData) {
-        setForm(initialData);
+        // تحويل البيانات من API إلى شكل النموذج
+        const formData = {
+          firstName: initialData.firstName || '',
+          lastName: initialData.lastName || '',
+          email: initialData.email || '',
+          password: '', // لا نعرض كلمة المرور في التعديل
+          mobile: initialData.mobile || '',
+          address: initialData.address || '',
+          affiliateLink: initialData.affiliateLink || '',
+          percent: initialData.percent || 0,
+          status: initialData.status || 'Active',
+          bankInfo: initialData.bankInfo || {
+            bankName: '',
+            accountNumber: '',
+            iban: '',
+            swiftCode: ''
+          },
+          settings: initialData.settings || {
+            autoPayment: false,
+            paymentThreshold: 100,
+            paymentMethod: 'bank_transfer'
+          },
+          notes: initialData.notes || ''
+        };
+        setForm(formData);
       } else {
+        // إنشاء رابط مسوق فريد عند إضافة مسوق جديد
+        let uniqueLink = '';
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        while (!uniqueLink && attempts < maxAttempts) {
+          const generatedLink = generateAffiliateLink();
+          if (generatedLink && isAffiliateLinkUnique(generatedLink, affiliates || [])) {
+            uniqueLink = generatedLink;
+          }
+          attempts++;
+        }
+        
         setForm({
           email: '',
           password: '',
@@ -70,16 +134,41 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
           percent: 0,
           status: 'Active',
           address: '',
-          link: ''
+          affiliateLink: uniqueLink,
+          bankInfo: {
+            bankName: '',
+            accountNumber: '',
+            iban: '',
+            swiftCode: ''
+          },
+          settings: {
+            autoPayment: false,
+            paymentThreshold: 100,
+            paymentMethod: 'bank_transfer'
+          },
+          notes: ''
         });
       }
       clearAllErrors();
     }
-  }, [open, initialData, clearAllErrors]);
+  }, [open, initialData, clearAllErrors, affiliates]);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    
+    // Handle nested object properties (e.g., bankInfo.bankName)
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setForm(prev => ({
+        ...prev,
+        [parent]: {
+          ...(prev[parent as keyof typeof prev] as any),
+          [child]: value
+        }
+      }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
     
     // Clear error for this field when user starts typing
     if (errors[name]) {
@@ -87,9 +176,16 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
       delete newErrors[name];
       setErrors(newErrors);
     }
+    
+    // Clear general error when user starts typing
+    if (errors.general) {
+      const newErrors = { ...errors };
+      delete newErrors.general;
+      setErrors(newErrors);
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Prepare form data for validation
     const formData = {
       ...form,
@@ -112,8 +208,58 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
     // Clear errors on successful validation
     clearAllErrors();
 
-    // Call the parent's save function
-    onSaveSuccess();
+    try {
+      // Check required fields
+      if (!form.firstName || !form.lastName || !form.email || !form.password || !form.mobile || !form.address) {
+        setErrors({ general: 'جميع الحقول المطلوبة يجب ملؤها' });
+        return;
+      }
+
+      // Prepare data for API
+      const apiData = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        password: form.password,
+        mobile: form.mobile,
+        address: form.address,
+        affiliateLink: form.affiliateLink || '',
+        percent: Number(form.percent) || 0,
+        store: {
+          _id: getStoreId()
+        },
+        status: form.status || 'Active',
+        bankInfo: form.bankInfo || {
+          bankName: '',
+          accountNumber: '',
+          iban: '',
+          swiftCode: ''
+        },
+        settings: form.settings || {
+          autoPayment: false,
+          paymentThreshold: 100,
+          paymentMethod: 'bank_transfer'
+        },
+        notes: form.notes || ''
+      };
+
+      if (isEdit && (initialData?._id || initialData?.id)) {
+        // Update existing affiliate
+        await updateAffiliate({
+          _id: initialData._id || initialData.id,
+          ...apiData
+        });
+      } else {
+        // Create new affiliate
+        await createAffiliate(apiData);
+      }
+
+      // Call the parent's save function
+      onSaveSuccess();
+    } catch (error) {
+      console.error('Error saving affiliate:', error);
+      // You can add error handling here if needed
+    }
   };
 
   if (!open) return null;
@@ -135,6 +281,7 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
             onFormChange={handleFormChange} 
             isRTL={isRTL} 
             errors={errors}
+            affiliates={affiliates}
           />
         </div>
         

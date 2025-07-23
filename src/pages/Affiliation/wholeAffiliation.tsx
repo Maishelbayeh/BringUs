@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import AffiliationDrawer from './component/AffiliationDrawer';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import PermissionModal from '../../components/common/PermissionModal';
-import { mockAffiliates } from '../../data/mockAffiliates';
+import useAffiliations from '@/hooks/useAffiliations';
 import AffiliatePaymentDrawer from './AffiliatePaymentDrawer';
 
 //------------------------------------------- AffiliationPage -------------------------------------------
@@ -13,14 +13,19 @@ const AffiliationPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [data, setData] = useState(mockAffiliates);
   const [editingAffiliate, setEditingAffiliate] = useState<any>(null);
   const [isEdit, setIsEdit] = useState(false);
   const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false);
   const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [affiliateToDelete, setAffiliateToDelete] = useState<any | null>(null);
-
+  const { 
+    affiliates, 
+    loading, 
+    error, 
+    deleteAffiliate, 
+    fetchAffiliates
+  } = useAffiliations();
 //------------------------------------------- columns -------------------------------------------
   const columns = [
     {
@@ -31,17 +36,60 @@ const AffiliationPage = () => {
           className="text-primary font-bold cursor-pointer hover:underline"
           onClick={() => { setSelectedAffiliate(row); setPaymentDrawerOpen(true); }}
         >
-          {value}
+          {`${row.firstName} ${row.lastName}`}
         </span>
       ),
     },
-    { key: 'lastName', label: { en: t('affiliation.lastName'), ar: t('affiliation.lastName') } },
     { key: 'email', label: { en: t('affiliation.email'), ar: t('affiliation.email') } },
     { key: 'mobile', label: { en: t('affiliation.mobile'), ar: t('affiliation.mobile') } },
-    { key: 'percent', label: { en: t('affiliation.percent'), ar: t('affiliation.percent') } },
-    { key: 'link', label: { en: t('affiliation.link'), ar: t('affiliation.link') }, type: 'link' },
-    {key: 'status',label: { en: t('affiliation.status'), ar: t('affiliation.status') },type: 'status',},
-    { key: 'address', label: { en: t('affiliation.address'), ar: t('affiliation.address') } },
+    { 
+      key: 'percent', 
+      label: { en: t('affiliation.percent'), ar: t('affiliation.percent') },
+      render: (value: number) => `${value}%`
+    },
+    { 
+      key: 'totalSales', 
+      label: { en: t('affiliation.totalSales'), ar: t('affiliation.totalSales') },
+      render: (value: number) => value ? `${value.toLocaleString()}` : '0'
+    },
+    { 
+      key: 'balance', 
+      label: { en: t('affiliation.balance'), ar: t('affiliation.balance') },
+      render: (value: number) => value ? `${value.toLocaleString()}` : '0'
+    },
+    { 
+      key: 'affiliateLink', 
+      label: { en: t('affiliation.affiliateLink'), ar: t('affiliation.affiliateLink') }, 
+      type: 'link',
+      render: (value: string) => (
+        value ? (
+          <a 
+            href={value} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            {t('affiliation.viewLink') || 'عرض الرابط'}
+          </a>
+        ) : (
+          <span className="text-gray-400">-</span>
+        )
+      )
+    },
+    {
+      key: 'status',
+      label: { en: t('affiliation.status'), ar: t('affiliation.status') },
+      type: 'status',
+      render: (value: string) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          value === 'Active' ? 'bg-green-100 text-green-800' :
+          value === 'Inactive' ? 'bg-red-100 text-red-800' :
+          'bg-gray-100 text-gray-800'
+        }`}>
+          {value}
+        </span>
+      )
+    },
   ];
 
 //------------------------------------------- handleDrawerOpen -------------------------------------------
@@ -65,21 +113,29 @@ const AffiliationPage = () => {
   };
 
 //------------------------------------------- handleDeleteConfirm -------------------------------------------
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (affiliateToDelete) {
-      setData(prev => prev.filter(d => d.id !== affiliateToDelete.id));
-      setAffiliateToDelete(null);
+      try {
+        await deleteAffiliate(affiliateToDelete._id || affiliateToDelete.id);
+        setAffiliateToDelete(null);
+      } catch (error) {
+        console.error('Error deleting affiliate:', error);
+      }
     }
     setShowDeleteModal(false);
   };
 
 //------------------------------------------- handleSaveSuccess -------------------------------------------  
-  const handleSaveSuccess = () => {
-    // This function will be called from AffiliationDrawer after successful validation
-    // Here you would normally make an API call to save the data
-    // For now, we'll just close the drawer
+  const handleSaveSuccess = async () => {
+    // Refresh the affiliates data after successful save
+    await fetchAffiliates();
     setDrawerOpen(false);
-    // You can add your save logic here
+  };
+
+//------------------------------------------- handlePaymentSuccess -------------------------------------------  
+  const handlePaymentSuccess = async () => {
+    // Refresh the affiliates data after successful payment
+    await fetchAffiliates();
   };
 
   return (
@@ -98,13 +154,31 @@ const AffiliationPage = () => {
         onAdd={handleDrawerOpen}
         isRtl={isRTL}
       />
+      
+      {/* ------------------------------------------- Loading and Error States ------------------------------------------- */}
+      {loading && (
+         <div className="sm:p-4 w-full">
+         <div className="flex items-center justify-center h-64">
+           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+         </div>
+       </div>
+      )}
+      
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <strong>خطأ:</strong> {error}
+        </div>
+      )}
+      
       {/* ------------------------------------------- CustomTable ------------------------------------------- */}
-      <CustomTable
-        columns={columns as any}
-        data={data}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {!loading && !error && (
+        <CustomTable
+          columns={columns as any}
+          data={affiliates}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      )}
       {/* ------------------------------------------- AffiliationDrawer ------------------------------------------- */}
       <AffiliationDrawer
         open={drawerOpen}
@@ -114,7 +188,7 @@ const AffiliationPage = () => {
         initialData={editingAffiliate}
         onSaveSuccess={handleSaveSuccess}
         isEdit={isEdit}
-        affiliates={data}
+        affiliates={affiliates}
       />
       {/* ------------------------------------------- AffiliatePaymentDrawer ------------------------------------------- */}
       <AffiliatePaymentDrawer
@@ -122,6 +196,7 @@ const AffiliationPage = () => {
         onClose={() => setPaymentDrawerOpen(false)}
         isRTL={isRTL}
         affiliate={selectedAffiliate}
+        onPaymentSuccess={handlePaymentSuccess}
       />
       {/* ------------------------------------------- PermissionModal ------------------------------------------- */}
       <PermissionModal

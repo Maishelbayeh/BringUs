@@ -412,25 +412,25 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <CustomInput
-              label={isRTL ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'}
-              name="nameAr"
-              value={form.nameAr || ''}
-              onChange={(e) => handleInputChange('nameAr', e.target.value)}
+          <CustomInput
+            label={isRTL ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'}
+            name="nameAr"
+            value={form.nameAr || ''}
+            onChange={(e) => handleInputChange('nameAr', e.target.value)}
               className={getFieldErrorClass('nameAr')}
-             required
-            />
+            required
+          />
             {renderFieldError('nameAr')}
           </div>
           <div>
-            <CustomInput
+          <CustomInput
               label={isRTL ? 'اسم المنتج (إنجليزي)' : 'Product Name (English)'}
-              name="nameEn"
-              value={form.nameEn || ''}
-              onChange={(e) => handleInputChange('nameEn', e.target.value)}
+            name="nameEn"
+            value={form.nameEn || ''}
+            onChange={(e) => handleInputChange('nameEn', e.target.value)}
               className={getFieldErrorClass('nameEn')}
-              required
-            />
+            required
+          />
             {renderFieldError('nameEn')}
           </div>
           <div className="md:col-span-2">
@@ -467,10 +467,10 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <CustomSelect
-              label={isRTL ? t('products.category') : 'Category'}
-              value={form.categoryId || ''}
-              onChange={(e) => handleSelectChange('categoryId', e.target.value)}
+          <CustomSelect
+            label={isRTL ? t('products.category') : 'Category'}
+            value={form.categoryId || ''}
+            onChange={(e) => handleSelectChange('categoryId', e.target.value)}
               className={getFieldErrorClass('categoryId')}
               options={createCategorySelectOptions(
                 categories as CategoryNode[] || [],
@@ -488,19 +488,19 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
             {renderFieldError('categoryId')}
           </div>
           <div>
-            <CustomSelect
-              label={isRTL ? t('products.unit') : 'Unit'}
-              value={form.unitId || ''}
-              onChange={(e) => handleSelectChange('unitId', e.target.value)}
+          <CustomSelect
+            label={isRTL ? t('products.unit') : 'Unit'}
+            value={form.unitId || ''}
+            onChange={(e) => handleSelectChange('unitId', e.target.value)}
               className={getFieldErrorClass('unitId')}
-              options={[
-                { value: '', label: isRTL ? t('products.selectUnit') : 'Select Unit' },
-                ...(Array.isArray(units) ? units.map((u: any) => ({ 
-                  value: String(u._id || u.id), 
-                  label: isRTL ? u.nameAr : u.nameEn 
-                })) : [])
-              ]}
-            />
+            options={[
+              { value: '', label: isRTL ? t('products.selectUnit') : 'Select Unit' },
+              ...(Array.isArray(units) ? units.map((u: any) => ({ 
+                value: String(u._id || u.id), 
+                label: isRTL ? u.nameAr : u.nameEn 
+              })) : [])
+            ]}
+          />
             {renderFieldError('unitId')}
           </div>
         </div>
@@ -517,37 +517,37 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <CustomInput
-              label={isRTL ? t('products.price') : 'Price'}
-              name="price"
-              value={form.price || ''}
-              onChange={(e) => handleInputChange('price', e.target.value)}
+          <CustomInput
+                  label={isRTL ? t('products.price') : 'Price'}
+            name="price"
+            value={form.price || ''}
+            onChange={(e) => handleInputChange('price', e.target.value)}
               className={getFieldErrorClass('price')}
-              type="number"
-              required
-            />
+            type="number"
+            required
+          />
             {renderFieldError('price')}
           </div>
           <div>
-            <CustomInput
-              label={isRTL ? 'سعر التكلفة' : 'Cost Price'}
-              name="costPrice"
-              value={form.costPrice || ''}
-              onChange={(e) => handleInputChange('costPrice', e.target.value)}
+          <CustomInput
+            label={isRTL ? 'سعر التكلفة' : 'Cost Price'}
+            name="costPrice"
+            value={form.costPrice || ''}
+            onChange={(e) => handleInputChange('costPrice', e.target.value)}
               className={getFieldErrorClass('costPrice')}
-              type="number"
-            />
+            type="number"
+          />
             {renderFieldError('costPrice')}
           </div>
           <div>
-            <CustomInput
-              label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
-              name="compareAtPrice"
-              value={form.compareAtPrice || ''}
-              onChange={(e) => handleInputChange('compareAtPrice', e.target.value)}
+          <CustomInput
+            label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
+            name="compareAtPrice"
+            value={form.compareAtPrice || ''}
+            onChange={(e) => handleInputChange('compareAtPrice', e.target.value)}
               className={getFieldErrorClass('compareAtPrice')}
-              type="number"
-            />
+            type="number"
+          />
             {renderFieldError('compareAtPrice')}
           </div>
         </div>
@@ -671,15 +671,15 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
           
           <div className="space-y-4">
             <div>
-              <CustomInput
-                label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
-                name="availableQuantity"
-                value={form.availableQuantity || ''}
-                onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
+            <CustomInput
+              label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
+              name="availableQuantity"
+              value={form.availableQuantity || ''}
+              onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
                 className={getFieldErrorClass('availableQuantity')}
-                type="number"
-                disabled={form.maintainStock !== 'Y'}
-              />
+              type="number"
+              disabled={form.maintainStock !== 'Y'}
+            />
               {renderFieldError('availableQuantity')}
             </div>
             

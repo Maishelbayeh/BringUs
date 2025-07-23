@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
 import PaymentForm, { PaymentFormRef } from './paymentForm';
 import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
@@ -17,13 +16,11 @@ interface Props {
 const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language, isEditMode }) => {
   const { t } = useTranslation();
   const formRef = useRef<PaymentFormRef>(null);
-  const [isFormValid, setIsFormValid] = useState(false); // Start as false to require validation
+  const [isFormValid, setIsFormValid] = useState(false);
   
-  // Reset validation state when modal opens
   useEffect(() => {
     if (open) {
-      // Don't reset to true, let the form validate itself
-      //CONSOLE.log('Payment modal opened');
+      // Reset validation state when drawer opens
     }
   }, [open]);
   
@@ -31,49 +28,40 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
   const isRTL = language === 'ARABIC';
   
   const handleSave = () => {
-    //CONSOLE.log('Payment drawer save clicked, form valid:', isFormValid);
-    //CONSOLE.log('Form ref exists:', !!formRef.current);
-    
     if (formRef.current) {
-      //CONSOLE.log('Calling payment form handleSubmit');
       try {
         formRef.current.handleSubmit();
       } catch (error) {
-        //CONSOLE.error('Error submitting payment form:', error);
+        console.error('Error submitting payment form:', error);
       }
-    } else {
-      //CONSOLE.log('Payment form ref is null');
     }
   };
 
   const handleValidationChange = (isValid: boolean) => {
-    //CONSOLE.log('Payment validation changed:', isValid);
     setIsFormValid(isValid);
   };
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div 
-        className={`bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-auto relative flex flex-col max-h-[90vh] ${isRTL ? 'text-right' : 'text-left'}`}
+        className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-2 relative flex flex-col max-h-[90vh] ${isRTL ? 'text-right' : 'text-left'}`}
         dir={isRTL ? 'rtl' : 'ltr'}
       >
-        {/* Fixed Header */}
-        <div className={`flex items-center justify-between border-b border-primary/20 px-6 py-4 bg-white rounded-t-2xl flex-shrink-0`}>
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-primary">
-              {isEditMode ? t('paymentMethods.editPaymentMethod') : t('paymentMethods.addPaymentMethod')}
-            </span>
-          </div>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
+          <span className="text-xl font-bold text-primary">
+            {isEditMode ? t('paymentMethods.editPaymentMethod') : t('paymentMethods.addPaymentMethod')}
+          </span>
           <button 
             onClick={onClose} 
-            className="text-primary hover:text-red-500 text-2xl transition-colors"
+            className="text-primary hover:text-red-500 text-2xl"
             type="button"
           >
-            <CloseIcon fontSize="inherit" />
+            ×
           </button>
         </div>
 
-        {/* Scrollable Form Content */}
+        {/* Form Content */}
         <div className="flex-1 overflow-y-auto">
           <PaymentForm 
             ref={formRef}
@@ -86,28 +74,22 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
           />
         </div>
 
-        {/* Fixed Footer */}
-        <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl flex-shrink-0`}>
+        {/* Footer */}
+        <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">
           <CustomButton
             color="white"
             textColor="primary"
             text={t("paymentMethods.cancel")}
             action={onClose}
+            bordercolor="primary"
           />
-          <div className="flex flex-col items-end">
-            <CustomButton
-              color="primary"
-              textColor="white"
-              text={isEditMode ? t("paymentMethods.edit") : t("paymentMethods.save")}
-              action={handleSave}
-              disabled={!isFormValid}
-            />
-            {!isFormValid && (
-              <p className="text-xs text-gray-500 mt-1">
-                {t('common.pleaseCompleteForm', 'Please complete all required fields')}
-              </p>
-            )}
-          </div>
+          <CustomButton
+            color="primary"
+            textColor="white"
+            text={isEditMode ? t("paymentMethods.edit") : t("paymentMethods.save")}
+            action={handleSave}
+            disabled={!isFormValid}
+          />
         </div>
       </div>
     </div>
