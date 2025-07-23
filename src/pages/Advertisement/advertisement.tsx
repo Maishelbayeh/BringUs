@@ -13,7 +13,7 @@ const AdvertisementPage = () => {
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
 
   // TODO: Replace with actual storeId from context/auth if needed
-  const storeId = '687505893fbf3098648bfe16';
+  const storeId = localStorage.getItem('storeId') || '';
   const token = localStorage.getItem('token') || '';
 
   const {
@@ -35,6 +35,8 @@ const AdvertisementPage = () => {
   const [permissionModalOpen, setPermissionModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [mode, setMode] = useState<'html' | 'image'>('html');
+  const [image, setImage] = useState<string | null>(null);
 
   // جلب البيانات عند التحميل
   useEffect(() => {
@@ -61,22 +63,32 @@ const AdvertisementPage = () => {
 
   const columns = [
     {
-      key: 'html',
+      key: 'preview',
       label: { en: t('advertisement.preview'), ar: t('advertisement.preview') },
-      render: (value: string) => (
-        <div className="border rounded-lg p-4 bg-white min-h-[60px] max-w-md overflow-x-auto shadow-sm">
-          <div 
-            className="max-w-none"
-            style={{ 
-              fontSize: '14px',
-              lineHeight: '1.5',
-              color: '#333',
-              wordBreak: 'break-word'
-            }}
-            dangerouslySetInnerHTML={renderHtml(value)} 
-          />
-        </div>
-      ),
+      render: (_: any, row: any) => {
+        if (row.raw && row.raw.backgroundImageUrl) {
+          return (
+            <div className="flex justify-center items-center">
+              <img src={row.raw.backgroundImageUrl} alt="Advertisement" style={{ maxWidth: '300px', maxHeight: '120px', borderRadius: '8px' }} />
+            </div>
+          );
+        } else {
+          return (
+            <div className="border rounded-lg p-4 bg-white min-h-[60px] max-w-md overflow-x-auto shadow-sm">
+              <div 
+                className="max-w-none"
+                style={{ 
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                  color: '#333',
+                  wordBreak: 'break-word'
+                }}
+                dangerouslySetInnerHTML={renderHtml(row.html)} 
+              />
+            </div>
+          );
+        }
+      },
       align: 'center' as const,
     },
     {
@@ -99,6 +111,8 @@ const AdvertisementPage = () => {
     setFormTitle('');
     setFormStatus('Active');
     setEditIndex(null);
+    setMode('html');
+    setImage(null);
     setDrawerOpen(true);
   };
 
@@ -107,6 +121,13 @@ const AdvertisementPage = () => {
     setFormTitle(item.raw?.title || '');
     setFormStatus(item.status);
     setEditIndex(data.findIndex((d) => d.id === item.id));
+    if (item.raw?.backgroundImageUrl) {
+      setMode('image');
+      setImage(item.raw.backgroundImageUrl);
+    } else {
+      setMode('html');
+      setImage(null);
+    }
     setDrawerOpen(true);
   };
 
@@ -130,27 +151,48 @@ const AdvertisementPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formHtml.trim()) {
-      return;
-    }
-
     setFormLoading(true);
     
+    let imageUrl = image;
+
     try {
+      // 1. If mode is image and image is base64, upload it first
+      if (mode === 'image' && image && image.startsWith('data:')) {
+        const formData = new FormData();
+        // Convert base64 to Blob
+        const res = await fetch(image);
+        const blob = await res.blob();
+        formData.append('file', blob, 'advertisement-image.png');
+
+        // Upload to backend
+        //http://localhost:5001/api/advertisements/upload-image
+        const uploadRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api/'}advertisements/upload-image`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success && uploadData.data.url) {
+          imageUrl = uploadData.data.url;
+        } else {
+          throw new Error('Image upload failed');
+        }
+      }
+
+      // 2. Now create/update the advertisement with the correct payload
+      const payload = {
+        htmlContent: mode === 'html' ? formHtml : '',
+        backgroundImageUrl: mode === 'image' ? (imageUrl || '') : '',
+        isActive: formStatus === 'Active',
+        title: formTitle,
+      };
+
       if (editIndex !== null && data[editIndex] && data[editIndex].id) {
-        // Update existing advertisement
-        await updateAdvertisement(String(data[editIndex].id), {
-          htmlContent: formHtml,
-          isActive: formStatus === 'Active',
-          title: formTitle,
-        });
+        await updateAdvertisement(String(data[editIndex].id), payload);
       } else {
-        // Create new advertisement
-        await createAdvertisement({
-          htmlContent: formHtml,
-          isActive: formStatus === 'Active',
-          title: formTitle,
-        });
+        await createAdvertisement(payload);
       }
       
       // Refresh data and close drawer
@@ -160,6 +202,8 @@ const AdvertisementPage = () => {
       setFormHtml('');
       setFormTitle('');
       setFormStatus('Active');
+      setMode('html');
+      setImage(null);
     } catch (error) {
       //CONSOLE.error('Submit error:', error);
     } finally {
@@ -230,6 +274,10 @@ const AdvertisementPage = () => {
                 renderHtml={renderHtml}
                 formTitle={formTitle}
                 setFormTitle={setFormTitle}
+                image={image}
+                setImage={setImage}
+                mode={mode}
+                setMode={setMode}
               />
               
               {/* Footer */}
