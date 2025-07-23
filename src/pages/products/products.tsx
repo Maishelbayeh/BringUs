@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductsDrawer from './ProductsDrawer';
@@ -111,6 +111,8 @@ const ProductsPage: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
   const subcategoryIdParam = params.get('subcategoryId');
+
+  const productsFormRef = useRef<any>(null); // أضف هذا السطر في بداية الكومبوننت
 
   // استخدام الهوك الجديد
   const {
@@ -970,11 +972,16 @@ const ProductsPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('🔍 handleSubmit called. drawerMode:', drawerMode, 'editProduct:', editProduct, 'form:', form);
-    //CONSOLE.log('🔍 handleSubmit - form data:', form);
-    //CONSOLE.log('🔍 handleSubmit - form.barcodes:', form.barcodes);
-    //CONSOLE.log('🔍 handleSubmit - form.barcodes type:', typeof form.barcodes);
-    //CONSOLE.log('🔍 handleSubmit - form.barcodes is array:', Array.isArray(form.barcodes));
-    
+
+    // جلب الباركود من ProductsForm مباشرة (حتى لو لم يضغط +)
+    if (productsFormRef.current && typeof productsFormRef.current.getCurrentBarcode === 'function') {
+      const currentBarcode = productsFormRef.current.getCurrentBarcode();
+      if (currentBarcode && currentBarcode.trim() && !form.barcodes.includes(currentBarcode.trim())) {
+        form.barcodes = [...form.barcodes, currentBarcode.trim()];
+        setForm({ ...form });
+      }
+    }
+
     try {
      
       // تحويل البيانات إلى الشكل المطلوب للـ API
@@ -1311,6 +1318,8 @@ const ProductsPage: React.FC = () => {
         validationErrors={productValidationErrors}
         onFieldValidation={handleFieldValidation}
         showValidation={true}
+        // مرر ref إلى ProductsForm عبر ProductsDrawer
+        productsFormRef={productsFormRef}
       />
 
       {/* ------------------------------------------- PermissionModal ------------------------------------------- */}

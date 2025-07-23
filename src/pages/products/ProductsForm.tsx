@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import CustomInput from '../../components/common/CustomInput';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomSelect from '../../components/common/CustomSelect';
@@ -54,21 +54,22 @@ interface ProductsFormProps {
 }
 
 //-------------------------------------------- ProductsForm -------------------------------------------
-const ProductsForm: React.FC<ProductsFormProps> = ({ 
-  form, 
-  onFormChange, 
-  onTagsChange, 
-  onImageChange, 
-  onMainImageChange, 
-  uploadMainImage,
-  categories = [], 
-  tags = [], 
-  units = [],
-  specifications = [],
-  validationErrors = {},
-  onFieldValidation,
-  showValidation = true
-}) => {
+const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
+  const {
+    form,
+    onFormChange,
+    onTagsChange,
+    onImageChange,
+    onMainImageChange,
+    uploadMainImage,
+    categories = [],
+    tags = [],
+    units = [],
+    specifications = [],
+    validationErrors = {},
+    onFieldValidation,
+    showValidation = true
+  } = props;
   const { i18n, t } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
 
@@ -390,6 +391,11 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       setMainImageUploading(false);
     }
   };
+
+  // expose getCurrentBarcode to parent
+  useImperativeHandle(ref, () => ({
+    getCurrentBarcode: () => localNewBarcode
+  }));
 
   //-------------------------------------------- return -------------------------------------------
   return (
@@ -962,6 +968,6 @@ const ProductsForm: React.FC<ProductsFormProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default ProductsForm; 
