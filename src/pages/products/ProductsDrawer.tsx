@@ -52,8 +52,9 @@ interface ProductsDrawerProps {
   validationErrors?: { [key: string]: string };
   onFieldValidation?: (fieldName: string, value: any) => void;
   showValidation?: boolean;
+  productsFormRef?: any; // أضف هذا السطر
 }
-const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onMainImageChange, uploadMainImage, onSubmit, categories = [], tags = [], units = [], specifications = [], validationErrors = {}, onFieldValidation, showValidation = true }) => {
+const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onMainImageChange, uploadMainImage, onSubmit, categories = [], tags = [], units = [], specifications = [], validationErrors = {}, onFieldValidation, showValidation = true, productsFormRef }) => {
   if (!open) return null;
   
   //-------------------------------------------- return ------------------------------------------- 
@@ -91,6 +92,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
         <form id="product-form" onSubmit={onSubmit} className="flex-1 ">
           <div className="h-full overflow-y-auto">
             <ProductsForm
+              ref={productsFormRef}
               form={form}
               onFormChange={onFormChange}
               onTagsChange={onTagsChange}
