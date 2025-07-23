@@ -44,7 +44,7 @@ const useProducts = () => {
     try {
       setLoading(true);
       setHasError(false); // إعادة تعيين حالة الخطأ عند بدء محاولة جديدة
-      const url = `${BASE_URL}meta/products`;
+      const url = `${BASE_URL}products/by-store/${getStoreId()}`;
       const res = await axios.get(url);
       //CONSOLE.log('FETCHED PRODUCTS FROM API:', res.data);
       
