@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BASE_URL, LOGIN } from '@/constants/api';
+import { BASE_URL, LOGIN } from '../constants/api';
 import { updateUserData, updateStoreData, updateStoreId } from './useLocalStorage';
 import { useStore } from './useStore';
 

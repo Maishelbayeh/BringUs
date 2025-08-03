@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import VariantsPopup from './VariantsPopup';
-import VariantEditDrawer from './VariantEditDrawer';
+import ProductsDrawer from './ProductsDrawer';
 import useProductSpecifications from '../../hooks/useProductSpecifications';
+import axios from 'axios';
+import { BASE_URL } from '../../constants/api';
 
 interface VariantManagerProps {
   isOpen: boolean;
@@ -12,7 +14,15 @@ interface VariantManagerProps {
   onUpdateVariant: (productId: string, variantId: string, variantData: any) => Promise<any>;
   onAddVariant: () => void;
   isRTL: boolean;
+  categories: any[];
+  tags: any[];
+  units: any[];
 }
+
+const fetchVariantById = async (productId: string, variantId: string, storeId: string) => {
+  const res = await axios.get(`${BASE_URL}products/${productId}/variants?storeId=${storeId}`);
+  return res.data.data.find((v: any) => v._id === variantId || v.id === variantId);
+};
 
 const VariantManager: React.FC<VariantManagerProps> = ({
   isOpen,
@@ -22,10 +32,13 @@ const VariantManager: React.FC<VariantManagerProps> = ({
   onDeleteVariant,
   onUpdateVariant,
   onAddVariant,
-  isRTL
+  isRTL,
+  categories,
+  tags,
+  units
 }) => {
+  const [showVariantDrawer, setShowVariantDrawer] = useState(false);
   const [editingVariant, setEditingVariant] = useState<any | null>(null);
-  const [showVariantEditDrawer, setShowVariantEditDrawer] = useState(false);
   const [localVariants, setLocalVariants] = useState<any[]>(variants);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,124 +57,138 @@ const VariantManager: React.FC<VariantManagerProps> = ({
     setLocalVariants(variants);
   }, [variants]);
 
-  const handleEditVariant = (variant: any) => {
- //   console.log('🔍 handleEditVariant - Editing variant:', variant);
-    setEditingVariant(variant);
-    setShowVariantEditDrawer(true);
-  };
-
-  const handleVariantEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!editingVariant || !parentProduct) {
-   //   console.error('❌ No variant or parent product selected for editing');
-      return;
+  const handleEditVariant = async (variant: any) => {
+    if (!parentProduct || !variant) return;
+    setIsLoading(true);
+    // دالة تطبيع الألوان المتداخلة
+    function deepParseColors(input: any): string[][] {
+      let arr = input;
+      for (let i = 0; i < 5; i++) {
+        if (typeof arr === 'string') {
+          try {
+            arr = JSON.parse(arr);
+          } catch {
+            break;
+          }
+        }
+      }
+      if (Array.isArray(arr) && Array.isArray(arr[0])) {
+        return arr.map((sub: any) =>
+          Array.isArray(sub)
+            ? sub.map((c: any) => (typeof c === 'string' ? c : ''))
+            : []
+        );
+      }
+      return [];
     }
-
     try {
-      setIsLoading(true);
-   //   console.log('🔍 handleVariantEditSubmit - Submitting variant edit:', editingVariant);
-      
-      // Prepare variant data for update
-      const variantData = {
-        nameAr: editingVariant.nameAr,
-        nameEn: editingVariant.nameEn,
-        descriptionAr: editingVariant.descriptionAr,
-        descriptionEn: editingVariant.descriptionEn,
-        price: editingVariant.price,
-        compareAtPrice: editingVariant.compareAtPrice,
-        costPrice: editingVariant.costPrice,
-        availableQuantity: editingVariant.availableQuantity,
-        barcodes: editingVariant.barcodes || [],
-        // Handle specifications properly - ensure it's a valid array
-        specifications: (() => {
-          // For variants, we typically don't need to send specifications array
-          // as the specificationValues contain the actual selected values
-          // So we'll send an empty array to avoid casting errors
-          return [];
-        })(),
-        specificationValues: (() => {
-          if (Array.isArray(editingVariant.specificationValues)) {
-            // Clean up the specificationValues to ensure proper format
-            return editingVariant.specificationValues
-              .filter((spec: any) => spec && spec.specificationId && spec.valueId && spec.value && spec.title)
-              .map((spec: any) => ({
-                specificationId: spec.specificationId,
-                valueId: spec.valueId,
-                value: spec.value,
-                title: spec.title
-                // Remove _id to avoid conflicts with MongoDB
-              }));
-          } else if (typeof editingVariant.specificationValues === 'string') {
+      const storeId = parentProduct.store?._id || parentProduct.storeId;
+      // استخدم الـ API الجديد لجلب بيانات المتغير
+      const res = await fetch(
+        `/api/products/${parentProduct._id}/variants/${variant._id}?storeId=${storeId}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && data.data) {
+          let freshVariant = data.data;
+          // تطبيع unit
+          freshVariant.unit = freshVariant.unit?._id || freshVariant.unit?.id || freshVariant.unit || '';
+          // تطبيع category
+          freshVariant.category = freshVariant.category?._id || freshVariant.category?.id || freshVariant.category || '';
+          // تطبيع productLabels
+          freshVariant.productLabels = Array.isArray(freshVariant.productLabels)
+            ? freshVariant.productLabels.map((l: any) => l._id || l.id || l)
+            : [];
+          // تطبيع specifications
+          freshVariant.specifications = Array.isArray(freshVariant.specifications)
+            ? freshVariant.specifications.map((s: any) => s._id || s.id || s)
+            : [];
+          // تطبيع الألوان
+          let parsedColors: string[][] = [];
+          if (Array.isArray(freshVariant.allColors) && freshVariant.allColors.length > 0) {
+            freshVariant.allColors.forEach((c: any) => {
+              const arr = deepParseColors(c);
+              if (arr.length > 0) parsedColors.push(...arr);
+            });
+          } else if (Array.isArray(freshVariant.colors) && freshVariant.colors.length > 0) {
+            freshVariant.colors.forEach((c: any) => {
+              const arr = deepParseColors(c);
+              if (arr.length > 0) parsedColors.push(...arr);
+            });
+          }
+          freshVariant.colors = parsedColors;
+          // تطبيع seo
+          if (typeof freshVariant.seo === 'string') {
             try {
-              const parsed = JSON.parse(editingVariant.specificationValues);
-              if (Array.isArray(parsed)) {
-                return parsed
-                  .filter((spec: any) => spec && spec.specificationId && spec.valueId && spec.value && spec.title)
-                  .map((spec: any) => ({
-                    specificationId: spec.specificationId,
-                    valueId: spec.valueId,
-                    value: spec.value,
-                    title: spec.title
-                    // Remove _id to avoid conflicts with MongoDB
-                  }));
-              }
-              return [];
+              freshVariant.seo = JSON.parse(freshVariant.seo);
             } catch {
-              return [];
+              freshVariant.seo = {};
             }
           }
-          return [];
-        })(),
-        mainImage: editingVariant.mainImage,
-        images: editingVariant.images || []
-      };
-
-      // Call the updateVariant API
-      await onUpdateVariant(parentProduct._id, editingVariant._id, variantData);
-      
-      // Update the local variants list
-      setLocalVariants(prev => 
-        prev.map(v => v._id === editingVariant._id ? { ...v, ...variantData } : v)
-      );
-      
-      // Close the drawer
-      setShowVariantEditDrawer(false);
-      setEditingVariant(null);
-      
-      // Show success message
-      if (isRTL) {
-        alert('تم تحديث المتغير بنجاح');
-      } else {
-        alert('Variant updated successfully');
+          setEditingVariant(freshVariant);
+          setShowVariantDrawer(true);
+          return;
+        }
       }
+      setEditingVariant(variant);
+      setShowVariantDrawer(true);
     } catch (error) {
-      //console.error('❌ handleVariantEditSubmit - Error:', error);
-      if (isRTL) {
-        alert('حدث خطأ أثناء تحديث المتغير');
-      } else {
-        alert('Error updating variant');
-      }
+      setEditingVariant(variant);
+      setShowVariantDrawer(true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVariantEditClose = () => {
-    setShowVariantEditDrawer(false);
+  const handleVariantDrawerClose = () => {
+    setShowVariantDrawer(false);
     setEditingVariant(null);
   };
 
-  const handleVariantEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleVariantFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (!editingVariant) return;
-    
     const { name, value } = e.target;
-    console.log('🔍 VariantManager - handleVariantEditFormChange:', { name, value, valueType: typeof value });
-    
     setEditingVariant((prev: any) => ({
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleVariantTagsChange = (tags: string[]) => {
+    setEditingVariant((prev: any) => ({
+      ...prev,
+      productLabels: tags
+    }));
+  };
+
+  const handleVariantImageChange = (images: any) => {
+    setEditingVariant((prev: any) => ({
+      ...prev,
+      images
+    }));
+  };
+
+  const handleVariantMainImageChange = (mainImage: any) => {
+    setEditingVariant((prev: any) => ({
+      ...prev,
+      mainImage
+    }));
+  };
+
+  const handleVariantSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingVariant || !parentProduct) return;
+    setIsLoading(true);
+    try {
+      await onUpdateVariant(parentProduct._id, editingVariant._id, editingVariant);
+      setShowVariantDrawer(false);
+      setEditingVariant(null);
+      // يمكنك عرض رسالة نجاح هنا إذا أردت
+    } catch (error) {
+      // يمكنك عرض رسالة خطأ هنا إذا أردت
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeleteVariant = async (variant: any) => {
@@ -175,10 +202,8 @@ const VariantManager: React.FC<VariantManagerProps> = ({
       if (!confirmed) return;
 
       await onDeleteVariant(variant);
-      
       // Update local variants list
       setLocalVariants(prev => prev.filter(v => v._id !== variant._id));
-      
       // Show success message
       if (isRTL) {
         alert('تم حذف المتغير بنجاح');
@@ -186,7 +211,6 @@ const VariantManager: React.FC<VariantManagerProps> = ({
         alert('Variant deleted successfully');
       }
     } catch (error) {
- //     console.error('❌ handleDeleteVariant - Error:', error);
       if (isRTL) {
         alert('حدث خطأ أثناء حذف المتغير');
       } else {
@@ -207,16 +231,23 @@ const VariantManager: React.FC<VariantManagerProps> = ({
         onAddVariant={onAddVariant}
         isRTL={isRTL}
       />
-      
-      <VariantEditDrawer
-        isOpen={showVariantEditDrawer}
-        onClose={handleVariantEditClose}
-        variant={editingVariant}
-        onFormChange={handleVariantEditFormChange}
-        onSubmit={handleVariantEditSubmit}
+      <ProductsDrawer
+        open={showVariantDrawer}
+        onClose={handleVariantDrawerClose}
         isRTL={isRTL}
-        isLoading={isLoading}
+        title={isRTL ? 'تعديل متغير' : 'Edit Variant'}
+        drawerMode="variant"
+        form={editingVariant}
+        onFormChange={handleVariantFormChange}
+        onTagsChange={handleVariantTagsChange}
+        onImageChange={handleVariantImageChange}
+        onMainImageChange={handleVariantMainImageChange}
+        onSubmit={handleVariantSubmit}
+        categories={categories}
+        tags={tags}
+        units={units}
         specifications={specifications}
+        // مرر أي props أخرى لازمة
       />
     </>
   );

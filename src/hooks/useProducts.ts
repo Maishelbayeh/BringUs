@@ -121,7 +121,7 @@ const useProducts = () => {
       isOnSale: form.isOnSale || false,
       salePercentage: parseFloat(form.salePercentage) || 0,
       category: form.categoryId || null,
-      unit: form.unitId && form.unitId !== '' ? form.unitId : null,
+      unit: form.unitId || null, // <-- use unitId from form
       images: Array.isArray(form.images) ? form.images : [],
       mainImage: form.mainImage || null,
       colors: Array.isArray(form.colors) 
@@ -197,6 +197,16 @@ const useProducts = () => {
               storeId: form.storeId || getStoreId(),
     };
 
+    // Remove unit if invalid
+    if (
+      payload.unit === null ||
+      payload.unit === undefined ||
+      payload.unit === '' ||
+      payload.unit === 'null'
+    ) {
+      delete payload.unit;
+    }
+
     //CONSOLE.log('🔍 Final payload barcodes:', payload.barcodes);
     //CONSOLE.log('🔍 Final payload barcodes type:', typeof payload.barcodes);
     //CONSOLE.log('🔍 Final payload barcodes is array:', Array.isArray(payload.barcodes));
@@ -241,12 +251,26 @@ const useProducts = () => {
       //CONSOLE.error('Response data:', err?.response?.data);
       
       // معالجة أخطاء التحقق من الـAPI
-      if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في البيانات');
+      if (err?.response?.data?.errors) {
+        const errors = err.response.data.errors;
+        if (Array.isArray(errors)) {
+          errors.forEach((error: any) => {
+            if (error.msg) showError(error.msg, 'خطأ في البيانات');
+            else if (typeof error === 'string') showError(error, 'خطأ في البيانات');
+          });
+        } else if (typeof errors === 'object') {
+          Object.values(errors).forEach((msg: any) => {
+            if (msg) showError(msg, 'خطأ في البيانات');
+          });
+        } else if (typeof errors === 'string') {
+          showError(errors, 'خطأ في البيانات');
+        }
+      } else if (err?.response?.data?.error) {
+        showError(err.response.data.error, 'خطأ في البيانات');
+      } else if (err?.response?.data?.message) {
+        showError(err.response.data.message, 'خطأ في البيانات');
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حفظ المنتج';
-        showError(errorMessage, 'خطأ في الحفظ');
+        showError('حدث خطأ غير متوقع', 'خطأ');
       }
       
       throw err;
@@ -266,12 +290,26 @@ const useProducts = () => {
       //CONSOLE.error('Error deleting product:', err);
       
       // معالجة أخطاء التحقق من الـAPI
-      if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في الحذف');
+      if (err?.response?.data?.errors) {
+        const errors = err.response.data.errors;
+        if (Array.isArray(errors)) {
+          errors.forEach((error: any) => {
+            if (error.msg) showError(error.msg, 'خطأ في الحذف');
+            else if (typeof error === 'string') showError(error, 'خطأ في الحذف');
+          });
+        } else if (typeof errors === 'object') {
+          Object.values(errors).forEach((msg: any) => {
+            if (msg) showError(msg, 'خطأ في الحذف');
+          });
+        } else if (typeof errors === 'string') {
+          showError(errors, 'خطأ في الحذف');
+        }
+      } else if (err?.response?.data?.error) {
+        showError(err.response.data.error, 'خطأ في الحذف');
+      } else if (err?.response?.data?.message) {
+        showError(err.response.data.message, 'خطأ في الحذف');
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حذف المنتج';
-        showError(errorMessage, 'خطأ في الحذف');
+        showError('حدث خطأ غير متوقع', 'خطأ');
       }
       
       throw err;
@@ -496,6 +534,53 @@ const useProducts = () => {
         delete variantData.specifications;
       }
 
+      // Ensure colors is an array of arrays of strings (no empty arrays or ["[]"])
+      if (Array.isArray(variantData.colors)) {
+        // If colors is array of objects with 'colors' property, convert to array of arrays of strings
+        if (variantData.colors[0] && typeof variantData.colors[0] === 'object' && Array.isArray(variantData.colors[0].colors)) {
+          variantData.colors = variantData.colors
+            .map((c: any) => Array.isArray(c.colors)
+              ? c.colors.filter((color: any) => typeof color === 'string' && color.trim() !== '' && color.trim() !== '[]')
+              : []
+            )
+            .filter((arr: string[]) => arr.length > 0);
+        } else {
+          variantData.colors = variantData.colors
+            .map((colorArr: any) =>
+              Array.isArray(colorArr)
+                ? colorArr.filter((color: any) => typeof color === 'string' && color.trim() !== '' && color.trim() !== '[]')
+                : (typeof colorArr === 'string' && colorArr.trim() !== '' && colorArr.trim() !== '[]')
+                  ? [colorArr]
+                  : []
+            )
+            .filter((arr: string[]) => Array.isArray(arr) && arr.length > 0);
+        }
+      }
+
+      // Clean up reference fields before sending
+      const cleanReference = (val: any) => {
+        if (!val) return val;
+        if (typeof val === 'object' && (val._id || val.id)) return val._id || val.id;
+        return val;
+      };
+      variantData.category = cleanReference(variantData.category);
+      // variantData.unit = cleanReference(variantData.unit);
+      variantData.store = cleanReference(variantData.store);
+      // --- FIX: Ensure productLabels is always an array of IDs ---
+      if (typeof variantData.productLabels === 'string') {
+        variantData.productLabels = variantData.productLabels.split(',').map((id: string) => id.trim());
+      }
+      if (Array.isArray(variantData.productLabels)) {
+        variantData.productLabels = variantData.productLabels.map(cleanReference);
+      }
+      // Remove variants field if present (should not be sent for variants)
+      if ('variants' in variantData) {
+        delete variantData.variants;
+      }
+
+      // Debug: print productLabels before FormData
+      console.log('🔍 productLabels before FormData (addVariant):', variantData.productLabels, Array.isArray(variantData.productLabels));
+
       const formData = new FormData();
       
       // Add all variant data to formData
@@ -525,12 +610,21 @@ const useProducts = () => {
         } else if (key === 'attributes') {
           // لا ترسل attributes إذا لم تكن مصفوفة غير فارغة
           // skip
+        } else if (key === 'colors' && Array.isArray(variantData[key])) {
+          formData.append('colors', JSON.stringify(variantData[key]));
         } else if (key === 'storeId') {
           // Only set ONCE, as a string, and do NOT append 'store'
-          formData.set('storeId', variantData[key] || storeId);
+          formData.set('storeId', variantData[key] || getStoreId());
         } else if (key === 'store') {
           // Do NOT append 'store' at all
           // skip
+        } else if (
+          typeof variantData[key] === 'object' &&
+          variantData[key] !== null &&
+          !Array.isArray(variantData[key])
+        ) {
+          // stringify any object (like seo, dimensions, etc.)
+          formData.append(key, JSON.stringify(variantData[key]));
         } else {
           formData.append(key, variantData[key]);
         }
@@ -552,6 +646,28 @@ const useProducts = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('❌ addVariant - API Error:', errorData);
+        // Show all validation errors
+        if (errorData?.errors) {
+          const errors = errorData.errors;
+          if (Array.isArray(errors)) {
+            errors.forEach((error: any) => {
+              if (error.msg) showError(error.msg, 'خطأ في البيانات');
+              else if (typeof error === 'string') showError(error, 'خطأ في البيانات');
+            });
+          } else if (typeof errors === 'object') {
+            Object.values(errors).forEach((msg: any) => {
+              if (msg) showError(msg, 'خطأ في البيانات');
+            });
+          } else if (typeof errors === 'string') {
+            showError(errors, 'خطأ في البيانات');
+          }
+        } else if (errorData?.error) {
+          showError(errorData.error, 'خطأ في البيانات');
+        } else if (errorData?.message) {
+          showError(errorData.message, 'خطأ في البيانات');
+        } else {
+          showError('حدث خطأ غير متوقع', 'خطأ');
+        }
         throw new Error(errorData.message || 'Failed to add variant');
       }
       
@@ -586,6 +702,28 @@ const useProducts = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('❌ deleteVariant - API Error:', errorData);
+        // Show all validation errors
+        if (errorData?.errors) {
+          const errors = errorData.errors;
+          if (Array.isArray(errors)) {
+            errors.forEach((error: any) => {
+              if (error.msg) showError(error.msg, 'خطأ في الحذف');
+              else if (typeof error === 'string') showError(error, 'خطأ في الحذف');
+            });
+          } else if (typeof errors === 'object') {
+            Object.values(errors).forEach((msg: any) => {
+              if (msg) showError(msg, 'خطأ في الحذف');
+            });
+          } else if (typeof errors === 'string') {
+            showError(errors, 'خطأ في الحذف');
+          }
+        } else if (errorData?.error) {
+          showError(errorData.error, 'خطأ في الحذف');
+        } else if (errorData?.message) {
+          showError(errorData.message, 'خطأ في الحذف');
+        } else {
+          showError('حدث خطأ غير متوقع', 'خطأ');
+        }
         throw new Error(errorData.message || 'Failed to delete variant');
       }
       
@@ -612,6 +750,53 @@ const useProducts = () => {
         delete variantData.specifications;
       }
 
+      // Ensure colors is an array of arrays of strings (no empty arrays or ["[]"])
+      if (Array.isArray(variantData.colors)) {
+        // If colors is array of objects with 'colors' property, convert to array of arrays of strings
+        if (variantData.colors[0] && typeof variantData.colors[0] === 'object' && Array.isArray(variantData.colors[0].colors)) {
+          variantData.colors = variantData.colors
+            .map((c: any) => Array.isArray(c.colors)
+              ? c.colors.filter((color: any) => typeof color === 'string' && color.trim() !== '' && color.trim() !== '[]')
+              : []
+            )
+            .filter((arr: string[]) => arr.length > 0);
+        } else {
+          variantData.colors = variantData.colors
+            .map((colorArr: any) =>
+              Array.isArray(colorArr)
+                ? colorArr.filter((color: any) => typeof color === 'string' && color.trim() !== '' && color.trim() !== '[]')
+                : (typeof colorArr === 'string' && colorArr.trim() !== '' && colorArr.trim() !== '[]')
+                  ? [colorArr]
+                  : []
+            )
+            .filter((arr: string[]) => Array.isArray(arr) && arr.length > 0);
+        }
+      }
+
+      // Clean up reference fields before sending
+      const cleanReference = (val: any) => {
+        if (!val) return val;
+        if (typeof val === 'object' && (val._id || val.id)) return val._id || val.id;
+        return val;
+      };
+      variantData.category = cleanReference(variantData.category);
+      variantData.unit = cleanReference(variantData.unit);
+      variantData.store = cleanReference(variantData.store);
+      // --- FIX: Ensure productLabels is always an array of IDs ---
+      if (typeof variantData.productLabels === 'string') {
+        variantData.productLabels = variantData.productLabels.split(',').map((id: string) => id.trim());
+      }
+      if (Array.isArray(variantData.productLabels)) {
+        variantData.productLabels = variantData.productLabels.map(cleanReference);
+      }
+      // Remove variants field if present (should not be sent for variants)
+      if ('variants' in variantData) {
+        delete variantData.variants;
+      }
+
+      // Debug: print productLabels before FormData
+      console.log('🔍 productLabels before FormData (updateVariant):', variantData.productLabels, Array.isArray(variantData.productLabels));
+
       const formData = new FormData();
       
       // Add all variant data to formData
@@ -635,6 +820,15 @@ const useProducts = () => {
         } else if (key === 'specificationValues' && Array.isArray(variantData[key])) {
           // Handle specification values array
           formData.append('specificationValues', JSON.stringify(variantData[key]));
+        } else if (key === 'colors' && Array.isArray(variantData[key])) {
+          formData.append('colors', JSON.stringify(variantData[key]));
+        } else if (
+          typeof variantData[key] === 'object' &&
+          variantData[key] !== null &&
+          !Array.isArray(variantData[key])
+        ) {
+          // stringify any object (like seo, dimensions, etc.)
+          formData.append(key, JSON.stringify(variantData[key]));
         } else {
           // Handle other fields
           formData.append(key, variantData[key]);
@@ -656,6 +850,28 @@ const useProducts = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('❌ updateVariant - API Error:', errorData);
+        // Show all validation errors
+        if (errorData?.errors) {
+          const errors = errorData.errors;
+          if (Array.isArray(errors)) {
+            errors.forEach((error: any) => {
+              if (error.msg) showError(error.msg, 'خطأ في البيانات');
+              else if (typeof error === 'string') showError(error, 'خطأ في البيانات');
+            });
+          } else if (typeof errors === 'object') {
+            Object.values(errors).forEach((msg: any) => {
+              if (msg) showError(msg, 'خطأ في البيانات');
+            });
+          } else if (typeof errors === 'string') {
+            showError(errors, 'خطأ في البيانات');
+          }
+        } else if (errorData?.error) {
+          showError(errorData.error, 'خطأ في البيانات');
+        } else if (errorData?.message) {
+          showError(errorData.message, 'خطأ في البيانات');
+        } else {
+          showError('حدث خطأ غير متوقع', 'خطأ');
+        }
         throw new Error(errorData.message || 'Failed to update variant');
       }
       
@@ -669,6 +885,23 @@ const useProducts = () => {
     } catch (error) {
       console.error('❌ updateVariant - Error:', error);
       throw error;
+    }
+  };
+
+  // Fetch variants for a product
+  const fetchProductVariants = async (productId: string, storeId: string): Promise<any[]> => {
+    try {
+      const response = await axios.get(`${BASE_URL}products/${productId}/variants`, {
+        params: { storeId },
+      });
+      if (response.data && response.data.success) {
+        return response.data.data || [];
+      }
+      return [];
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب متغيرات المنتج';
+      showError(errorMessage);
+      return [];
     }
   };
 
@@ -690,6 +923,7 @@ const useProducts = () => {
     addVariant,
     deleteVariant,
     updateVariant,
+    fetchProductVariants, // <-- Export the new function
   };
 };
 

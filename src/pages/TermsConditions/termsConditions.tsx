@@ -6,9 +6,10 @@ import 'react-quill/dist/quill.snow.css';
 import CustomButton from '../../components/common/CustomButton';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import { useTermsConditions } from '../../hooks/useTermsConditions';
+import { getStoreId } from '@/utils/storeUtils';
 
 // Mock store ID - replace with actual store ID from context
-const STORE_ID = '687505893fbf3098648bfe16';
+const STORE_ID =getStoreId();
 
 const initialHtml = `<h2>Terms & Conditions</h2><ul><li>All users must be 18+ years old.</li><li>Respect privacy and data policies.</li></ul>`;
 
@@ -58,7 +59,6 @@ const TermsConditionsPage = () => {
         await createTerms({
           title: 'Terms & Conditions',
           htmlContent: html,
-          language: i18n.language as 'en' | 'ar' | 'fr' | 'es',
           category: 'general',
         }, true); // تظهر toast للنجاح
       }
