@@ -48,6 +48,7 @@ const useProducts = () => {
       const res = await axios.get(url);
       //CONSOLE.log('FETCHED PRODUCTS FROM API:', res.data);
       
+      
       // Log barcodes for debugging
       const productsData = res.data.data || res.data;
       if (Array.isArray(productsData)) {
