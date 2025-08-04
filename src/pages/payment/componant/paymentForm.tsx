@@ -1,6 +1,6 @@
 // src/components/PaymentMethods/componant/PaymentForm.tsx
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { PaymentMethod, PaymentImage } from '../../../Types';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
 import CustomFileInput from '../../../components/common/CustomFileInput';
 import CustomSelect from '../../../components/common/CustomSelect';
@@ -94,7 +94,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
           descriptionEn: formData.descriptionEn || '',
           methodType: formData.methodType || 'other',
           isActive: formData.isActive !== undefined ? formData.isActive : true,
-          isDefault: method?.isDefault || false,
+          isDefault: formData.isDefault !== undefined ? formData.isDefault : false,
           logoUrl: method?.logoUrl,
           qrCode: formData.qrCode,
           paymentImages: formData.paymentImages || [],
@@ -175,7 +175,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
 
   // Validate form whenever formData changes
   useEffect(() => {
-    const isValid = validateForm();
+    validateForm();
   }, [formData, logoFile, qrCodeFile, paymentImageFiles]);
 
   // Initial validation when component mounts or method changes
@@ -361,6 +361,14 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
           name="isActive"
           checked={formData.isActive !== undefined ? formData.isActive : true}
           onChange={(e) => handleInputChange('isActive', e.target.checked)}
+        />
+
+        {/* Default Status */}
+        <CustomSwitch
+          label={t('paymentMethods.isDefault')}
+          name="isDefault"
+          checked={formData.isDefault !== undefined ? formData.isDefault : false}
+          onChange={(e) => handleInputChange('isDefault', e.target.checked)}
         />
 
         {/* QR Code Section */}

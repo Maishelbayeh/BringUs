@@ -16,29 +16,45 @@ interface Props {
 const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language, isEditMode }) => {
   const { t } = useTranslation();
   const formRef = useRef<PaymentFormRef>(null);
-  const [isFormValid, setIsFormValid] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
     if (open) {
-      // Reset validation state when drawer opens
+      // Reset validation and submission state when drawer opens
+      setIsSubmitting(false);
     }
   }, [open]);
   
   if (!open) return null;
   const isRTL = language === 'ARABIC';
   
-  const handleSave = () => {
-    if (formRef.current) {
-      try {
-        formRef.current.handleSubmit();
-      } catch (error) {
-        console.error('Error submitting payment form:', error);
-      }
+  const handleSave = async () => {
+    if (isSubmitting || !formRef.current) return;
+    
+    setIsSubmitting(true);
+    try {
+      formRef.current.handleSubmit();
+    } catch (error) {
+      console.error('Error submitting payment form:', error);
+      setIsSubmitting(false);
     }
   };
 
-  const handleValidationChange = (isValid: boolean) => {
-    setIsFormValid(isValid);
+  // Wrap onSave to reset submission state after success
+  const handleFormSubmit = async (method: PaymentMethod) => {
+    try {
+      await onSave(method);
+      setIsSubmitting(false);
+    } catch (error) {
+      setIsSubmitting(false);
+      throw error;
+    }
+  };
+
+  const handleClose = () => {
+    setIsSubmitting(false);
+    onClose();
   };
   
   return (
@@ -53,7 +69,7 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
             {isEditMode ? t('paymentMethods.editPaymentMethod') : t('paymentMethods.addPaymentMethod')}
           </span>
           <button 
-            onClick={onClose} 
+            onClick={handleClose} 
             className="text-primary hover:text-red-500 text-2xl"
             type="button"
           >
@@ -66,11 +82,10 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
           <PaymentForm 
             ref={formRef}
             method={method} 
-            onSubmit={onSave} 
-            onCancel={onClose} 
+            onSubmit={handleFormSubmit} 
+            onCancel={handleClose} 
             language={language} 
             isEditMode={isEditMode}
-            onValidationChange={handleValidationChange}
           />
         </div>
 
@@ -80,15 +95,18 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
             color="white"
             textColor="primary"
             text={t("paymentMethods.cancel")}
-            action={onClose}
+            action={handleClose}
             bordercolor="primary"
           />
           <CustomButton
             color="primary"
             textColor="white"
-            text={isEditMode ? t("paymentMethods.edit") : t("paymentMethods.save")}
+            text={isSubmitting 
+              ? t("general.saving") 
+              : isEditMode ? t("paymentMethods.update") : t("paymentMethods.save")
+            }
             action={handleSave}
-            disabled={!isFormValid}
+            disabled={isSubmitting}
           />
         </div>
       </div>

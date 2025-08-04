@@ -80,7 +80,7 @@ export const usePaymentMethods = () => {
     itemsPerPage: 10
   });
 
-  const { getToken, getCurrentUser } = useAuth();
+  const { getToken } = useAuth();
   const { showSuccess, showError } = useToast();
 
   // Get all payment methods
@@ -203,7 +203,7 @@ export const usePaymentMethods = () => {
         });
       }
 
-      const response = await fetch(`${BASE_URL}payment-methods`, {
+      const response = await fetch(`${BASE_URL}payment-methods/with-files`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -271,7 +271,7 @@ export const usePaymentMethods = () => {
         });
       }
 
-      const response = await fetch(`${BASE_URL}payment-methods/${id}`, {
+      const response = await fetch(`${BASE_URL}payment-methods/${id}/with-files`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -604,7 +604,8 @@ export const usePaymentMethods = () => {
   // Load payment methods on mount
   useEffect(() => {
     fetchPaymentMethods();
-  }, [fetchPaymentMethods]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array to run only once on mount
 
   return {
     paymentMethods,

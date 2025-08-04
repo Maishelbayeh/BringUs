@@ -117,12 +117,12 @@ export const validatePaymentForm = (
       errors.qrCode = t('validation.qrCodeRequired', 'QR Code URL or data is required when QR code is enabled');
     }
     
-    if (data.qrCode.qrCodeUrl && data.qrCode.qrCodeUrl.trim()) {
-      const urlRegex = /^https?:\/\/.+\.(jpg|jpeg|png|gif|svg|webp)$/i;
-      if (!urlRegex.test(data.qrCode.qrCodeUrl.trim())) {
-        errors.qrCode = t('validation.invalidQrCodeUrl', 'Please enter a valid QR code image URL');
-      }
-    }
+    // if (data.qrCode.qrCodeUrl && data.qrCode.qrCodeUrl.trim()) {
+    //   const urlRegex = /^https?:\/\/.+\.(jpg|jpeg|png|gif|svg|webp)$/i;
+    //   if (!urlRegex.test(data.qrCode.qrCodeUrl.trim())) {
+    //     errors.qrCode = t('validation.invalidQrCodeUrl', 'Please enter a valid QR code image URL');
+    //   }
+    // }
   }
 
   // Validate Payment Images

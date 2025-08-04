@@ -26,9 +26,6 @@ const PaymentMethods: React.FC = () => {
     paymentMethods,
     loading,
     error,
-    pagination,
-    createPaymentMethod,
-    updatePaymentMethod,
     createPaymentMethodWithFiles,
     updatePaymentMethodWithFiles,
     deletePaymentMethod,
@@ -98,11 +95,35 @@ const PaymentMethods: React.FC = () => {
       altText: string;
     }>;
   }) => {
-    if (current) {
-      // Update existing method with files
-      const methodId = current._id || current.id?.toString();
-      if (methodId) {
-        await updatePaymentMethodWithFiles(methodId, {
+    try {
+      if (current) {
+        // Update existing method with files
+        const methodId = current._id || current.id?.toString();
+        if (methodId) {
+          const result = await updatePaymentMethodWithFiles(methodId, {
+            titleAr: method.titleAr,
+            titleEn: method.titleEn,
+            descriptionAr: method.descriptionAr,
+            descriptionEn: method.descriptionEn,
+            methodType: method.methodType,
+            isActive: method.isActive,
+            isDefault: method.isDefault,
+            logoUrl: method.logoUrl,
+            qrCode: method.qrCode,
+            paymentImages: method.paymentImages,
+            // Add file data from form
+            logoFile: method.logoFile,
+            qrCodeFile: method.qrCodeFile,
+            paymentImageFiles: method.paymentImageFiles,
+          });
+          
+          if (result) {
+            closeDrawer();
+          }
+        }
+      } else {
+        // Create new method with files
+        const result = await createPaymentMethodWithFiles({
           titleAr: method.titleAr,
           titleEn: method.titleEn,
           descriptionAr: method.descriptionAr,
@@ -118,27 +139,14 @@ const PaymentMethods: React.FC = () => {
           qrCodeFile: method.qrCodeFile,
           paymentImageFiles: method.paymentImageFiles,
         });
+        
+        if (result) {
+          closeDrawer();
+        }
       }
-    } else {
-      // Create new method with files
-      await createPaymentMethodWithFiles({
-        titleAr: method.titleAr,
-        titleEn: method.titleEn,
-        descriptionAr: method.descriptionAr,
-        descriptionEn: method.descriptionEn,
-        methodType: method.methodType,
-        isActive: method.isActive,
-        isDefault: method.isDefault,
-        logoUrl: method.logoUrl,
-        qrCode: method.qrCode,
-        paymentImages: method.paymentImages,
-        // Add file data from form
-        logoFile: method.logoFile,
-        qrCodeFile: method.qrCodeFile,
-        paymentImageFiles: method.paymentImageFiles,
-      });
+    } catch (error) {
+      console.error('Error saving payment method:', error);
     }
-    closeDrawer();
   };
 
   if (loading) {
