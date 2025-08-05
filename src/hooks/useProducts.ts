@@ -148,51 +148,103 @@ const useProducts = () => {
       productLabels: form.tags || [],
       attributes: form.attributes || [],
       specifications: (() => {
-        // معالجة المواصفات المختارة
+        console.log('🔍 saveProduct - form.selectedSpecifications:', form.selectedSpecifications);
+        console.log('🔍 saveProduct - form.specifications:', form.specifications);
+        
+        // أولاً: محاولة استخدام specifications الموجودة في form
+        if (form.specifications && Array.isArray(form.specifications)) {
+          console.log('🔍 saveProduct - Using existing form.specifications:', form.specifications);
+          return form.specifications;
+        }
+        
+        // ثانياً: معالجة المواصفات المختارة من selectedSpecifications
         if (form.selectedSpecifications) {
           try {
             const parsed = JSON.parse(form.selectedSpecifications);
+            console.log('🔍 saveProduct - Parsed selectedSpecifications:', parsed);
             if (Array.isArray(parsed)) {
               // استخراج IDs المواصفات فقط (بدون القيم)
               const specificationIds = [...new Set(parsed.map((spec: any) => spec._id.split('_')[0]))];
-              //CONSOLE.log('Specification IDs:', specificationIds);
+              console.log('🔍 saveProduct - Specification IDs from selectedSpecifications:', specificationIds);
               return specificationIds;
             }
           } catch (error) {
-            //CONSOLE.error('Error parsing selectedSpecifications:', error);
+            console.error('🔍 saveProduct - Error parsing selectedSpecifications:', error);
           }
         }
-        // إذا كانت المواصفات موجودة في form.productSpecifications
+        
+        // ثالثاً: إذا كانت المواصفات موجودة في form.productSpecifications
         if (form.productSpecifications && Array.isArray(form.productSpecifications)) {
+          console.log('🔍 saveProduct - Using productSpecifications:', form.productSpecifications);
           return form.productSpecifications;
         }
+        
+        console.log('🔍 saveProduct - No specifications found, returning empty array');
         return [];
       })(),
       specificationValues: (() => {
-        // معالجة قيم المواصفات المختارة
+        console.log('🔍 saveProduct - form.specificationValues:', form.specificationValues);
+        console.log('🔍 saveProduct - Processing specificationValues from selectedSpecifications:', form.selectedSpecifications);
+        
+        // أولاً: محاولة استخدام specificationValues الموجودة في form
+        if (form.specificationValues && Array.isArray(form.specificationValues)) {
+          console.log('🔍 saveProduct - Using existing form.specificationValues:', form.specificationValues);
+          // Ensure each specification value has the required title field
+          return form.specificationValues.map((spec: any) => {
+            if (!spec.title && spec.specificationId) {
+              // If title is missing, we need to fetch it or provide a default
+              // For now, we'll use the specificationId as title if missing
+              return {
+                ...spec,
+                title: spec.title || `Specification ${spec.specificationId}`
+              };
+            }
+            return spec;
+          });
+        }
+        
+        // ثانياً: معالجة قيم المواصفات المختارة من selectedSpecifications
         if (form.selectedSpecifications) {
           try {
             const parsed = JSON.parse(form.selectedSpecifications);
+            console.log('🔍 saveProduct - Parsed for specificationValues:', parsed);
             if (Array.isArray(parsed)) {
               // تحويل المواصفات إلى التنسيق المطلوب للـ API
               const formattedSpecs = parsed.map((spec: any) => {
                 const specificationId = spec._id.split('_')[0]; // أخذ ID المواصفة الأساسي
                 const valueIndex = spec._id.split('_')[1]; // أخذ index القيمة
                 
+                // Ensure we have a proper title - use the spec title if available, otherwise use a fallback
+                let title = spec.title;
+                if (!title && spec.specificationTitle) {
+                  title = spec.specificationTitle;
+                }
+                if (!title && spec.titleAr) {
+                  title = spec.titleAr;
+                }
+                if (!title && spec.titleEn) {
+                  title = spec.titleEn;
+                }
+                if (!title) {
+                  title = `Specification ${specificationId}`;
+                }
+                
                 return {
                   specificationId: specificationId,
                   valueId: spec._id,
                   value: spec.value, // القيمة المختارة (مثل: "أحمر"، "كبير")
-                  title: spec.title  // عنوان المواصفة (مثل: "اللون"، "الحجم")
+                  title: title  // عنوان المواصفة (مثل: "اللون"، "الحجم")
                 };
               });
-              //CONSOLE.log('Specification values:', formattedSpecs);
+              console.log('🔍 saveProduct - Formatted specification values from selectedSpecifications:', formattedSpecs);
               return formattedSpecs;
             }
           } catch (error) {
-            //CONSOLE.error('Error parsing selectedSpecifications:', error);
+            console.error('🔍 saveProduct - Error parsing selectedSpecifications for values:', error);
           }
         }
+        
+        console.log('🔍 saveProduct - No specification values found, returning empty array');
         return [];
       })(),
               storeId: form.storeId || getStoreId(),
@@ -212,7 +264,13 @@ const useProducts = () => {
     //CONSOLE.log('🔍 Final payload barcodes type:', typeof payload.barcodes);
     //CONSOLE.log('🔍 Final payload barcodes is array:', Array.isArray(payload.barcodes));
 
-                //CONSOLE.log('Final payload to send:', payload);
+                    console.log('🔍 saveProduct - Final payload specifications:', payload.specifications);
+    console.log('🔍 saveProduct - Final payload specificationValues:', payload.specificationValues);
+    console.log('🔍 saveProduct - Final payload specifications type:', typeof payload.specifications);
+    console.log('🔍 saveProduct - Final payload specificationValues type:', typeof payload.specificationValues);
+    console.log('🔍 saveProduct - Final payload specifications is array:', Array.isArray(payload.specifications));
+    console.log('🔍 saveProduct - Final payload specificationValues is array:', Array.isArray(payload.specificationValues));
+    //CONSOLE.log('Final payload to send:', payload);
       //CONSOLE.log('Barcodes in payload:', payload.barcodes);
       //CONSOLE.log('Barcodes type:', typeof payload.barcodes);
       //CONSOLE.log('Barcodes is array:', Array.isArray(payload.barcodes));
@@ -221,12 +279,12 @@ const useProducts = () => {
           //CONSOLE.log('Specifications type:', typeof payload.specifications);
           //CONSOLE.log('Specifications is array:', Array.isArray(payload.specifications));
           //CONSOLE.log('Specification values in payload:', payload.specificationValues);
-          //CONSOLE.log('Specification values type:', typeof payload.specificationValues);
-          //CONSOLE.log('Specification values is array:', Array.isArray(payload.specificationValues));
-          //CONSOLE.log('Images in payload:', payload.images);
-          //CONSOLE.log('Main image in payload:', payload.mainImage);
-          //CONSOLE.log('Main image type:', typeof payload.mainImage);
-          //CONSOLE.log('Main image === null:', payload.mainImage === null);
+      //CONSOLE.log('Specification values type:', typeof payload.specificationValues);
+      //CONSOLE.log('Specification values is array:', Array.isArray(payload.specificationValues));
+      //CONSOLE.log('Images in payload:', payload.images);
+      //CONSOLE.log('Main image in payload:', payload.mainImage);
+      //CONSOLE.log('Main image type:', typeof payload.mainImage);
+      //CONSOLE.log('Main image === null:', payload.mainImage === null);
 
       //CONSOLE.log('Store field in payload:', payload.store);
     try {
@@ -234,7 +292,7 @@ const useProducts = () => {
         //CONSOLE.log('🔍 Updating product with ID:', editId);
         //CONSOLE.log('🔍 Update URL:', `${BASE_URL}meta/products/${editId}`);
         const response = await axios.put(`${BASE_URL}meta/products/${editId}`, payload);
-        //CONSOLE.log('Product updated successfully:', response.data);
+        console.log('Product updated successfully:', payload);
         showSuccess('تم تعديل المنتج بنجاح', 'نجح التحديث');
       } else {
         //CONSOLE.log('🔍 Creating new product');
@@ -581,6 +639,7 @@ const useProducts = () => {
 
       // Debug: print productLabels before FormData
       console.log('🔍 productLabels before FormData (addVariant):', variantData.productLabels, Array.isArray(variantData.productLabels));
+      console.log('🔍 allColors before FormData (addVariant):', variantData.allColors, Array.isArray(variantData.allColors));
 
       const formData = new FormData();
       
@@ -599,7 +658,32 @@ const useProducts = () => {
             formData.append('specifications', JSON.stringify(variantData[key]));
           }
         } else if (key === 'specificationValues' && Array.isArray(variantData[key])) {
-          formData.append('specificationValues', JSON.stringify(variantData[key]));
+          // Handle specification values array - ensure title field is present
+          const processedSpecValues = variantData[key].map((spec: any) => {
+            if (!spec.title && spec.specificationId) {
+              // Ensure we have a proper title - use the spec title if available, otherwise use a fallback
+              let title = spec.title;
+              if (!title && spec.specificationTitle) {
+                title = spec.specificationTitle;
+              }
+              if (!title && spec.titleAr) {
+                title = spec.titleAr;
+              }
+              if (!title && spec.titleEn) {
+                title = spec.titleEn;
+              }
+              if (!title) {
+                title = `Specification ${spec.specificationId}`;
+              }
+              
+              return {
+                ...spec,
+                title: title
+              };
+            }
+            return spec;
+          });
+          formData.append('specificationValues', JSON.stringify(processedSpecValues));
         } else if (key === 'productLabels' && Array.isArray(variantData[key])) {
           variantData[key].forEach((label: any) => {
             formData.append('productLabels', typeof label === 'object' ? label._id || label.id : label);
@@ -612,7 +696,20 @@ const useProducts = () => {
           // لا ترسل attributes إذا لم تكن مصفوفة غير فارغة
           // skip
         } else if (key === 'colors' && Array.isArray(variantData[key])) {
-          formData.append('colors', JSON.stringify(variantData[key]));
+          // Check if colors is already a JSON string to avoid double stringification
+          const colorsValue = variantData[key];
+          if (colorsValue.length > 0 && typeof colorsValue[0] === 'string' && colorsValue[0].startsWith('[')) {
+            // Already a JSON string, don't stringify again
+            formData.append('colors', colorsValue[0]);
+          } else {
+            // Normal array, stringify it
+            formData.append('colors', JSON.stringify(variantData[key]));
+          }
+        } else if (key === 'allColors' && Array.isArray(variantData[key])) {
+          // Handle allColors array - send each color separately
+          variantData[key].forEach((color: any) => {
+            formData.append('allColors', color);
+          });
         } else if (key === 'storeId') {
           // Only set ONCE, as a string, and do NOT append 'store'
           formData.set('storeId', variantData[key] || getStoreId());
@@ -675,6 +772,9 @@ const useProducts = () => {
       const data = await response.json();
       console.log('✅ addVariant - Variant added successfully:', data);
       
+      // Show success toast
+      showSuccess('تم إضافة المتغير بنجاح', 'نجح الإضافة');
+      
       // Refresh products list
       await fetchProducts(true);
       
@@ -730,6 +830,9 @@ const useProducts = () => {
       
       const data = await response.json();
       console.log('✅ deleteVariant - Variant deleted successfully:', data);
+      
+      // Show success toast
+      showSuccess('تم حذف المتغير بنجاح', 'نجح الحذف');
       
       // Refresh products list
       await fetchProducts(true);
@@ -797,6 +900,11 @@ const useProducts = () => {
 
       // Debug: print productLabels before FormData
       console.log('🔍 productLabels before FormData (updateVariant):', variantData.productLabels, Array.isArray(variantData.productLabels));
+      console.log('🔍 allColors before FormData (updateVariant):', variantData.allColors, Array.isArray(variantData.allColors));
+      console.log('🔍 specifications before FormData (updateVariant):', variantData.specifications, Array.isArray(variantData.specifications));
+      console.log('🔍 specificationValues before FormData (updateVariant):', variantData.specificationValues, Array.isArray(variantData.specificationValues));
+      console.log('🔍 selectedSpecifications before FormData (updateVariant):', variantData.selectedSpecifications);
+      console.log('🔍 Full variantData before FormData:', variantData);
 
       const formData = new FormData();
       
@@ -819,10 +927,59 @@ const useProducts = () => {
             formData.append('specifications', JSON.stringify(variantData[key]));
           }
         } else if (key === 'specificationValues' && Array.isArray(variantData[key])) {
-          // Handle specification values array
-          formData.append('specificationValues', JSON.stringify(variantData[key]));
+          // Handle specification values array - ensure title field is present
+          const processedSpecValues = variantData[key].map((spec: any) => {
+            if (!spec.title && spec.specificationId) {
+              // Ensure we have a proper title - use the spec title if available, otherwise use a fallback
+              let title = spec.title;
+              if (!title && spec.specificationTitle) {
+                title = spec.specificationTitle;
+              }
+              if (!title && spec.titleAr) {
+                title = spec.titleAr;
+              }
+              if (!title && spec.titleEn) {
+                title = spec.titleEn;
+              }
+              if (!title) {
+                title = `Specification ${spec.specificationId}`;
+              }
+              
+              return {
+                ...spec,
+                title: title
+              };
+            }
+            return spec;
+          });
+          formData.append('specificationValues', JSON.stringify(processedSpecValues));
+        } else if (key === 'selectedSpecifications') {
+          // Handle selectedSpecifications
+          if (Array.isArray(variantData[key])) {
+            formData.append('selectedSpecifications', JSON.stringify(variantData[key]));
+          } else if (typeof variantData[key] === 'string') {
+            formData.append('selectedSpecifications', variantData[key]);
+          }
+        } else if (key === 'productLabels' && Array.isArray(variantData[key])) {
+          // Handle productLabels array - send each label separately like in addVariant
+          variantData[key].forEach((label: any) => {
+            formData.append('productLabels', typeof label === 'object' ? label._id || label.id : label);
+          });
         } else if (key === 'colors' && Array.isArray(variantData[key])) {
-          formData.append('colors', JSON.stringify(variantData[key]));
+          // Check if colors is already a JSON string to avoid double stringification
+          const colorsValue = variantData[key];
+          if (colorsValue.length > 0 && typeof colorsValue[0] === 'string' && colorsValue[0].startsWith('[')) {
+            // Already a JSON string, don't stringify again
+            formData.append('colors', colorsValue[0]);
+          } else {
+            // Normal array, stringify it
+            formData.append('colors', JSON.stringify(variantData[key]));
+          }
+        } else if (key === 'allColors' && Array.isArray(variantData[key])) {
+          // Handle allColors array - send each color separately
+          variantData[key].forEach((color: any) => {
+            formData.append('allColors', color);
+          });
         } else if (
           typeof variantData[key] === 'object' &&
           variantData[key] !== null &&
@@ -842,6 +999,17 @@ const useProducts = () => {
         throw new Error('Store ID not found');
       }
       formData.append('storeId', storeId);
+
+      // Debug: print FormData contents
+      console.log('🔍 FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`🔍 ${key}:`, value);
+      }
+      
+      // Debug: check specific fields in FormData
+      console.log('🔍 FormData specifications:', formData.get('specifications'));
+      console.log('🔍 FormData specificationValues:', formData.get('specificationValues'));
+      console.log('🔍 FormData selectedSpecifications:', formData.get('selectedSpecifications'));
       
       const response = await fetch(`${BASE_URL}products/${productId}/variants/${variantId}`, {
         method: 'PUT',
@@ -878,6 +1046,9 @@ const useProducts = () => {
       
       const data = await response.json();
       console.log('✅ updateVariant - Variant updated successfully:', data);
+      
+      // Show success toast
+      showSuccess('تم تحديث المتغير بنجاح', 'نجح التحديث');
       
       // Refresh products list
       await fetchProducts(true);

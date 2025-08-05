@@ -42,13 +42,35 @@ const VariantManager: React.FC<VariantManagerProps> = ({
   const [localVariants, setLocalVariants] = useState<any[]>(variants);
   const [isLoading, setIsLoading] = useState(false);
 
+  // دالة لإعادة تحميل المتغيرات من API
+  const refreshVariants = async () => {
+    if (!parentProduct) return;
+    
+    console.log('🔍 VariantManager - Refreshing variants for product:', parentProduct._id);
+    
+    try {
+      const storeId = parentProduct.store?._id || parentProduct.storeId;
+      const res = await fetch(`/api/products/${parentProduct._id}/variants?storeId=${storeId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && data.data) {
+          console.log('🔍 VariantManager - Refreshed variants:', data.data);
+          setLocalVariants(data.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing variants:', error);
+    }
+  };
+
   // استخدام hook لجلب مواصفات المنتجات
   const { specifications, fetchSpecifications } = useProductSpecifications();
 
-  // جلب المواصفات عند فتح المكون
+  // جلب المواصفات والمتغيرات عند فتح المكون
   React.useEffect(() => {
     if (isOpen) {
       fetchSpecifications();
+      refreshVariants(); // إعادة تحميل المتغيرات عند فتح الـ popup
     }
   }, [isOpen, fetchSpecifications]);
 
@@ -180,12 +202,33 @@ const VariantManager: React.FC<VariantManagerProps> = ({
     if (!editingVariant || !parentProduct) return;
     setIsLoading(true);
     try {
-      await onUpdateVariant(parentProduct._id, editingVariant._id, editingVariant);
+      console.log('🔍 VariantManager - Updating variant:', editingVariant._id);
+      
+      // تحديث المتغير
+      const updatedVariant = await onUpdateVariant(parentProduct._id, editingVariant._id, editingVariant);
+      
+      console.log('🔍 VariantManager - Variant updated successfully:', updatedVariant);
+      
+      // إعادة تحميل المتغيرات من API للتأكد من تحديث البيانات
+      await refreshVariants();
+      
       setShowVariantDrawer(false);
       setEditingVariant(null);
-      // يمكنك عرض رسالة نجاح هنا إذا أردت
+      
+      // عرض رسالة نجاح
+      if (isRTL) {
+        alert('تم تحديث المتغير بنجاح');
+      } else {
+        alert('Variant updated successfully');
+      }
     } catch (error) {
-      // يمكنك عرض رسالة خطأ هنا إذا أردت
+      console.error('Error updating variant:', error);
+      // عرض رسالة خطأ
+      if (isRTL) {
+        alert('حدث خطأ أثناء تحديث المتغير');
+      } else {
+        alert('Error updating variant');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -202,8 +245,8 @@ const VariantManager: React.FC<VariantManagerProps> = ({
       if (!confirmed) return;
 
       await onDeleteVariant(variant);
-      // Update local variants list
-      setLocalVariants(prev => prev.filter(v => v._id !== variant._id));
+      // إعادة تحميل المتغيرات من API بعد الحذف
+      await refreshVariants();
       // Show success message
       if (isRTL) {
         alert('تم حذف المتغير بنجاح');
@@ -230,6 +273,7 @@ const VariantManager: React.FC<VariantManagerProps> = ({
         onDeleteVariant={handleDeleteVariant}
         onAddVariant={onAddVariant}
         isRTL={isRTL}
+        isLoading={isLoading}
       />
       <ProductsDrawer
         open={showVariantDrawer}

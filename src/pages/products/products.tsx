@@ -337,8 +337,12 @@ const ProductsPage: React.FC = () => {
         // أولاً نتحقق من قيم المواصفات المختارة (الحقل الجديد)
         if (product.specificationValues && Array.isArray(product.specificationValues) && product.specificationValues.length > 0) {
           return product.specificationValues.map((spec: any) => {
-            if (typeof spec === 'object' && spec.value && spec.title) {
-              return `${spec.title}: ${spec.value}`;
+            // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
+            const specData = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec.specificationId) : null;
+            const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec.specificationId}`);
+            
+            if (typeof spec === 'object' && spec.value) {
+              return `${title}: ${spec.value}`;
             }
             return spec;
           }).join(', ');

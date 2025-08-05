@@ -10,6 +10,7 @@ interface VariantsPopupProps {
   onDeleteVariant: (variant: any) => void;
   onAddVariant: () => void;
   isRTL: boolean;
+  isLoading?: boolean;
 }
 
 const VariantsPopup: React.FC<VariantsPopupProps> = ({
@@ -20,7 +21,8 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
   onEditVariant,
   onDeleteVariant,
   onAddVariant,
-  isRTL
+  isRTL,
+  isLoading = false
 }) => {
   if (!isOpen) return null;
 
@@ -51,7 +53,14 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
 
         {/* Content */}
         <div className="p-6">
-          {variants.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">
+                {isRTL ? 'جاري تحميل المتغيرات...' : 'Loading variants...'}
+              </p>
+            </div>
+          ) : variants.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 text-6xl mb-4">📦</div>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">

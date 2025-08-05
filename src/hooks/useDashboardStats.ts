@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
 import { getStoreId } from '../utils/storeUtils';
+import { getAuthHeaders } from '../utils/apiUtils';
 
 interface DashboardStats {
   totalOrders: number;
@@ -65,9 +66,9 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
         customersRes,
         categoriesRes
       ] = await Promise.all([
-        axios.get(`${BASE_URL}meta/products`),
-        axios.get(`${BASE_URL}stores/${storeId}/customers`),
-        axios.get(`${BASE_URL}categories/store/${storeId}`)
+        axios.get(`${BASE_URL}meta/products`, { headers: getAuthHeaders() }),
+        axios.get(`${BASE_URL}stores/${storeId}/customers`, { headers: getAuthHeaders() }),
+        axios.get(`${BASE_URL}categories/store/${storeId}`, { headers: getAuthHeaders() })
       ]);
 
       const products = productsRes.data.data || productsRes.data || [];
