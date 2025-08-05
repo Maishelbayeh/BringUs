@@ -6,6 +6,8 @@ import CustomInput from '../../../components/common/CustomInput';
 import { useTranslation } from 'react-i18next';
 import { useValidation } from '../../../hooks/useValidation';
 import { deliveryValidationSchema, DeliveryFormData } from '../../../validation/deliveryValidation';
+import { useStore } from '../../../hooks/useStore';
+import { getStoreId } from '../../../utils/storeUtils';
 
 interface Props {
   area: DeliveryArea | null;
@@ -20,11 +22,14 @@ export interface FormRef {
 }
 
 const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel, language, onValidationChange }, ref) => {
+  const { t } = useTranslation();
+  const { getStore } = useStore();
+  const [storeWhatsappNumber, setStoreWhatsappNumber] = useState('');
+  
   const [locationAr, setLocationAr] = useState(area?.locationAr || '');
   const [locationEn, setLocationEn] = useState(area?.locationEn || '');
   const [price, setPrice] = useState(area?.price !== undefined ? area.price.toString() : '');
   const [whatsappNumber, setWhatsappNumber] = useState(area?.whatsappNumber || '');
-  const { t } = useTranslation();
 
   // استخدام النظام الجديد للفالديشين
   const {
@@ -37,14 +42,37 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel,
     onValidationChange,
   });
 
+  // جلب رقم الواتساب للمتجر عند تحميل المكون
+  useEffect(() => {
+    const fetchStoreWhatsapp = async () => {
+      try {
+        const storeId = getStoreId();
+        if (storeId) {
+          const storeData = await getStore(storeId);
+          if (storeData?.whatsappNumber) {
+            setStoreWhatsappNumber(storeData.whatsappNumber);
+            // إذا لم يكن هناك رقم واتساب محدد، استخدم رقم المتجر كافتراضي
+            if (!area?.whatsappNumber) {
+              setWhatsappNumber(storeData.whatsappNumber);
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to fetch store whatsapp number:', error);
+      }
+    };
+    
+    fetchStoreWhatsapp();
+  }, [getStore, area?.whatsappNumber]);
+
   useEffect(() => {
     setLocationAr(area?.locationAr || '');
     setLocationEn(area?.locationEn || '');
     setPrice(area?.price !== undefined ? area.price.toString() : '');
-    setWhatsappNumber(area?.whatsappNumber || '');
+    setWhatsappNumber(area?.whatsappNumber || storeWhatsappNumber);
     // مسح الأخطاء عند تحديث البيانات
     // clearAllErrors(); // سيتم مسح الأخطاء تلقائياً مع التحديث
-  }, [area]);
+  }, [area, storeWhatsappNumber]);
 
   const validateForm = () => {
     const formData: DeliveryFormData = {

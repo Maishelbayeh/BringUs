@@ -233,10 +233,7 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, valu
               setCurrentColors([]);
             }} />
             <div className="bg-white rounded-2xl shadow-2xl p-6 z-10 flex flex-col gap-4">
-              {/* Debug info */}
-              <div className="text-xs text-gray-500 mb-2">
-                Debug: currentColors = {JSON.stringify(currentColors)} ({currentColors.length} colors)
-              </div>
+             
               <div className="flex flex-wrap gap-2 mb-2">
                 {currentColors.map((color, idx) => (
                   <div key={idx} className="relative group">

@@ -54,12 +54,12 @@ export const getMenuAsText = (): MenuItem[] => [
     icon: DocumentDuplicateIcon,
     path: '/products',
     children: [
-      {
-        id: 31,
-        title: 'sideBar.productVariants',
-        icon: Squares2X2Icon,
-        path: '/product-variants',
-      },
+      // {
+      //   id: 31,
+      //   title: 'sideBar.productVariants',
+      //   icon: Squares2X2Icon,
+      //   path: '/product-variants',
+      // },
       {
         id: 32,
         title: 'sideBar.productSpecifications',

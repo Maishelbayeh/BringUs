@@ -177,6 +177,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             <CustomSelect
               label={t('affiliation.paymentMethod') || 'طريقة الدفع'}
               value={form.paymentMethod || 'bank_transfer'}
+              
               onChange={(e) => handleFormChange('paymentMethod', e.target.value)}
               options={paymentMethods}
             />

@@ -257,9 +257,11 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
         {/* Payment Method */}
         <CustomSelect
           label={t('affiliation.paymentMethod') || 'Payment Method'}
+          name="settings.paymentMethod"
           value={form.settings?.paymentMethod || 'bank_transfer'}
           onChange={onFormChange}
           error={errors['settings.paymentMethod']}
+          searchable={true}
           options={[
             { value: 'bank_transfer', label: t('affiliation.bankTransfer') || 'Bank Transfer' },
             { value: 'cash', label: t('affiliation.cash') || 'Cash' },

@@ -41,7 +41,7 @@ const useProducts = () => {
       return products;
     }
 
-    
+
     try {
       setLoading(true);
       setHasError(false); // إعادة تعيين حالة الخطأ عند بدء محاولة جديدة

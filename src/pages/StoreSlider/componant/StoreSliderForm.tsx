@@ -52,7 +52,7 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
         label={isRTL ? 'الوصف' : 'Description'}
         name="description"
         value={safeForm.description}
-        placeholder={isRTL ? 'ادخل الوصف' : 'Enter description'}
+        placeholder={isRTL ? 'ادخل الوصف (اختياري)' : 'Enter description (optional)'}
         rows={3}
         onChange={onFormChange}
         error={errors.description}
@@ -100,7 +100,7 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
       <CustomSwitch
         label={isRTL ? 'مفعل' : 'Active'}
         name="isActive"
-        isRTL={isRTL}
+        
         checked={safeForm.isActive}
         onChange={(e) => {
           onFormChange({ target: { name: 'isActive', value: e.target.checked } } as any);

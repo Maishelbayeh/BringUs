@@ -18,4 +18,5 @@ export { default as CustomSelect } from './CustomSelect';
 export { default as CustomTable } from './CustomTable';
 export { default as HeaderWithAction } from './HeaderWithAction';
 export { default as PermissionModal } from './PermissionModal';
+export { default as StoreSlider } from './StoreSlider';
 export { default as ToastContainer } from './ToastContainer'; 

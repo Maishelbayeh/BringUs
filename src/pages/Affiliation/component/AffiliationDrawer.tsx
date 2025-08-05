@@ -157,7 +157,7 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
     const { name, value } = e.target;
     
     // Handle nested object properties (e.g., bankInfo.bankName)
-    if (name.includes('.')) {
+    if (name && name.includes('.')) {
       const [parent, child] = name.split('.');
       setForm(prev => ({
         ...prev,
@@ -166,7 +166,7 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
           [child]: value
         }
       }));
-    } else {
+    } else if (name) {
       setForm(prev => ({ ...prev, [name]: value }));
     }
     

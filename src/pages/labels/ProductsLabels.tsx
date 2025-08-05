@@ -101,7 +101,7 @@ import useProductLabel from '../../hooks/useProductLabel';
   const columns = [
     { 
       key: 'name', 
-      label: { ar: 'التصنيف', en: 'Label' }, 
+      label: { ar: 'علامة المنتج', en: 'Label' }, 
       type: 'text', 
       align: 'center' 
     },

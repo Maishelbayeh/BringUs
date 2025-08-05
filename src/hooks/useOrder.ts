@@ -60,7 +60,7 @@ export function useOrder(storeId: string): UseOrderResult {
   const fetchOrders = () => {
     setIsLoading(true);
     setError(null);
-    fetch(`http://localhost:5001/api/orders/store/${storeId}`)
+    fetch(`http://localhost:5001/api/orders/store/687c9bb0a7b3f2a0831c4675`)
       .then(res => res.json())
       .then(result => {
         if (result.success) {

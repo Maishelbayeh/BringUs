@@ -509,7 +509,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   
   //-------------------------------------------- handleSelectChange -------------------------------------------
   const handleSelectChange = (name: string, value: string) => {
-    //CONSOLE.log('🔍 ProductsForm - handleSelectChange:', { name, value });
+    // console.log('🔍 ProductsForm - handleSelectChange:', { name, value });
     
     // التحقق من صحة البيانات للحقل المحدث
     if (showValidation) {
@@ -525,12 +525,32 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
       }
     }
     
+    // تحديث الحقل المطلوب
     onFormChange({
       target: {
         name,
         value,
       }
     } as any);
+    
+    // تحديث unitId أيضاً عندما يتم تغيير unit
+    if (name === 'unit') {
+      onFormChange({
+        target: {
+          name: 'unitId',
+          value,
+        }
+      } as any);
+      
+      // التحقق من صحة unitId أيضاً
+      if (showValidation) {
+        clearError('unitId');
+        const fieldError = validateField('unitId', value);
+        if (onFieldValidation) {
+          onFieldValidation('unitId', value);
+        }
+      }
+    }
   };
   
   // handle multi-select for product labels
@@ -739,7 +759,8 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                 // console.log('🚩 select unitId:', e.target.value);
                 handleSelectChange('unit', e.target.value);
               }}
-              className={getFieldErrorClass('unit')}
+              className={getFieldErrorClass('unitId')}
+               searchable={true}
               options={[
                 { value: '', label: isRTL ? t('products.selectUnit') : 'Select Unit' },
                 ...(Array.isArray(units) ? units.map((u: any) => ({ 
@@ -748,7 +769,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                 })) : [])
               ]}
             />
-            {renderFieldError('units')}
+            {renderFieldError('unitId')}
           </div>
         </div>
         

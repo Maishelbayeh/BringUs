@@ -271,7 +271,7 @@
        "products": "المنتجات",
        "customers": "العملاء",
        "orders": "الطلبات",
-       "labels": "التصنيفات",
+       "labels": "علامات المنتج",
        "storeSlider": "شريط المتجر",
        "storePreview": "معاينة المتجر",
        "storeVideos": "فيديوهات المتجر",
@@ -528,7 +528,7 @@
     "price": "السعر",
     "category": "الفئة",
     "productOrder": "الترتيب",
-    "productLabel": "التصنيف",
+    "productLabel": "علامات المنتج",
     "available": "متوفر",
     "notAvailable": "غير متوفر",
     "sort": {
@@ -676,7 +676,10 @@
     "forgot": "نسيت كلمة المرور؟",
     "saving": "جاري الحفظ...",
     "pleaseCompleteForm": "يرجى إكمال جميع الحقول المطلوبة",
-    "copy": "نسخ"
+    "copy": "نسخ",
+    "search": "بحث...",
+    "noOptions": "لا توجد خيارات",
+    "selectOption": "اختر خياراً"
   },
   "orders": {
     "title": "الطلبات",
@@ -1023,13 +1026,13 @@
   },
 
   "productsLabels": {
-    "title": "التصنيفات",
-    "add": "إضافة التصنيف",
-    "edit": "تعديل التصنيف",
+    "title": "علامات المنتج",
+    "add": "إضافة علامة منتج",
+    "edit": "تعديل علامة منتج",
     "nameAr": "الاسم (عربي)",
     "nameEn": "الاسم (إنجليزي)",
-    "nameArPlaceholder": "أدخل اسم التصنيف بالعربية",
-    "nameEnPlaceholder": "أدخل اسم التصنيف بالإنجليزية",
+    "nameArPlaceholder": "أدخل اسم علامة المنتج بالعربية",
+    "nameEnPlaceholder": "أدخل اسم علامة المنتج بالإنجليزية",
     "sortOrder": "ترتيب الفرز",
     "isActive": "مفعل؟",
     "symbol": "الرمز",
@@ -1037,12 +1040,12 @@
     "descriptionEn": "الوصف (إنجليزي)",
     "descriptionArPlaceholder": "أدخل الوصف بالعربية",
     "descriptionEnPlaceholder": "أدخل الوصف بالإنجليزية",
-    "label": "التصنيف",
-    "addLabel": "إضافة التصنيف",
-    "editLabel": "تعديل التصنيف",
-    "deleteLabel": "حذف التصنيف",
-    "deleteConfirmTitle": "تأكيد حذف التصنيف",
-    "deleteConfirmMessage": "هل أنت متأكد من حذف هذا التصنيف؟"
+    "label": "علامة المنتج",
+    "addLabel": "إضافة علامة منتج",
+    "editLabel": "تعديل علامة منتج",
+    "deleteLabel": "حذف علامة منتج",
+    "deleteConfirmTitle": "تأكيد حذف علامة المنتج",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذه العلامة المنتج؟"
   },
   "store": {
     "basicInfo": "المعلومات الأساسية",

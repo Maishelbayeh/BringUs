@@ -329,7 +329,7 @@ const ProductsPage: React.FC = () => {
               return foundLabel ? (isRTL ? foundLabel.nameAr : foundLabel.nameEn) : label;
             }
           }).join(', ')
-        : (isRTL ? 'لا يوجد تصنيف' : 'No Labels'),
+        : (isRTL ? 'لا يوجد علامات' : 'No Labels'),
       descriptionAr: product.descriptionAr,
       descriptionEn: product.descriptionEn,
           barcodes: Array.isArray(product.barcodes) ? product.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [],
@@ -473,10 +473,10 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- renderProductLabels -------------------------------------------
   const renderProductLabels = (value: any, item: any) => {
-    if (!value || value === (isRTL ? 'لا يوجد تصنيف' : 'No Labels')) {
+    if (!value || value === (isRTL ? 'لا يوجد علامات' : 'No Labels')) {
       return (
         <span className="text-gray-500 text-sm">
-          {isRTL ? 'لا يوجد تصنيف' : 'No Labels'}
+          {isRTL ? 'لا يوجد علامات' : 'No Labels'}
         </span>
       );
     }
@@ -813,7 +813,7 @@ const ProductsPage: React.FC = () => {
       onClick={() => handleShowVariants(item)}
       title={isRTL ? 'عرض متغيرات المنتج' : 'Show Product Variants'}
     >
-      {value}
+     {isRTL ? 'عرض متغيرات المنتج' : 'Show Product Variants'}
     </button>
   );
 
@@ -1031,6 +1031,14 @@ const ProductsPage: React.FC = () => {
       //CONSOLE.log('🔍 handleFormChange - Updated mainImage:', newForm.mainImage);
       //CONSOLE.log('🔍 handleFormChange - Updated mainImage type:', typeof newForm.mainImage);
       setForm(newForm);
+    } else if (e.target.name === 'unitId') {
+      // تحديث unitId و unit معاً
+      const newForm = { ...form, unitId: e.target.value, unit: e.target.value };
+      setForm(newForm);
+    } else if (e.target.name === 'unit') {
+      // تحديث unit و unitId معاً
+      const newForm = { ...form, unit: e.target.value, unitId: e.target.value };
+      setForm(newForm);
     } else {
       // التعامل مع الحقول الأخرى
       const newForm = { ...form, [e.target.name]: e.target.value };
@@ -1215,7 +1223,6 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- columns -------------------------------------------
   const columns = [
-    { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const, render: renderProductId },
     { key: 'mainImage', label: { ar: 'الصورة الرئيسية', en: 'Main Image' }, type: 'image' as const, render: renderMainImage },
     { key: 'images', label: { ar: 'الصور الإضافية', en: 'Additional Images' }, type: 'text' as const, render: renderImages },
     { key: isRTL ? 'nameAr' : 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
@@ -1228,11 +1235,13 @@ const ProductsPage: React.FC = () => {
     { key: 'availableQuantity', label: { ar: 'الكمية المتوفرة', en: 'Available Quantity' }, type: 'number' as const, render: renderStock },
     { key: 'maintainStock', label: { ar: 'إدارة المخزون', en: 'Stock Management' }, type: 'text' as const },
     { key: 'visibility', label: { ar: 'الظهور', en: 'Visibility' }, type: 'status' as const, render: renderVisibility },
-    { key: 'tags', label: { ar: 'التصنيف', en: 'Label' }, type: 'text' as const, render: renderProductLabels },
+    { key: 'tags', label: { ar: 'علامات المنتج', en: 'Label' }, type: 'text' as const, render: renderProductLabels },
     { key: 'specifications', label: { ar: 'المواصفات', en: 'Specifications' }, type: 'text' as const, render: renderSpecifications },
     { key: 'barcodes', label: { ar: 'الباركود', en: 'Barcode' }, type: 'text' as const, render: renderBarcode },
     { key: 'variantStatus', label: { ar: 'النوع', en: 'Type' }, type: 'text' as const, render: renderVariantStatus },
     { key: 'colors', label: { ar: 'عدد الألوان', en: 'Colors Count' }, type: 'number' as const },
+    { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const, render: renderProductId },
+
     { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text' as const, render: renderActions, showControls: false },
   ];
   //-------------------------------------------- return -------------------------------------------   

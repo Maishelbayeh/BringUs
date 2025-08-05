@@ -498,7 +498,7 @@
   },
   "common": {
     "back": "Back",
-    "search": "Search",
+   
     "add": "Add",
     "edit": "Edit",
     "delete": "Delete",
@@ -541,7 +541,9 @@
     "unknown": "Unknown",
     "saving": "Saving...",
     "yes": "Yes",
-    "copy": "Copy"
+    "copy": "Copy",
+    "search": "Search...",
+    "noOptions": "No options found"
   },
   "orders": {
     "title": "Orders",

@@ -8,6 +8,7 @@ import CustomButton from '@/components/common/CustomButton';
 import PermissionModal from '../../components/common/PermissionModal';
 import { useStoreSlider, StoreSlider } from '@/hooks/useStoreSlider';
 import { BASE_URL } from '@/constants/api';
+import StoreSliderComponent from '@/components/common/StoreSlider';
 
 
 // Initial form state for StoreSlider - ثابت على نوع الصورة
@@ -53,6 +54,8 @@ const StoreSliderPage: React.FC = () => {
     slider.title.toLowerCase().includes(search.toLowerCase()) ||
     (slider.description && slider.description.toLowerCase().includes(search.toLowerCase()))
   );
+
+
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     console.log('Form change:', e.target.name, e.target.value);
@@ -228,10 +231,7 @@ const StoreSliderPage: React.FC = () => {
       errors.title = isRTL ? 'العنوان مطلوب' : 'Title is required';
     }
     
-    // التحقق من الوصف
-    if (!form.description.trim()) {
-      errors.description = isRTL ? 'الوصف مطلوب' : 'Description is required';
-    }
+   
     
     // التحقق من الصورة (النوع ثابت على slider)
     if (!form.selectedFile && !form.imageUrl) {
@@ -251,6 +251,8 @@ const StoreSliderPage: React.FC = () => {
   useEffect(() => {
     // console.log('Form state updated:', form);
   }, [form]);
+
+
 
   return (
     <div className="sm:p-4 w-full" >
@@ -276,20 +278,65 @@ const StoreSliderPage: React.FC = () => {
         onSearchChange={e => setSearch(e.target.value)}
         searchPlaceholder={t('storeSlider.searchPlaceholder') || 'Search sliders...'}
       />
-      
 
-      
-      <div className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-6"
-      style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}>
+      {/* معاينة السلايدر */}
+      {filteredSliders.length > 0 && (
+        <div className="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200 w-2/3 mx-auto">
+          <h3 style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }} className={`text-lg font-semibold text-gray-700 mb-4 ${isRTL ? 'text-right' : 'text-left'} flex items-center gap-2`}>
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            {isRTL ? 'معاينة السلايدر' : 'Slider Preview'}
+          </h3>
+          
+          {(() => {
+            const sliderImages = filteredSliders
+              .filter(slider => {
+                const hasImage = slider.imageUrl || slider.thumbnailUrl;
+                return slider.type === 'slider' && slider.isActive && hasImage;
+              })
+              .sort((a, b) => a.order - b.order)
+              .map(slider => slider.imageUrl || slider.thumbnailUrl!);
+
+            return (
+              <div className=" rounded-lg ">
+                <StoreSliderComponent
+                  images={sliderImages}
+                  autoPlay={false}
+                  showArrows={true}
+                  showDots={true}
+                  isRTL={isRTL}
+                  className="w-full h-64"
+                />
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* قائمة السلايدرز */}
+      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+        <h3 style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }} className={`text-lg font-semibold text-gray-700 mb-4 ${isRTL ? 'text-right' : 'text-left'} flex items-center gap-2`}>
+          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          {isRTL ? 'إدارة السلايدرز' : 'Manage Sliders'}
+        </h3>
+        
+        <div 
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6"
+          style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
+        >
         {loading ? (
           // Skeleton loading cards
           Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="group cursor-pointer bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-2xl shadow-lg border border-gray-200 hover:shadow-2xl transition flex flex-col items-stretch min-h-[320px] animate-pulse"
+              className="group cursor-pointer bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col items-stretch min-h-[280px] animate-pulse"
               style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
             >
-              <div className="relative w-full h-48 rounded-t-2xl overflow-hidden flex items-center justify-center bg-gray-300">
+              <div className="relative w-full h-40 rounded-t-lg overflow-hidden flex items-center justify-center bg-gray-200 border-b border-gray-200">
                 {/* Skeleton for image */}
                 <div className="w-full h-full bg-gray-400 animate-pulse"></div>
               </div>
@@ -315,14 +362,14 @@ const StoreSliderPage: React.FC = () => {
           filteredSliders.map((slider) => (
             <div
               key={slider._id}
-              className="group cursor-pointer bg-gradient-to-br from-primary/5 via-white to-gray-100 rounded-2xl shadow-lg border border-primary/10 hover:shadow-2xl transition flex flex-col items-stretch min-h-[320px]"
+              className="group cursor-pointer bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-200 flex flex-col items-stretch min-h-[280px]"
               onClick={() => handleEdit(slider)}
                 style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
             >
-              <div className="relative w-full h-48 rounded-t-2xl overflow-hidden flex items-center justify-center bg-gray-100">
+              <div className="relative w-full h-40 rounded-t-lg overflow-hidden flex items-center justify-center bg-gray-50 border-b border-gray-200">
                 {/* أيقونة الحذف */}
                 <button
-                  className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 bg-red-500/90 hover:bg-red-500 text-white rounded-full p-1.5 shadow opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110`}
+                  className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 bg-red-500 hover:bg-red-600 text-white rounded-md p-1.5 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-200`}
                   onClick={e => { e.stopPropagation(); handleDelete(slider); }}
                   title={t('common.delete')}
                 >
@@ -345,26 +392,27 @@ const StoreSliderPage: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="flex-1 flex flex-col gap-2 p-4">
+              <div className="flex-1 flex flex-col gap-3 p-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-primary truncate">{slider.title}</h2>
-                  <span className={`px-2 py-1 text-xs rounded-full ${slider.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                  <h2 className="text-base font-semibold text-gray-800 truncate">{slider.title}</h2>
+                  <span className={`px-2 py-1 text-xs rounded-md ${slider.isActive ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-600 border border-gray-200'}`}>
                     {slider.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>
-                <p className="text-gray-500 text-sm line-clamp-2">{slider.description}</p>
-                <div className="flex items-center justify-between text-xs text-gray-400">
+                <p className="text-gray-600 text-sm line-clamp-2">{slider.description}</p>
+                {/* <div className="flex items-center justify-between text-xs text-gray-400">
                   <span>Type: {slider.type}</span>
                   <span>Order: {slider.order}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs text-gray-400">
+                </div> */}
+                {/* <div className="flex items-center justify-between text-xs text-gray-400">
                   <span>Views: {slider.views}</span>
                   <span>Clicks: {slider.clicks}</span>
-                </div>
+                </div> */}
               </div>
             </div>
           ))
         )}
+        </div>
       </div>
       <StoreSliderDrawer
         open={showDrawer}
