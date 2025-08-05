@@ -26,22 +26,35 @@ export interface LogInFormValues {
     children?: MenuItem[];
   }
 
+  export interface PaymentImage {
+    imageUrl: string;
+    imageType: 'logo' | 'banner' | 'qr_code' | 'payment_screenshot' | 'other';
+    altText?: string;
+  }
+
+  export interface QrCode {
+    enabled: boolean;
+    qrCodeUrl?: string;
+    qrCodeImage?: string;
+    qrCodeData?: string;
+  }
+
   export interface PaymentMethod {
-    id: number;
-    title: string;
-    titleAr?: string;
-    titleEn?: string;
-    logoUrl?: string;
-    isDefault: boolean;
-    isActive: boolean;
+    _id?: string;
+    id?: number; // Keep for backward compatibility
+    title?: string;
+    titleAr: string;
+    titleEn: string;
     description?: string;
     descriptionAr?: string;
     descriptionEn?: string;
-    methodType: 'cash' | 'card' | 'digital_wallet' | 'bank_transfer' | 'other';
-    processingFee?: number;
-    minimumAmount?: number;
-    maximumAmount?: number;
-    supportedCurrencies?: string[];
+    methodType: 'cash' | 'card' | 'digital_wallet' | 'bank_transfer' | 'qr_code' | 'other';
+    isActive: boolean;
+    isDefault: boolean;
+    logoUrl?: string;
+    qrCode?: QrCode;
+    paymentImages?: PaymentImage[];
+    store?: string;
     createdAt?: string;
     updatedAt?: string;
   }

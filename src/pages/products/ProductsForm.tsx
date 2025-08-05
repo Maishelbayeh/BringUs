@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback, useRef } from 'react';
 import CustomInput from '../../components/common/CustomInput';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomSelect from '../../components/common/CustomSelect';
@@ -7,13 +7,12 @@ import CustomColorPicker from '../../components/common/CustomColorPicker';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import { CheckboxSpecificationSelector } from '../../components/common';
 
-import { t } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import MultiSelect from '@/components/common/MultiSelect';
 import useProductSpecifications from '@/hooks/useProductSpecifications';
 import { createCategorySelectOptions, type CategoryNode } from '@/utils/categoryUtils';
 import { useValidation } from '@/hooks/useValidation';
-import { productValidationSchema, validateBarcode, ProductFormData } from '@/validation/productValidation';
+import { productValidationSchema, validateBarcode } from '@/validation/productValidation';
 
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
@@ -98,48 +97,264 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const [localNewBarcode, setLocalNewBarcode] = useState('');
   const [mainImageUploading, setMainImageUploading] = useState(false);
   const [showMainImageSuccess, setShowMainImageSuccess] = useState(false);
+  const [formattedColors, setFormattedColors] = useState<ColorVariant[]>([]);
+  const [hasLocalColorChanges, setHasLocalColorChanges] = useState(false);
+  const hasFetchedSpecifications = useRef(false);
+  const hasLoadedSpecifications = useRef(false);
 
-  // جلب مواصفات المنتجات عند تحميل المكون
-  useEffect(() => {
-    //CONSOLE.log('🔍 ProductsForm - Fetching specifications...');
-    fetchSpecifications().then((data) => {
-      //CONSOLE.log('🔍 ProductsForm - Fetched specifications:', data);
-    }).catch((error) => {
-      //CONSOLE.error('🔍 ProductsForm - Error fetching specifications:', error);
-    });
-  }, [fetchSpecifications]);
+  // دالة تحويل الألوان من API إلى التنسيق المطلوب
+  const convertColorsFromAPI = (colors: any[]): ColorVariant[] => {
+    // console.log('🔍 convertColorsFromAPI - input colors:', colors);
+    
+    if (!Array.isArray(colors) || colors.length === 0) {
+      return [];
+    }
 
-  // تحويل البيانات من النموذج إلى التنسيق المطلوب
-  useEffect(() => {
-    //CONSOLE.log('🔍 ProductsForm - form.selectedSpecifications:', form.selectedSpecifications);
-    if (form.selectedSpecifications) {
-      try {
-        let parsed;
-        if (typeof form.selectedSpecifications === 'string') {
-          parsed = JSON.parse(form.selectedSpecifications);
-        } else {
-          parsed = form.selectedSpecifications;
+    try {
+      // تحويل الألوان من التنسيق القادم من API
+      const convertedColors: ColorVariant[] = [];
+      
+      colors.forEach((colorGroup, index) => {
+        // console.log(`🔍 Processing colorGroup ${index}:`, colorGroup);
+        
+        if (Array.isArray(colorGroup)) {
+          // إذا كان colorGroup مصفوفة، خذ العنصر الأول
+          const firstElement = colorGroup[0];
+          // console.log(`🔍 First element of colorGroup ${index}:`, firstElement);
+          
+          if (typeof firstElement === 'string') {
+            try {
+              // محاولة تحليل JSON string
+              const parsedColors = JSON.parse(firstElement);
+              // console.log(`🔍 Parsed colors for group ${index}:`, parsedColors);
+              
+              if (Array.isArray(parsedColors)) {
+                // إذا كان parsedColors مصفوفة، خذ جميع الألوان
+                let colorsArray: string[] = [];
+                
+                if (Array.isArray(parsedColors[0])) {
+                  // إذا كان العنصر الأول مصفوفة، خذ جميع العناصر
+                  colorsArray = parsedColors.flat().filter((color: any) => typeof color === 'string');
+                } else {
+                  // إذا لم يكن العنصر الأول مصفوفة، خذ جميع العناصر مباشرة
+                  colorsArray = parsedColors.filter((color: any) => typeof color === 'string');
+                }
+                
+                // console.log(`🔍 Colors array for group ${index}:`, colorsArray);
+                
+                if (colorsArray.length > 0) {
+                  convertedColors.push({
+                    id: `color-${index}`,
+                    colors: colorsArray
+                  });
+                }
+              }
+            } catch (parseError) {
+              // console.log('🔍 Failed to parse color JSON, treating as direct color:', firstElement);
+              convertedColors.push({
+                id: `color-${index}`,
+                colors: [firstElement]
+              });
+            }
+          }
+        } else if (typeof colorGroup === 'string') {
+          try {
+            // محاولة تحليل JSON string مباشرة
+            const parsedColors = JSON.parse(colorGroup);
+            // console.log(`🔍 Direct parsed colors for group ${index}:`, parsedColors);
+            
+            if (Array.isArray(parsedColors)) {
+              // إذا كان parsedColors مصفوفة، خذ جميع الألوان
+              let colorsArray: string[] = [];
+              
+              if (Array.isArray(parsedColors[0])) {
+                // إذا كان العنصر الأول مصفوفة، خذ جميع العناصر
+                colorsArray = parsedColors.flat().filter((color: any) => typeof color === 'string');
+              } else {
+                // إذا لم يكن العنصر الأول مصفوفة، خذ جميع العناصر مباشرة
+                colorsArray = parsedColors.filter((color: any) => typeof color === 'string');
+              }
+              
+              // console.log(`🔍 Direct colors array for group ${index}:`, colorsArray);
+              
+              if (colorsArray.length > 0) {
+                convertedColors.push({
+                  id: `color-${index}`,
+                  colors: colorsArray
+                });
+              }
+            }
+          } catch (parseError) {
+            // console.log('🔍 Failed to parse color JSON, treating as direct color:', colorGroup);
+            convertedColors.push({
+              id: `color-${index}`,
+              colors: [colorGroup]
+            });
+          }
         }
-        if (Array.isArray(parsed)) {
-          // تنظيف الداتا هنا أيضًا
-          const cleaned = parsed.map(spec => ({
-            _id: spec._id,
-            title: typeof spec.title === 'string' ? spec.title : JSON.stringify(spec.title),
-            value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
-          }));
-          setSelectedSpecifications(cleaned);
-        } else {
+      });
+
+      // console.log('🔍 convertColorsFromAPI - final converted colors:', convertedColors);
+      return convertedColors;
+    } catch (error) {
+      // console.error('🔍 Error converting colors:', error);
+      return [];
+    }
+  };
+
+  // جلب مواصفات المنتجات عند تحميل المكون (مرة واحدة فقط)
+  useEffect(() => {
+    if (!hasFetchedSpecifications.current) {
+      //CONSOLE.log('🔍 ProductsForm - Fetching specifications...');
+      hasFetchedSpecifications.current = true;
+      fetchSpecifications().then((data) => {
+        //CONSOLE.log('🔍 ProductsForm - Fetched specifications:', data);
+      }).catch((error) => {
+        //CONSOLE.error('🔍 ProductsForm - Error fetching specifications:', error);
+        hasFetchedSpecifications.current = false; // إعادة تعيين في حالة الخطأ
+      });
+    }
+  }, []); // جلب البيانات مرة واحدة فقط عند تحميل المكون
+
+  // تحويل البيانات من النموذج إلى التنسيق المطلوب (مرة واحدة فقط عند التحميل)
+  useEffect(() => {
+    if (!hasLoadedSpecifications.current) {
+      console.log('🔍 ProductsForm - Initial load - form.selectedSpecifications:', form.selectedSpecifications);
+      console.log('🔍 ProductsForm - Initial load - form.specificationValues:', form.specificationValues);
+      
+      // محاولة استخدام specificationValues أولاً (من API)
+      if (form.specificationValues && Array.isArray(form.specificationValues) && form.specificationValues.length > 0) {
+        console.log('🔍 ProductsForm - Using specificationValues from API');
+        const cleaned = form.specificationValues.map((spec: any) => {
+          // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
+          const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec.specificationId) : null;
+          const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec.specificationId}`);
+          
+          return {
+            _id: spec.valueId || spec._id,
+            title: title,
+            value: spec.value || ''
+          };
+        });
+        console.log('🔍 ProductsForm - Cleaned specificationValues:', cleaned);
+        setSelectedSpecifications(cleaned);
+      }
+      // إذا لم تكن specificationValues موجودة، استخدم selectedSpecifications
+      else if (form.selectedSpecifications) {
+        try {
+          let parsed;
+          if (typeof form.selectedSpecifications === 'string') {
+            parsed = JSON.parse(form.selectedSpecifications);
+          } else {
+            parsed = form.selectedSpecifications;
+          }
+          if (Array.isArray(parsed)) {
+            // تنظيف الداتا هنا أيضاً
+            const cleaned = parsed.map(spec => ({
+              _id: spec._id,
+              title: typeof spec.title === 'string' ? spec.title : JSON.stringify(spec.title),
+              value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
+            }));
+            console.log('🔍 ProductsForm - Cleaned selectedSpecifications:', cleaned);
+            setSelectedSpecifications(cleaned);
+          } else {
+            setSelectedSpecifications([]);
+          }
+        } catch (error) {
+          console.error('Error parsing selectedSpecifications:', error);
           setSelectedSpecifications([]);
         }
-      } catch (error) {
-        //CONSOLE.error('Error parsing selectedSpecifications:', error);
+      } else {
+        console.log('🔍 ProductsForm - No specifications found, setting empty array');
         setSelectedSpecifications([]);
       }
-    } else {
-      //CONSOLE.log('🔍 ProductsForm - No selectedSpecifications, setting empty array');
-      setSelectedSpecifications([]);
+      
+      hasLoadedSpecifications.current = true;
     }
-  }, [form.selectedSpecifications]);
+  }, []); // تشغيل مرة واحدة فقط عند التحميل
+
+  // تحويل الألوان من API إلى التنسيق المطلوب
+  useEffect(() => {
+    console.log('🔍 ProductsForm - Colors useEffect triggered');
+    console.log('🔍 ProductsForm - form.colors:', form.colors);
+    console.log('🔍 ProductsForm - form.allColors:', form.allColors);
+    console.log('🔍 ProductsForm - Current formattedColors:', formattedColors);
+    
+    // تحقق مما إذا كانت هناك تغييرات محلية
+    if (hasLocalColorChanges) {
+      console.log('🔍 ProductsForm - Skipping conversion, using local formattedColors');
+      return; // لا تعيد التحويل إذا كانت هناك تغييرات محلية
+    }
+    
+    // تحقق من تضارب البيانات بين colors و allColors
+    const hasColorsConflict = form.colors && form.allColors && 
+      Array.isArray(form.colors) && Array.isArray(form.allColors) &&
+      form.colors.length > 0 && form.allColors.length > 0;
+    
+    if (hasColorsConflict) {
+      console.log('🔍 ProductsForm - Colors conflict detected, using colors (groups) instead of allColors');
+      // في حالة التضارب، استخدم colors (المجموعات) بدلاً من allColors (الألوان المنفردة)
+      const convertedColors = convertColorsFromAPI(form.colors);
+      console.log('🔍 ProductsForm - Converted colors from form.colors:', convertedColors);
+      setFormattedColors(convertedColors);
+      setHasLocalColorChanges(false);
+    }
+    // محاولة استخدام allColors (من API)
+    else if (form.allColors && Array.isArray(form.allColors) && form.allColors.length > 0) {
+      console.log('🔍 ProductsForm - Using allColors from API');
+      
+      // معالجة خاصة لـ allColors - قد يكون مصفوفة تحتوي على string واحد
+      let colorsToProcess = form.allColors;
+      if (form.allColors.length === 1 && typeof form.allColors[0] === 'string') {
+        // إذا كان allColors مصفوفة تحتوي على string واحد، عالجها مباشرة
+        try {
+          const parsedColors = JSON.parse(form.allColors[0]);
+          if (Array.isArray(parsedColors)) {
+            colorsToProcess = parsedColors;
+          }
+        } catch (error) {
+          console.log('🔍 Failed to parse allColors string:', error);
+        }
+      }
+      
+      const convertedColors = convertColorsFromAPI(colorsToProcess);
+      console.log('🔍 ProductsForm - Converted colors from API:', convertedColors);
+      setFormattedColors(convertedColors);
+      setHasLocalColorChanges(false); // إعادة تعيين عند تحميل بيانات جديدة
+    }
+    // إذا لم تكن allColors موجودة، استخدم colors
+    else if (form.colors && Array.isArray(form.colors) && form.colors.length > 0) {
+      console.log('🔍 ProductsForm - Using colors from form');
+      const convertedColors = convertColorsFromAPI(form.colors);
+      console.log('🔍 ProductsForm - Converted colors from form:', convertedColors);
+      setFormattedColors(convertedColors);
+      setHasLocalColorChanges(false); // إعادة تعيين عند تحميل بيانات جديدة
+    } else {
+      console.log('🔍 ProductsForm - No colors found, setting empty array');
+      setFormattedColors([]);
+      setHasLocalColorChanges(false); // إعادة تعيين عند تحميل بيانات جديدة
+    }
+  }, [form.colors, form.allColors]);
+
+  // تحويل الفئة والوحدة من API إلى التنسيق المطلوب
+  useEffect(() => {
+    // console.log('🔍 ProductsForm - form.category:', form.category);
+    // console.log('🔍 ProductsForm - form.unit:', form.unit);
+    
+    // تحويل الفئة من API إلى categoryId
+    if (form.category && form.category._id && !form.categoryId) {
+      // console.log('🔍 ProductsForm - Setting categoryId from API:', form.category._id);
+      handleInputChange('categoryId', form.category._id);
+    }
+    
+    // تحويل الوحدة من API إلى unit
+    if (form.unit && typeof form.unit === 'object' && form.unit._id) {
+      // console.log('🔍 ProductsForm - Setting unit from API object:', form.unit._id);
+      handleInputChange('unit', form.unit._id);
+    } else if (form.unit && typeof form.unit === 'string' && form.unit !== '') {
+      // console.log('🔍 ProductsForm - Unit is already a string:', form.unit);
+    }
+  }, [form.category, form.unit]);
 
   // Debug: طباعة بيانات النموذج
   useEffect(() => {
@@ -224,11 +439,40 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   
   //-------------------------------------------- handleColorChange -------------------------------------------
   const handleColorChange = (e: React.ChangeEvent<{ name: string; value: ColorVariant[] }>) => {
-    //CONSOLE.log('🔍 ProductsForm - handleColorChange:', e.target);
+    console.log('🔍 ProductsForm - handleColorChange:', e.target);
+    
+    // تحديث formattedColors مباشرة
+    setFormattedColors(e.target.value);
+    
+    // تعيين أن هناك تغييرات محلية
+    setHasLocalColorChanges(true);
+    
+    // تحويل الألوان إلى التنسيق المطلوب للـ API
+    const convertedColors = e.target.value.map(colorVariant => {
+      return [JSON.stringify(colorVariant.colors)];
+    });
+    
+    // تحديث allColors أيضاً لتجنب التضارب
+    const allColorsArray = e.target.value.flatMap(colorVariant => 
+      colorVariant.colors
+    );
+    
+    console.log('🔍 ProductsForm - convertedColors for API:', convertedColors);
+    console.log('🔍 ProductsForm - allColorsArray for API:', allColorsArray);
+    
+    // تحديث colors
     onFormChange({
       target: {
         name: e.target.name,
-        value: e.target.value,
+        value: convertedColors,
+      }
+    } as any);
+    
+    // تحديث allColors أيضاً
+    onFormChange({
+      target: {
+        name: 'allColors',
+        value: allColorsArray,
       }
     } as any);
   };
@@ -412,25 +656,25 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-          <CustomInput
-            label={isRTL ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'}
-            name="nameAr"
-            value={form.nameAr || ''}
-            onChange={(e) => handleInputChange('nameAr', e.target.value)}
+            <CustomInput
+              label={isRTL ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'}
+              name="nameAr"
+              value={form.nameAr || ''}
+              onChange={(e) => handleInputChange('nameAr', e.target.value)}
               className={getFieldErrorClass('nameAr')}
-            required
-          />
+             required
+            />
             {renderFieldError('nameAr')}
           </div>
           <div>
-          <CustomInput
+            <CustomInput
               label={isRTL ? 'اسم المنتج (إنجليزي)' : 'Product Name (English)'}
-            name="nameEn"
-            value={form.nameEn || ''}
-            onChange={(e) => handleInputChange('nameEn', e.target.value)}
+              name="nameEn"
+              value={form.nameEn || ''}
+              onChange={(e) => handleInputChange('nameEn', e.target.value)}
               className={getFieldErrorClass('nameEn')}
-            required
-          />
+              required
+            />
             {renderFieldError('nameEn')}
           </div>
           <div className="md:col-span-2">
@@ -467,10 +711,10 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-          <CustomSelect
-            label={isRTL ? t('products.category') : 'Category'}
-            value={form.categoryId || ''}
-            onChange={(e) => handleSelectChange('categoryId', e.target.value)}
+            <CustomSelect
+              label={isRTL ? t('products.category') : 'Category'}
+              value={form.categoryId || ''}
+              onChange={(e) => handleSelectChange('categoryId', e.target.value)}
               className={getFieldErrorClass('categoryId')}
               options={createCategorySelectOptions(
                 categories as CategoryNode[] || [],
@@ -488,22 +732,40 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
             {renderFieldError('categoryId')}
           </div>
           <div>
-          <CustomSelect
-            label={isRTL ? t('products.unit') : 'Unit'}
-            value={form.unitId || ''}
-            onChange={(e) => handleSelectChange('unitId', e.target.value)}
-              className={getFieldErrorClass('unitId')}
-            options={[
-              { value: '', label: isRTL ? t('products.selectUnit') : 'Select Unit' },
-              ...(Array.isArray(units) ? units.map((u: any) => ({ 
-                value: String(u._id || u.id), 
-                label: isRTL ? u.nameAr : u.nameEn 
-              })) : [])
-            ]}
-          />
-            {renderFieldError('unitId')}
+            <CustomSelect
+              label={isRTL ? t('products.unit') : 'Unit'}
+              value={typeof form.unit === 'object' && form.unit && form.unit._id ? form.unit._id : (form.unit || '')}
+              onChange={(e) => {
+                // console.log('🚩 select unitId:', e.target.value);
+                handleSelectChange('unit', e.target.value);
+              }}
+              className={getFieldErrorClass('unit')}
+              options={[
+                { value: '', label: isRTL ? t('products.selectUnit') : 'Select Unit' },
+                ...(Array.isArray(units) ? units.map((u: any) => ({ 
+                  value: String(u._id || u.id), 
+                  label: isRTL ? u.nameAr : u.nameEn 
+                })) : [])
+              ]}
+            />
+            {renderFieldError('units')}
           </div>
         </div>
+        
+        {/* Debug info for category and unit */}
+        {/* <div className="mt-4 p-3 bg-blue-100 rounded-lg text-xs">
+          <p><strong>Debug Category & Unit:</strong></p>
+          <p>form.category: {form.category ? JSON.stringify(form.category) : 'null'}</p>
+          <p>form.categoryId: {form.categoryId || 'null'}</p>
+          <p>form.unit: {form.unit ? JSON.stringify(form.unit) : 'null'}</p>
+          <p>form.unit type: {typeof form.unit}</p>
+          <p>Unit value for select: {typeof form.unit === 'object' && form.unit && form.unit._id ? form.unit._id : (form.unit || '')}</p>
+          <p>Available units count: {Array.isArray(units) ? units.length : 0}</p>
+          <p>Available categories count: {Array.isArray(categories) ? categories.length : 0}</p>
+          {Array.isArray(units) && units.length > 0 && (
+            <p>First unit: {JSON.stringify(units[0])}</p>
+          )}
+        </div> */}
       </div>
 
       {/* ==================== Pricing Section ==================== */}
@@ -517,37 +779,37 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-          <CustomInput
-                  label={isRTL ? t('products.price') : 'Price'}
-            name="price"
-            value={form.price || ''}
-            onChange={(e) => handleInputChange('price', e.target.value)}
+            <CustomInput
+              label={isRTL ? t('products.price') : 'Price'}
+              name="price"
+              value={form.price || ''}
+              onChange={(e) => handleInputChange('price', e.target.value)}
               className={getFieldErrorClass('price')}
-            type="number"
-            required
-          />
+              type="number"
+              required
+            />
             {renderFieldError('price')}
           </div>
           <div>
-          <CustomInput
-            label={isRTL ? 'سعر التكلفة' : 'Cost Price'}
-            name="costPrice"
-            value={form.costPrice || ''}
-            onChange={(e) => handleInputChange('costPrice', e.target.value)}
+            <CustomInput
+              label={isRTL ? 'سعر التكلفة' : 'Cost Price'}
+              name="costPrice"
+              value={form.costPrice || ''}
+              onChange={(e) => handleInputChange('costPrice', e.target.value)}
               className={getFieldErrorClass('costPrice')}
-            type="number"
-          />
+              type="number"
+            />
             {renderFieldError('costPrice')}
           </div>
           <div>
-          <CustomInput
-            label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
-            name="compareAtPrice"
-            value={form.compareAtPrice || ''}
-            onChange={(e) => handleInputChange('compareAtPrice', e.target.value)}
+            <CustomInput
+              label={isRTL ? 'سعر الجملة' : 'Wholesale Price'}
+              name="compareAtPrice"
+              value={form.compareAtPrice || ''}
+              onChange={(e) => handleInputChange('compareAtPrice', e.target.value)}
               className={getFieldErrorClass('compareAtPrice')}
-            type="number"
-          />
+              type="number"
+            />
             {renderFieldError('compareAtPrice')}
           </div>
         </div>
@@ -647,7 +909,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <CustomSwitch
               label={isRTL ? t('products.visibility') : 'Visibility'}
               name="visibility"
@@ -667,19 +929,19 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
               }}
               
             />
-          </div>
+          </div> */}
           
           <div className="space-y-4">
             <div>
-            <CustomInput
-              label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
-              name="availableQuantity"
-              value={form.availableQuantity || ''}
-              onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
+              <CustomInput
+                label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
+                name="availableQuantity"
+                value={form.availableQuantity || ''}
+                onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
                 className={getFieldErrorClass('availableQuantity')}
-              type="number"
-              disabled={form.maintainStock !== 'Y'}
-            />
+                type="number"
+                disabled={false}
+              />
               {renderFieldError('availableQuantity')}
             </div>
             
@@ -694,7 +956,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                 min="1"
                 max="1000"
                 placeholder={isRTL ? 'أدخل الحد الأدنى للمخزون (مثال: 10)' : 'Enter minimum stock level (e.g., 10)'}
-                disabled={form.maintainStock !== 'Y'}
+                disabled={false}
               />
               {renderFieldError('lowStockThreshold')}
               <p className="text-xs text-gray-500 mt-1">
@@ -707,14 +969,34 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
             
             <MultiSelect
               label={isRTL ? t('products.productLabel') : 'Product Label'}
-              value={Array.isArray(form.tags) ? form.tags : []}
-              onChange={handleTagsChange}
-              options={[
-                ...(Array.isArray(tags) ? tags.map((opt: any) => ({
-                  value: String(opt._id || opt.id),
-                  label: isRTL ? opt.nameAr : opt.nameEn
-                })) : [])
-              ]}
+              value={
+                Array.isArray(form.productLabels)
+                  ? form.productLabels.map((l: any) => typeof l === 'object' ? l._id || l.id : l)
+                  : Array.isArray(form.tags)
+                    ? form.tags.map((l: any) => typeof l === 'object' ? l._id || l.id : l)
+                    : []
+              }
+              onChange={(values) => {
+                const ids = values.map((v: any) => typeof v === 'object' ? v._id || v.id : v);
+                if ('productLabels' in form) {
+                  onFormChange({
+                    target: {
+                      name: 'productLabels',
+                      value: ids,
+                    }
+                  } as any);
+                } else {
+                  handleTagsChange(ids);
+                }
+              }}
+              options={
+                Array.isArray(tags)
+                  ? tags.map((opt: any) => ({
+                      value: String(opt._id || opt.id),
+                      label: isRTL ? opt.nameAr : opt.nameEn
+                    }))
+                  : []
+              }
               placeholder={isRTL ? 'اختر علامات المنتج' : 'Select product labels'}
             />
           </div>
@@ -735,14 +1017,68 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
             specifications={formattedSpecificationsProp.length > 0 ? formattedSpecificationsProp : formattedSpecifications}
             selectedSpecifications={selectedSpecifications}
             onSelectionChange={(selected) => {
-              // تنظيف المواصفات المختارة قبل حفظها
-              const cleaned = selected.map(spec => ({
-                _id: spec._id,
-                title: typeof spec.title === 'string' ? spec.title : JSON.stringify(spec.title),
-                value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
-              }));
+              console.log('🔍 ProductsForm - onSelectionChange called with:', selected);
+              console.log('🔍 ProductsForm - Current form state before update:', {
+                selectedSpecifications: form.selectedSpecifications,
+                specifications: form.specifications,
+                specificationValues: form.specificationValues
+              });
+              
+              // تنظيف المواصفات المختارة قبل حفظها مع البحث عن العنوان الصحيح
+              const cleaned = selected.map(spec => {
+                // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
+                const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec._id.split('_')[0]) : null;
+                const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec._id.split('_')[0]}`);
+                
+                return {
+                  _id: spec._id,
+                  title: title,
+                  value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
+                };
+              });
+              console.log('🔍 ProductsForm - Cleaned specifications:', cleaned);
               setSelectedSpecifications(cleaned);
-              handleInputChange('selectedSpecifications', JSON.stringify(cleaned));
+              
+              // تحديث form.selectedSpecifications
+              onFormChange({
+                target: {
+                  name: 'selectedSpecifications',
+                  value: JSON.stringify(cleaned)
+                }
+              } as any);
+              
+              // تحديث form.specifications (IDs فقط)
+              const specificationIds = [...new Set(cleaned.map(spec => spec._id.split('_')[0]))];
+              console.log('🔍 ProductsForm - Specification IDs:', specificationIds);
+              onFormChange({
+                target: {
+                  name: 'specifications',
+                  value: specificationIds
+                }
+              } as any);
+              
+              // تحديث form.specificationValues (القيم الكاملة)
+              const specificationValues = cleaned.map(spec => {
+                // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
+                const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec._id.split('_')[0]) : null;
+                const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec._id.split('_')[0]}`);
+                
+                return {
+                  specificationId: spec._id.split('_')[0],
+                  valueId: spec._id,
+                  value: spec.value,
+                  title: title
+                };
+              });
+              console.log('🔍 ProductsForm - Specification values:', specificationValues);
+              onFormChange({
+                target: {
+                  name: 'specificationValues',
+                  value: specificationValues
+                }
+              } as any);
+              
+              console.log('🔍 ProductsForm - Form updates completed. New values will be available on next render.');
             }}
           />
         ) : (
@@ -783,10 +1119,13 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         <CustomColorPicker
           label={isRTL ? t('products.colors') : 'Colors'}
           name="colors"
-          value={form.colors || []}
+          value={formattedColors}
           onChange={handleColorChange}
           isRTL={isRTL}
         />
+        
+        {/* Debug info for colors */}
+     
       </div>
 
       {/* ==================== Media Section ==================== */}

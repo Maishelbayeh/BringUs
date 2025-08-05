@@ -35,29 +35,29 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   // Initialize selected values from props
   useEffect(() => {
-    // console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);
-    // console.log('🔍 CheckboxSpecificationSelector - specifications:', specifications);
+    console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);
+    console.log('🔍 CheckboxSpecificationSelector - specifications:', specifications);
     
     if (Array.isArray(selectedSpecifications) && selectedSpecifications.length > 0) {
       const selectedIds = new Set(selectedSpecifications.map(spec => spec._id));
-      // console.log('🔍 CheckboxSpecificationSelector - Setting selectedIds:', selectedIds);
-      // console.log('🔍 CheckboxSpecificationSelector - Selected specs details:', selectedSpecifications.map(spec => ({
-      //   id: spec._id,
-      //   title: spec.title,
-      //   value: spec.value
-      // })));
+      console.log('🔍 CheckboxSpecificationSelector - Setting selectedIds:', selectedIds);
+      console.log('🔍 CheckboxSpecificationSelector - Selected specs details:', selectedSpecifications.map(spec => ({
+        id: spec._id,
+        title: spec.title,
+        value: spec.value
+      })));
       
       // تحقق من تطابق الـ IDs
       const availableIds = specifications.flatMap(s => s.values.map(v => v._id));
-      // console.log('🔍 CheckboxSpecificationSelector - Available IDs:', availableIds);
-      // console.log('🔍 CheckboxSpecificationSelector - Matching IDs:', selectedSpecifications.filter(spec => availableIds.includes(spec._id)));
+      console.log('🔍 CheckboxSpecificationSelector - Available IDs:', availableIds);
+      console.log('🔍 CheckboxSpecificationSelector - Matching IDs:', selectedSpecifications.filter(spec => availableIds.includes(spec._id)));
       
       setSelectedValues(selectedIds);
     } else {
-     // console.log('🔍 CheckboxSpecificationSelector - No selectedSpecifications, clearing selectedValues');
+      console.log('🔍 CheckboxSpecificationSelector - No selectedSpecifications, clearing selectedValues');
       setSelectedValues(new Set());
     }
-  }, [selectedSpecifications]);
+  }, [selectedSpecifications, specifications]);
 
   const toggleTitle = (titleId: string) => {
     const newExpanded = new Set(expandedTitles);
@@ -70,8 +70,8 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
   };
 
   const toggleValue = (value: SpecificationValue) => {
-    // console.log('🔍 toggleValue - value:', value);
-    // console.log('🔍 toggleValue - current selectedValues:', selectedValues);
+    console.log('🔍 toggleValue - value:', value);
+    console.log('🔍 toggleValue - current selectedValues:', selectedValues);
     
     const newSelected = new Set(selectedValues);
     if (newSelected.has(value._id)) {
@@ -86,11 +86,12 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
       .flatMap(spec => spec.values)
       .filter(val => newSelected.has(val._id));
     
-    //  console.log('🔍 toggleValue - updatedSelection:', updatedSelection);
+    console.log('🔍 toggleValue - updatedSelection:', updatedSelection);
     onSelectionChange(updatedSelection);
   };
 
   const removeValue = (valueId: string) => {
+    console.log('🔍 removeValue - valueId:', valueId);
     const newSelected = new Set(selectedValues);
     newSelected.delete(valueId);
     setSelectedValues(newSelected);
@@ -99,12 +100,14 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
     const updatedSelection = specifications
       .flatMap(spec => spec.values)
       .filter(val => newSelected.has(val._id));
+    
+    console.log('🔍 removeValue - updatedSelection:', updatedSelection);
     onSelectionChange(updatedSelection);
   };
 
   const isTitleSelected = (title: SpecificationTitle) => {
     const selected = title.values.some(value => selectedValues.has(value._id));
-    // console.log(`🔍 Title ${title.title} selected: ${selected}`);
+    console.log(`🔍 Title ${title.title} selected: ${selected}`);
     return selected;
   };
 
@@ -112,8 +115,9 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
     return title.values.filter(value => selectedValues.has(value._id)).length;
   };
 
-  // console.log('🔍 CheckboxSpecificationSelector - Rendering with specifications:', specifications);
-  // console.log('🔍 CheckboxSpecificationSelector - Rendering with selectedSpecifications:', selectedSpecifications);
+  console.log('🔍 CheckboxSpecificationSelector - Rendering with specifications:', specifications);
+  console.log('🔍 CheckboxSpecificationSelector - Rendering with selectedSpecifications:', selectedSpecifications);
+  console.log('🔍 CheckboxSpecificationSelector - Current selectedValues:', selectedValues);
   
   return (
     <div className={`space-y-4 ${className}`}>
@@ -128,10 +132,10 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
                 className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
               >
                 <span className="text-xs text-primary">
-                  {typeof spec.title === 'string' ? spec.title : JSON.stringify(spec.title)}:
+                  {spec.title && typeof spec.title === 'string' ? spec.title : 'مواصفة'}:
                 </span>
                 <span className="font-medium">
-                  {typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)}
+                  {spec.value && typeof spec.value === 'string' ? spec.value : 'قيمة'}
                 </span>
                 <button
                   type="button"

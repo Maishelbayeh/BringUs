@@ -10,6 +10,7 @@ interface VariantsPopupProps {
   onDeleteVariant: (variant: any) => void;
   onAddVariant: () => void;
   isRTL: boolean;
+  isLoading?: boolean;
 }
 
 const VariantsPopup: React.FC<VariantsPopupProps> = ({
@@ -20,7 +21,8 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
   onEditVariant,
   onDeleteVariant,
   onAddVariant,
-  isRTL
+  isRTL,
+  isLoading = false
 }) => {
   if (!isOpen) return null;
 
@@ -51,7 +53,14 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
 
         {/* Content */}
         <div className="p-6">
-          {variants.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">
+                {isRTL ? 'جاري تحميل المتغيرات...' : 'Loading variants...'}
+              </p>
+            </div>
+          ) : variants.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 text-6xl mb-4">📦</div>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
@@ -110,11 +119,41 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                             <p className="text-gray-600 text-sm">
                               {isRTL ? variant.descriptionAr : variant.descriptionEn}
                             </p>
+                            {/* Barcodes Section */}
+                            {Array.isArray(variant.barcodes) && variant.barcodes.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {variant.barcodes.map((barcode: string, idx: number) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-lg border border-purple-200 font-mono"
+                                    title="Barcode"
+                                    style={{ direction: 'ltr' }}
+                                  >
+                                    {barcode}
+                                    <button
+                                      type="button"
+                                      className="ml-1 text-purple-500 hover:text-purple-700"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(barcode);
+                                      }}
+                                      title={isRTL ? 'نسخ الباركود' : 'Copy barcode'}
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16h8M8 12h8m-8-4h8M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                      </svg>
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                           {/* Action Buttons */}
                           <div className="flex space-x-2 rtl:space-x-reverse">
                             <button
-                              onClick={() => onEditVariant(variant)}
+                              onClick={() => {
+                                console.log('🔍 Edit button clicked', variant);
+                                onEditVariant(variant);
+                              }}
                               className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
                               title={isRTL ? 'تعديل المتغير' : 'Edit Variant'}
                             >
@@ -182,54 +221,59 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                           )}
                         </div>
 
-                        {/* Colors */}
-                        {Array.isArray(variant.colors) && variant.colors.length > 0 && (
-                          <div>
-                            <div className="text-sm font-semibold text-gray-700 mb-2 mt-4">
-                              <svg className="w-4 h-4 inline-block mr-1 rtl:ml-1 rtl:mr-0 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-                              </svg>
-                              {isRTL ? 'الألوان' : 'Colors'}
-                            </div>
-                            <div className={`flex flex-wrap gap-1 mb-2 ${isRTL ? 'justify-end' : 'justify-start'}`} style={{ minHeight: 28 }}>
-                              {variant.colors.map((colorArr: any, idx: number) => {
-                                // معالجة: إذا كان العنصر سترينج فيه فاصلة، حوله لمصفوفة ألوان
-                                let arr: string[] = [];
-                                if (Array.isArray(colorArr)) {
-                                  if (typeof colorArr[0] === 'string' && colorArr[0].includes(',')) {
-                                    arr = colorArr[0].split(',').map(s => s.trim());
+                        {/* Colors Section */}
+                        {(() => {
+                          // استخدم allColors إذا كانت موجودة
+                          let colorArrs: string[][] = [];
+                          if (Array.isArray(variant.allColors) && variant.allColors.length > 0) {
+                            colorArrs = variant.allColors.flatMap((c: any) => {
+                              try {
+                                const parsed = typeof c === 'string' ? JSON.parse(c) : c;
+                                if (Array.isArray(parsed) && Array.isArray(parsed[0])) return parsed;
+                                if (Array.isArray(parsed)) return [parsed];
+                                return [];
+                              } catch {
+                                return [];
+                              }
+                            });
+                          } else if (Array.isArray(variant.colors)) {
+                            colorArrs = variant.colors;
+                          }
+                          return colorArrs.length > 0 ? (
+                            <div>
+                              <div className="text-sm font-semibold text-gray-700 mb-2 mt-4">
+                                <svg className="w-4 h-4 inline-block mr-1 rtl:ml-1 rtl:mr-0 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                                </svg>
+                                {isRTL ? 'الألوان' : 'Colors'}
+                              </div>
+                              <div className={`flex flex-wrap gap-1 mb-2 ${isRTL ? 'justify-end' : 'justify-start'}`} style={{ minHeight: 28 }}>
+                                {colorArrs.map((arr: string[], idx: number) => {
+                                  let style = {};
+                                  if (arr.length > 1) {
+                                    const step = 100 / arr.length;
+                                    const segments = arr.map((color, i) => {
+                                      const start = step * i;
+                                      const end = step * (i + 1);
+                                      return `${color} ${start}% ${end}%`;
+                                    }).join(', ');
+                                    style = { background: `conic-gradient(${segments})` };
                                   } else {
-                                    arr = colorArr;
+                                    style = { background: arr[0] };
                                   }
-                                } else if (typeof colorArr === 'string' && colorArr.includes(',')) {
-                                  arr = colorArr.split(',').map(s => s.trim());
-                                } else if (typeof colorArr === 'string') {
-                                  arr = [colorArr];
-                                }
-                                let style = {};
-                                if (arr.length > 1) {
-                                  const step = 100 / arr.length;
-                                  const segments = arr.map((color, i) => {
-                                    const start = step * i;
-                                    const end = step * (i + 1);
-                                    return `${color} ${start}% ${end}%`;
-                                  }).join(', ');
-                                  style = { background: `conic-gradient(${segments})` };
-                                } else {
-                                  style = { background: arr[0] };
-                                }
-                                return (
-                                  <span
-                                    key={arr.join('-') + idx}
-                                    className="inline-block w-6 h-6 rounded-full border border-gray-300 shadow-sm hover:scale-110 transition-transform duration-150 cursor-pointer"
-                                    style={style}
-                                    title={arr.join(', ')}
-                                  />
-                                );
-                              })}
+                                  return (
+                                    <span
+                                      key={arr.join('-') + idx}
+                                      className="inline-block w-6 h-6 rounded-full border border-gray-300 shadow-sm hover:scale-110 transition-transform duration-150 cursor-pointer"
+                                      style={style}
+                                      title={arr.join(', ')}
+                                    />
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          ) : null;
+                        })()}
 
                         {/* Additional Images */}
                         {variant.images && variant.images.length > 0 && (

@@ -1,15 +1,15 @@
 // src/components/PaymentMethods/componant/PaymentCard.tsx
 import React from 'react';
-import { PencilSquareIcon, TrashIcon, StarIcon, CheckCircleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon, TrashIcon, StarIcon, CheckCircleIcon, EyeIcon, EyeSlashIcon, QrCodeIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
   method: PaymentMethod;
   onEdit: (m: PaymentMethod) => void;
-  onDelete: (id: number) => void;
-  onSetDefault: (id: number) => void;
-  onToggleActive: (id: number) => void;
+  onDelete: (id: string) => void;
+  onSetDefault: (id: string) => void;
+  onToggleActive: (id: string) => void;
   onClick: (m: PaymentMethod) => void;
   language: 'ENGLISH' | 'ARABIC';
 }
@@ -32,6 +32,7 @@ const PaymentCard: React.FC<Props> = ({
       case 'card': return 'bg-blue-100 text-blue-800';
       case 'digital_wallet': return 'bg-purple-100 text-purple-800';
       case 'bank_transfer': return 'bg-orange-100 text-orange-800';
+      case 'qr_code': return 'bg-indigo-100 text-indigo-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -42,9 +43,12 @@ const PaymentCard: React.FC<Props> = ({
       case 'card': return '💳';
       case 'digital_wallet': return '📱';
       case 'bank_transfer': return '🏦';
+      case 'qr_code': return '📱';
       default: return '💰';
     }
   };
+
+  const methodId = method._id || method.id?.toString() || '';
 
   return (
     <div
@@ -61,7 +65,7 @@ const PaymentCard: React.FC<Props> = ({
           {method.logoUrl ? (
             <img 
               src={method.logoUrl} 
-              alt={method.title} 
+              alt={method.titleAr} 
               className="w-12 h-12 rounded-lg bg-white border border-gray-200 object-contain" 
             />
           ) : (
@@ -104,38 +108,58 @@ const PaymentCard: React.FC<Props> = ({
         </span>
       </div>
 
-      {/* Financial details */}
-      <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-        {method.processingFee !== undefined && method.processingFee > 0 && (
-          <div>
-            <span className="text-gray-600">{t('paymentMethods.processingFee')}:</span>
-            <span className="font-medium ml-1">{method.processingFee}%</span>
+      {/* QR Code indicator */}
+      {method.qrCode?.enabled && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 text-sm text-indigo-600">
+            <QrCodeIcon className="w-4 h-4" />
+            <span>{t('paymentMethods.qrCodeEnabled')}</span>
           </div>
-        )}
-        {method.minimumAmount !== undefined && method.minimumAmount > 0 && (
-          <div>
-            <span className="text-gray-600">{t('paymentMethods.minimumAmount')}:</span>
-            <span className="font-medium ml-1">₪{method.minimumAmount}</span>
+          {method.qrCode.qrCodeImage && (
+            <div className="mt-2">
+              <img 
+                src={method.qrCode.qrCodeImage} 
+                alt="QR Code" 
+                className="w-16 h-16 rounded-lg border object-contain"
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Payment Images indicator */}
+      {method.paymentImages && method.paymentImages.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 text-sm text-purple-600 mb-2">
+            <PhotoIcon className="w-4 h-4" />
+            <span>{t('paymentMethods.paymentImages')} ({method.paymentImages.length})</span>
           </div>
-        )}
-        {method.maximumAmount !== undefined && method.maximumAmount > 0 && (
-          <div>
-            <span className="text-gray-600">{t('paymentMethods.maximumAmount')}:</span>
-            <span className="font-medium ml-1">₪{method.maximumAmount}</span>
+          <div className="flex gap-2 flex-wrap">
+            {method.paymentImages.slice(0, 3).map((image, index) => (
+              <div key={index} className="relative">
+                <img 
+                  src={image.imageUrl} 
+                  alt={image.altText || 'Payment image'} 
+                  className="w-12 h-12 rounded-lg object-cover border"
+                />
+                <span className="absolute -top-1 -right-1 bg-gray-800 text-white text-xs px-1 rounded-full">
+                  {image.imageType}
+                </span>
+              </div>
+            ))}
+            {method.paymentImages.length > 3 && (
+              <div className="w-12 h-12 rounded-lg border border-dashed border-gray-300 flex items-center justify-center text-xs text-gray-500">
+                +{method.paymentImages.length - 3}
+              </div>
+            )}
           </div>
-        )}
-        {method.supportedCurrencies && method.supportedCurrencies.length > 0 && (
-          <div>
-            <span className="text-gray-600">{t('paymentMethods.supportedCurrencies')}:</span>
-            <span className="font-medium ml-1">{method.supportedCurrencies.join(', ')}</span>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Action buttons */}
       <div className={`flex items-center justify-end gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} onClick={e => e.stopPropagation()}>
         <button
-          onClick={() => onToggleActive(method.id)}
+          onClick={() => onToggleActive(methodId)}
           className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 transition"
           title={method.isActive ? t('paymentMethods.deactivateConfirmTitle') : t('paymentMethods.activateConfirmTitle')}
           type="button"
@@ -154,7 +178,7 @@ const PaymentCard: React.FC<Props> = ({
               <PencilSquareIcon className="w-4 h-4" />
             </button>
             <button
-              onClick={() => onDelete(method.id)}
+              onClick={() => onDelete(methodId)}
               className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 transition"
               title={t('paymentMethods.delete')}
               type="button"
@@ -162,7 +186,7 @@ const PaymentCard: React.FC<Props> = ({
               <TrashIcon className="w-4 h-4" />
             </button>
             <button
-              onClick={() => onSetDefault(method.id)}
+              onClick={() => onSetDefault(methodId)}
               className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-50 hover:bg-yellow-100 text-yellow-600 transition"
               title={t('paymentMethods.setDefault')}
               type="button"

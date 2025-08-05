@@ -39,7 +39,7 @@ const useProductSpecifications = () => {
     } finally {
       setLoading(false);
     }
-  }, [hasLoaded, specifications.length, showError]);
+  }, [hasLoaded, showError]); // إزالة specifications.length من dependencies
 
   // إضافة أو تعديل مواصفة منتج
   const saveSpecification = async (form: any, editId?: string | number | null) => {
