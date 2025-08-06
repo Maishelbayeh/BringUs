@@ -14,7 +14,8 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ClockIcon
+  ClockIcon,
+  TruckIcon
 } from '@heroicons/react/24/outline';
 import { WarningAmber } from '@mui/icons-material';
 
@@ -85,6 +86,37 @@ const Homepage: React.FC = () => {
           </div>
         </motion.div>
 
+        {/* Total Revenue Section */}
+        <motion.div 
+          variants={itemVariants}
+          className="mb-8"
+          style={{
+            direction: isRTL ? 'rtl' : 'ltr'
+          }}
+        >
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-8 text-white shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold mb-2">
+                  {t('dashboard.totalRevenue')}
+                </h2>
+                <p className="text-green-100 mb-4">
+                  {t('dashboard.totalRevenueSubtitle')}
+                </p>
+                <div className="text-4xl font-bold">
+                  {stats?.totalRevenue?.toLocaleString() || '0'} {stats?.storeCurrency || 'ILS'}
+                </div>
+              </div>
+              <div className="text-right">
+                <CurrencyDollarIcon className="h-16 w-16 text-green-200" />
+                <div className="mt-2 text-sm text-green-100">
+                  {t('dashboard.allTimeRevenue')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Stats Cards Grid */}
         <motion.div 
           variants={itemVariants}
@@ -102,23 +134,12 @@ const Homepage: React.FC = () => {
           />
           
           <DashboardStatCard
-            title={t('dashboard.totalRevenue')}
-            value={stats?.totalRevenue || 0}
-            prefix="$"
-            icon={CurrencyDollarIcon}
-            color="#10B981"
-            bgColor="#ECFDF5"
-            trend={{ value: -2.4, isPositive: false }}
-            isLoading={loading}
-          />
-          
-          <DashboardStatCard
           link={`/customers`}
             title={t('dashboard.totalCustomers')}
             value={stats?.totalCustomers || 0}
             icon={UsersIcon}
-            color="#8B5CF6"
-            bgColor="#F3F4F6"
+            color="#6366F1"
+            bgColor="#EEF2FF"
             trend={{ value: 8.2, isPositive: true }}
             isLoading={loading}
           />
@@ -133,15 +154,26 @@ const Homepage: React.FC = () => {
             trend={{ value: 15.3, isPositive: true }}
             isLoading={loading}
           />
+          
+          <DashboardStatCard
+            title={t('dashboard.monthlyRevenue')}
+            value={stats?.monthlyRevenue || 0}
+            prefix={stats?.storeCurrency || 'ILS'}
+            icon={CurrencyDollarIcon}
+            color="#8B5CF6"
+            bgColor="#F3F4F6"
+            trend={{ value: 5.2, isPositive: true }}
+            isLoading={loading}
+          />
         </motion.div>
 
         {/* Order Status Cards */}
         <motion.div 
           variants={itemVariants}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8"
         >
           <DashboardStatCard
-          link={`/orders`}
+            link={`/orders`}
             title={t('dashboard.pendingOrders')}
             value={stats?.pendingOrders || 0}
             icon={ClockIcon}
@@ -151,7 +183,17 @@ const Homepage: React.FC = () => {
           />
           
           <DashboardStatCard
-          link={`/orders`}
+            link={`/orders`}
+            title={t('dashboard.shippedOrders')}
+            value={stats?.shippedOrders || 0}
+            icon={TruckIcon}
+            color="#6366F1"
+            bgColor="#EEF2FF"
+            isLoading={loading}
+          />
+          
+          <DashboardStatCard
+            link={`/orders`}
             title={t('dashboard.completedOrders')}
             value={stats?.completedOrders || 0}
             icon={CheckCircleIcon}
@@ -161,7 +203,7 @@ const Homepage: React.FC = () => {
           />
           
           <DashboardStatCard
-          link={`/orders`}
+            link={`/orders`}
             title={t('dashboard.cancelledOrders')}
             value={stats?.cancelledOrders || 0}
             icon={XCircleIcon}
@@ -171,7 +213,7 @@ const Homepage: React.FC = () => {
           />
           
           <DashboardStatCard
-          link={`/stock-preview`}
+            link={`/stock-preview`}
             title={t('dashboard.lowStockItems')}
             value={stats?.productStats?.lowStock || 0}
             icon={ExclamationTriangleIcon}
