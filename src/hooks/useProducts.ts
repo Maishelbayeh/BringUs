@@ -126,26 +126,48 @@ const useProducts = () => {
       unit: form.unitId || null, // <-- use unitId from form
       images: Array.isArray(form.images) ? form.images : [],
       mainImage: form.mainImage || null,
-      colors: Array.isArray(form.colors) 
-        ? form.colors.map((variant: any) => {
+      colors: (() => {
+        console.log('🔍 saveProduct - form.colors received:', form.colors);
+        console.log('🔍 saveProduct - form.colors type:', typeof form.colors);
+        console.log('🔍 saveProduct - form.colors is array:', Array.isArray(form.colors));
+        
+        if (Array.isArray(form.colors)) {
+          const processedColors = form.colors.map((variant: any) => {
+            console.log('🔍 saveProduct - Processing variant:', variant);
+            console.log('🔍 saveProduct - Variant type:', typeof variant);
+            console.log('🔍 saveProduct - Variant is object:', typeof variant === 'object');
+            console.log('🔍 saveProduct - Variant has colors property:', variant && typeof variant === 'object' && 'colors' in variant);
+            console.log('🔍 saveProduct - Variant.colors is array:', Array.isArray(variant?.colors));
+            
             // إذا كان variant يحتوي على colors property (من CustomColorPicker)
             if (variant && typeof variant === 'object' && Array.isArray(variant.colors)) {
+              console.log('🔍 saveProduct - Returning variant.colors:', variant.colors);
               return variant.colors;
             }
             // إذا كان variant مصفوفة ألوان مباشرة
             else if (Array.isArray(variant)) {
+              console.log('🔍 saveProduct - Returning variant as array:', variant);
               return variant;
             }
             // إذا كان لون واحد
             else if (typeof variant === 'string') {
+              console.log('🔍 saveProduct - Returning single color as array:', [variant]);
               return [variant];
             }
             // إذا كان null أو undefined
             else {
+              console.log('🔍 saveProduct - Returning empty array for null/undefined variant');
               return [];
             }
-          }).filter((colors: string[]) => colors.length > 0) // إزالة المصفوفات الفارغة
-        : [],
+          }).filter((colors: string[]) => colors.length > 0); // إزالة المصفوفات الفارغة
+          
+          console.log('🔍 saveProduct - Final processed colors:', processedColors);
+          return processedColors;
+        } else {
+          console.log('🔍 saveProduct - form.colors is not an array, returning empty array');
+          return [];
+        }
+      })(),
       productLabels: form.tags || [],
       attributes: form.attributes || [],
       specifications: (() => {
@@ -271,6 +293,9 @@ const useProducts = () => {
     console.log('🔍 saveProduct - Final payload specificationValues type:', typeof payload.specificationValues);
     console.log('🔍 saveProduct - Final payload specifications is array:', Array.isArray(payload.specifications));
     console.log('🔍 saveProduct - Final payload specificationValues is array:', Array.isArray(payload.specificationValues));
+    console.log('🔍 saveProduct - Final payload colors:', payload.colors);
+    console.log('🔍 saveProduct - Final payload colors type:', typeof payload.colors);
+    console.log('🔍 saveProduct - Final payload colors is array:', Array.isArray(payload.colors));
     //CONSOLE.log('Final payload to send:', payload);
       //CONSOLE.log('Barcodes in payload:', payload.barcodes);
       //CONSOLE.log('Barcodes type:', typeof payload.barcodes);
@@ -1078,6 +1103,131 @@ const useProducts = () => {
     }
   };
 
+  // Add colors to product
+  const addColorsToProduct = async (productId: string, colors: string[][]): Promise<any> => {
+    try {
+      console.log('🎨 addColorsToProduct - Adding colors to product:', productId);
+      console.log('🎨 Colors to add:', colors);
+
+      const response = await axios.post(`${BASE_URL}products/${productId}/colors`, {
+        storeId: getStoreId(),
+        colors: colors
+      });
+
+      if (response.data && response.data.success) {
+        console.log('✅ Colors added successfully:', response.data);
+        showSuccess('تم إضافة الألوان بنجاح', 'نجح الإضافة');
+        
+        // Refresh products list
+        await fetchProducts(true);
+        
+        return response.data.data;
+      }
+      
+      throw new Error('Failed to add colors');
+    } catch (err: any) {
+      console.error('❌ Error adding colors:', err);
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في إضافة الألوان';
+      showError(errorMessage, 'خطأ في إضافة الألوان');
+      throw err;
+    }
+  };
+
+  // Remove colors from product
+  const removeColorsFromProduct = async (productId: string, colorIndexes: number[]): Promise<any> => {
+    try {
+      console.log('🗑️ removeColorsFromProduct - Removing colors from product:', productId);
+      console.log('🗑️ Color indexes to remove:', colorIndexes);
+
+      const response = await axios.delete(`${BASE_URL}products/${productId}/colors`, {
+        data: {
+          storeId: getStoreId(),
+          colorIndexes: colorIndexes
+        }
+      });
+
+      if (response.data && response.data.success) {
+        console.log('✅ Colors removed successfully:', response.data);
+        showSuccess('تم حذف الألوان بنجاح', 'نجح الحذف');
+        
+        // Refresh products list
+        await fetchProducts(true);
+        
+        return response.data.data;
+      }
+      
+      throw new Error('Failed to remove colors');
+    } catch (err: any) {
+      console.error('❌ Error removing colors:', err);
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حذف الألوان';
+      showError(errorMessage, 'خطأ في حذف الألوان');
+      throw err;
+    }
+  };
+
+  // Replace all colors for product
+  const replaceProductColors = async (productId: string, colors: string[][]): Promise<any> => {
+    try {
+      console.log('🔄 replaceProductColors - Replacing colors for product:', productId);
+      console.log('🔄 New colors:', colors);
+
+      const response = await axios.put(`${BASE_URL}products/${productId}/colors`, {
+        storeId: getStoreId(),
+        colors: colors
+      });
+
+      if (response.data && response.data.success) {
+        console.log('✅ Colors replaced successfully:', response.data);
+        showSuccess('تم استبدال الألوان بنجاح', 'نجح الاستبدال');
+        
+        // Refresh products list
+        await fetchProducts(true);
+        
+        return response.data.data;
+      }
+      
+      throw new Error('Failed to replace colors');
+    } catch (err: any) {
+      console.error('❌ Error replacing colors:', err);
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في استبدال الألوان';
+      showError(errorMessage, 'خطأ في استبدال الألوان');
+      throw err;
+    }
+  };
+
+  // Get product colors (helper function)
+  const getProductColors = (product: any): string[][] => {
+    if (!product) return [];
+    
+    // Check if colors is already an array
+    if (Array.isArray(product.colors)) {
+      return product.colors;
+    }
+    
+    // If colors is a string, try to parse it
+    if (typeof product.colors === 'string') {
+      try {
+        const parsed = JSON.parse(product.colors);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.error('Error parsing product colors:', error);
+        return [];
+      }
+    }
+    
+    return [];
+  };
+
+  // Add single color to product
+  const addSingleColorToProduct = async (productId: string, color: string): Promise<any> => {
+    return await addColorsToProduct(productId, [[color]]);
+  };
+
+  // Add multiple colors to product
+  const addMultipleColorsToProduct = async (productId: string, colors: string[]): Promise<any> => {
+    return await addColorsToProduct(productId, [colors]);
+  };
+
   return {
     products,
     setProducts,
@@ -1096,7 +1246,14 @@ const useProducts = () => {
     addVariant,
     deleteVariant,
     updateVariant,
-    fetchProductVariants, // <-- Export the new function
+    fetchProductVariants,
+    // New color management functions
+    addColorsToProduct,
+    removeColorsFromProduct,
+    replaceProductColors,
+    getProductColors,
+    addSingleColorToProduct,
+    addMultipleColorsToProduct,
   };
 };
 
