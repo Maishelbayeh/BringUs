@@ -103,28 +103,48 @@ export function useOrder(storeId: string): UseOrderResult {
 
   const updateOrderPaymentStatus = async (orderId: string, paid: boolean) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/orders/${orderId}/payment-status`, {
+      // إذا تم تغيير الدفع إلى مدفوع، تغيير حالة الطلب إلى "تم التوصيل"
+      // إذا تم تغيير الدفع إلى غير مدفوع، تغيير حالة الطلب إلى "معلق"
+      const newStatus = paid ? 'delivered' : 'pending';
+      console.log(`🔄 Updating payment status for order ${orderId}:`, { paid, newStatus });
+      
+      // تحديث حالة الدفع أولاً
+      const paymentResponse = await fetch(`http://localhost:5001/api/orders/${orderId}/payment-status`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ paymentStatus: paid ? 'paid' : 'unpaid' }),
       });
 
-      const result = await response.json();
+      const paymentResult = await paymentResponse.json();
       
-      if (result.success) {
-        // Update the local state with paymentStatus
-        setData(prevData => 
-          prevData.map(order => 
-            (order.id === orderId || order.orderNumber === orderId || order._id === orderId)
-              ? { 
-                  ...order, 
-                  paymentStatus: result.data.paymentStatus
-                } 
-              : order
-          )
-        );
+      if (paymentResult.success) {
+        // ثم تحديث حالة الطلب
+        const statusResponse = await fetch(`http://localhost:5001/api/orders/${orderId}/status`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ status: newStatus }),
+        });
+
+        const statusResult = await statusResponse.json();
+        
+        if (statusResult.success) {
+          // Update the local state with both paymentStatus and status
+          setData(prevData => 
+            prevData.map(order => 
+              (order.id === orderId || order.orderNumber === orderId || order._id === orderId)
+                ? { 
+                    ...order, 
+                    paymentStatus: paymentResult.data.paymentStatus,
+                    status: statusResult.data.status || newStatus
+                  } 
+                : order
+            )
+          );
+        } else {
+          throw new Error(statusResult.message || 'Failed to update order status');
+        }
       } else {
-        throw new Error(result.message || 'Failed to update payment status');
+        throw new Error(paymentResult.message || 'Failed to update payment status');
       }
     } catch (err: any) {
       setError(err.message || 'Network error');
@@ -134,25 +154,56 @@ export function useOrder(storeId: string): UseOrderResult {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/orders/${orderId}/status`, {
+      // تحديد حالة الدفع بناءً على حالة الطلب
+      let newPaymentStatus = 'unpaid';
+      
+      if (status === 'delivered') {
+        // إذا تم تغيير حالة الطلب إلى "تم التوصيل"، جعل الدفع مدفوع
+        newPaymentStatus = 'paid';
+      } else if (status !== 'delivered') {
+        // إذا تم تغيير حالة الطلب إلى أي شيء آخر غير "تم التوصيل"، جعل الدفع غير مدفوع
+        newPaymentStatus = 'unpaid';
+      }
+      
+      console.log(`🔄 Updating order status for order ${orderId}:`, { status, newPaymentStatus });
+      
+      // تحديث حالة الطلب أولاً
+      const statusResponse = await fetch(`http://localhost:5001/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ status }),
       });
 
-      const result = await response.json();
+      const statusResult = await statusResponse.json();
       
-      if (result.success) {
-        // Update the local state
-        setData(prevData => 
-          prevData.map(order => 
-            (order.id === orderId || order.orderNumber === orderId || order._id === orderId)
-              ? { ...order, status } 
-              : order
-          )
-        );
+      if (statusResult.success) {
+        // ثم تحديث حالة الدفع
+        const paymentResponse = await fetch(`http://localhost:5001/api/orders/${orderId}/payment-status`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ paymentStatus: newPaymentStatus }),
+        });
+
+        const paymentResult = await paymentResponse.json();
+        
+        if (paymentResult.success) {
+          // Update the local state with both status and paymentStatus
+          setData(prevData => 
+            prevData.map(order => 
+              (order.id === orderId || order.orderNumber === orderId || order._id === orderId)
+                ? { 
+                    ...order, 
+                    status: statusResult.data.status || status,
+                    paymentStatus: paymentResult.data.paymentStatus || newPaymentStatus
+                  } 
+                : order
+            )
+          );
+        } else {
+          throw new Error(paymentResult.message || 'Failed to update payment status');
+        }
       } else {
-        throw new Error(result.message || 'Failed to update order status');
+        throw new Error(statusResult.message || 'Failed to update order status');
       }
     } catch (err: any) {
       setError(err.message || 'Network error');

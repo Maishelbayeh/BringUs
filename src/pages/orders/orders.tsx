@@ -297,14 +297,14 @@ const OrdersPage: React.FC = () => {
     }
 
     return filteredOrders.map(order => {
-      const orderData = {
-        id: order.id || order.orderNumber || order._id, // Use the correct ID field
-        customer: order.customer,
-        phone: order.customerPhone,
-        email: order.customerEmail || '-',
-        deliveryArea: order.deliveryArea?.locationEn || '-',
-        affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
-        currency: order.currency,
+    const orderData = {
+      id: order.id || order.orderNumber || order._id, // Use the correct ID field
+      customer: order.customer,
+      phone: order.customerPhone,
+      email: order.customerEmail || '-',
+      deliveryArea: order.deliveryArea?.locationEn || '-',
+      affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
+      currency: order.currency,
         price: (() => {
           if (order.items && Array.isArray(order.items) && order.items.length > 0) {
             const total = order.items.reduce((sum: number, item: any) => {
@@ -317,15 +317,15 @@ const OrdersPage: React.FC = () => {
             return 0; // إذا لم تكن هناك items، استخدم 0
           }
         })(),
-        date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
-        status: order.status,
-        paymentStatus: order.paymentStatus || 'unpaid', // Default to 'unpaid' if not present
-        itemsCount: order.itemsCount,
-        notes: order.notes,
-        originalOrder: order,
-      };
-      return orderData;
-    });
+      date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
+      status: order.status,
+      paymentStatus: order.paymentStatus || 'unpaid', // Default to 'unpaid' if not present
+      itemsCount: order.itemsCount,
+      notes: order.notes,
+      originalOrder: order,
+    };
+    return orderData;
+  });
   }, [orders, activeFilter]);
 
 //-------------------------------------------- Status Renderer -------------------------------------------

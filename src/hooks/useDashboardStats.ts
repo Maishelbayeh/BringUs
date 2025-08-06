@@ -71,7 +71,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
         categoriesRes,
         ordersRes
       ] = await Promise.all([
-        axios.get(`${BASE_URL}meta/products`, { headers: getAuthHeaders() }),
+        axios.get(`${BASE_URL}products/by-store/${storeId}`, { headers: getAuthHeaders() }),
         axios.get(`${BASE_URL}stores/${storeId}/customers`, { headers: getAuthHeaders() }),
         axios.get(`${BASE_URL}categories/store/${storeId}`, { headers: getAuthHeaders() }),
         axios.get(`${BASE_URL}orders/store/${storeId}`, { headers: getAuthHeaders() })
@@ -81,6 +81,9 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
       const customers = customersRes.data.data || customersRes.data || [];
       const categories = categoriesRes.data.data || categoriesRes.data || [];
       const orders = ordersRes.data.data || ordersRes.data || [];
+      
+      console.log('Products for store:', storeId, 'Count:', products.length);
+      console.log('Sample product:', products[0]);
       
       // جلب معلومات المتجر باستخدام useStore (سيتم تخزينها في localStorage تلقائياً)
       const store = await getStore(storeId);
