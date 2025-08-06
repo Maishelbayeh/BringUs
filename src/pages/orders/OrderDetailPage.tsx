@@ -5,6 +5,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon, BuildingStorefrontIcon, UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import { CustomTable } from '../../components/common/CustomTable';
+import InvoicePrint from '../../components/common/InvoicePrint';
 
 
 interface Order {
@@ -56,6 +57,7 @@ const OrderDetailPage: React.FC = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showInvoicePrint, setShowInvoicePrint] = useState(false);
 
   // Helper function to get auth token
   const getAuthHeaders = () => {
@@ -162,7 +164,7 @@ const OrderDetailPage: React.FC = () => {
                 <span className="inline-block bg-primary/20 text-primary font-bold text-lg px-3 py-1 rounded-md tracking-widest">#{order.id}</span>
               </div>
               <button
-                onClick={() => window.print()}
+                onClick={() => setShowInvoicePrint(true)}
                 className="flex items-center gap-1 px-3 py-1 bg-primary/20 text-primary rounded hover:bg-primary/30 transition text-base no-print"
                 title={t('orders.print')}
               >
@@ -197,7 +199,14 @@ const OrderDetailPage: React.FC = () => {
                     <DocumentTextIcon className="h-5 w-5 text-primary" />
                     <span className="font-bold">{t('orders.orderInfo')}</span>
                   </div>
-                  <div className="mb-1"><span className="font-semibold">{t('orders.date')}:</span> {order.date ? new Date(order.date).toLocaleString() : '-'}</div>
+                  <div className="mb-1"><span className="font-semibold">{t('orders.date')}:</span> {order.date ? new Date(order.date).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    calendar: 'gregory'
+                  }) : '-'}</div>
                   <div className="mb-1"><span className="font-semibold">{t('orders.orderPrice')}:</span> {order.items && order.items.length > 0 ? order.items[0].totalPrice : '-'} {order.currency || ''}</div>
                   <div className="mb-1 flex items-center gap-1">
                     <span className="font-semibold">{t('orders.paymentStatus')}:</span>
@@ -301,6 +310,13 @@ const OrderDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Invoice Print Modal */}
+      <InvoicePrint
+        order={order}
+        isVisible={showInvoicePrint}
+        onClose={() => setShowInvoicePrint(false)}
+      />
     </div>
   );
 };

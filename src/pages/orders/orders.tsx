@@ -3,10 +3,20 @@ import {  currencies } from '../../api/mockCustomers';
 import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
+import { motion } from 'framer-motion';
 
 import { useOrder } from '../../hooks/useOrder';
 import { getStoreId } from '../../utils/storeUtils';
 import { useToastContext } from '../../contexts/ToastContext';
+import { 
+  ShoppingCartIcon, 
+  ClockIcon,
+  TruckIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  CreditCardIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
 
 //-------------------------------------------- Types -------------------------------------------
 type Column = {
@@ -17,38 +27,295 @@ type Column = {
   render?: (value: any, item: any) => React.ReactNode;
 };
 
+//-------------------------------------------- OrderStatistics Component -------------------------------------------
+interface OrderStatisticsProps {
+  data: any[];
+  isRtl: boolean;
+  onFilterChange: (filter: { type: 'status' | 'payment', value: string | null }) => void;
+  activeFilter: { type: 'status' | 'payment', value: string | null };
+}
 
+const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilterChange, activeFilter }) => {
+  const { t } = useTranslation();
+  
+  // Calculate statistics
+  const stats = {
+    total: data.length,
+    pending: data.filter(order => order.status === 'pending').length,
+    shipped: data.filter(order => order.status === 'shipped').length,
+    delivered: data.filter(order => order.status === 'delivered').length,
+    cancelled: data.filter(order => order.status === 'cancelled').length,
+    paid: data.filter(order => order.paymentStatus === 'paid').length,
+    unpaid: data.filter(order => order.paymentStatus === 'unpaid').length,
+  };
+
+  // Calculate total amounts for paid and unpaid orders
+  const paidTotal = data
+    .filter(order => order.paymentStatus === 'paid' && typeof order.price === 'number')
+    .reduce((sum, order) => sum + order.price, 0);
+  
+  const unpaidTotal = data
+    .filter(order => order.paymentStatus === 'unpaid' && typeof order.price === 'number')
+    .reduce((sum, order) => sum + order.price, 0);
+
+  const statusCards = [
+    {
+      title: t('orders.totalOrders'),
+      value: stats.total,
+      icon: ShoppingCartIcon,
+      color: '#3B82F6',
+      bgColor: '#EBF4FF',
+      filterValue: null
+    },
+    {
+      title: t('orders.pendingOrders'),
+      value: stats.pending,
+      icon: ClockIcon,
+      color: '#F59E0B',
+      bgColor: '#FFFBEB',
+      filterValue: 'pending'
+    },
+    {
+      title: t('orders.shippedOrders'),
+      value: stats.shipped,
+      icon: TruckIcon,
+      color: '#6366F1',
+      bgColor: '#EEF2FF',
+      filterValue: 'shipped'
+    },
+    {
+      title: t('orders.deliveredOrders'),
+      value: stats.delivered,
+      icon: CheckCircleIcon,
+      color: '#10B981',
+      bgColor: '#ECFDF5',
+      filterValue: 'delivered'
+    },
+    {
+      title: t('orders.cancelledOrders'),
+      value: stats.cancelled,
+      icon: XCircleIcon,
+      color: '#EF4444',
+      bgColor: '#FEF2F2',
+      filterValue: 'cancelled'
+    }
+  ];
+
+  const paymentCards = [
+    {
+      title: t('orders.paidOrders'),
+      value: stats.paid,
+      amount: paidTotal,
+      icon: CreditCardIcon,
+      color: '#10B981',
+      bgColor: '#ECFDF5',
+      filterValue: 'paid'
+    },
+    {
+      title: t('orders.unpaidOrders'),
+      value: stats.unpaid,
+      amount: unpaidTotal,
+      icon: ExclamationTriangleIcon,
+      color: '#F59E0B',
+      bgColor: '#FFFBEB',
+      filterValue: 'unpaid'
+    }
+  ];
+
+  return (
+    <div className="mb-6 space-y-4">
+      {/* Order Status Statistics */}
+      <div>
+        <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+          <span className=" h-4 bg-blue-500 rounded-full"></span>
+          {t('orders.orderStatusStatistics')}
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {statusCards.map((stat, index) => {
+            const Icon = stat.icon;
+            const isActive = activeFilter.type === 'status' && activeFilter.value === stat.filterValue;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all duration-300 group cursor-pointer ${
+                  isActive 
+                    ? 'border-blue-500 shadow-md bg-blue-50' 
+                    : 'border-gray-100'
+                }`}
+                dir={isRtl ? 'rtl' : 'ltr'}
+                onClick={() => onFilterChange({ 
+                  type: 'status', 
+                  value: stat.filterValue 
+                })}
+              >
+                <div className={`flex items-center justify-between mb-3 `}>
+                  <h3 className={`text-sm font-medium ${isRtl ? 'text-right' : 'text-left'} ${
+                    isActive ? 'text-blue-600' : 'text-gray-600'
+                  }`}>
+                    {stat.title}
+                  </h3>
+                  <div 
+                    className={`p-2 rounded-lg group-hover:scale-110 transition-transform duration-300`}
+                    style={{ backgroundColor: stat.bgColor }}
+                  >
+                    <Icon className="w-5 h-5" style={{ color: stat.color }} />
+                  </div>
+                </div>
+
+                <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                  <div className={`text-xl font-bold ${
+                    isActive ? 'text-blue-900' : 'text-gray-900'
+                  }`}>
+                    {stat.value}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Payment Statistics */}
+      <div>
+        <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+          <span className=" h-4 bg-green-500 rounded-full"></span>
+          {t('orders.paymentStatistics')}
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {paymentCards.map((stat, index) => {
+            const Icon = stat.icon;
+            const percentage = data.length > 0 ? Math.round((stat.value / data.length) * 100) : 0;
+            const isActive = activeFilter.type === 'payment' && activeFilter.value === stat.filterValue;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className={`bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-all duration-300 group cursor-pointer ${
+                  isActive 
+                    ? 'border-blue-500 shadow-md bg-blue-50' 
+                    : 'border-gray-100'
+                }`}
+                dir={isRtl ? 'rtl' : 'ltr'}
+                onClick={() => onFilterChange({ 
+                  type: 'payment', 
+                  value: stat.filterValue 
+                })}
+              >
+                <div className={`flex items-center justify-between mb-4 `}>
+                  <h3 className={`text-sm font-medium ${isRtl ? 'text-right' : 'text-left'} ${
+                    isActive ? 'text-blue-600' : 'text-gray-600'
+                  }`}>
+                    {stat.title}
+                  </h3>
+                  <div 
+                    className={`p-3 rounded-lg group-hover:scale-110 transition-transform duration-300`}
+                    style={{ backgroundColor: stat.bgColor }}
+                  >
+                    <Icon className="w-6 h-6" style={{ color: stat.color }} />
+                  </div>
+                </div>
+
+                <div className={`mb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  <div className={`text-2xl font-bold ${
+                    isActive ? 'text-blue-900' : 'text-gray-900'
+                  }`}>
+                    {stat.value}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {t('orders.orders')}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">{t('orders.totalAmount')}:</span>
+                    <span className="text-sm font-bold text-gray-900">
+                      {stat.amount.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                      <div
+                        className={`h-1.5 rounded-full transition-all duration-500`}
+                        style={{ 
+                          width: `${percentage}%`,
+                          backgroundColor: stat.color
+                        }}
+                      ></div>
+                    </div>
+                    <span className="text-xs font-medium text-gray-500">
+                      {percentage}%
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      
+    </div>
+  );
+};
 
 //-------------------------------------------- OrdersPage -------------------------------------------
 const OrdersPage: React.FC = () => {
   const { i18n, t } = useTranslation();
   const { showSuccess, showError } = useToastContext();
 
+  // Filter state
+  const [activeFilter, setActiveFilter] = useState<{ type: 'status' | 'payment', value: string | null }>({
+    type: 'status',
+    value: null
+  });
 
   const storeId = getStoreId();
   const { data: orders, isLoading, error,  updateOrderPaymentStatus, updateOrderStatus } = useOrder(storeId);
 
 //-------------------------------------------- tableData -------------------------------------------
-  const tableData = orders.map(order => {
-    const orderData = {
-      id: order.id || order.orderNumber || order._id, // Use the correct ID field
-      customer: order.customer,
-      phone: order.customerPhone,
-      email: order.customerEmail || '-',
-      deliveryArea: order.deliveryArea?.locationEn || '-',
-      affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
-      currency: order.currency,
-      price: order.items && order.items.length > 0 ? order.items[0].total : '-',
-      date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
-      status: order.status,
-      paymentStatus: order.paymentStatus || 'unpaid', // Default to 'unpaid' if not present
-      itemsCount: order.itemsCount,
-      notes: order.notes,
-      originalOrder: order,
-    };
-    console.log('Table row data:', orderData); // Debug log
-    return orderData;
-  });
+  // Handle filter changes
+  const handleFilterChange = (filter: { type: 'status' | 'payment', value: string | null }) => {
+    setActiveFilter(filter);
+  };
+
+  const tableData = React.useMemo(() => {
+    let filteredOrders = orders;
+    
+    // Apply filter if active
+    if (activeFilter.value) {
+      if (activeFilter.type === 'status') {
+        filteredOrders = orders.filter(order => order.status === activeFilter.value);
+      } else if (activeFilter.type === 'payment') {
+        filteredOrders = orders.filter(order => order.paymentStatus === activeFilter.value);
+      }
+    }
+
+    return filteredOrders.map(order => {
+      const orderData = {
+        id: order.id || order.orderNumber || order._id, // Use the correct ID field
+        customer: order.customer,
+        phone: order.customerPhone,
+        email: order.customerEmail || '-',
+        deliveryArea: order.deliveryArea?.locationEn || '-',
+        affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
+        currency: order.currency,
+        price: order.items && order.items.length > 0 ? order.items[0].total : '-',
+        date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
+        status: order.status,
+        paymentStatus: order.paymentStatus || 'unpaid', // Default to 'unpaid' if not present
+        itemsCount: order.itemsCount,
+        notes: order.notes,
+        originalOrder: order,
+      };
+      return orderData;
+    });
+  }, [orders, activeFilter]);
 
 //-------------------------------------------- Status Renderer -------------------------------------------
   const renderStatus = (status: string, item: any) => {
@@ -172,7 +439,7 @@ const OrdersPage: React.FC = () => {
 
 
 //-------------------------------------------- columns -------------------------------------------
-  const columns: Column[] = [
+  const columns: Column[] = React.useMemo(() => [
     { key: 'id', label: { ar: 'رقم الطلب', en: 'Order Number' }, type: 'number'},
     { key: 'customer', label: { ar: 'العميل', en: 'Customer' }, type: 'text'},
     { key: 'phone', label: { ar: 'رقم الهاتف', en: 'Phone' }, type: 'text'},
@@ -187,14 +454,10 @@ const OrdersPage: React.FC = () => {
     { key: 'itemsCount', label: { ar: 'عدد المنتجات', en: 'Items Count' }, type: 'number'},
     { key: 'notes', label: { ar: 'ملاحظات', en: 'Notes' }, type: 'text'},
     // { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text', render: renderActions},
-  ];
+  ], [renderStatus, renderPaymentStatus]);
 
 //-------------------------------------------- visibleTableData -------------------------------------------     
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
-  
-
-
-
 
 //-------------------------------------------- return -------------------------------------------
   if (isLoading) return <div>Loading...</div>;
@@ -207,17 +470,26 @@ const OrdersPage: React.FC = () => {
       count={tableData.length}
       isRtl={i18n.language === 'ARABIC'}
      />
+     
+     {/* ------------------------------------------- Order Statistics ------------------------------------------- */}
+     <OrderStatistics 
+       data={visibleTableData} 
+       isRtl={i18n.language === 'ARABIC'}
+       onFilterChange={handleFilterChange}
+       activeFilter={activeFilter}
+     />
+     
      {/* ------------------------------------------- CustomTable ------------------------------------------- */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" style={{ maxHeight: '70vh', overflowY: 'auto', scrollBehavior: 'smooth' }}>
         <CustomTable 
           columns={columns} 
           data={tableData} 
           onFilteredDataChange={setVisibleTableData}
+          autoScrollToFirst={false}
           linkConfig={[{
             column: 'id',
             getPath: (row) => {
               const path = `/orders/${row.id}`;
-              console.log('Generated path:', path, 'for row:', row); // Debug log
               return path;
             }
           }]}

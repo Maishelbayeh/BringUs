@@ -229,8 +229,8 @@ const Signup: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* First Name and Last Name */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              {/*<div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-2">
                   <CustomInput
                     label={t('signup.firstName')}
                     type="text"
@@ -241,7 +241,7 @@ const Signup: React.FC = () => {
                     placeholder={t('signup.firstNamePlaceholder')}
                     error={errors.firstName}
                   />
-                </div>
+                </div> 
                 <div className="space-y-2">
                   <CustomInput
                     label={t('signup.lastName')}
@@ -255,9 +255,9 @@ const Signup: React.FC = () => {
                   />
                 </div>
               </div>
-
+*/}
               {/* Email */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <CustomInput
                   label={t('signup.email')}
                   type="email"
@@ -268,10 +268,10 @@ const Signup: React.FC = () => {
                   placeholder={t('signup.emailPlaceholder')}
                   error={errors.email}
                 />
-              </div>
+              </div> */}
 
               {/* Phone */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <CustomInput
                   label={t('signup.phone')}
                   type="tel"
@@ -282,10 +282,10 @@ const Signup: React.FC = () => {
                   placeholder={t('signup.phonePlaceholder')}
                   error={errors.phone}
                 />
-              </div>
+              </div> */}
 
               {/* Password */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <div className="relative">
                   <label htmlFor="password" className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
                     {t('signup.password')}
@@ -319,10 +319,10 @@ const Signup: React.FC = () => {
                     <span className="mt-1 text-xs text-red-600 block">{errors.password}</span>
                   )}
                 </div>
-              </div>
+              </div> */}
 
               {/* Confirm Password */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <div className="relative">
                   <label htmlFor="confirmPassword" className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
                     {t('signup.confirmPassword')}
@@ -351,7 +351,7 @@ const Signup: React.FC = () => {
                     >
                       {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </button>
-                    {/* Green check icon when passwords match */}
+                   
                     {formData.confirmPassword && formData.password === formData.confirmPassword && !errors.confirmPassword && (
                       <div className={`absolute top-1/2 transform -translate-y-1/2 ${language === 'ARABIC' ? 'right-12' : 'left-12'}`}>
                         <Check className="text-green-500 text-lg" />
@@ -362,10 +362,10 @@ const Signup: React.FC = () => {
                     <span className="mt-1 text-xs text-red-600 block">{errors.confirmPassword}</span>
                   )}
                 </div>
-              </div>
+              </div> */}
 
               {/* Terms and Conditions */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label className={`flex items-start ${language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
                   <input
                     type="checkbox"
@@ -380,9 +380,9 @@ const Signup: React.FC = () => {
                 {errors.terms && (
                   <span className={`mt-1 text-xs text-red-600 block ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>{errors.terms}</span>
                 )}
-              </div>
+              </div> */}
 
-              <CustomButton
+              {/* <CustomButton
                 text={isLoading ? t('signup.creatingAccount') : t('signup.signUp')}
                 color="purple"
                 type="submit"
@@ -391,17 +391,17 @@ const Signup: React.FC = () => {
                 icon={isLoading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                 ) : <CheckCircle />}
-              />
+              /> */}
 
               {/* Divider */}
-              <div className="relative my-6">
+              {/* <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white text-gray-500">{t('signup.or')}</span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Store Registration Button */}
               <CustomButton
