@@ -1,5 +1,5 @@
 // src/components/DeliveryAreas/DeliveryAreaForm.tsx
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import  { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { DeliveryArea } from '../../../Types';
 
 import CustomInput from '../../../components/common/CustomInput';
@@ -21,7 +21,7 @@ export interface FormRef {
   handleSubmit: () => void;
 }
 
-const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, onCancel, language, onValidationChange }, ref) => {
+const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, language, onValidationChange }, ref) => {
   const { t } = useTranslation();
   const { getStore } = useStore();
   const [storeWhatsappNumber, setStoreWhatsappNumber] = useState('');

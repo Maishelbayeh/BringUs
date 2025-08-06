@@ -1,7 +1,7 @@
 // src/validation/affiliatePaymentValidation.ts
 // فاليديشن دفع المسوقين باستخدام النظام العام
 
-import { ValidationSchema, COMMON_SCHEMAS } from '../utils/validation';
+import { ValidationSchema } from '../utils/validation';
 
 // Interface لبيانات فورم دفع المسوق
 export interface AffiliatePaymentFormData {

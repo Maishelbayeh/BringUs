@@ -22,9 +22,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   form, 
   setForm, 
   onClose, 
-  isRTL, 
+  
   affiliate,
-  payments = [],
+ 
   loading = false,
   onPaymentSuccess
 }) => {

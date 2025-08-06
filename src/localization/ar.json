@@ -677,7 +677,7 @@
     "saving": "جاري الحفظ...",
     "pleaseCompleteForm": "يرجى إكمال جميع الحقول المطلوبة",
     "copy": "نسخ",
-    "search": "بحث...",
+   
     "noOptions": "لا توجد خيارات",
     "selectOption": "اختر خياراً"
   },
@@ -725,7 +725,20 @@
     "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج من الطلب؟",
     "order": "طلب",
     "deleteOrderConfirmTitle": "تأكيد حذف الطلب",
-    "deleteOrderConfirmMessage": "هل أنت متأكد من حذف هذا الطلب؟"
+    "deleteOrderConfirmMessage": "هل أنت متأكد من حذف هذا الطلب؟",
+    "paymentStatusUpdated": "تم تحديث حالة الدفع للطلب ",
+    "paymentStatusUpdateFailed": "فشل في تحديث حالة الدفع",
+    "orderStatusUpdated": "تم تحديث حالة الطلب ",
+    "orderStatusUpdateFailed": "فشل في تحديث حالة الطلب",
+    "updating": "جاري التحديث...",
+    "paymentStatus": "حالة الدفع",
+    "orderStatus": "حالة الطلب",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "الشحن",
+    "tax": "الضريبة",
+    "itemsCount": "عدد المنتجات",
+    "notes": "ملاحظات",
+    "notFound": "الطلب غير موجود"
   },
   "storeSlider": {
     "addSlider": "إضافة شريط متجر",

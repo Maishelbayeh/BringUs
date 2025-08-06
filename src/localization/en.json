@@ -589,7 +589,20 @@
     "deleteConfirmMessage": "Are you sure you want to delete this product from the order?",
     "order": "order",
     "deleteOrderConfirmTitle": "Confirm Delete Order",
-    "deleteOrderConfirmMessage": "Are you sure you want to delete this order?"
+    "deleteOrderConfirmMessage": "Are you sure you want to delete this order?",
+    "paymentStatusUpdated": "Payment status updated for order",
+    "paymentStatusUpdateFailed": "Failed to update payment status",
+    "orderStatusUpdated": "Order status updated for order ",
+    "orderStatusUpdateFailed": "Failed to update order status",
+    "updating": "Updating...",
+    "paymentStatus": "Payment Status",
+    "orderStatus": "Order Status",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "itemsCount": "Items Count",
+    "notes": "Notes",
+    "notFound": "Order not found"
   
     
 

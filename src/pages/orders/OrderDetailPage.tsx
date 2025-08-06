@@ -1,22 +1,139 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useOrder } from '../../hooks/useOrder';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon, BuildingStorefrontIcon, UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import { CustomTable } from '../../components/common/CustomTable';
-import PermissionModal from '../../components/common/PermissionModal';
 
-const storeId = '687505893fbf3098648bfe16';
+
+interface Order {
+  _id?: string;
+  id: string;
+  orderNumber?: string;
+  storeName: string;
+  storePhone: string;
+  storeUrl: string;
+  customer: string;
+  customerPhone: string;
+  customerEmail?: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  };
+  affiliate: string;
+  deliveryArea?: {
+    locationAr?: string;
+    locationEn?: string;
+    price?: number;
+    estimatedDays?: number;
+  };
+  currency: string;
+  date: string;
+  paymentStatus?: string;
+  status: string;
+  itemsCount: number;
+  notes: string;
+  items: Array<{
+    productId?: string;
+    name?: string;
+    sku?: string;
+    quantity?: number;
+    price?: number;
+    totalPrice?: number;
+    image?: string;
+    variant?: any;
+    productSnapshot?: any;
+  }>;
+}
 
 const OrderDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const { data: orders, isLoading, error } = useOrder(storeId);
-  const order = orders.find(o => String(o.id) === String(id));
+  // Helper function to get auth token
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  };
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!id) return;
+      
+      console.log('Looking for order with ID:', id); // Debug log
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Use the new getOrderDetails endpoint
+        const response = await fetch(`http://localhost:5001/api/orders/details/${id}`, {
+          headers: getAuthHeaders()
+        });
+        
+        const result = await response.json();
+        console.log('API Response:', result); // Debug log
+        
+        if (result.success) {
+          console.log('Found order:', result.data); // Debug log
+          // Map the order data to match our interface
+          const mappedOrder = {
+            _id: result.data.id,
+            id: result.data.orderNumber,
+            orderNumber: result.data.orderNumber,
+            storeName: result.data.store?.nameEn || '',
+            storePhone: result.data.store?.phone || '',
+            storeUrl: result.data.store ? `/store/${result.data.store.slug}` : '',
+            customer: result.data.user ? `${result.data.user.firstName} ${result.data.user.lastName}` : '',
+            customerPhone: result.data.user?.phone || '',
+            customerEmail: result.data.user?.email || '',
+            user: result.data.user ? {
+              firstName: result.data.user.firstName,
+              lastName: result.data.user.lastName,
+              email: result.data.user.email,
+              phone: result.data.user.phone
+            } : undefined,
+            affiliate: result.data.affiliate ? 
+              `${result.data.affiliate.snapshot?.firstName || ''} ${result.data.affiliate.snapshot?.lastName || ''}`.trim() || 'لا يوجد' : 'لا يوجد',
+            deliveryArea: result.data.deliveryArea ? {
+              locationAr: result.data.deliveryArea.snapshot?.locationAr,
+              locationEn: result.data.deliveryArea.snapshot?.locationEn,
+              price: result.data.deliveryArea.snapshot?.price,
+              estimatedDays: result.data.deliveryArea.snapshot?.estimatedDays
+            } : undefined,
+            currency: result.data.currency || '',
+            date: result.data.createdAt,
+            paymentStatus: result.data.paymentStatus || 'unpaid',
+            status: result.data.status || '',
+            itemsCount: result.data.itemsCount || 0,
+            notes: result.data.notes?.customer || result.data.notes?.admin || '',
+            items: result.data.items || []
+          };
+          setOrder(mappedOrder);
+        } else {
+          console.log('Order not found:', result.message); // Debug log
+          setError(result.message || 'Order not found');
+        }
+      } catch (err: any) {
+        console.error('Error fetching order:', err); // Debug log
+        setError(err.message || 'Network error');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [id]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div className="p-8 text-center text-red-600 font-bold">{error}</div>;
@@ -81,12 +198,28 @@ const OrderDetailPage: React.FC = () => {
                     <span className="font-bold">{t('orders.orderInfo')}</span>
                   </div>
                   <div className="mb-1"><span className="font-semibold">{t('orders.date')}:</span> {order.date ? new Date(order.date).toLocaleString() : '-'}</div>
-                  <div className="mb-1"><span className="font-semibold">{t('orders.orderPrice')}:</span> {order.items && order.items.length > 0 ? order.items[0].total : '-'} {order.currency || ''}</div>
+                  <div className="mb-1"><span className="font-semibold">{t('orders.orderPrice')}:</span> {order.items && order.items.length > 0 ? order.items[0].totalPrice : '-'} {order.currency || ''}</div>
                   <div className="mb-1 flex items-center gap-1">
-                    <span className="font-semibold">{t('orders.status')}:</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${order.paid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {order.paid ? <CheckCircleIcon className="h-4 w-4 text-green-500" /> : <XCircleIcon className="h-4 w-4 text-red-500" />}
-                      {order.paid ? t('orders.paid') : t('orders.unpaid')}
+                    <span className="font-semibold">{t('orders.paymentStatus')}:</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {order.paymentStatus === 'paid' ? <CheckCircleIcon className="h-4 w-4 text-green-500" /> : <XCircleIcon className="h-4 w-4 text-red-500" />}
+                      {order.paymentStatus === 'paid' ? t('orders.paid') : t('orders.unpaid')}
+                    </span>
+                  </div>
+                  <div className="mb-1 flex items-center gap-1">
+                    <span className="font-semibold">{t('orders.orderStatus')}:</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                      order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                      order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                      order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {order.status === 'pending' ? (i18n.language === 'ARABIC' ? 'معلق' : 'Pending') :
+                       order.status === 'shipped' ? (i18n.language === 'ARABIC' ? 'تم الشحن' : 'Shipped') :
+                       order.status === 'delivered' ? (i18n.language === 'ARABIC' ? 'تم التوصيل' : 'Delivered') :
+                       order.status === 'cancelled' ? (i18n.language === 'ARABIC' ? 'تم إلغاؤه' : 'Cancelled') :
+                       order.status}
                     </span>
                   </div>
                 </div>
@@ -95,10 +228,42 @@ const OrderDetailPage: React.FC = () => {
                 <h3 className="text-lg font-bold text-primary mb-2">{t('orders.orderItems')}</h3>
                 <CustomTable
                   columns={[
+                    { 
+                      key: 'image', 
+                      label: { ar: 'الصورة', en: 'Image' }, 
+                      type: 'image',
+                      render: (value: any, item: any) => (
+                        <div className="flex justify-center">
+                          <img 
+                            src={value || '/placeholder-image.png'} 
+                            alt={item.name || 'Product'} 
+                            className="w-12 h-12 object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => {
+                              if (value) {
+                                window.open(value, '_blank');
+                              }
+                            }}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/placeholder-image.png';
+                            }}
+                          />
+                        </div>
+                      )
+                    },
+                    { key: 'name', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' },
                     { key: 'quantity', label: { ar: 'الكمية', en: 'Quantity' }, type: 'number' },
-                    { key: 'total', label: { ar: 'الإجمالي', en: 'Total' }, type: 'number' },
+                    { key: 'price', label: { ar: 'سعر الوحدة', en: 'Unit Price' }, type: 'number' },
+                    { key: 'totalPrice', label: { ar: 'الإجمالي', en: 'Total' }, type: 'number' },
                   ]}
-                  data={order.items}
+                  data={order.items.map(item => ({
+                    image: item.productSnapshot?.images?.[0] || item.image || '',
+                    name: item.name || item.productSnapshot?.nameEn || 'غير محدد',
+                    quantity: item.quantity || 0,
+                    price: item.price || 0,
+                    totalPrice: item.totalPrice || 0,
+                    currency: order.currency
+                  }))}
                 />
               </div>
             </div>
@@ -109,16 +274,28 @@ const OrderDetailPage: React.FC = () => {
             <div className="text-xl font-bold text-primary bg-primary/10 py-2 px-4 rounded-t-lg">{i18n.language === 'ARABIC' ? 'ملخص الطلب' : 'Order Summary'}</div>
             <div className=" p-6 divide-y divide-gray-200">
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
-                <span className="font-semibold">{t('orders.productsTotal') || 'Products Total'}</span>
-                <span>{order.items && order.items.length > 0 ? order.items[0].total : '-'} {order.currency || ''}</span>
+                <span className="font-semibold">{t('orders.itemsCount') || 'Items Count'}</span>
+                <span>{order.itemsCount}</span>
+              </div>
+              <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
+                <span className="font-semibold">{t('orders.subtotal') || 'Subtotal'}</span>
+                <span>{order.items.reduce((sum, item) => sum + (item.totalPrice || 0), 0)} {order.currency || ''}</span>
+              </div>
+              <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
+                <span className="font-semibold">{t('orders.shipping') || 'Shipping'}</span>
+                <span>{order.deliveryArea?.price || 0} {order.currency || ''}</span>
+              </div>
+              <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
+                <span className="font-semibold">{t('orders.tax') || 'Tax'}</span>
+                <span>-</span>
+              </div>
+              <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''} font-bold text-lg border-t-2 pt-2`}> 
+                <span>{t('orders.total') || 'Total'}</span>
+                <span>{order.items.reduce((sum, item) => sum + (item.totalPrice || 0), 0) + (order.deliveryArea?.price || 0)} {order.currency || ''}</span>
               </div>
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
                 <span className="font-semibold">{t('orders.notes') || 'Notes'}</span>
-                <span>{order.notes || '-'}</span>
-              </div>
-              <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
-                <span className="font-semibold">{t('orders.itemsCount') || 'Items Count'}</span>
-                <span>{order.itemsCount}</span>
+                <span className="text-sm text-gray-600 max-w-xs truncate">{order.notes || '-'}</span>
               </div>
             </div>
           </div>

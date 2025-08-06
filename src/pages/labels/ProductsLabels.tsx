@@ -18,7 +18,7 @@ import useProductLabel from '../../hooks/useProductLabel';
 
   const {
     productLabels,  
-    loading,
+    
     fetchProductLabels,
     saveProductLabel,
     deleteProductLabel,
