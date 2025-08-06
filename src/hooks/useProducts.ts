@@ -80,7 +80,7 @@ const useProducts = () => {
   }, [hasLoaded, products, loading, lastFetchTime, hasError, showError]);
 
   // إضافة أو تعديل منتج
-  const saveProduct = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
+  const saveProduct = async (form: any, editId?: string | number | null) => {
     //CONSOLE.log('Saving product with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     //CONSOLE.log('Store ID from form:', form.storeId);
     //CONSOLE.log('Form barcodes:', form.barcodes);

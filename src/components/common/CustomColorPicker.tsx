@@ -71,17 +71,17 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({ label, name, valu
     }
   };
 
-  const handleVariantAdd = () => {
-    if (currentColors.length > 0) {
-      const newVariant: ColorVariant = {
-        id: Date.now().toString(),
-        colors: [...currentColors]
-      };
-      onChange({ target: { name, value: [...value, newVariant] } } as any);
-      setCurrentColors([]);
-      setShowPicker(false);
-    }
-  };
+  // const handleVariantAdd = () => {
+  //   if (currentColors.length > 0) {
+  //     const newVariant: ColorVariant = {
+  //       id: Date.now().toString(),
+  //       colors: [...currentColors]
+  //     };
+  //     onChange({ target: { name, value: [...value, newVariant] } } as any);
+  //     setCurrentColors([]);
+  //     setShowPicker(false);
+  //   }
+  // };
 
   const handleVariantRemove = (variantId: string) => {
     const newVariants = value.filter(variant => variant.id !== variantId);

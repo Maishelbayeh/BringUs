@@ -28,6 +28,7 @@ interface StoreSocials {
 interface StoreSettings {
   mainColor: string;        // اللون الرئيسي للمتجر
   language: string;         // اللغة الافتراضية
+  currency: string;         // عملة المتجر
   storeDiscount: number;    // نسبة الخصم
   timezone: string;         // المنطقة الزمنية
   taxRate: number;          // نسبة الضريبة

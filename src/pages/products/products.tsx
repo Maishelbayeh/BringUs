@@ -18,8 +18,8 @@ import useProductSpecifications from '../../hooks/useProductSpecifications';
 import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 import TableImage from '../../components/common/TableImage';
 import useToast from '../../hooks/useToast';
-import { useValidation } from '../../hooks/useValidation';
-import { validateProductWithDuplicates, ProductFormData } from '../../validation/productValidation';
+
+import { validateProductWithDuplicates } from '../../validation/productValidation';
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
@@ -1269,7 +1269,7 @@ const ProductsPage: React.FC = () => {
         }
       } else {
         // تعديل أو إنشاء منتج عادي
-        await saveProduct(productData, editId, isRTL);
+        await saveProduct(productData, editId);
       }
       
       setShowDrawer(false);

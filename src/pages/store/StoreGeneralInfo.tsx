@@ -9,6 +9,7 @@ import useLanguage from '@/hooks/useLanguage';
 import { useStore } from '@/hooks/useStore';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
+import { currencyOptions } from '../../data/currencyOptions';
 
 // ============================================================================
 // CONSTANTS
@@ -108,6 +109,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     settings: {
       mainColor: '#1976d2',
       language: 'ar',
+      currency: 'ILS',
       storeDiscount: 0,
       timezone: 'Asia/Amman',
       taxRate: 0,
@@ -612,6 +614,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
               settings: {
                 mainColor: store.settings?.mainColor || '#1976d2',
                 language: store.settings?.language || 'ar',
+                currency: store.settings?.currency || 'ILS',
                 storeDiscount: store.settings?.storeDiscount || 0,
                 timezone: store.settings?.timezone || 'Asia/Amman',
                 taxRate: store.settings?.taxRate || 0,
@@ -860,6 +863,51 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
                 {form.settings.mainColor}
               </span>
             </div>
+          </div>
+        </div>
+
+        {/* عملة المتجر */}
+        <div className="mb-4">
+          <div className={`flex flex-col gap-2`}>
+            <label className="block mb-1 text-sm font-medium text-gray-900">
+              {t('store.currency')}
+            </label>
+            <select
+              value={form.settings.currency}
+              onChange={(e) => {
+                setForm(prev => {
+                  const newForm = {
+                    ...prev,
+                    settings: { ...prev.settings, currency: e.target.value }
+                  };
+                  
+                  // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+                  if (onSubmit && !isEditMode) {
+                    setTimeout(() => {
+                      const formData = {
+                        ...newForm,
+                        logo: newForm.logo || { public_id: null, url: null }
+                      };
+                      onSubmit(formData);
+                    }, 100);
+                  }
+                  
+                  return newForm;
+                });
+              }}
+              className={`
+                w-full px-3 py-2 border border-gray-300 rounded-lg
+                focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+                disabled:opacity-50 disabled:cursor-not-allowed
+                ${isRTL ? 'text-right' : 'text-left'}
+              `}
+            >
+              {currencyOptions.map((currency) => (
+                <option key={currency.code} value={currency.code}>
+                  {isRTL ? currency.nameAr : currency.nameEn} ({currency.code})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

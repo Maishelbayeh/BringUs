@@ -57,3 +57,108 @@ body {
   direction: rtl;
   text-align: right;
 }
+
+/* Print Styles */
+@media print {
+  /* Hide all elements except print content */
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-content,
+  .print-content * {
+    visibility: visible !important;
+  }
+  
+  .print-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 20px;
+    background: white !important;
+    color: black !important;
+  }
+  
+  /* Remove shadows and borders for cleaner print */
+  .print-content * {
+    box-shadow: none !important;
+    border-color: #000 !important;
+  }
+  
+  /* Ensure text is black for better readability */
+  .print-content {
+    color: #000 !important;
+  }
+  
+  /* Adjust font sizes for print */
+  .print-content h1 {
+    font-size: 24px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .print-content h3 {
+    font-size: 16px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .print-content table {
+    font-size: 11px !important;
+    border-collapse: collapse !important;
+  }
+  
+  .print-content table th,
+  .print-content table td {
+    border: 1px solid #000 !important;
+    padding: 4px 6px !important;
+  }
+  
+  .print-content img {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  /* Ensure proper page breaks */
+  .print-content {
+    page-break-inside: avoid;
+  }
+  
+  .print-content table {
+    page-break-inside: avoid;
+  }
+  
+  /* Remove background colors for better print */
+  .print-content * {
+    background: transparent !important;
+  }
+  
+  /* Keep status colors for print */
+  .print-content .bg-green-100 {
+    background: #dcfce7 !important;
+  }
+  
+  .print-content .bg-red-100 {
+    background: #fee2e2 !important;
+  }
+  
+  .print-content .bg-yellow-100 {
+    background: #fef3c7 !important;
+  }
+  
+  .print-content .bg-blue-100 {
+    background: #dbeafe !important;
+  }
+  
+  .print-content .bg-gray-100 {
+    background: #f3f4f6 !important;
+  }
+}
+
+/* Hide print button when printing */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

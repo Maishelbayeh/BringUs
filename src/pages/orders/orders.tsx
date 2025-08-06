@@ -1,10 +1,22 @@
 import React, { useState } from 'react';
-import { ordersData as ordersDataRaw, customersData, deliveryAreas, affiliates, currencies } from '../../api/mockCustomers';
+import {  currencies } from '../../api/mockCustomers';
 import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
-import PermissionModal from '../../components/common/PermissionModal';
+import { motion } from 'framer-motion';
+
 import { useOrder } from '../../hooks/useOrder';
+import { getStoreId } from '../../utils/storeUtils';
+import { useToastContext } from '../../contexts/ToastContext';
+import { 
+  ShoppingCartIcon, 
+  ClockIcon,
+  TruckIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  CreditCardIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
 
 //-------------------------------------------- Types -------------------------------------------
 type Column = {
@@ -15,110 +27,419 @@ type Column = {
   render?: (value: any, item: any) => React.ReactNode;
 };
 
-type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+//-------------------------------------------- OrderStatistics Component -------------------------------------------
+interface OrderStatisticsProps {
+  data: any[];
+  isRtl: boolean;
+  onFilterChange: (filter: { type: 'status' | 'payment', value: string | null }) => void;
+  activeFilter: { type: 'status' | 'payment', value: string | null };
+}
+
+const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilterChange, activeFilter }) => {
+  const { t } = useTranslation();
+  
+  // Calculate statistics
+  const stats = {
+    total: data.length,
+    pending: data.filter(order => order.status === 'pending').length,
+    shipped: data.filter(order => order.status === 'shipped').length,
+    delivered: data.filter(order => order.status === 'delivered').length,
+    cancelled: data.filter(order => order.status === 'cancelled').length,
+    paid: data.filter(order => order.paymentStatus === 'paid').length,
+    unpaid: data.filter(order => order.paymentStatus === 'unpaid').length,
+  };
+
+  // Calculate total amounts for paid and unpaid orders
+  const paidTotal = data
+    .filter(order => order.paymentStatus === 'paid' && typeof order.price === 'number')
+    .reduce((sum, order) => sum + order.price, 0);
+  
+  const unpaidTotal = data
+    .filter(order => order.paymentStatus === 'unpaid' && typeof order.price === 'number')
+    .reduce((sum, order) => sum + order.price, 0);
+
+  const statusCards = [
+    {
+      title: t('orders.totalOrders'),
+      value: stats.total,
+      icon: ShoppingCartIcon,
+      color: '#3B82F6',
+      bgColor: '#EBF4FF',
+      filterValue: null
+    },
+    {
+      title: t('orders.pendingOrders'),
+      value: stats.pending,
+      icon: ClockIcon,
+      color: '#F59E0B',
+      bgColor: '#FFFBEB',
+      filterValue: 'pending'
+    },
+    {
+      title: t('orders.shippedOrders'),
+      value: stats.shipped,
+      icon: TruckIcon,
+      color: '#6366F1',
+      bgColor: '#EEF2FF',
+      filterValue: 'shipped'
+    },
+    {
+      title: t('orders.deliveredOrders'),
+      value: stats.delivered,
+      icon: CheckCircleIcon,
+      color: '#10B981',
+      bgColor: '#ECFDF5',
+      filterValue: 'delivered'
+    },
+    {
+      title: t('orders.cancelledOrders'),
+      value: stats.cancelled,
+      icon: XCircleIcon,
+      color: '#EF4444',
+      bgColor: '#FEF2F2',
+      filterValue: 'cancelled'
+    }
+  ];
+
+  const paymentCards = [
+    {
+      title: t('orders.paidOrders'),
+      value: stats.paid,
+      amount: paidTotal,
+      icon: CreditCardIcon,
+      color: '#10B981',
+      bgColor: '#ECFDF5',
+      filterValue: 'paid'
+    },
+    {
+      title: t('orders.unpaidOrders'),
+      value: stats.unpaid,
+      amount: unpaidTotal,
+      icon: ExclamationTriangleIcon,
+      color: '#F59E0B',
+      bgColor: '#FFFBEB',
+      filterValue: 'unpaid'
+    }
+  ];
+
+  return (
+    <div className="mb-6 space-y-4">
+      {/* Order Status Statistics */}
+      <div>
+        <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+          <span className=" h-4 bg-blue-500 rounded-full"></span>
+          {t('orders.orderStatusStatistics')}
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {statusCards.map((stat, index) => {
+            const Icon = stat.icon;
+            const isActive = activeFilter.type === 'status' && activeFilter.value === stat.filterValue;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all duration-300 group cursor-pointer ${
+                  isActive 
+                    ? 'border-blue-500 shadow-md bg-blue-50' 
+                    : 'border-gray-100'
+                }`}
+                dir={isRtl ? 'rtl' : 'ltr'}
+                onClick={() => onFilterChange({ 
+                  type: 'status', 
+                  value: stat.filterValue 
+                })}
+              >
+                <div className={`flex items-center justify-between mb-3 `}>
+                  <h3 className={`text-sm font-medium ${isRtl ? 'text-right' : 'text-left'} ${
+                    isActive ? 'text-blue-600' : 'text-gray-600'
+                  }`}>
+                    {stat.title}
+                  </h3>
+                  <div 
+                    className={`p-2 rounded-lg group-hover:scale-110 transition-transform duration-300`}
+                    style={{ backgroundColor: stat.bgColor }}
+                  >
+                    <Icon className="w-5 h-5" style={{ color: stat.color }} />
+                  </div>
+                </div>
+
+                <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                  <div className={`text-xl font-bold ${
+                    isActive ? 'text-blue-900' : 'text-gray-900'
+                  }`}>
+                    {stat.value}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Payment Statistics */}
+      <div>
+        <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2" style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
+          <span className=" h-4 bg-green-500 rounded-full"></span>
+          {t('orders.paymentStatistics')}
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {paymentCards.map((stat, index) => {
+            const Icon = stat.icon;
+            const percentage = data.length > 0 ? Math.round((stat.value / data.length) * 100) : 0;
+            const isActive = activeFilter.type === 'payment' && activeFilter.value === stat.filterValue;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className={`bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-all duration-300 group cursor-pointer ${
+                  isActive 
+                    ? 'border-blue-500 shadow-md bg-blue-50' 
+                    : 'border-gray-100'
+                }`}
+                dir={isRtl ? 'rtl' : 'ltr'}
+                onClick={() => onFilterChange({ 
+                  type: 'payment', 
+                  value: stat.filterValue 
+                })}
+              >
+                <div className={`flex items-center justify-between mb-4 `}>
+                  <h3 className={`text-sm font-medium ${isRtl ? 'text-right' : 'text-left'} ${
+                    isActive ? 'text-blue-600' : 'text-gray-600'
+                  }`}>
+                    {stat.title}
+                  </h3>
+                  <div 
+                    className={`p-3 rounded-lg group-hover:scale-110 transition-transform duration-300`}
+                    style={{ backgroundColor: stat.bgColor }}
+                  >
+                    <Icon className="w-6 h-6" style={{ color: stat.color }} />
+                  </div>
+                </div>
+
+                <div className={`mb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  <div className={`text-2xl font-bold ${
+                    isActive ? 'text-blue-900' : 'text-gray-900'
+                  }`}>
+                    {stat.value}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {t('orders.orders')}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">{t('orders.totalAmount')}:</span>
+                    <span className="text-sm font-bold text-gray-900">
+                      {stat.amount.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                      <div
+                        className={`h-1.5 rounded-full transition-all duration-500`}
+                        style={{ 
+                          width: `${percentage}%`,
+                          backgroundColor: stat.color
+                        }}
+                      ></div>
+                    </div>
+                    <span className="text-xs font-medium text-gray-500">
+                      {percentage}%
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      
+    </div>
+  );
+};
 
 //-------------------------------------------- OrdersPage -------------------------------------------
 const OrdersPage: React.FC = () => {
   const { i18n, t } = useTranslation();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [orderToDelete, setOrderToDelete] = useState<any | null>(null);
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [orderToUpdateStatus, setOrderToUpdateStatus] = useState<any | null>(null);
-  const [newStatus, setNewStatus] = useState<OrderStatus>('pending');
+  const { showSuccess, showError } = useToastContext();
 
-  const storeId = '687505893fbf3098648bfe16';
-  const { data: orders, isLoading, error, refetch } = useOrder(storeId);
+  // Filter state
+  const [activeFilter, setActiveFilter] = useState<{ type: 'status' | 'payment', value: string | null }>({
+    type: 'status',
+    value: null
+  });
+
+  const storeId = getStoreId();
+  const { data: orders, isLoading, error,  updateOrderPaymentStatus, updateOrderStatus } = useOrder(storeId);
 
 //-------------------------------------------- tableData -------------------------------------------
-  const tableData = orders.map(order => ({
-    id: order.id,
-    customer: order.customer,
-    phone: order.customerPhone,
-    email: order.customerEmail || '-',
-    deliveryArea: order.deliveryArea?.locationEn || '-',
-    affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
-    currency: order.currency,
-    price: order.items && order.items.length > 0 ? order.items[0].total : '-',
-    date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
-    status: order.status,
-    paymentStatus: order.paid ? 'paid' : 'unpaid',
-    itemsCount: order.itemsCount,
-    notes: order.notes,
-    originalOrder: order,
-  }));
+  // Handle filter changes
+  const handleFilterChange = (filter: { type: 'status' | 'payment', value: string | null }) => {
+    setActiveFilter(filter);
+  };
+
+  const tableData = React.useMemo(() => {
+    let filteredOrders = orders;
+    
+    // Apply filter if active
+    if (activeFilter.value) {
+      if (activeFilter.type === 'status') {
+        filteredOrders = orders.filter(order => order.status === activeFilter.value);
+      } else if (activeFilter.type === 'payment') {
+        filteredOrders = orders.filter(order => order.paymentStatus === activeFilter.value);
+      }
+    }
+
+    return filteredOrders.map(order => {
+      const orderData = {
+        id: order.id || order.orderNumber || order._id, // Use the correct ID field
+        customer: order.customer,
+        phone: order.customerPhone,
+        email: order.customerEmail || '-',
+        deliveryArea: order.deliveryArea?.locationEn || '-',
+        affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
+        currency: order.currency,
+        price: order.items && order.items.length > 0 ? order.items[0].total : '-',
+        date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
+        status: order.status,
+        paymentStatus: order.paymentStatus || 'unpaid', // Default to 'unpaid' if not present
+        itemsCount: order.itemsCount,
+        notes: order.notes,
+        originalOrder: order,
+      };
+      return orderData;
+    });
+  }, [orders, activeFilter]);
 
 //-------------------------------------------- Status Renderer -------------------------------------------
-  const renderStatus = (status: string) => {
+  const renderStatus = (status: string, item: any) => {
+    const [isUpdating, setIsUpdating] = useState(false);
+    
     const statusConfig = {
       pending: { 
-        label: i18n.language === 'ARABIC' ? 'في الانتظار' : 'Pending',
+        label: i18n.language === 'ARABIC' ? 'معلق' : 'Pending',
         class: 'bg-yellow-100 text-yellow-700'
-      },
-      confirmed: { 
-        label: i18n.language === 'ARABIC' ? 'مؤكد' : 'Confirmed',
-        class: 'bg-blue-100 text-blue-700'
-      },
-      processing: { 
-        label: i18n.language === 'ARABIC' ? 'قيد المعالجة' : 'Processing',
-        class: 'bg-orange-100 text-orange-700'
       },
       shipped: { 
         label: i18n.language === 'ARABIC' ? 'تم الشحن' : 'Shipped',
-        class: 'bg-purple-100 text-purple-700'
+        class: 'bg-blue-100 text-blue-700'
       },
       delivered: { 
         label: i18n.language === 'ARABIC' ? 'تم التوصيل' : 'Delivered',
         class: 'bg-green-100 text-green-700'
       },
       cancelled: { 
-        label: i18n.language === 'ARABIC' ? 'ملغي' : 'Cancelled',
+        label: i18n.language === 'ARABIC' ? 'تم إلغاؤه' : 'Cancelled',
         class: 'bg-red-100 text-red-700'
+      }
+    };
+
+    const handleStatusChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const newStatus = event.target.value;
+      setIsUpdating(true);
+      try {
+        const orderId = item.originalOrder.id || item.originalOrder.orderNumber || item.originalOrder._id;
+        await updateOrderStatus(orderId, newStatus);
+        showSuccess(
+          t('orders.orderStatusUpdated', { orderId }),
+          i18n.language === 'ARABIC' ? 'تم التحديث' : 'Updated'
+        );
+      } catch (error) {
+        console.error('Failed to update order status:', error);
+        showError(
+          t('orders.orderStatusUpdateFailed'),
+          i18n.language === 'ARABIC' ? 'خطأ' : 'Error'
+        );
+      } finally {
+        setIsUpdating(false);
       }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
     
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.class}`}>
-        {config.label}
-      </span>
+      <select
+        value={status}
+        onChange={handleStatusChange}
+        disabled={isUpdating}
+        className={`px-3 py-1 rounded-full text-xs font-semibold border-0 focus:ring-2 focus:ring-primary focus:outline-none ${
+          isUpdating ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+        } ${config.class}`}
+        style={{ minWidth: '120px' }}
+      >
+        <option value="pending" className="bg-[#ffffff] text-yellow-700">
+          {isUpdating ? t('orders.updating') : statusConfig.pending.label}
+        </option>
+        <option value="shipped" className="bg-[#ffffff] text-blue-700">
+          {isUpdating ? t('orders.updating') : statusConfig.shipped.label}
+        </option>
+        <option value="delivered" className="bg-[#ffffff] text-green-700">
+          {isUpdating ? t('orders.updating') : statusConfig.delivered.label}
+        </option>
+        <option value="cancelled" className="bg-[#ffffff] text-red-700">
+          {isUpdating ? t('orders.updating') : statusConfig.cancelled.label}
+        </option>
+      </select>
     );
   };
 
-  const renderPaymentStatus = (status: string) => {
+  const renderPaymentStatus = (status: string, item: any) => {
     const isPaid = status === 'paid';
+    const [isUpdating, setIsUpdating] = useState(false);
+    
+    const handlePaymentStatusChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const newPaymentStatus = event.target.value;
+      setIsUpdating(true);
+      try {
+        const orderId = item.originalOrder.id || item.originalOrder.orderNumber || item.originalOrder._id;
+        await updateOrderPaymentStatus(orderId, newPaymentStatus === 'paid');
+        showSuccess(
+          t('orders.paymentStatusUpdated', { orderId }),
+          i18n.language === 'ARABIC' ? 'تم التحديث' : 'Updated'
+        );
+      } catch (error) {
+        console.error('Failed to update payment status:', error);
+        showError(
+          t('orders.paymentStatusUpdateFailed'),
+          i18n.language === 'ARABIC' ? 'خطأ' : 'Error'
+        );
+      } finally {
+        setIsUpdating(false);
+      }
+    };
+
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-        {isPaid ? (i18n.language === 'ARABIC' ? 'مدفوع' : 'Paid') : (i18n.language === 'ARABIC' ? 'غير مدفوع' : 'Unpaid')}
-      </span>
+      <select
+        value={status}
+        onChange={handlePaymentStatusChange}
+        disabled={isUpdating}
+        className={`px-3 py-1 rounded-full text-xs font-semibold border-0 focus:ring-2 focus:ring-primary focus:outline-none ${
+          isUpdating ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+        } ${
+          isPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        }`}
+        style={{ minWidth: '80px' }}
+      >
+        <option value="paid" className="bg-green-100 text-green-700" disabled={isUpdating}>
+          {isUpdating ? t('orders.updating') : t('orders.paid')}
+        </option>
+        <option value="unpaid" className="bg-red-100 text-red-700" disabled={isUpdating}>
+          {isUpdating ? t('orders.updating') : t('orders.unpaid')}
+        </option>
+      </select>
     );
   };
 
-  const renderActions = (value: any, item: any) => (
-    <div className="flex justify-center space-x-2">
-      <button
-        onClick={() => handleEditStatus(item)}
-        className="text-blue-600 hover:text-blue-900 p-1"
-        title={i18n.language === 'ARABIC' ? 'تغيير الحالة' : 'Change Status'}
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-      </button>
-      <button
-        onClick={() => handleDelete(item)}
-        className="text-red-600 hover:text-red-900 p-1"
-        title={i18n.language === 'ARABIC' ? 'حذف الطلب' : 'Delete Order'}
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-      </button>
-    </div>
-  );
+
 
 //-------------------------------------------- columns -------------------------------------------
-  const columns: Column[] = [
+  const columns: Column[] = React.useMemo(() => [
     { key: 'id', label: { ar: 'رقم الطلب', en: 'Order Number' }, type: 'number'},
     { key: 'customer', label: { ar: 'العميل', en: 'Customer' }, type: 'text'},
     { key: 'phone', label: { ar: 'رقم الهاتف', en: 'Phone' }, type: 'text'},
@@ -133,48 +454,10 @@ const OrdersPage: React.FC = () => {
     { key: 'itemsCount', label: { ar: 'عدد المنتجات', en: 'Items Count' }, type: 'number'},
     { key: 'notes', label: { ar: 'ملاحظات', en: 'Notes' }, type: 'text'},
     // { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text', render: renderActions},
-  ];
+  ], [renderStatus, renderPaymentStatus]);
 
 //-------------------------------------------- visibleTableData -------------------------------------------     
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
-  
-  //-------------------------------------------- handleDelete -------------------------------------------
-  const handleDelete = (order: any) => {
-    setOrderToDelete(order);
-    setShowDeleteModal(true);
-  };
-  
-  //-------------------------------------------- handleDeleteConfirm -------------------------------------------
-  const handleDeleteConfirm = () => {
-    if (orderToDelete) {
-      // في التطبيق الحقيقي، هنا سيتم إرسال طلب حذف للخادم
-      //CONSOLE.log('Deleting order:', orderToDelete);
-      setOrderToDelete(null);
-    }
-    setShowDeleteModal(false);
-  };
-
-  //-------------------------------------------- handleEditStatus -------------------------------------------
-  const handleEditStatus = (order: any) => {
-    setOrderToUpdateStatus(order);
-    setNewStatus(order.status);
-    setShowStatusModal(true);
-  };
-
-  //-------------------------------------------- handleStatusUpdate -------------------------------------------
-  const handleStatusUpdate = () => {
-    if (orderToUpdateStatus) {
-      // في التطبيق الحقيقي، هنا سيتم إرسال طلب تحديث للخادم
-      //CONSOLE.log('Updating order status:', orderToUpdateStatus.id, 'to:', newStatus);
-      
-      // Note: In a real application, you would send an API request here
-      // For now, we'll just log the status change
-      // The mock data doesn't have status fields, so we can't update them directly
-      
-      setOrderToUpdateStatus(null);
-    }
-    setShowStatusModal(false);
-  };
 
 //-------------------------------------------- return -------------------------------------------
   if (isLoading) return <div>Loading...</div>;
@@ -187,15 +470,28 @@ const OrdersPage: React.FC = () => {
       count={tableData.length}
       isRtl={i18n.language === 'ARABIC'}
      />
+     
+     {/* ------------------------------------------- Order Statistics ------------------------------------------- */}
+     <OrderStatistics 
+       data={visibleTableData} 
+       isRtl={i18n.language === 'ARABIC'}
+       onFilterChange={handleFilterChange}
+       activeFilter={activeFilter}
+     />
+     
      {/* ------------------------------------------- CustomTable ------------------------------------------- */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" style={{ maxHeight: '70vh', overflowY: 'auto', scrollBehavior: 'smooth' }}>
         <CustomTable 
           columns={columns} 
           data={tableData} 
           onFilteredDataChange={setVisibleTableData}
+          autoScrollToFirst={false}
           linkConfig={[{
             column: 'id',
-            getPath: (row) => `/orders/${row.id}`
+            getPath: (row) => {
+              const path = `/orders/${row.id}`;
+              return path;
+            }
           }]}
         />
       </div>
@@ -231,75 +527,9 @@ const OrdersPage: React.FC = () => {
         );
       })()}
 
-      {/* ------------------------------------------- Delete Modal ------------------------------------------- */}
-      <PermissionModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDeleteConfirm}
-        title={t('orders.deleteOrderConfirmTitle') || 'Confirm Delete Order'}
-        message={t('orders.deleteOrderConfirmMessage') || 'Are you sure you want to delete this order?'}
-        itemName={orderToDelete ? `Order #${orderToDelete.id}` : ''}
-        itemType={t('orders.order') || 'order'}
-        isRTL={i18n.language === 'ARABIC'}
-        severity="danger"
-      />
+      
 
-      {/* ------------------------------------------- Status Update Modal ------------------------------------------- */}
-      {showStatusModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {i18n.language === 'ARABIC' ? 'تغيير حالة الطلب' : 'Change Order Status'}
-              </h3>
-              <button
-                onClick={() => setShowStatusModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 mb-2">
-                {i18n.language === 'ARABIC' ? 'الطلب رقم:' : 'Order #'}{orderToUpdateStatus?.id}
-              </p>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {i18n.language === 'ARABIC' ? 'الحالة الجديدة:' : 'New Status:'}
-              </label>
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value as OrderStatus)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              >
-                <option value="pending">{i18n.language === 'ARABIC' ? 'في الانتظار' : 'Pending'}</option>
-                <option value="confirmed">{i18n.language === 'ARABIC' ? 'مؤكد' : 'Confirmed'}</option>
-                <option value="processing">{i18n.language === 'ARABIC' ? 'قيد المعالجة' : 'Processing'}</option>
-                <option value="shipped">{i18n.language === 'ARABIC' ? 'تم الشحن' : 'Shipped'}</option>
-                <option value="delivered">{i18n.language === 'ARABIC' ? 'تم التوصيل' : 'Delivered'}</option>
-                <option value="cancelled">{i18n.language === 'ARABIC' ? 'ملغي' : 'Cancelled'}</option>
-              </select>
-            </div>
-            
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowStatusModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition"
-              >
-                {i18n.language === 'ARABIC' ? 'إلغاء' : 'Cancel'}
-              </button>
-              <button
-                onClick={handleStatusUpdate}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition"
-              >
-                {i18n.language === 'ARABIC' ? 'تحديث' : 'Update'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 };

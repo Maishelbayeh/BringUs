@@ -77,8 +77,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     errors: internalErrors,
     validateField,
     clearError,
-    setError,
-    hasError
+    
   } = useValidation({
     schema: productValidationSchema,
     validateOnChange: true,
