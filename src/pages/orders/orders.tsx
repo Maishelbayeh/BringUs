@@ -51,12 +51,12 @@ const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilter
 
   // Calculate total amounts for paid and unpaid orders
   const paidTotal = data
-    .filter(order => order.paymentStatus === 'paid' && typeof order.price === 'number')
-    .reduce((sum, order) => sum + order.price, 0);
+    .filter(order => order.paymentStatus === 'paid')
+    .reduce((sum, order) => sum + (order.price || 0), 0);
   
   const unpaidTotal = data
-    .filter(order => order.paymentStatus === 'unpaid' && typeof order.price === 'number')
-    .reduce((sum, order) => sum + order.price, 0);
+    .filter(order => order.paymentStatus === 'unpaid')
+    .reduce((sum, order) => sum + (order.price || 0), 0);
 
   const statusCards = [
     {
@@ -142,7 +142,7 @@ const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilter
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className={`bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-all duration-300 group cursor-pointer ${
                   isActive 
-                    ? 'border-blue-500 shadow-md bg-blue-50' 
+                    ? 'border-primary shadow-md bg-primary/10' 
                     : 'border-gray-100'
                 }`}
                 dir={isRtl ? 'rtl' : 'ltr'}
@@ -153,7 +153,7 @@ const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilter
               >
                 <div className={`flex items-center justify-between mb-3 `}>
                   <h3 className={`text-sm font-medium ${isRtl ? 'text-right' : 'text-left'} ${
-                    isActive ? 'text-blue-600' : 'text-gray-600'
+                    isActive ? 'text-primary' : 'text-gray-600'
                   }`}>
                     {stat.title}
                   </h3>
@@ -167,7 +167,7 @@ const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilter
 
                 <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
                   <div className={`text-xl font-bold ${
-                    isActive ? 'text-blue-900' : 'text-gray-900'
+                      isActive ? 'text-primary' : 'text-gray-900'
                   }`}>
                     {stat.value}
                   </div>
@@ -197,7 +197,7 @@ const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilter
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className={`bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-all duration-300 group cursor-pointer ${
                   isActive 
-                    ? 'border-blue-500 shadow-md bg-blue-50' 
+                      ? 'border-primary shadow-md bg-primary/10' 
                     : 'border-gray-100'
                 }`}
                 dir={isRtl ? 'rtl' : 'ltr'}
@@ -208,7 +208,7 @@ const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilter
               >
                 <div className={`flex items-center justify-between mb-4 `}>
                   <h3 className={`text-sm font-medium ${isRtl ? 'text-right' : 'text-left'} ${
-                    isActive ? 'text-blue-600' : 'text-gray-600'
+                    isActive ? 'text-primary' : 'text-gray-600'
                   }`}>
                     {stat.title}
                   </h3>
@@ -222,7 +222,7 @@ const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilter
 
                 <div className={`mb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
                   <div className={`text-2xl font-bold ${
-                    isActive ? 'text-blue-900' : 'text-gray-900'
+                    isActive ? 'text-primary' : 'text-gray-900'
                   }`}>
                     {stat.value}
                   </div>
@@ -305,7 +305,18 @@ const OrdersPage: React.FC = () => {
         deliveryArea: order.deliveryArea?.locationEn || '-',
         affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
         currency: order.currency,
-        price: order.items && order.items.length > 0 ? order.items[0].total : '-',
+        price: (() => {
+          if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+            const total = order.items.reduce((sum: number, item: any) => {
+              return sum + (item.total || item.totalPrice || item.price || 0);
+            }, 0);
+            console.log('Order ID:', order.id, 'Items:', order.items, 'Total calculated:', total);
+            return total;
+          } else {
+            console.log('Order ID:', order.id, 'No items, using 0');
+            return 0; // إذا لم تكن هناك items، استخدم 0
+          }
+        })(),
         date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
         status: order.status,
         paymentStatus: order.paymentStatus || 'unpaid', // Default to 'unpaid' if not present
@@ -447,7 +458,11 @@ const OrdersPage: React.FC = () => {
     { key: 'deliveryArea', label: { ar: 'منطقة التوصيل', en: 'Delivery Area' }, type: 'text'},
     { key: 'affiliate', label: { ar: 'المسوق', en: 'Affiliate' }, type: 'text'},
     { key: 'currency', label: { ar: 'العملة', en: 'Currency' }, type: 'text'},
-    { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number'},
+    { 
+      key: 'price', 
+      label: { ar: 'السعر الكلي', en: 'Total Price' }, 
+      type: 'number'
+    },
     { key: 'date', label: { ar: 'تاريخ الطلب', en: 'Order Date' }, type: 'date'},
     { key: 'status', label: { ar: 'حالة الطلب', en: 'Order Status' }, type: 'status', render: renderStatus},
     { key: 'paymentStatus', label: { ar: 'حالة الدفع', en: 'Payment Status' }, type: 'status', render: renderPaymentStatus},
@@ -506,7 +521,8 @@ const OrdersPage: React.FC = () => {
           if (!currency) return;
           const label = i18n.language === 'ARABIC' ? currency.labelAr : currency.labelEn;
           if (!totals[label]) totals[label] = 0;
-          totals[label] += row.price;
+          // استخدام السعر المحسوب مسبقاً في tableData
+        totals[label] += row.price || 0;
         });
         const totalEntries: [string, number][] = Object.entries(totals);
         if (totalEntries.length === 0) return null;
