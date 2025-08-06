@@ -41,6 +41,7 @@ const initialForm: {
   originalPrice: string;
 
   tags: string[];
+  productLabels: string[];
   productOrder: string;
   maintainStock: string;
   availableQuantity: number;
@@ -52,6 +53,8 @@ const initialForm: {
   newBarcode: string;
   productSpecifications: string[];
   selectedSpecifications: string;
+  specifications: string[];
+  specificationValues: any[];
   colors: ColorVariant[];
   images: string[];
   mainImage: string | null;
@@ -71,6 +74,7 @@ const initialForm: {
   originalPrice: '',
 
   tags: [],
+  productLabels: [],
   productOrder: '',
   maintainStock: 'Y',
   availableQuantity: 0,
@@ -82,6 +86,8 @@ const initialForm: {
   newBarcode: '',
   productSpecifications: [],
   selectedSpecifications: '',
+  specifications: [],
+  specificationValues: [],
   colors: [],
   images: [],
   mainImage: null,
@@ -318,7 +324,7 @@ const ProductsPage: React.FC = () => {
       hasVariants: product.hasVariants,
       maintainStock: (product.availableQuantity || product.stock || 0) > 0 ? (isRTL ? 'نعم' : 'Yes') : (isRTL ? 'لا' : 'No'),
       visibility: product.visibility ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden'),
-      tags: product.productLabels && product.productLabels.length > 0 
+      productLabels: product.productLabels && product.productLabels.length > 0 
         ? product.productLabels.map((label: any) => {
             // Handle both populated objects and IDs
             if (typeof label === 'object' && label.nameAr && label.nameEn) {
@@ -566,6 +572,7 @@ const ProductsPage: React.FC = () => {
     const storeId = originalProduct.store?._id || originalProduct.storeId || (typeof originalProduct.store === 'string' ? originalProduct.store : '');
     const tags = (originalProduct.productLabels || []).map((l: any) => typeof l === 'object' ? String(l._id || l.id) : String(l));
     // تعريف formColors
+    
     const productColors = originalProduct.colors || [];
     const formColors = Array.isArray(productColors) && productColors.length > 0
       ? productColors.map((arr: string[], idx: number) => ({
@@ -658,6 +665,7 @@ const ProductsPage: React.FC = () => {
       subcategoryId: String(subcategoryId),
       storeId: String(storeId),
       tags: tags,
+      productLabels: productLabelIds, 
       selectedSpecifications: JSON.stringify(selectedSpecifications), // Use the extracted specifications in JSON format
       // إفراغ الصور للمتغير الجديد
       images: [],
@@ -899,6 +907,7 @@ const ProductsPage: React.FC = () => {
       subcategoryId: String(subcategoryId),
       storeId: String(storeId),
       tags: tags,
+      productLabels: productLabels, 
       selectedSpecifications: typeof selectedSpecifications === 'string' ? selectedSpecifications : JSON.stringify(selectedSpecifications),
       images: Array.isArray(originalProduct.images) ? originalProduct.images : [],
       mainImage: originalProduct.mainImage || null,
@@ -1063,18 +1072,110 @@ const ProductsPage: React.FC = () => {
       const newForm = { ...form, colors: colorsArray };
       console.log('🔍 handleFormChange - Updated colors:', newForm.colors);
       setForm(newForm);
+    } else if (e.target.name === 'productLabels') {
+      // التعامل مع productLabels كمصفوفة
+      console.log('🔍 handleFormChange - productLabels received:', e.target.value);
+      console.log('🔍 handleFormChange - productLabels type:', typeof e.target.value);
+      console.log('🔍 handleFormChange - productLabels is array:', Array.isArray(e.target.value));
+      
+      let productLabelsValue: any = e.target.value;
+      
+      // إذا كانت القيمة مصفوفة، استخدمها كما هي
+      if (Array.isArray(e.target.value)) {
+        productLabelsValue = e.target.value;
+      } else if (typeof e.target.value === 'string') {
+        // إذا كانت القيمة نص، حاول تحليلها كـ JSON
+        try {
+          productLabelsValue = JSON.parse(e.target.value);
+        } catch {
+          // إذا فشل التحليل، استخدمها كمصفوفة فارغة
+          productLabelsValue = [];
+        }
+      }
+      
+      // تأكد من أن القيمة مصفوفة
+      const productLabelsArray = Array.isArray(productLabelsValue) ? productLabelsValue : [];
+      
+      const newForm = { ...form, productLabels: productLabelsArray };
+      console.log('🔍 handleFormChange - Updated productLabels:', newForm.productLabels);
+      setForm(newForm);
+    } else if (e.target.name === 'specifications') {
+      // التعامل مع specifications كمصفوفة
+      console.log('🔍 handleFormChange - specifications received:', e.target.value);
+      console.log('🔍 handleFormChange - specifications type:', typeof e.target.value);
+      console.log('🔍 handleFormChange - specifications is array:', Array.isArray(e.target.value));
+      
+      let specificationsValue: any = e.target.value;
+      
+      // إذا كانت القيمة مصفوفة، استخدمها كما هي
+      if (Array.isArray(e.target.value)) {
+        specificationsValue = e.target.value;
+      } else if (typeof e.target.value === 'string') {
+        // إذا كانت القيمة نص، حاول تحليلها كـ JSON
+        try {
+          specificationsValue = JSON.parse(e.target.value);
+        } catch {
+          // إذا فشل التحليل، استخدمها كمصفوفة فارغة
+          specificationsValue = [];
+        }
+      }
+      
+      // تأكد من أن القيمة مصفوفة
+      const specificationsArray = Array.isArray(specificationsValue) ? specificationsValue : [];
+      
+      const newForm = { ...form, specifications: specificationsArray };
+      console.log('🔍 handleFormChange - Updated specifications:', newForm.specifications);
+      setForm(newForm);
+    } else if (e.target.name === 'specificationValues') {
+      // التعامل مع specificationValues كمصفوفة
+      console.log('🔍 handleFormChange - specificationValues received:', e.target.value);
+      console.log('🔍 handleFormChange - specificationValues type:', typeof e.target.value);
+      console.log('🔍 handleFormChange - specificationValues is array:', Array.isArray(e.target.value));
+      
+      let specificationValuesValue: any = e.target.value;
+      
+      // إذا كانت القيمة مصفوفة، استخدمها كما هي
+      if (Array.isArray(e.target.value)) {
+        specificationValuesValue = e.target.value;
+      } else if (typeof e.target.value === 'string') {
+        // إذا كانت القيمة نص، حاول تحليلها كـ JSON
+        try {
+          specificationValuesValue = JSON.parse(e.target.value);
+        } catch {
+          // إذا فشل التحليل، استخدمها كمصفوفة فارغة
+          specificationValuesValue = [];
+        }
+      }
+      
+      // تأكد من أن القيمة مصفوفة
+      const specificationValuesArray = Array.isArray(specificationValuesValue) ? specificationValuesValue : [];
+      
+      const newForm = { ...form, specificationValues: specificationValuesArray };
+      console.log('🔍 handleFormChange - Updated specificationValues:', newForm.specificationValues);
+      setForm(newForm);
     } else {
       // التعامل مع الحقول الأخرى
+      console.log('🔍 handleFormChange - generic case for:', e.target.name);
+      console.log('🔍 handleFormChange - generic case value:', e.target.value);
+      console.log('🔍 handleFormChange - generic case value type:', typeof e.target.value);
+      console.log('🔍 handleFormChange - generic case value is array:', Array.isArray(e.target.value));
+      
       const newForm = { ...form, [e.target.name]: e.target.value };
+      console.log('🔍 handleFormChange - newForm after update:', newForm);
+      console.log('🔍 handleFormChange - newForm[e.target.name]:', newForm[e.target.name as keyof typeof newForm]);
       setForm(newForm);
     }
   };
 
   //-------------------------------------------- handleProductLabelsChange -------------------------------------------
   const handleTagsChange = (values: string[]) => {
-    //CONSOLE.log('🔍 handleTagsChange:', values);
-    const newForm = { ...form, tags: values };
-    //CONSOLE.log('🔍 handleTagsChange - newForm.barcodes:', newForm.barcodes);
+    console.log('🔍 handleTagsChange called with values:', values);
+    console.log('🔍 handleTagsChange - values type:', typeof values);
+    console.log('🔍 handleTagsChange - values is array:', Array.isArray(values));
+    const newForm = { ...form, productLabels : values };
+    console.log('🔍 handleTagsChange - newForm.productLabels:', newForm.productLabels);
+    console.log('🔍 handleTagsChange - newForm.productLabels type:', typeof newForm.productLabels);
+    console.log('🔍 handleTagsChange - newForm.productLabels is array:', Array.isArray(newForm.productLabels));
     setForm(newForm);
   };
   //-------------------------------------------- handleImageChange -------------------------------------------
@@ -1145,7 +1246,11 @@ const ProductsPage: React.FC = () => {
   //-------------------------------------------- handleSubmit -------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🔍 handleSubmit called. drawerMode:', drawerMode, 'editProduct:', editProduct, 'form:', form);
+    console.log('🔍 handleSubmit called. drawerMode:', drawerMode, 'editProduct:', editProduct);
+    console.log('🔍 handleSubmit - Complete form state:', form);
+    console.log('🔍 handleSubmit - form.tags:', form.tags);
+    console.log('🔍 handleSubmit - form.productLabels:', form.productLabels);
+    console.log('🔍 handleSubmit - form keys:', Object.keys(form));
 
     // جلب الباركود من ProductsForm مباشرة (حتى لو لم يضغط +)
     if (productsFormRef.current && typeof productsFormRef.current.getCurrentBarcode === 'function') {
@@ -1174,10 +1279,19 @@ const ProductsPage: React.FC = () => {
         visibility: form.visibility === 'Y',
         unitId: form.unitId || form.unit || null,
         categoryId: form.categoryId || null,
+        //productLabels: form.productLabels || [],
         subcategoryId: form.subcategoryId || null,
-        tags: form.tags || [],
+        productLabels: (() => {
+        
+          // Use tags if available, otherwise use productLabels
+            const labels =  form.productLabels || [];
+          console.log('🔍 handleSubmit - Final productLabels to send:', labels);
+          return labels;
+        })(),
         barcodes: Array.isArray(form.barcodes) ? form.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [], // إضافة الباركود مع فلترة القيم الفارغة
         selectedSpecifications: form.selectedSpecifications || '', // إرسال المواصفات المختارة
+        specifications: Array.isArray(form.specifications) ? form.specifications : [], // إرسال IDs المواصفات
+        specificationValues: Array.isArray(form.specificationValues) ? form.specificationValues : [], // إرسال قيم المواصفات مع الكمية والسعر
         colors: (() => {
           console.log('🔍 handleSubmit - form.colors:', form.colors);
           console.log('🔍 handleSubmit - form.colors type:', typeof form.colors);
@@ -1269,6 +1383,12 @@ const ProductsPage: React.FC = () => {
         }
       } else {
         // تعديل أو إنشاء منتج عادي
+        console.log('🔍 handleSubmit - About to call saveProduct with productData:', productData);
+        console.log('🔍 handleSubmit - productData.productLabels:', productData.productLabels);
+        console.log('🔍 handleSubmit - productData.productLabels type:', typeof productData.productLabels);
+        console.log('🔍 handleSubmit - productData.productLabels is array:', Array.isArray(productData.productLabels));
+        console.log('🔍 handleSubmit - productData.specifications:', productData.specifications);
+        console.log('🔍 handleSubmit - productData.specificationValues:', productData.specificationValues);
         await saveProduct(productData, editId);
       }
       
@@ -1296,7 +1416,7 @@ const ProductsPage: React.FC = () => {
     { key: 'availableQuantity', label: { ar: 'الكمية المتوفرة', en: 'Available Quantity' }, type: 'number' as const, render: renderStock },
     { key: 'maintainStock', label: { ar: 'إدارة المخزون', en: 'Stock Management' }, type: 'text' as const },
     { key: 'visibility', label: { ar: 'الظهور', en: 'Visibility' }, type: 'status' as const, render: renderVisibility },
-    { key: 'tags', label: { ar: 'علامات المنتج', en: 'Label' }, type: 'text' as const, render: renderProductLabels },
+    { key: 'productLabels', label: { ar: 'علامات المنتج', en: 'Label' }, type: 'text' as const, render: renderProductLabels },
     { key: 'specifications', label: { ar: 'المواصفات', en: 'Specifications' }, type: 'text' as const, render: renderSpecifications },
     { key: 'barcodes', label: { ar: 'الباركود', en: 'Barcode' }, type: 'text' as const, render: renderBarcode },
     { key: 'variantStatus', label: { ar: 'النوع', en: 'Type' }, type: 'text' as const, render: renderVariantStatus },

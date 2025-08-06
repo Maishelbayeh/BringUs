@@ -5,7 +5,7 @@ import CustomSelect from '../../components/common/CustomSelect';
 import CustomSwitch from '../../components/common/CustomSwitch';
 import CustomColorPicker from '../../components/common/CustomColorPicker';
 import CustomTextArea from '../../components/common/CustomTextArea';
-import { CheckboxSpecificationSelector } from '../../components/common';
+import SpecificationSelector from '../../components/common/SpecificationSelector';
 
 import { useTranslation } from 'react-i18next';
 import MultiSelect from '@/components/common/MultiSelect';
@@ -91,7 +91,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const { specifications: apiSpecifications, fetchSpecifications } = useProductSpecifications();
   
   // state للمواصفات المختارة
-  const [selectedSpecifications, setSelectedSpecifications] = useState<any[]>([]);
+  const [specificationDetails, setSpecificationDetails] = useState<any[]>([]);
   const [showBarcodeSuccess, setShowBarcodeSuccess] = useState(false);
   const [localNewBarcode, setLocalNewBarcode] = useState('');
   const [mainImageUploading, setMainImageUploading] = useState(false);
@@ -199,7 +199,6 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   // تحويل البيانات من النموذج إلى التنسيق المطلوب (مرة واحدة فقط عند التحميل)
   useEffect(() => {
     if (!hasLoadedSpecifications.current) {
-      console.log('🔍 ProductsForm - Initial load - form.selectedSpecifications:', form.selectedSpecifications);
       console.log('🔍 ProductsForm - Initial load - form.specificationValues:', form.specificationValues);
       
       // محاولة استخدام specificationValues أولاً (من API)
@@ -211,42 +210,18 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
           const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec.specificationId}`);
           
           return {
-            _id: spec.valueId || spec._id,
-            title: title,
-            value: spec.value || ''
+            specId: spec.specificationId,
+            valueId: spec.valueId || spec._id,
+            value: spec.value || '',
+            quantity: spec.quantity || 0,
+            price: spec.price || 0
           };
         });
         console.log('🔍 ProductsForm - Cleaned specificationValues:', cleaned);
-        setSelectedSpecifications(cleaned);
-      }
-      // إذا لم تكن specificationValues موجودة، استخدم selectedSpecifications
-      else if (form.selectedSpecifications) {
-        try {
-          let parsed;
-          if (typeof form.selectedSpecifications === 'string') {
-            parsed = JSON.parse(form.selectedSpecifications);
-          } else {
-            parsed = form.selectedSpecifications;
-          }
-          if (Array.isArray(parsed)) {
-            // تنظيف الداتا هنا أيضاً
-            const cleaned = parsed.map(spec => ({
-              _id: spec._id,
-              title: typeof spec.title === 'string' ? spec.title : JSON.stringify(spec.title),
-              value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
-            }));
-            console.log('🔍 ProductsForm - Cleaned selectedSpecifications:', cleaned);
-            setSelectedSpecifications(cleaned);
-          } else {
-            setSelectedSpecifications([]);
-          }
-        } catch (error) {
-          console.error('Error parsing selectedSpecifications:', error);
-          setSelectedSpecifications([]);
-        }
+        setSpecificationDetails(cleaned);
       } else {
         console.log('🔍 ProductsForm - No specifications found, setting empty array');
-        setSelectedSpecifications([]);
+        setSpecificationDetails([]);
       }
       
       hasLoadedSpecifications.current = true;
@@ -365,10 +340,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const formattedSpecifications = Array.isArray(apiSpecifications) ? apiSpecifications.map((spec: ProductSpecification) => ({
     _id: spec._id,
     title: isRTL ? spec.titleAr : spec.titleEn,
+    titleAr: spec.titleAr,
+    titleEn: spec.titleEn,
     values: spec.values.map((value, index) => ({
-      _id: `${spec._id}_${index}`,
-      value: isRTL ? value.valueAr : value.valueEn,
-      title: isRTL ? spec.titleAr : spec.titleEn
+      valueAr: value.valueAr,
+      valueEn: value.valueEn
     }))
   })) : [];
 
@@ -376,10 +352,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const formattedSpecificationsProp = Array.isArray(specifications) ? specifications.map((spec: any) => ({
     _id: spec._id,
     title: isRTL ? spec.titleAr : spec.titleEn,
-    values: spec.values.map((value: any, index: number) => ({
-      _id: `${spec._id}_${index}`,
-      value: isRTL ? value.valueAr : value.valueEn,
-      title: isRTL ? spec.titleAr : spec.titleEn
+    titleAr: spec.titleAr,
+    titleEn: spec.titleEn,
+    values: spec.values.map((value: any) => ({
+      valueAr: value.valueAr,
+      valueEn: value.valueEn
     }))
   })) : [];
 
@@ -527,7 +504,9 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   
   // handle multi-select for product labels
   const handleTagsChange = (values: string[]) => {
-    //CONSOLE.log('🔍 ProductsForm - handleTagsChange:', values);
+    console.log('🔍 ProductsForm - handleTagsChange called with values:', values);
+    console.log('🔍 ProductsForm - handleTagsChange - values type:', typeof values);
+    console.log('🔍 ProductsForm - handleTagsChange - values is array:', Array.isArray(values));
     onTagsChange(values);
   };
 
@@ -635,7 +614,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
   //-------------------------------------------- return -------------------------------------------
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-4 max-h-[70vh] space-y-6">
+    <div className="flex-1 overflow-y-auto px-6 py-4 max-h-[70vh] space-y-6" onClick={(e) => e.stopPropagation()}>
       
       {/* ==================== Basic Information Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -970,8 +949,18 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                     : []
               }
               onChange={(values) => {
+                console.log('🔍 MultiSelect onChange called with values:', values);
+                console.log('🔍 MultiSelect - values type:', typeof values);
+                console.log('🔍 MultiSelect - values is array:', Array.isArray(values));
+                
                 const ids = values.map((v: any) => typeof v === 'object' ? v._id || v.id : v);
-                if ('productLabels' in form) {
+                console.log('🔍 MultiSelect - processed ids:', ids);
+                console.log('🔍 MultiSelect - form has productLabels:', 'productLabels' in form);
+                        console.log('🔍 MultiSelect - form.productLabels:', form.productLabels);
+        console.log('🔍 MultiSelect - form.tags:', form.tags);
+        
+        if ('productLabels' in form) {
+                  console.log('🔍 MultiSelect - calling onFormChange with productLabels');
                   onFormChange({
                     target: {
                       name: 'productLabels',
@@ -979,6 +968,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                     }
                   } as any);
                 } else {
+                  console.log('🔍 MultiSelect - calling handleTagsChange with tags');
                   handleTagsChange(ids);
                 }
               }}
@@ -1006,31 +996,20 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         </h3>
         
         {formattedSpecificationsProp.length > 0 || formattedSpecifications.length > 0 ? (
-          <CheckboxSpecificationSelector
+          <SpecificationSelector
             specifications={formattedSpecificationsProp.length > 0 ? formattedSpecificationsProp : formattedSpecifications}
-            selectedSpecifications={selectedSpecifications}
-            onSelectionChange={(selected) => {
-              console.log('🔍 ProductsForm - onSelectionChange called with:', selected);
-              console.log('🔍 ProductsForm - Current form state before update:', {
-                selectedSpecifications: form.selectedSpecifications,
-                specifications: form.specifications,
-                specificationValues: form.specificationValues
-              });
+            selectedSpecifications={specificationDetails}
+            onSpecificationChange={(specifications) => {
+              console.log('🔍 ProductsForm - New specification selector called with:', specifications);
               
-              // تنظيف المواصفات المختارة قبل حفظها مع البحث عن العنوان الصحيح
-              const cleaned = selected.map(spec => {
-                // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
-                const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec._id.split('_')[0]) : null;
-                const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec._id.split('_')[0]}`);
-                
-                return {
-                  _id: spec._id,
-                  title: title,
-                  value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
-                };
-              });
-              console.log('🔍 ProductsForm - Cleaned specifications:', cleaned);
-              setSelectedSpecifications(cleaned);
+              setSpecificationDetails(specifications);
+              
+              // تحويل البيانات إلى التنسيق المطلوب للنموذج
+              const cleaned = specifications.map(spec => ({
+                _id: spec.valueId,
+                title: spec.value,
+                value: spec.value
+              }));
               
               // تحديث form.selectedSpecifications
               onFormChange({
@@ -1041,7 +1020,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
               } as any);
               
               // تحديث form.specifications (IDs فقط)
-              const specificationIds = [...new Set(cleaned.map(spec => spec._id.split('_')[0]))];
+              const specificationIds = [...new Set(specifications.map(spec => spec.specId))];
               console.log('🔍 ProductsForm - Specification IDs:', specificationIds);
               onFormChange({
                 target: {
@@ -1050,20 +1029,22 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                 }
               } as any);
               
-              // تحديث form.specificationValues (القيم الكاملة)
-              const specificationValues = cleaned.map(spec => {
+              // تحديث form.specificationValues (القيم الكاملة مع الكمية والسعر)
+              const specificationValues = specifications.map(spec => {
                 // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
-                const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec._id.split('_')[0]) : null;
-                const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec._id.split('_')[0]}`);
+                const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec.specId) : null;
+                const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : `Specification ${spec.specId}`;
                 
                 return {
-                  specificationId: spec._id.split('_')[0],
-                  valueId: spec._id,
+                  specificationId: spec.specId,
+                  valueId: spec.valueId,
                   value: spec.value,
-                  title: title
+                  title: title,
+                  quantity: spec.quantity,
+                  price: spec.price
                 };
               });
-              console.log('🔍 ProductsForm - Specification values:', specificationValues);
+              console.log('🔍 ProductsForm - Specification values with quantity and price:', specificationValues);
               onFormChange({
                 target: {
                   name: 'specificationValues',
@@ -1071,8 +1052,9 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                 }
               } as any);
               
-              console.log('🔍 ProductsForm - Form updates completed. New values will be available on next render.');
+              console.log('🔍 ProductsForm - Form updates completed with new specification selector.');
             }}
+            isRTL={isRTL}
           />
         ) : (
           <div className="text-center py-8 text-gray-500">

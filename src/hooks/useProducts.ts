@@ -81,6 +81,13 @@ const useProducts = () => {
 
   // إضافة أو تعديل منتج
   const saveProduct = async (form: any, editId?: string | number | null) => {
+    console.log('🔍 saveProduct - Function called with form:', form);
+    console.log('🔍 saveProduct - form.tags:', form.tags);
+    console.log('🔍 saveProduct - form.tags type:', typeof form.tags);
+    console.log('🔍 saveProduct - form.tags is array:', Array.isArray(form.tags));
+    console.log('🔍 saveProduct - form.productLabels:', form.productLabels);
+    console.log('🔍 saveProduct - form.productLabels type:', typeof form.productLabels);
+    console.log('🔍 saveProduct - form.productLabels is array:', Array.isArray(form.productLabels));
     //CONSOLE.log('Saving product with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     //CONSOLE.log('Store ID from form:', form.storeId);
     //CONSOLE.log('Form barcodes:', form.barcodes);
@@ -168,11 +175,25 @@ const useProducts = () => {
           return [];
         }
       })(),
-      productLabels: form.tags || [],
+      productLabels: (() => {
+        console.log('🔍 saveProduct - form.tags received:', form.tags);
+        console.log('🔍 saveProduct - form.tags type:', typeof form.tags);
+        console.log('🔍 saveProduct - form.tags is array:', Array.isArray(form.tags));
+        console.log('🔍 saveProduct - form.productLabels received:', form.productLabels);
+        console.log('🔍 saveProduct - form.productLabels type:', typeof form.productLabels);
+        console.log('🔍 saveProduct - form.productLabels is array:', Array.isArray(form.productLabels));
+        
+        // Use tags if available, otherwise use productLabels
+        const labels = form.productLabels || [];
+        console.log('🔍 saveProduct - Final productLabels to send:', labels);
+        return labels;
+      })(),
       attributes: form.attributes || [],
       specifications: (() => {
         console.log('🔍 saveProduct - form.selectedSpecifications:', form.selectedSpecifications);
         console.log('🔍 saveProduct - form.specifications:', form.specifications);
+        console.log('🔍 saveProduct - form.specifications type:', typeof form.specifications);
+        console.log('🔍 saveProduct - form.specifications is array:', Array.isArray(form.specifications));
         
         // أولاً: محاولة استخدام specifications الموجودة في form
         if (form.specifications && Array.isArray(form.specifications)) {
@@ -207,6 +228,8 @@ const useProducts = () => {
       })(),
       specificationValues: (() => {
         console.log('🔍 saveProduct - form.specificationValues:', form.specificationValues);
+        console.log('🔍 saveProduct - form.specificationValues type:', typeof form.specificationValues);
+        console.log('🔍 saveProduct - form.specificationValues is array:', Array.isArray(form.specificationValues));
         console.log('🔍 saveProduct - Processing specificationValues from selectedSpecifications:', form.selectedSpecifications);
         
         // أولاً: محاولة استخدام specificationValues الموجودة في form
