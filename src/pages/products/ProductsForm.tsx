@@ -103,9 +103,12 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
   // دالة تحويل الألوان من API إلى التنسيق المطلوب
   const convertColorsFromAPI = (colors: any[]): ColorVariant[] => {
-    // console.log('🔍 convertColorsFromAPI - input colors:', colors);
+    console.log('🔍 convertColorsFromAPI - input colors:', colors);
+    console.log('🔍 convertColorsFromAPI - colors type:', typeof colors);
+    console.log('🔍 convertColorsFromAPI - colors is array:', Array.isArray(colors));
     
     if (!Array.isArray(colors) || colors.length === 0) {
+      console.log('🔍 convertColorsFromAPI - No colors to convert, returning empty array');
       return [];
     }
 
@@ -114,89 +117,67 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
       const convertedColors: ColorVariant[] = [];
       
       colors.forEach((colorGroup, index) => {
-        // console.log(`🔍 Processing colorGroup ${index}:`, colorGroup);
+        console.log(`🔍 Processing colorGroup ${index}:`, colorGroup);
+        console.log(`🔍 colorGroup type:`, typeof colorGroup);
+        console.log(`🔍 colorGroup is array:`, Array.isArray(colorGroup));
         
         if (Array.isArray(colorGroup)) {
-          // إذا كان colorGroup مصفوفة، خذ العنصر الأول
-          const firstElement = colorGroup[0];
-          // console.log(`🔍 First element of colorGroup ${index}:`, firstElement);
+          // إذا كان colorGroup مصفوفة من الألوان، استخدمها مباشرة
+          const colorsArray = colorGroup.filter((color: any) => typeof color === 'string');
+          console.log(`🔍 Colors array for group ${index}:`, colorsArray);
           
-          if (typeof firstElement === 'string') {
-            try {
-              // محاولة تحليل JSON string
-              const parsedColors = JSON.parse(firstElement);
-              // console.log(`🔍 Parsed colors for group ${index}:`, parsedColors);
-              
-              if (Array.isArray(parsedColors)) {
-                // إذا كان parsedColors مصفوفة، خذ جميع الألوان
-                let colorsArray: string[] = [];
-                
-                if (Array.isArray(parsedColors[0])) {
-                  // إذا كان العنصر الأول مصفوفة، خذ جميع العناصر
-                  colorsArray = parsedColors.flat().filter((color: any) => typeof color === 'string');
-                } else {
-                  // إذا لم يكن العنصر الأول مصفوفة، خذ جميع العناصر مباشرة
-                  colorsArray = parsedColors.filter((color: any) => typeof color === 'string');
-                }
-                
-                // console.log(`🔍 Colors array for group ${index}:`, colorsArray);
+          if (colorsArray.length > 0) {
+            convertedColors.push({
+              id: `color-${index}-${Date.now()}`,
+              colors: colorsArray
+            });
+          }
+        } else if (typeof colorGroup === 'string') {
+          // إذا كان colorGroup string، قد يكون JSON أو لون واحد
+          try {
+            const parsedColors = JSON.parse(colorGroup);
+            console.log(`🔍 Parsed colors for group ${index}:`, parsedColors);
+            
+            if (Array.isArray(parsedColors)) {
+              // إذا كان parsedColors مصفوفة من المصفوفات
+              if (Array.isArray(parsedColors[0])) {
+                // إذا كان العنصر الأول مصفوفة، خذ جميع العناصر
+                const colorsArray = parsedColors.flat().filter((color: any) => typeof color === 'string');
+                console.log(`🔍 Flattened colors array for group ${index}:`, colorsArray);
                 
                 if (colorsArray.length > 0) {
                   convertedColors.push({
-                    id: `color-${index}`,
+                    id: `color-${index}-${Date.now()}`,
+                    colors: colorsArray
+                  });
+                }
+              } else {
+                // إذا لم يكن العنصر الأول مصفوفة، خذ جميع العناصر مباشرة
+                const colorsArray = parsedColors.filter((color: any) => typeof color === 'string');
+                console.log(`🔍 Direct colors array for group ${index}:`, colorsArray);
+                
+                if (colorsArray.length > 0) {
+                  convertedColors.push({
+                    id: `color-${index}-${Date.now()}`,
                     colors: colorsArray
                   });
                 }
               }
-            } catch (parseError) {
-              // console.log('🔍 Failed to parse color JSON, treating as direct color:', firstElement);
-              convertedColors.push({
-                id: `color-${index}`,
-                colors: [firstElement]
-              });
-            }
-          }
-        } else if (typeof colorGroup === 'string') {
-          try {
-            // محاولة تحليل JSON string مباشرة
-            const parsedColors = JSON.parse(colorGroup);
-            // console.log(`🔍 Direct parsed colors for group ${index}:`, parsedColors);
-            
-            if (Array.isArray(parsedColors)) {
-              // إذا كان parsedColors مصفوفة، خذ جميع الألوان
-              let colorsArray: string[] = [];
-              
-              if (Array.isArray(parsedColors[0])) {
-                // إذا كان العنصر الأول مصفوفة، خذ جميع العناصر
-                colorsArray = parsedColors.flat().filter((color: any) => typeof color === 'string');
-              } else {
-                // إذا لم يكن العنصر الأول مصفوفة، خذ جميع العناصر مباشرة
-                colorsArray = parsedColors.filter((color: any) => typeof color === 'string');
-              }
-              
-              // console.log(`🔍 Direct colors array for group ${index}:`, colorsArray);
-              
-              if (colorsArray.length > 0) {
-                convertedColors.push({
-                  id: `color-${index}`,
-                  colors: colorsArray
-                });
-              }
             }
           } catch (parseError) {
-            // console.log('🔍 Failed to parse color JSON, treating as direct color:', colorGroup);
+            console.log('🔍 Failed to parse color JSON, treating as direct color:', colorGroup);
             convertedColors.push({
-              id: `color-${index}`,
+              id: `color-${index}-${Date.now()}`,
               colors: [colorGroup]
             });
           }
         }
       });
 
-      // console.log('🔍 convertColorsFromAPI - final converted colors:', convertedColors);
+      console.log('🔍 convertColorsFromAPI - final converted colors:', convertedColors);
       return convertedColors;
     } catch (error) {
-      // console.error('🔍 Error converting colors:', error);
+      console.error('🔍 Error converting colors:', error);
       return [];
     }
   };
@@ -276,6 +257,8 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   useEffect(() => {
     console.log('🔍 ProductsForm - Colors useEffect triggered');
     console.log('🔍 ProductsForm - form.colors:', form.colors);
+    console.log('🔍 ProductsForm - form.colors type:', typeof form.colors);
+    console.log('🔍 ProductsForm - form.colors is array:', Array.isArray(form.colors));
     console.log('🔍 ProductsForm - form.allColors:', form.allColors);
     console.log('🔍 ProductsForm - Current formattedColors:', formattedColors);
     
@@ -446,34 +429,24 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     // تعيين أن هناك تغييرات محلية
     setHasLocalColorChanges(true);
     
-    // تحويل الألوان إلى التنسيق المطلوب للـ API
-    const convertedColors = e.target.value.map(colorVariant => {
-      return [JSON.stringify(colorVariant.colors)];
-    });
-    
-    // تحديث allColors أيضاً لتجنب التضارب
-    const allColorsArray = e.target.value.flatMap(colorVariant => 
-      colorVariant.colors
-    );
-    
-    console.log('🔍 ProductsForm - convertedColors for API:', convertedColors);
-    console.log('🔍 ProductsForm - allColorsArray for API:', allColorsArray);
-    
-    // تحديث colors
-    onFormChange({
-      target: {
-        name: e.target.name,
-        value: convertedColors,
-      }
-    } as any);
-    
-    // تحديث allColors أيضاً
-    onFormChange({
-      target: {
-        name: 'allColors',
-        value: allColorsArray,
-      }
-    } as any);
+      // تحويل الألوان إلى التنسيق المطلوب للـ API
+  const convertedColors = e.target.value.map(colorVariant => colorVariant.colors);
+  
+  // تحديث allColors أيضاً لتجنب التضارب
+  const allColorsArray = e.target.value.flatMap(colorVariant => 
+    colorVariant.colors
+  );
+  
+  console.log('🔍 ProductsForm - convertedColors for API:', convertedColors);
+  console.log('🔍 ProductsForm - allColorsArray for API:', allColorsArray);
+  
+  // تحديث colors
+  onFormChange({
+    target: {
+      name: e.target.name,
+      value: convertedColors,
+    }
+  } as any);
   };
   
   //-------------------------------------------- handleInputChange -------------------------------------------

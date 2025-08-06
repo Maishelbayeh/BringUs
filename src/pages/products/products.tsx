@@ -821,14 +821,11 @@ const ProductsPage: React.FC = () => {
   const handleEdit = (product: any) => {
     const originalProduct = product.originalProduct || product;
     
-    // Handle colors from original product data
+    // Handle colors from original product data - pass raw colors data to let ProductsForm handle conversion
     const productColors = originalProduct.colors || [];
-    const formColors = Array.isArray(productColors) && productColors.length > 0
-      ? productColors.map((arr: string[], idx: number) => ({
-          id: String(idx) + '-' + Date.now(),
-          colors: arr
-        }))
-      : [];
+    console.log('🔍 handleEdit - originalProduct.colors:', originalProduct.colors);
+    console.log('🔍 handleEdit - productColors type:', typeof productColors);
+    console.log('🔍 handleEdit - productColors is array:', Array.isArray(productColors));
     
     const maintainStock = (originalProduct.availableQuantity || originalProduct.stock || 0) > 0 ? 'Y' : 'N';
     const unitId = originalProduct.unit?._id || originalProduct.unitId || (typeof originalProduct.unit === 'string' ? originalProduct.unit : '');
@@ -890,7 +887,7 @@ const ProductsPage: React.FC = () => {
     const newForm = {
       ...initialForm,
       ...originalProduct,
-      colors: Array.isArray(formColors) ? formColors : [],
+      colors: productColors, // Pass raw colors data to let ProductsForm handle conversion
       nameAr: originalProduct.nameAr || '',
       nameEn: originalProduct.nameEn || '',
       descriptionAr: originalProduct.descriptionAr || '',
@@ -977,7 +974,7 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- handleFormChange -------------------------------------------
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    //CONSOLE.log('🔍 handleFormChange:', { name: e.target.name, value: e.target.value });
+    console.log('🔍 handleFormChange:', { name: e.target.name, value: e.target.value });
     
     if (e.target.name === 'maintainStock') {
       if (e.target.value === 'N') {
@@ -1038,6 +1035,33 @@ const ProductsPage: React.FC = () => {
     } else if (e.target.name === 'unit') {
       // تحديث unit و unitId معاً
       const newForm = { ...form, unit: e.target.value, unitId: e.target.value };
+      setForm(newForm);
+    } else if (e.target.name === 'colors') {
+      // التعامل مع الألوان كمصفوفة
+      console.log('🔍 handleFormChange - colors received:', e.target.value);
+      console.log('🔍 handleFormChange - colors type:', typeof e.target.value);
+      console.log('🔍 handleFormChange - colors is array:', Array.isArray(e.target.value));
+      
+      let colorsValue: any = e.target.value;
+      
+      // إذا كانت القيمة مصفوفة، استخدمها كما هي
+      if (Array.isArray(e.target.value)) {
+        colorsValue = e.target.value;
+      } else if (typeof e.target.value === 'string') {
+        // إذا كانت القيمة نص، حاول تحليلها كـ JSON
+        try {
+          colorsValue = JSON.parse(e.target.value);
+        } catch {
+          // إذا فشل التحليل، استخدمها كمصفوفة فارغة
+          colorsValue = [];
+        }
+      }
+      
+      // تأكد من أن القيمة مصفوفة
+      const colorsArray = Array.isArray(colorsValue) ? colorsValue : [];
+      
+      const newForm = { ...form, colors: colorsArray };
+      console.log('🔍 handleFormChange - Updated colors:', newForm.colors);
       setForm(newForm);
     } else {
       // التعامل مع الحقول الأخرى
@@ -1154,9 +1178,46 @@ const ProductsPage: React.FC = () => {
         tags: form.tags || [],
         barcodes: Array.isArray(form.barcodes) ? form.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [], // إضافة الباركود مع فلترة القيم الفارغة
         selectedSpecifications: form.selectedSpecifications || '', // إرسال المواصفات المختارة
-        colors: Array.isArray(form.colors)
-          ? form.colors.map((variant: any) => Array.isArray(variant.colors) ? variant.colors : [])
-          : [],
+        colors: (() => {
+          console.log('🔍 handleSubmit - form.colors:', form.colors);
+          console.log('🔍 handleSubmit - form.colors type:', typeof form.colors);
+          console.log('🔍 handleSubmit - form.colors is array:', Array.isArray(form.colors));
+          
+          if (Array.isArray(form.colors)) {
+            const processedColors = form.colors.map((variant: any) => {
+              console.log('🔍 handleSubmit - Processing variant:', variant);
+              console.log('🔍 handleSubmit - Variant type:', typeof variant);
+              console.log('🔍 handleSubmit - Variant is array:', Array.isArray(variant));
+              
+              // إذا كان variant مصفوفة ألوان مباشرة (من convertedColors)
+              if (Array.isArray(variant)) {
+                console.log('🔍 handleSubmit - Returning variant as array:', variant);
+                return variant;
+              }
+              // إذا كان variant يحتوي على colors property (من CustomColorPicker)
+              else if (variant && typeof variant === 'object' && Array.isArray(variant.colors)) {
+                console.log('🔍 handleSubmit - Returning variant.colors:', variant.colors);
+                return variant.colors;
+              }
+              // إذا كان لون واحد
+              else if (typeof variant === 'string') {
+                console.log('🔍 handleSubmit - Returning single color as array:', [variant]);
+                return [variant];
+              }
+              // إذا كان null أو undefined
+              else {
+                console.log('🔍 handleSubmit - Returning empty array for null/undefined variant');
+                return [];
+              }
+            }).filter((colors: string[]) => colors.length > 0); // إزالة المصفوفات الفارغة
+            
+            console.log('🔍 handleSubmit - Final processed colors:', processedColors);
+            return processedColors;
+          } else {
+            console.log('🔍 handleSubmit - form.colors is not an array, returning empty array');
+            return [];
+          }
+        })(),
         images: form.images || [],
         mainImage: form.mainImage || null,
         isActive: true,
