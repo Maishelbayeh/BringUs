@@ -18,6 +18,7 @@ import useProductSpecifications from '../../hooks/useProductSpecifications';
 import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 import TableImage from '../../components/common/TableImage';
 import useToast from '../../hooks/useToast';
+import CustomBarcode from '../../components/common/CustomBarcode';
 
 import { validateProductWithDuplicates } from '../../validation/productValidation';
 //-------------------------------------------- ColorVariant -------------------------------------------
@@ -31,6 +32,7 @@ const initialForm: {
   nameEn: string;
   categoryId: string;
   subcategoryId: string;
+  categoryIds: string[];
   storeId: string;
   visibility: string;
   unit: string;
@@ -59,6 +61,8 @@ const initialForm: {
   images: string[];
   mainImage: string | null;
   productVideo: string;
+  isOnSale: string;
+  salePercentage: string;
 } = {
   nameAr: '',
   nameEn: '',
@@ -72,7 +76,7 @@ const initialForm: {
   costPrice: '',
   compareAtPrice: '',
   originalPrice: '',
-
+  categoryIds: [],
   tags: [],
   productLabels: [],
   productOrder: '',
@@ -92,6 +96,8 @@ const initialForm: {
   images: [],
   mainImage: null,
   productVideo: '',
+  isOnSale: 'false',
+  salePercentage: '',
 };
 //-------------------------------------------- ProductsPage -------------------------------------------
 const ProductsPage: React.FC = () => {
@@ -127,10 +133,9 @@ const ProductsPage: React.FC = () => {
     fetchProducts,
     saveProduct,
     deleteProduct,
-    uploadProductImage,
+    
     uploadProductImages,
     uploadMainImage,
-    validateProduct,
     addVariant,
     deleteVariant,
     updateVariant,
@@ -314,8 +319,9 @@ const ProductsPage: React.FC = () => {
       images: product.images || [],
       nameAr: product.nameAr,
       nameEn: product.nameEn,
-    category: product.category ? (isRTL ? product.category.nameAr : product.category.nameEn) : '',
-    price: product.price,
+      category: product.category ? (isRTL ? product.category.nameAr : product.category.nameEn) : '',
+      categories: product.categories || [],
+      price: product.price,
       costPrice: product.costPrice,
       compareAtPrice: product.compareAtPrice,
       originalPrice: product.originalPrice,
@@ -375,7 +381,7 @@ const ProductsPage: React.FC = () => {
           }
         }).join(', ');
       })(),
-    colors: product.colors?.length || 0,
+    colors: product.colors || [],
     originalProduct: product,
     };
   }) : [];
@@ -501,6 +507,62 @@ const ProductsPage: React.FC = () => {
       </div>
     );
   };
+  //-------------------------------------------- renderColors -------------------------------------------
+  const renderColors = (value: any, item: any) => {
+    const colors = item.colors || [];
+    
+    if (!colors || colors.length === 0) {
+      return (
+        <span className="text-gray-500 text-sm">
+          {isRTL ? 'لا توجد ألوان' : 'No Colors'}
+        </span>
+      );
+    }
+    
+    return (
+      <div className="flex flex-wrap gap-1">
+        {colors.map((colorGroup: any, groupIndex: number) => {
+          // Handle both array of colors and object with colors property
+          const colorArray = Array.isArray(colorGroup) ? colorGroup : 
+                           (colorGroup && colorGroup.colors && Array.isArray(colorGroup.colors)) ? colorGroup.colors : 
+                           [colorGroup];
+          
+          return colorArray.map((color: string, colorIndex: number) => (
+            <div
+              key={`${groupIndex}-${colorIndex}`}
+              className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
+              style={{ backgroundColor: color }}
+              title={color}
+            />
+          ));
+        })}
+      </div>
+    );
+  };
+
+  //-------------------------------------------- renderCategories -------------------------------------------
+  const renderCategories = (value: any, item: any) => {
+    const categories = item.categories || [];
+    
+    if (!categories || categories.length === 0) {
+      return (
+        <span className="text-gray-500 text-sm">
+          {isRTL ? 'لا توجد فئات' : 'No Categories'}
+        </span>
+      );
+    }
+    
+    return (
+      <div className="text-sm space-y-1">
+        {categories.map((category: any, index: number) => (
+          <div key={index} className="bg-blue-50 px-2 py-1 rounded text-xs text-blue-700 font-medium">
+            {isRTL ? category.nameAr : category.nameEn}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   //-------------------------------------------- renderBarcode -------------------------------------------
   const renderBarcode = (value: any, item: any) => {
     //CONSOLE.log('🔍 renderBarcode - value:', value);
@@ -520,8 +582,23 @@ const ProductsPage: React.FC = () => {
       return (
         <div className="text-sm space-y-1">
           {value.map((barcode: string, index: number) => (
-            <div key={index} className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-              {barcode}
+            <div key={index} className="flex flex-col items-center">
+              <div className="relative group">
+                <CustomBarcode 
+                  value={barcode} 
+                  width={1.5} 
+                  height={40} 
+                  fontSize={8}
+                  margin={2}
+                  displayValue={false}
+                  showPrintButton={true}
+                  isRTL={isRTL}
+                  className="mb-1"
+                />
+                <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs text-center">
+                  {barcode}
+                </span>
+              </div>
             </div>
           ))}
         </div>
@@ -530,10 +607,23 @@ const ProductsPage: React.FC = () => {
     
     // إذا كان الباركود قيمة واحدة
     return (
-      <div className="text-sm">
-        <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-          {value}
-        </span>
+      <div className="text-sm flex flex-col items-center">
+        <div className="relative group">
+          <CustomBarcode 
+            value={value} 
+            width={1.5} 
+            height={40} 
+            fontSize={8}
+            margin={2}
+            displayValue={false}
+            showPrintButton={true}
+            isRTL={isRTL}
+            className="mb-1"
+          />
+          <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs text-center">
+            {value}
+          </span>
+        </div>
       </div>
     );
   };
@@ -662,6 +752,7 @@ const ProductsPage: React.FC = () => {
       unit: String(unitId),
       unitId: String(unitId),
       categoryId: String(categoryId),
+      categoryIds: originalProduct.categoryIds || originalProduct.categories?.map((cat: any) => cat._id || cat.id) || [String(categoryId)],
       subcategoryId: String(subcategoryId),
       storeId: String(storeId),
       tags: tags,
@@ -758,22 +849,7 @@ const ProductsPage: React.FC = () => {
     setShowVariantsPopup(true);
   };
 
-  //-------------------------------------------- handleEditVariant -------------------------------------------
-  const handleEditVariant = (variant: any) => {
-    setEditProduct(variant);
-    setDrawerMode('variant');
-    setForm({
-      ...initialForm,
-      ...variant,
-      // Ensure colors is always an array of {id, colors}
-      colors: Array.isArray(variant.colors) ? variant.colors : [],
-      // Ensure images is always an array
-      images: Array.isArray(variant.images) ? variant.images : [],
-      mainImage: variant.mainImage || null,
-      // Add any other fields you want to ensure are present
-    });
-    setShowDrawer(true);
-  };
+  // Note: handleEditVariant is not used - variant editing is handled in VariantManager.tsx
 
   //-------------------------------------------- handleDeleteVariant -------------------------------------------
   const handleDeleteVariant = async (variant: any) => {
@@ -799,18 +875,8 @@ const ProductsPage: React.FC = () => {
       setSelectedProductVariants(prev => prev.filter(v => v._id !== variant._id));
       
       // Show success message
-      if (isRTL) {
-        alert('تم حذف المتغير بنجاح');
-      } else {
-        alert('Variant deleted successfully');
-      }
     } catch (error) {
-      console.error('❌ handleDeleteVariant - Error:', error);
-      if (isRTL) {
-        alert('حدث خطأ أثناء حذف المتغير');
-      } else {
-        alert('Error deleting variant');
-      }
+      console.error('🔍 handleDeleteVariant - Error:', error);
     }
   };
 
@@ -828,6 +894,11 @@ const ProductsPage: React.FC = () => {
   //-------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (product: any) => {
     const originalProduct = product.originalProduct || product;
+    
+    console.log('🔍 handleEdit - originalProduct:', originalProduct);
+    console.log('🔍 handleEdit - originalProduct.categoryIds:', originalProduct.categoryIds);
+    console.log('🔍 handleEdit - originalProduct.categories:', originalProduct.categories);
+    console.log('🔍 handleEdit - originalProduct.category:', originalProduct.category);
     
     // Handle colors from original product data - pass raw colors data to let ProductsForm handle conversion
     const productColors = originalProduct.colors || [];
@@ -904,6 +975,7 @@ const ProductsPage: React.FC = () => {
       unitId: String(unitId),
       unit: String(unitId),
       categoryId: String(categoryId),
+      categoryIds: originalProduct.categoryIds || originalProduct.categories?.map((cat: any) => cat._id || cat.id) || [String(categoryId)],
       subcategoryId: String(subcategoryId),
       storeId: String(storeId),
       tags: tags,
@@ -917,6 +989,11 @@ const ProductsPage: React.FC = () => {
       barcodes: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [],
       newBarcode: '',
     };
+    
+    console.log('🔍 handleEdit - Final newForm:', newForm);
+    console.log('🔍 handleEdit - newForm.categoryIds:', newForm.categoryIds);
+    console.log('🔍 handleEdit - newForm.categoryId:', newForm.categoryId);
+    
     setForm(newForm);
     setEditProduct(originalProduct);
     setDrawerMode('edit');
@@ -969,6 +1046,7 @@ const ProductsPage: React.FC = () => {
       unit: '',
       unitId: '',
       categoryId: '',
+      categoryIds: [],
       tags: [],
     });
     setEditProduct(null);
@@ -980,6 +1058,7 @@ const ProductsPage: React.FC = () => {
     setShowDrawer(false);
     setEditProduct(null);
     setDrawerMode('add');
+    setForm(initialForm); // Reset form to initial state
   };
   //-------------------------------------------- handleFormChange -------------------------------------------
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -1153,6 +1232,33 @@ const ProductsPage: React.FC = () => {
       const newForm = { ...form, specificationValues: specificationValuesArray };
       console.log('🔍 handleFormChange - Updated specificationValues:', newForm.specificationValues);
       setForm(newForm);
+    } else if (e.target.name === 'categoryIds') {
+      // التعامل مع categoryIds كمصفوفة
+      console.log('🔍 handleFormChange - categoryIds received:', e.target.value);
+      console.log('🔍 handleFormChange - categoryIds type:', typeof e.target.value);
+      console.log('🔍 handleFormChange - categoryIds is array:', Array.isArray(e.target.value));
+      
+      let categoryIdsValue: any = e.target.value;
+      
+      // إذا كانت القيمة مصفوفة، استخدمها كما هي
+      if (Array.isArray(e.target.value)) {
+        categoryIdsValue = e.target.value;
+      } else if (typeof e.target.value === 'string') {
+        // إذا كانت القيمة نص، حاول تحليلها كـ JSON
+        try {
+          categoryIdsValue = JSON.parse(e.target.value);
+        } catch {
+          // إذا فشل التحليل، استخدمها كمصفوفة فارغة
+          categoryIdsValue = [];
+        }
+      }
+      
+      // تأكد من أن القيمة مصفوفة
+      const categoryIdsArray = Array.isArray(categoryIdsValue) ? categoryIdsValue : [];
+      
+      const newForm = { ...form, categoryIds: categoryIdsArray };
+      console.log('🔍 handleFormChange - Updated categoryIds:', newForm.categoryIds);
+      setForm(newForm);
     } else {
       // التعامل مع الحقول الأخرى
       console.log('🔍 handleFormChange - generic case for:', e.target.name);
@@ -1279,6 +1385,7 @@ const ProductsPage: React.FC = () => {
         visibility: form.visibility === 'Y',
         unitId: form.unitId || form.unit || null,
         categoryId: form.categoryId || null,
+        categoryIds: form.categoryIds || [],  
         //productLabels: form.productLabels || [],
         subcategoryId: form.subcategoryId || null,
         productLabels: (() => {
@@ -1335,6 +1442,8 @@ const ProductsPage: React.FC = () => {
         images: form.images || [],
         mainImage: form.mainImage || null,
         isActive: true,
+        isOnSale: form.isOnSale === 'true',
+        salePercentage: parseFloat(form.salePercentage) || 0,
       };
 
       //CONSOLE.log('🔍 handleSubmit - productData:', productData);
@@ -1375,8 +1484,10 @@ const ProductsPage: React.FC = () => {
           await addVariant(editProduct._id, form);
         } else {
           // Update existing variant
+          // For variants, editProduct is the variant itself, so we need the parent product ID
+          const parentProductId = selectedProductInfo?._id || editProduct.parentProductId || editProduct.parent || editProduct.productId;
           await updateVariant(
-            editProduct.parentProductId || editProduct.parent || editProduct.productId || editProduct._id,
+            parentProductId,
             formWithId._id,
             form
           );
@@ -1408,7 +1519,7 @@ const ProductsPage: React.FC = () => {
     { key: 'images', label: { ar: 'الصور الإضافية', en: 'Additional Images' }, type: 'text' as const, render: renderImages },
     { key: isRTL ? 'nameAr' : 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
     { key: isRTL ? 'descriptionAr' : 'descriptionEn', label: { ar: 'الوصف', en: 'Description' }, type: 'text' as const },
-    { key: 'category', label: { ar: 'الفئة', en: 'Category' }, type: 'text' as const },
+    { key: 'categories', label: { ar: 'الفئات', en: 'Categories' }, type: 'text' as const, render: renderCategories },
     { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number' as const, render: renderPrice },
     { key: 'costPrice', label: { ar: 'سعر التكلفة', en: 'Cost Price' }, type: 'number' as const },
     { key: 'compareAtPrice', label: { ar: 'سعر الجملة', en: 'Wholesale Price' }, type: 'number' as const },
@@ -1420,7 +1531,7 @@ const ProductsPage: React.FC = () => {
     { key: 'specifications', label: { ar: 'المواصفات', en: 'Specifications' }, type: 'text' as const, render: renderSpecifications },
     { key: 'barcodes', label: { ar: 'الباركود', en: 'Barcode' }, type: 'text' as const, render: renderBarcode },
     { key: 'variantStatus', label: { ar: 'النوع', en: 'Type' }, type: 'text' as const, render: renderVariantStatus },
-    { key: 'colors', label: { ar: 'عدد الألوان', en: 'Colors Count' }, type: 'number' as const },
+    { key: 'colors', label: { ar: 'الألوان', en: 'Colors' }, type: 'text' as const, render: renderColors },
     { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const, render: renderProductId },
 
     { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text' as const, render: renderActions, showControls: false },
@@ -1471,6 +1582,7 @@ const ProductsPage: React.FC = () => {
           renderBarcode={renderBarcode}
           renderSpecifications={renderSpecifications}
           renderVariantStatus={renderVariantStatus}
+          renderColors={renderColors}
           renderActions={renderActions}
         />
       )}
@@ -1529,7 +1641,7 @@ const ProductsPage: React.FC = () => {
         onUpdateVariant={updateVariant}
         onAddVariant={() => {
           // TODO: Implement add variant functionality
-          console.log('🔍 Add variant clicked for product:', selectedProductInfo?._id);
+          console.log('🔍 Add variant clicked for product:', selectedProductInfo);
         }}
         isRTL={isRTL}
         categories={categories as any}

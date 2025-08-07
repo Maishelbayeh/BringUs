@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon, CheckIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ChevronUpIcon, CheckIcon, PlusIcon, MinusIcon, EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface SpecificationValue {
   valueAr: string;
@@ -37,6 +37,7 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
   className = ''
 }) => {
   const [expandedSpecs, setExpandedSpecs] = useState<{ [key: string]: boolean }>({});
+  const [showSummaryPopup, setShowSummaryPopup] = useState(false);
 
   const toggleSpec = (specId: string) => {
     setExpandedSpecs(prev => ({
@@ -120,9 +121,22 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
 
   return (
     <div className={`space-y-6 ${className}`}>
-      <h3 className={`text-lg font-semibold text-gray-800 ${isRTL ? 'text-right' : 'text-left'}`}>
-        {isRTL ? 'مواصفات المنتج' : 'Product Specifications'}
-      </h3>
+      {/* Header with Summary Button */}
+      <div className={`flex items-center justify-end ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+      
+        
+        {selectedSpecifications.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowSummaryPopup(true)}
+            className={`flex items-center space-x-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+            title={isRTL ? 'عرض ملخص المواصفات' : 'View Specifications Summary'}
+          >
+            <EyeIcon className="w-4 h-4" />
+            <span>{isRTL ? 'ملخص المواصفات' : 'Summary'}</span>
+          </button>
+        )}
+      </div>
       
       <div className="space-y-4">
         {specifications.map((spec) => {
@@ -140,7 +154,7 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                 }`}
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+                  <div className={`${isRTL ? 'ml-2' : 'mr-2'} w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full`}></div>
                   <span className="font-medium text-gray-800">
                     {isRTL ? spec.titleAr : spec.titleEn}
                   </span>
@@ -194,7 +208,7 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
 
                     {/* Quantity and Price Section for Selected Values */}
                     {selectedValues.length > 0 && (
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+                      <div className={`${isRTL ? 'mr-6' : 'ml-6'} bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200`}>
                         <div className="flex items-center justify-between mb-4">
                           <h4 className={`font-medium text-blue-800 ${isRTL ? 'text-right' : 'text-left'}`}>
                             {isRTL ? 'تفاصيل القيم المختارة:' : 'Selected Values Details:'}
@@ -326,67 +340,97 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
         })}
       </div>
 
-      {/* Summary Section */}
-      {selectedSpecifications.length > 0 && (
-        <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
-          <h4 className={`font-medium text-green-800 mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-            {isRTL ? 'ملخص المواصفات المختارة:' : 'Selected Specifications Summary:'}
-          </h4>
-          <div className="space-y-3">
-            {specifications.map((spec) => {
-              const specValues = selectedSpecifications.filter(s => s.specId === spec._id);
-              if (specValues.length === 0) return null;
-              
-              return (
-                <div key={spec._id} className="p-3 bg-white rounded-lg border border-green-200">
-                  <div className={`${isRTL ? 'text-right' : 'text-left'} mb-2`}>
-                    <p className="font-medium text-gray-800">
-                      {isRTL ? spec.titleAr : spec.titleEn}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    {specValues.map((selected) => (
-                      <div key={selected.valueId} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
-                          <p className="text-sm font-medium text-gray-800">
-                            {selected.value}
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            {isRTL ? 'الكمية:' : 'Quantity:'} {selected.quantity} | {isRTL ? 'السعر الإضافي:' : 'Additional Price:'} ${selected.price.toFixed(2)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-green-600">
-                            ${(selected.quantity * selected.price).toFixed(2)}
-                          </p>
+
+
+      {/* Summary Popup Modal */}
+      {selectedSpecifications.length > 0 && showSummaryPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className={`flex items-center justify-between p-6 border-b border-gray-200 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+              <h3 className={`text-xl font-semibold text-gray-800 ${isRTL ? 'text-right' : 'text-left'}`}>
+                {isRTL ? 'ملخص المواصفات المختارة' : 'Selected Specifications Summary'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowSummaryPopup(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                title={isRTL ? 'إغلاق' : 'Close'}
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="space-y-3">
+                {specifications.map((spec) => {
+                  const specValues = selectedSpecifications.filter(s => s.specId === spec._id);
+                  if (specValues.length === 0) return null;
+                  
+                  return (
+                    <div key={spec._id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className={`${isRTL ? 'text-right' : 'text-left'} mb-3`}>
+                        <p className="font-medium text-gray-800 text-lg">
+                          {isRTL ? spec.titleAr : spec.titleEn}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        {specValues.map((selected) => (
+                          <div key={selected.valueId} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                            <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
+                              <p className="text-sm font-medium text-gray-800">
+                                {selected.value}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                {isRTL ? 'الكمية:' : 'Quantity:'} {selected.quantity} | {isRTL ? 'السعر الإضافي:' : 'Additional Price:'} ${selected.price.toFixed(2)}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-blue-600">
+                                ${(selected.quantity * selected.price).toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">
+                            {isRTL ? 'مجموع المواصفة:' : 'Specification total:'}
+                          </span>
+                          <span className="font-medium text-blue-600">
+                            ${specValues.reduce((total, val) => total + (val.quantity * val.price), 0).toFixed(2)}
+                          </span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  <div className="mt-2 pt-2 border-t border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">
-                        {isRTL ? 'مجموع المواصفة:' : 'Specification total:'}
-                      </span>
-                      <span className="font-medium text-green-600">
-                        ${specValues.reduce((total, val) => total + (val.quantity * val.price), 0).toFixed(2)}
-                      </span>
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
+              
+              {/* Total */}
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-800 text-lg">
+                    {isRTL ? 'المجموع الكلي:' : 'Total Additional Cost:'}
+                  </span>
+                  <span className="font-bold text-blue-600 text-xl">
+                    ${selectedSpecifications.reduce((total, spec) => total + (spec.quantity * spec.price), 0).toFixed(2)}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-          
-          {/* Total */}
-          <div className="mt-4 pt-4 border-t border-green-200">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-green-800">
-                {isRTL ? 'المجموع الكلي:' : 'Total Additional Cost:'}
-              </span>
-              <span className="font-bold text-green-600 text-lg">
-                ${selectedSpecifications.reduce((total, spec) => total + (spec.quantity * spec.price), 0).toFixed(2)}
-              </span>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end p-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => setShowSummaryPopup(false)}
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors duration-200"
+              >
+                {isRTL ? 'إغلاق' : 'Close'}
+              </button>
             </div>
           </div>
         </div>

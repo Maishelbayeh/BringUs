@@ -15,6 +15,7 @@ interface ProductTreeViewProps {
   renderBarcode: (value: any, item: any) => React.ReactNode;
   renderSpecifications: (value: any, item: any) => React.ReactNode;
   renderVariantStatus: (value: any, item: any) => React.ReactNode;
+  renderColors: (value: any, item: any) => React.ReactNode;
   renderActions: (value: any, item: any) => React.ReactNode;
 }
 
@@ -32,6 +33,7 @@ const ProductTreeView: React.FC<ProductTreeViewProps> = ({
   renderBarcode,
   renderSpecifications,
   renderVariantStatus,
+  renderColors,
   renderActions
 }) => {
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());
@@ -100,11 +102,25 @@ const ProductTreeView: React.FC<ProductTreeViewProps> = ({
               </p>
             </div>
 
-            {/* Category */}
-            <div className="flex-shrink-0 w-24 px-2">
-              <span className="text-xs text-gray-600">
-                {product.category?.nameAr || product.category?.nameEn || '-'}
-              </span>
+            {/* Categories */}
+            <div className="flex-shrink-0 w-32 px-2">
+              <div className="space-y-1">
+                {product.categories && Array.isArray(product.categories) && product.categories.length > 0 ? (
+                  product.categories.map((category: any, index: number) => (
+                    <div key={index} className="bg-blue-50 px-2 py-1 rounded text-xs text-blue-700 font-medium">
+                      {isRTL ? category.nameAr : category.nameEn}
+                    </div>
+                  ))
+                ) : product.category ? (
+                  <div className="bg-blue-50 px-2 py-1 rounded text-xs text-blue-700 font-medium">
+                    {isRTL ? product.category.nameAr : product.category.nameEn}
+                  </div>
+                ) : (
+                  <span className="text-xs text-gray-500">
+                    {isRTL ? 'لا توجد فئات' : 'No Categories'}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Price */}
@@ -158,6 +174,33 @@ const ProductTreeView: React.FC<ProductTreeViewProps> = ({
               {renderBarcode(product.barcodes, product)}
             </div>
 
+            {/* Colors */}
+            <div className="flex-shrink-0 w-24 px-2">
+              <div className="flex flex-wrap gap-1">
+                {product.colors && Array.isArray(product.colors) && product.colors.length > 0 ? (
+                  product.colors.map((colorGroup: any, groupIndex: number) => {
+                    // Handle both array of colors and object with colors property
+                    const colorArray = Array.isArray(colorGroup) ? colorGroup : 
+                                     (colorGroup && colorGroup.colors && Array.isArray(colorGroup.colors)) ? colorGroup.colors : 
+                                     [colorGroup];
+                    
+                    return colorArray.map((color: string, colorIndex: number) => (
+                      <div
+                        key={`${groupIndex}-${colorIndex}`}
+                        className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ));
+                  })
+                ) : (
+                  <span className="text-xs text-gray-500">
+                    {isRTL ? 'لا توجد ألوان' : 'No Colors'}
+                  </span>
+                )}
+              </div>
+            </div>
+
             {/* Variant Status */}
             <div className="flex-shrink-0 w-16 px-2">
               {renderVariantStatus(product.hasVariants, product)}
@@ -190,7 +233,7 @@ const ProductTreeView: React.FC<ProductTreeViewProps> = ({
           <div className="flex-shrink-0 w-6"></div>
           <div className="flex-shrink-0 w-16">{isRTL ? 'الصورة' : 'Image'}</div>
           <div className="flex-1 px-4">{isRTL ? 'اسم المنتج' : 'Product Name'}</div>
-          <div className="flex-shrink-0 w-24 px-2">{isRTL ? 'الفئة' : 'Category'}</div>
+          <div className="flex-shrink-0 w-32 px-2">{isRTL ? 'الفئات' : 'Categories'}</div>
           <div className="flex-shrink-0 w-20 px-2">{isRTL ? 'السعر' : 'Price'}</div>
           <div className="flex-shrink-0 w-20 px-2">{isRTL ? 'سعر التكلفة' : 'Cost'}</div>
           <div className="flex-shrink-0 w-20 px-2">{isRTL ? 'سعر الجملة' : 'Wholesale'}</div>
@@ -200,6 +243,7 @@ const ProductTreeView: React.FC<ProductTreeViewProps> = ({
           <div className="flex-shrink-0 w-24 px-2">{isRTL ? 'التصنيف' : 'Labels'}</div>
           <div className="flex-shrink-0 w-24 px-2">{isRTL ? 'المواصفات' : 'Specs'}</div>
           <div className="flex-shrink-0 w-24 px-2">{isRTL ? 'الباركود' : 'Barcode'}</div>
+          <div className="flex-shrink-0 w-24 px-2">{isRTL ? 'الألوان' : 'Colors'}</div>
           <div className="flex-shrink-0 w-16 px-2">{isRTL ? 'النوع' : 'Type'}</div>
           <div className="flex-shrink-0 w-24 px-2">{isRTL ? 'العمليات' : 'Actions'}</div>
         </div>
