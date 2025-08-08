@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import useLanguage from '../../hooks/useLanguage';
-import { useCustomers, Customer } from '../../hooks/useCustomers';
+import { useCustomers, Customer, Order } from '../../hooks/useCustomers';
 import * as XLSX from 'xlsx';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
@@ -9,16 +9,8 @@ import CustomerDetailsPopup from './CustomerDetailsPopup';
 import PermissionModal from '../../components/common/PermissionModal';
 import { FiTrash2 } from 'react-icons/fi';
 
-type Order = {
-  id: number;
-  customerId: number;
-  date: string;
-  price: number;
-  paid: boolean;
-};
-
 const STORE_ID_KEY = 'storeId';
-const DEFAULT_STORE_ID = '686a719956a82bfcc93a2e2d';
+const DEFAULT_STORE_ID = localStorage.getItem(STORE_ID_KEY) || '';
 
 const CustomersPage: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -51,27 +43,12 @@ const CustomersPage: React.FC = () => {
     pagination,
     fetchCustomers,
     deleteCustomer,
+    fetchCustomerOrders,
   } = useCustomers();
 
-  // Mock orders data for now (you can create a separate hook for orders later)
-  const ordersData: Order[] = [
-    { id: 101, customerId: 1, date: '2025-06-01', price: 200, paid: true },
-    { id: 95, customerId: 1, date: '2025-05-20', price: 150, paid: false },
-    { id: 99, customerId: 2, date: '2025-05-29', price: 250, paid: true },
-    { id: 90, customerId: 2, date: '2025-05-10', price: 150, paid: true },
-    { id: 88, customerId: 3, date: '2025-05-15', price: 120, paid: true },
-    { id: 77, customerId: 4, date: '2025-05-10', price: 100, paid: false },
-    { id: 70, customerId: 4, date: '2025-04-30', price: 200, paid: true },
-    { id: 110, customerId: 5, date: '2025-06-03', price: 300, paid: true },
-    { id: 111, customerId: 5, date: '2025-06-04', price: 180, paid: false },
-    { id: 112, customerId: 5, date: '2025-06-05', price: 220, paid: true },
-    { id: 120, customerId: 6, date: '2025-05-30', price: 90, paid: false },
-    { id: 121, customerId: 6, date: '2025-06-01', price: 400, paid: true },
-    { id: 130, customerId: 7, date: '2025-06-02', price: 500, paid: true },
-    { id: 140, customerId: 8, date: '2025-05-25', price: 210, paid: false },
-    { id: 160, customerId: 10, date: '2025-05-29', price: 250, paid: true },
-    { id: 161, customerId: 10, date: '2025-06-02', price: 175, paid: true },
-  ];
+  // State for customer orders
+  const [customerOrders, setCustomerOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   // Filter customers based on search (محليًا)
   const filteredCustomers = customers.filter((customer) => {
@@ -105,17 +82,33 @@ const CustomersPage: React.FC = () => {
   }, [storeId, fetchCustomers]);
 
   const getTotalSpent = (orders: Order[]) =>
-    orders.reduce((sum, order) => sum + (order.paid ? order.price : 0), 0);
+    orders.reduce((sum, order) => sum + (order.paid ? order.items.reduce((itemSum, item) => itemSum + item.total, 0) : 0), 0);
   
   const getAverageOrderValue = (orders: Order[]) => {
     const paidOrders = orders.filter(order => order.paid);
     if (paidOrders.length === 0) return 0;
-    return Math.round(getTotalSpent(orders) / paidOrders.length);
+    const totalSpent = getTotalSpent(orders);
+    return Math.round(totalSpent / paidOrders.length);
   };
 
   const getLastOrderDate = (orders: Order[]) => {
     if (!orders.length) return '-';
-    return orders.reduce((latest, order) => order.date > latest ? order.date : latest, orders[0].date);
+    return orders.reduce((latest, order) => new Date(order.date) > new Date(latest) ? order.date : latest, orders[0].date);
+  };
+
+  const handleCustomerClick = async (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setOrdersLoading(true);
+    try {
+      const orders = await fetchCustomerOrders(customer._id, storeId);
+      if (orders) {
+        setCustomerOrders(orders);
+      }
+    } catch (error) {
+      console.error('Error fetching customer orders:', error);
+    } finally {
+      setOrdersLoading(false);
+    }
   };
 
   const handleDelete = (customer: Customer, e: React.MouseEvent) => {
@@ -234,12 +227,11 @@ const CustomersPage: React.FC = () => {
       {/* Customers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
         {filteredCustomers.map((customer) => {
-          const orderCount = ordersData.filter(order => order.customerId === parseInt(customer._id.slice(-1))).length;
           return (
             <div
               key={customer._id}
               className={`border bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 flex items-center gap-6 group relative cursor-pointer `}
-              onClick={() => setSelectedCustomer(customer)}
+              onClick={() => handleCustomerClick(customer)}
             >
               <div className="relative">
                 {(() => {
@@ -264,7 +256,7 @@ const CustomersPage: React.FC = () => {
                   <svg className="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14l-1.68 9.39A2 2 0 0 1 15.34 19H8.66a2 2 0 0 1-1.98-1.61L5 8zm2-3a3 3 0 0 1 6 0" />
                   </svg>
-                  {orderCount}
+                  {customerOrders.length}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
@@ -334,14 +326,18 @@ const CustomersPage: React.FC = () => {
       {selectedCustomer && (
         <CustomerDetailsPopup
           open={!!selectedCustomer}
-          onClose={() => setSelectedCustomer(null)}
+          onClose={() => {
+            setSelectedCustomer(null);
+            setCustomerOrders([]);
+          }}
           customer={selectedCustomer}
-          orders={ordersData}
+          orders={customerOrders}
           isRTL={isRTL}
           t={t}
           getLastOrderDate={getLastOrderDate}
           getTotalSpent={getTotalSpent}
           getAverageOrderValue={getAverageOrderValue}
+          ordersLoading={ordersLoading}
         />
       )}
       

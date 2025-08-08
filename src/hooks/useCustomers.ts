@@ -61,6 +61,63 @@ export interface CustomersResponse {
   };
 }
 
+export interface Order {
+  id: string;
+  orderNumber: string;
+  storeName: string;
+  storeUrl: string;
+  currency: string;
+  date: string;
+  paid: boolean;
+  status: string;
+  itemsCount: number;
+  notes: string;
+  deliveryArea: {
+    locationAr: string;
+    locationEn: string;
+    price: number;
+    estimatedDays: number;
+  };
+  items: Array<{
+    image?: string;
+    name: string;
+    quantity: number;
+    pricePerUnit: number;
+    total: number;
+    selectedSpecifications: Array<{
+      specificationId: string;
+      valueId: string;
+      valueAr: string;
+      valueEn: string;
+      titleAr: string;
+      titleEn: string;
+      _id: string;
+      id: string;
+    }>;
+    selectedColors: string[];
+  }>;
+  pricing: any;
+  isGift: boolean;
+  affiliate: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomerOrdersResponse {
+  success: boolean;
+  data: Order[];
+  count: number;
+  total: number;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
 export interface UseCustomersReturn {
   customers: Customer[];
   loading: boolean;
@@ -71,6 +128,7 @@ export interface UseCustomersReturn {
   deleteCustomer: (storeId: string, id: string) => Promise<boolean>;
   updateCustomer: (storeId: string, id: string, data: Partial<Customer>) => Promise<boolean>;
   createCustomer: (storeId: string, data: Omit<Customer, '_id'>) => Promise<boolean>;
+  fetchCustomerOrders: (customerId: string, storeId: string, page?: number, limit?: number) => Promise<Order[] | void>;
   setCustomers: React.Dispatch<React.SetStateAction<Customer[]>>;
 }
 
@@ -81,7 +139,7 @@ export const useCustomers = (): UseCustomersReturn => {
   const [statistics, setStatistics] = useState<CustomersResponse['statistics'] | null>(null);
   const [pagination, setPagination] = useState<CustomersResponse['pagination'] | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
-
+  const token = localStorage.getItem('token');
   const fetchCustomers = useCallback(async (
     storeId: string,
     forceRefresh: boolean = false,
@@ -102,7 +160,11 @@ export const useCustomers = (): UseCustomersReturn => {
         ...(search && { search })
       });
       const url = `${BASE_URL}stores/${storeId}/customers?${params}`;
-      const res = await axios.get(url);
+        const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const result: CustomersResponse = res.data;
       if (result.success) {
         // فلترة الحقول: لا تعرض email أو password، وأضف addressSummary، وفلتر role === 'client'
@@ -135,7 +197,11 @@ export const useCustomers = (): UseCustomersReturn => {
 
   const deleteCustomer = async (storeId: string, id: string): Promise<boolean> => {
     try {
-      const response = await axios.delete(`${BASE_URL}stores/${storeId}/customers/${id}`);
+      const response = await axios.delete(`${BASE_URL}stores/${storeId}/customers/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const result = response.data;
       if (result.success) {
         setCustomers(prev => prev.filter(customer => customer._id !== id));
@@ -174,6 +240,7 @@ export const useCustomers = (): UseCustomersReturn => {
   const createCustomer = async (storeId: string, data: Omit<Customer, '_id'>): Promise<boolean> => {
     try {
       const response = await axios.post(`${BASE_URL}stores/${storeId}/customers`, data);
+
       const result = response.data;
       if (result.success) {
         setCustomers(prev => [...prev, result.data]);
@@ -189,6 +256,40 @@ export const useCustomers = (): UseCustomersReturn => {
     }
   };
 
+  const fetchCustomerOrders = async (
+    customerId: string,
+    storeId: string,
+    page = 1,
+    limit = 10
+  ): Promise<Order[] | void> => {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        storeId: storeId
+      });
+      
+      const url = `${BASE_URL}orders/customer/${customerId}?${params}`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      const result: CustomerOrdersResponse = response.data;
+      if (result.success) {
+        return result.data;
+      } else {
+        throw new Error('Failed to fetch customer orders');
+      }
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      console.error('Error fetching customer orders:', err);
+      return [];
+    }
+  };
+
   return {
     customers,
     setCustomers,
@@ -200,5 +301,6 @@ export const useCustomers = (): UseCustomersReturn => {
     deleteCustomer,
     updateCustomer,
     createCustomer,
+    fetchCustomerOrders,
   };
 }; 

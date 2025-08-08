@@ -14,6 +14,7 @@ export interface Wholesaler {
   address: string;
   discount: number;
   status: 'Active' | 'Inactive' | 'Suspended' | 'Pending';
+  password?: string;
   businessName?: string;
   businessLicense?: string;
   taxNumber?: string;

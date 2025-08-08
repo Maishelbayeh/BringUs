@@ -15,6 +15,7 @@ interface SallersDrawerProps {
   initialData?: any;
   onSaveSuccess: () => void;
   isEdit: boolean;
+  password?: string;
 }
 
 const SallersDrawer: React.FC<SallersDrawerProps> = ({ 
@@ -24,7 +25,8 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
   title, 
   initialData, 
   onSaveSuccess, 
-  isEdit 
+  isEdit,
+  password = ''
 }) => {
   const { t } = useTranslation();
   const storeId = localStorage.getItem('storeId') || '';
@@ -42,7 +44,8 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
     mobile: '',
     discount: 0,
     address: '',
-    status: 'Active'
+    status: 'Active',
+    password: password || ''
   });
 
   useEffect(() => {
@@ -57,7 +60,8 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
           mobile: '',
           discount: 0,
           address: '',
-          status: 'Active'
+            status: 'Active',
+            password: password || ''
         });
       }
       clearAllErrors();
@@ -158,6 +162,11 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
           _id: storeId
         }
       };
+
+      // Remove password if it's empty during edit (to keep current password)
+      if (isEdit && (!dataToSend.password || dataToSend.password.trim() === '')) {
+        delete dataToSend.password;
+      }
 
       if (isEdit && initialData?._id) {
         await updateWholesaler(initialData._id, dataToSend as any);

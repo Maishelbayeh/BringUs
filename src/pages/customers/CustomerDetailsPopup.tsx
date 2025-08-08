@@ -1,13 +1,5 @@
 import React from 'react';
-import { Customer } from '../../hooks/useCustomers';
-
-type Order = {
-  id: number;
-  customerId: number;
-  date: string;
-  price: number;
-  paid: boolean;
-};
+import { Customer, Order } from '../../hooks/useCustomers';
 
 interface CustomerDetailsPopupProps {
   open: boolean;
@@ -19,6 +11,7 @@ interface CustomerDetailsPopupProps {
   getLastOrderDate: (orders: Order[]) => string;
   getTotalSpent: (orders: Order[]) => number;
   getAverageOrderValue: (orders: Order[]) => number;
+  ordersLoading?: boolean;
 }
 
 const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
@@ -31,6 +24,7 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
   getLastOrderDate,
   getTotalSpent,
   getAverageOrderValue,
+  ordersLoading = false,
 }) => {
   if (!open || !customer) return null;
   
@@ -44,7 +38,7 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
     return `${customer.firstName[0]}${customer.lastName[0]}`.toUpperCase();
   };
 
-  const customerOrders = orders.filter(order => order.customerId === parseInt(customer._id.slice(-1)));
+  const customerOrders = orders;
   const colors = [
     'bg-primary/10 text-primary',
     'bg-blue-100 text-blue-700',
@@ -107,40 +101,69 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
         </div>
         {/* جدول الطلبات */}
         <h3 className={`mt-2 mb-2 font-bold text-lg text-primary/90 ${isRTL ? 'text-right' : 'text-left'}` } dir={isRTL ? 'rtl' : 'ltr'}>{t('customers.orders')}:</h3>
-        <div className="overflow-x-auto rounded-lg border border-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-primary/10 text-primary">
-                <th className="py-2 px-3 border-b">{t('customers.orderNumber')}</th>
-                <th className="py-2 px-3 border-b">{t('customers.orderDate')}</th>
-                <th className="py-2 px-3 border-b">{t('customers.orderPrice')}</th>
-                <th className="py-2 px-3 border-b">{t('customers.orderPaid')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {customerOrders.map((order) => (
-                <tr key={order.id} className={`text-center hover:bg-primary/5 transition ${order.paid ? 'bg-green-50' : 'bg-red-50'}`}>
-                  <td className="py-2 px-3 border-b font-semibold">{order.id}</td>
-                  <td className="py-2 px-3 border-b">{order.date}</td>
-                  <td className="py-2 px-3 border-b">{order.price} ₪</td>
-                  <td className="py-2 px-3 border-b">
-                    {order.paid ? (
-                      <span className="inline-flex items-center gap-1 text-green-700 font-semibold">
-                        <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                        {t('customers.orderPaid')}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-red-600 font-semibold">
-                        <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                        {t('customers.orderUnpaid')}
-                      </span>
-                    )}
-                  </td>
+        
+        {ordersLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-2 text-gray-600">{isRTL ? 'جاري تحميل الطلبات...' : 'Loading orders...'}</span>
+          </div>
+        ) : customerOrders.length > 0 ? (
+          <div className="overflow-x-auto rounded-lg border border-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="bg-primary/10 text-primary">
+                  <th className="py-2 px-3 border-b">{t('customers.orderNumber')}</th>
+                  <th className="py-2 px-3 border-b">{t('customers.orderDate')}</th>
+                  <th className="py-2 px-3 border-b">{t('customers.orderPrice')}</th>
+                  <th className="py-2 px-3 border-b">{t('customers.orderStatus')}</th>
+                  <th className="py-2 px-3 border-b">{t('customers.orderPaid')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {customerOrders.map((order) => (
+                  <tr key={order.id} className={`text-center hover:bg-primary/5 transition ${order.paid ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <td className="py-2 px-3 border-b font-semibold">{order.orderNumber}</td>
+                    <td className="py-2 px-3 border-b">{new Date(order.date).toLocaleDateString()}</td>
+                    <td className="py-2 px-3 border-b">
+                      {order.items.reduce((sum, item) => sum + item.total, 0)} {order.currency}
+                    </td>
+                    <td className="py-2 px-3 border-b">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="py-2 px-3 border-b">
+                      {order.paid ? (
+                        <span className="inline-flex items-center gap-1 text-green-700 font-semibold">
+                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                          {t('customers.orderPaid')}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-red-600 font-semibold">
+                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                          {t('customers.orderUnpaid')}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <p className="text-lg font-medium">{isRTL ? 'لا توجد طلبات' : 'No orders found'}</p>
+            <p className="text-sm">{isRTL ? 'هذا العميل لم يقم بأي طلبات بعد' : 'This customer has not placed any orders yet'}</p>
+          </div>
+        )}
       </div>
     </div>
   );
