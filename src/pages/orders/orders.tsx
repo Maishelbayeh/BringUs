@@ -276,7 +276,7 @@ const OrdersPage: React.FC = () => {
   });
 
   const storeId = getStoreId();
-  const { data: orders, isLoading, error,  updateOrderPaymentStatus, updateOrderStatus } = useOrder(storeId);
+  const { data: orders, isLoading, error, updateOrderPaymentStatus, updateOrderStatus, deleteOrder } = useOrder(storeId);
 
 //-------------------------------------------- tableData -------------------------------------------
   // Handle filter changes
@@ -447,7 +447,69 @@ const OrdersPage: React.FC = () => {
     );
   };
 
+//-------------------------------------------- renderActions -------------------------------------------
+  const renderActions = (value: any, item: any) => {
+    const [isDeleting, setIsDeleting] = useState(false);
+    
+    const handleDelete = async () => {
+      const orderId = item.originalOrder.id || item.originalOrder.orderNumber || item.originalOrder._id;
+      
+      // تأكيد الحذف
+      const confirmed = window.confirm(
+        i18n.language === 'ARABIC' 
+          ? t('orders.deleteOrderConfirmMessage')
+          : t('orders.deleteOrderConfirmMessage')
+      );
+      
+      if (!confirmed) return;
+      
+      setIsDeleting(true);
+      try {
+        await deleteOrder(orderId);
+        showSuccess(
+          t('orders.orderDeletedSuccessfully'),
+          i18n.language === 'ARABIC' ? 'تم الحذف' : 'Deleted'
+        );
+      } catch (error) {
+        console.error('Failed to delete order:', error);
+        showError(
+          t('orders.orderDeleteFailed'),
+          i18n.language === 'ARABIC' ? 'خطأ' : 'Error'
+        );
+      } finally {
+        setIsDeleting(false);
+      }
+    };
 
+    return (
+      <div className="flex items-center justify-center gap-2">
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
+            isDeleting 
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+              : 'bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800'
+          }`}
+          title={t('orders.deleteOrder')}
+        >
+          {isDeleting ? (
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 border border-red-300 border-t-red-600 rounded-full animate-spin"></div>
+              {i18n.language === 'ARABIC' ? 'جاري الحذف...' : 'Deleting...'}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              {t('orders.deleteOrder')}
+            </div>
+          )}
+        </button>
+      </div>
+    );
+  };
 
 //-------------------------------------------- columns -------------------------------------------
   const columns: Column[] = React.useMemo(() => [
@@ -468,8 +530,8 @@ const OrdersPage: React.FC = () => {
     { key: 'paymentStatus', label: { ar: 'حالة الدفع', en: 'Payment Status' }, type: 'status', render: renderPaymentStatus},
     { key: 'itemsCount', label: { ar: 'عدد المنتجات', en: 'Items Count' }, type: 'number'},
     { key: 'notes', label: { ar: 'ملاحظات', en: 'Notes' }, type: 'text'},
-    // { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text', render: renderActions},
-  ], [renderStatus, renderPaymentStatus]);
+    { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text', render: renderActions},
+  ], [renderStatus, renderPaymentStatus, renderActions]);
 
 //-------------------------------------------- visibleTableData -------------------------------------------     
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);

@@ -762,7 +762,13 @@
     "orderStatusStatistics": "إحصائيات حالة الطلبات",
     "paymentStatistics": "إحصائيات الدفع",
     "totalAmount": "المبلغ الإجمالي",
-    "orders": "الطلبات"
+    "orders": "الطلبات",
+    "deleteOrder": "حذف الطلب",
+    "deleteOrderConfirmTitle": "تأكيد حذف الطلب",
+    "deleteOrderConfirmMessage": "هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.",
+    "orderDeletedSuccessfully": "تم حذف الطلب بنجاح",
+    "orderDeleteFailed": "فشل في حذف الطلب",
+    "actions": "العمليات"
   },
   "storeSlider": {
     "addSlider": "إضافة شريط متجر",

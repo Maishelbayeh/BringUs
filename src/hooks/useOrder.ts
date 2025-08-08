@@ -53,6 +53,7 @@ export interface UseOrderResult {
   refetch: () => void;
   updateOrderPaymentStatus: (orderId: string, paid: boolean) => Promise<void>;
   updateOrderStatus: (orderId: string, status: string) => Promise<void>;
+  deleteOrder: (orderId: string) => Promise<void>;
 }
 
 export function useOrder(storeId: string): UseOrderResult {
@@ -218,5 +219,34 @@ export function useOrder(storeId: string): UseOrderResult {
 
   const refetch = () => setReloadFlag(f => f + 1);
 
-  return { data, isLoading, error, refetch, updateOrderPaymentStatus, updateOrderStatus };
+  const deleteOrder = async (orderId: string) => {
+    try {
+      console.log(`🗑️ Deleting order ${orderId}`);
+      
+      const response = await fetch(`http://localhost:5001/api/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Remove the order from local state
+        setData(prevData => 
+          prevData.filter(order => 
+            !(order.id === orderId || order.orderNumber === orderId || order._id === orderId)
+          )
+        );
+        console.log(`✅ Order ${orderId} deleted successfully`);
+      } else {
+        throw new Error(result.message || 'Failed to delete order');
+      }
+    } catch (err: any) {
+      console.error(`❌ Failed to delete order ${orderId}:`, err);
+      setError(err.message || 'Network error');
+      throw err;
+    }
+  };
+
+  return { data, isLoading, error, refetch, updateOrderPaymentStatus, updateOrderStatus, deleteOrder };
 } 
