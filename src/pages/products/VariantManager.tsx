@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import VariantsPopup from './VariantsPopup';
 import ProductsDrawer from './ProductsDrawer';
 import useProductSpecifications from '../../hooks/useProductSpecifications';
+import useProducts from '../../hooks/useProducts';
 import axios from 'axios';
 import { BASE_URL } from '../../constants/api';
 
@@ -50,14 +51,9 @@ const VariantManager: React.FC<VariantManagerProps> = ({
     
     try {
       const storeId = parentProduct.store?._id || parentProduct.storeId;
-      const res = await fetch(`/api/products/${parentProduct._id}/variants?storeId=${storeId}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.success && data.data) {
-          console.log('🔍 VariantManager - Refreshed variants:', data.data);
-          setLocalVariants(data.data);
-        }
-      }
+      const freshVariants = await fetchProductVariants(parentProduct._id, storeId);
+      console.log('🔍 VariantManager - Refreshed variants:', freshVariants);
+      setLocalVariants(freshVariants);
     } catch (error) {
       console.error('Error refreshing variants:', error);
     }
@@ -65,6 +61,9 @@ const VariantManager: React.FC<VariantManagerProps> = ({
 
   // استخدام hook لجلب مواصفات المنتجات
   const { specifications, fetchSpecifications } = useProductSpecifications();
+  
+  // استخدام hook لجلب متغيرات المنتج
+  const { fetchProductVariants } = useProducts();
 
   // جلب المواصفات والمتغيرات عند فتح المكون
   React.useEffect(() => {
@@ -80,6 +79,8 @@ const VariantManager: React.FC<VariantManagerProps> = ({
   }, [variants]);
 
   const handleEditVariant = async (variant: any) => {
+      console.log('🔍 VariantManager - handleEditVariant - variant:', variant); 
+
     if (!parentProduct || !variant) return;
     setIsLoading(true);
     // دالة تطبيع الألوان المتداخلة
@@ -103,58 +104,89 @@ const VariantManager: React.FC<VariantManagerProps> = ({
       }
       return [];
     }
-    try {
-      const storeId = parentProduct.store?._id || parentProduct.storeId;
-      // استخدم الـ API الجديد لجلب بيانات المتغير
-      const res = await fetch(
-        `/api/products/${parentProduct._id}/variants/${variant._id}?storeId=${storeId}`
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.success && data.data) {
-          let freshVariant = data.data;
-          // تطبيع unit
-          freshVariant.unit = freshVariant.unit?._id || freshVariant.unit?.id || freshVariant.unit || '';
-          // تطبيع category
-          freshVariant.category = freshVariant.category?._id || freshVariant.category?.id || freshVariant.category || '';
-          // تطبيع productLabels
-          freshVariant.productLabels = Array.isArray(freshVariant.productLabels)
-            ? freshVariant.productLabels.map((l: any) => l._id || l.id || l)
-            : [];
-          // تطبيع specifications
-          freshVariant.specifications = Array.isArray(freshVariant.specifications)
-            ? freshVariant.specifications.map((s: any) => s._id || s.id || s)
-            : [];
-          // تطبيع الألوان
-          let parsedColors: string[][] = [];
-          if (Array.isArray(freshVariant.allColors) && freshVariant.allColors.length > 0) {
-            freshVariant.allColors.forEach((c: any) => {
-              const arr = deepParseColors(c);
-              if (arr.length > 0) parsedColors.push(...arr);
-            });
-          } else if (Array.isArray(freshVariant.colors) && freshVariant.colors.length > 0) {
-            freshVariant.colors.forEach((c: any) => {
-              const arr = deepParseColors(c);
-              if (arr.length > 0) parsedColors.push(...arr);
-            });
-          }
-          freshVariant.colors = parsedColors;
-          // تطبيع seo
-          if (typeof freshVariant.seo === 'string') {
-            try {
-              freshVariant.seo = JSON.parse(freshVariant.seo);
-            } catch {
-              freshVariant.seo = {};
-            }
-          }
-          setEditingVariant(freshVariant);
-          setShowVariantDrawer(true);
-          return;
+        try {
+      // استخدم البيانات الموجودة مباشرة بدلاً من جلبها من API
+      let freshVariant = { ...variant };
+      
+      console.log('🔍 VariantManager - Using existing variant data:', {
+        categories: freshVariant.categories,
+        category: freshVariant.category
+      });
+      
+      // تطبيع unit
+      freshVariant.unit = freshVariant.unit?._id || freshVariant.unit?.id || freshVariant.unit || '';
+      
+      // تطبيع categories - handle both category and categories
+      if (freshVariant.categories && Array.isArray(freshVariant.categories)) {
+        // If categories array exists, extract IDs
+        freshVariant.categoryIds = freshVariant.categories.map((cat: any) => cat._id || cat.id);
+        // Keep categoryIds as array for ProductsForm
+        freshVariant.categoryId = freshVariant.categoryIds.join(','); // Also keep as string for compatibility
+      } else if (freshVariant.category) {
+        // If single category exists, convert to array format
+        const categoryId = freshVariant.category._id || freshVariant.category.id || freshVariant.category;
+        freshVariant.categoryIds = [categoryId];
+        freshVariant.categoryId = categoryId;
+      } else {
+        // If no categories, inherit from parent product
+        const parentCategories = parentProduct.categories || parentProduct.categoryIds || [];
+        freshVariant.categoryIds = Array.isArray(parentCategories) 
+          ? parentCategories.map((cat: any) => cat._id || cat.id || cat)
+          : [];
+        freshVariant.categoryId = freshVariant.categoryIds.join(','); // Also keep as string for compatibility
+      }
+      
+      console.log('🔍 VariantManager - Processed categories:', {
+        originalCategories: freshVariant.categories,
+        categoryIds: freshVariant.categoryIds,
+        categoryId: freshVariant.categoryId
+      });
+      
+      // تطبيع productLabels
+      freshVariant.productLabels = Array.isArray(freshVariant.productLabels)
+        ? freshVariant.productLabels.map((l: any) => l._id || l.id || l)
+        : [];
+      
+      // تطبيع specifications
+      freshVariant.specifications = Array.isArray(freshVariant.specifications)
+        ? freshVariant.specifications.map((s: any) => s._id || s.id || s)
+        : [];
+      
+      // تطبيع الألوان
+      let parsedColors: string[][] = [];
+      if (Array.isArray(freshVariant.allColors) && freshVariant.allColors.length > 0) {
+        freshVariant.allColors.forEach((c: any) => {
+          const arr = deepParseColors(c);
+          if (arr.length > 0) parsedColors.push(...arr);
+        });
+      } else if (Array.isArray(freshVariant.colors) && freshVariant.colors.length > 0) {
+        freshVariant.colors.forEach((c: any) => {
+          const arr = deepParseColors(c);
+          if (arr.length > 0) parsedColors.push(...arr);
+        });
+      }
+      freshVariant.colors = parsedColors;
+      
+      // تطبيع seo
+      if (typeof freshVariant.seo === 'string') {
+        try {
+          freshVariant.seo = JSON.parse(freshVariant.seo);
+        } catch {
+          freshVariant.seo = {};
         }
       }
-      setEditingVariant(variant);
+      
+      console.log('🔍 VariantManager - Final editingVariant before setting:', {
+        categoryIds: freshVariant.categoryIds,
+        categoryId: freshVariant.categoryId,
+        categories: freshVariant.categories
+      });
+      
+      setEditingVariant(freshVariant);
       setShowVariantDrawer(true);
+      
     } catch (error) {
+      console.error('Error processing variant data:', error);
       setEditingVariant(variant);
       setShowVariantDrawer(true);
     } finally {
@@ -202,33 +234,21 @@ const VariantManager: React.FC<VariantManagerProps> = ({
     if (!editingVariant || !parentProduct) return;
     setIsLoading(true);
     try {
-      console.log('🔍 VariantManager - Updating variant:', editingVariant._id);
+      console.log('🔍 VariantManager - Updating variant:', editingVariant.categoryIds);
       
       // تحديث المتغير
       const updatedVariant = await onUpdateVariant(parentProduct._id, editingVariant._id, editingVariant);
       
       console.log('🔍 VariantManager - Variant updated successfully:', updatedVariant);
       
-      // إعادة تحميل المتغيرات من API للتأكد من تحديث البيانات
+      // إعادة تحميل المتغيرات من API لجلب البيانات المحدثة
       await refreshVariants();
       
       setShowVariantDrawer(false);
       setEditingVariant(null);
       
       // عرض رسالة نجاح
-      if (isRTL) {
-        alert('تم تحديث المتغير بنجاح');
-      } else {
-        alert('Variant updated successfully');
-      }
-    } catch (error) {
-      console.error('Error updating variant:', error);
-      // عرض رسالة خطأ
-      if (isRTL) {
-        alert('حدث خطأ أثناء تحديث المتغير');
-      } else {
-        alert('Error updating variant');
-      }
+      
     } finally {
       setIsLoading(false);
     }
@@ -245,20 +265,13 @@ const VariantManager: React.FC<VariantManagerProps> = ({
       if (!confirmed) return;
 
       await onDeleteVariant(variant);
-      // إعادة تحميل المتغيرات من API بعد الحذف
+      
+      // إعادة تحميل المتغيرات من API لجلب البيانات المحدثة
       await refreshVariants();
+      
       // Show success message
-      if (isRTL) {
-        alert('تم حذف المتغير بنجاح');
-      } else {
-        alert('Variant deleted successfully');
-      }
     } catch (error) {
-      if (isRTL) {
-        alert('حدث خطأ أثناء حذف المتغير');
-      } else {
-        alert('Error deleting variant');
-      }
+      console.error('Error deleting variant:', error);
     }
   };
 

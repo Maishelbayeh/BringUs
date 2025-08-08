@@ -11,8 +11,10 @@ export { default as SimpleSpecificationSelector } from './SimpleSpecificationSel
 export { default as CheckboxSpecificationSelector } from './CheckboxSpecificationSelector';
 
 // تصدير المكونات الأخرى
+export { default as CustomBarcode } from './CustomBarcode';
 export { default as CustomBreadcrumb } from './CustomBreadcrumb';
 export { default as CustomButton } from './CustomButton';
+export { default as CustomCategorySelector } from './CustomCategorySelector';
 export { default as CustomInput } from './CustomInput';
 export { default as CustomSelect } from './CustomSelect';
 export { default as CustomTable } from './CustomTable';

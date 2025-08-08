@@ -6,6 +6,81 @@ import { BASE_URL } from '../constants/api';
 // Import the store utility function
 import { getStoreId } from '../utils/storeUtils';
 
+/**
+ * IMPORTANT: ObjectId Conversion Issue
+ * 
+ * The backend expects MongoDB ObjectIds (24-character hexadecimal strings) for category fields,
+ * but the frontend is sending numeric string values (like "6"). This causes the error:
+ * "Cast to ObjectId failed for value '6' (type string) at path 'category' because of 'BSONError'"
+ * 
+ * Solutions:
+ * 1. Backend should handle conversion from numeric strings to ObjectIds
+ * 2. Frontend should convert numeric strings to proper ObjectIds before sending
+ * 3. Category IDs should be stored as ObjectIds in the database
+ * 
+ * For now, we're sending the data as-is and letting the backend handle the conversion.
+ * If the backend doesn't handle this, you'll need to implement one of the above solutions.
+ */
+
+// Utility function to convert numeric string IDs to proper ObjectId format
+const convertToObjectId = (val: any): any => {
+  if (!val) return val;
+  if (typeof val === 'object' && (val._id || val.id)) return val._id || val.id;
+  // If it's a string that looks like a number, it might be a numeric ID that needs to be converted to ObjectId
+  if (typeof val === 'string' && /^\d+$/.test(val)) {
+    // This is a numeric string ID, we need to ensure it's a valid ObjectId
+    // For now, we'll return it as is and let the backend handle the conversion
+    console.warn('Numeric string ID detected, may need ObjectId conversion:', val);
+    console.warn('Backend should handle conversion from numeric string to ObjectId');
+    return val;
+  }
+  return val;
+};
+
+// Function to validate and clean category data before sending to backend
+const validateCategoryData = (categoryData: any): any => {
+  if (!categoryData) return categoryData;
+  
+  if (Array.isArray(categoryData)) {
+    return categoryData.map(validateCategoryData);
+  }
+  
+  if (typeof categoryData === 'string' && /^\d+$/.test(categoryData)) {
+    console.warn('Category ID is numeric string, backend should handle ObjectId conversion:', categoryData);
+    return categoryData;
+  }
+  
+  return categoryData;
+};
+
+// Function to clean variant data and prevent ObjectId casting errors
+const cleanVariantData = (variantData: any): any => {
+  const cleaned = { ...variantData };
+  
+  // Ensure category field is completely removed to prevent ObjectId casting errors
+  // The backend expects categories array, not a single category field
+  delete cleaned.category;
+  
+  // Additional safety check
+  if ('category' in cleaned) {
+    console.warn('Removing category field to prevent ObjectId casting error');
+    delete cleaned.category;
+  }
+  
+  // Preserve categoryIds but remove categoryId to prevent conflicts
+  // categoryIds will be converted to categories array later
+  if ('categoryId' in cleaned) {
+    console.warn('Removing categoryId field to prevent ObjectId casting error');
+    delete cleaned.categoryId;
+  }
+  
+  // Don't remove categoryIds - it will be converted to categories array
+  // The categoryIds field is needed for the form to work properly
+  console.log('Preserving categoryIds for processing:', cleaned.categoryIds);
+  
+  return cleaned;
+};
+
 const useProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -122,61 +197,54 @@ const useProducts = () => {
       isFeatured: form.isFeatured || false,
       isOnSale: form.isOnSale || false,
       salePercentage: parseFloat(form.salePercentage) || 0,
-      category: form.categoryId || null,
+      categories: (() => {
+        // Use categoryIds if available, otherwise use categoryId as single item array
+        if (form.categoryIds && Array.isArray(form.categoryIds) && form.categoryIds.length > 0) {
+          return form.categoryIds;
+        } else if (form.categoryId) {
+          return [form.categoryId];
+        } else {
+          return [];
+        }
+      })(),
       unit: form.unitId || null, // <-- use unitId from form
       images: Array.isArray(form.images) ? form.images : [],
       mainImage: form.mainImage || null,
       colors: (() => {
-        console.log('🔍 saveProduct - form.colors received:', form.colors);
-        console.log('🔍 saveProduct - form.colors type:', typeof form.colors);
-        console.log('🔍 saveProduct - form.colors is array:', Array.isArray(form.colors));
-        
         if (Array.isArray(form.colors)) {
           const processedColors = form.colors.map((variant: any) => {
-            console.log('🔍 saveProduct - Processing variant:', variant);
-            console.log('🔍 saveProduct - Variant type:', typeof variant);
-            console.log('🔍 saveProduct - Variant is object:', typeof variant === 'object');
-            console.log('🔍 saveProduct - Variant has colors property:', variant && typeof variant === 'object' && 'colors' in variant);
-            console.log('🔍 saveProduct - Variant.colors is array:', Array.isArray(variant?.colors));
-            
             // إذا كان variant يحتوي على colors property (من CustomColorPicker)
             if (variant && typeof variant === 'object' && Array.isArray(variant.colors)) {
-              console.log('🔍 saveProduct - Returning variant.colors:', variant.colors);
               return variant.colors;
             }
             // إذا كان variant مصفوفة ألوان مباشرة
             else if (Array.isArray(variant)) {
-              console.log('🔍 saveProduct - Returning variant as array:', variant);
               return variant;
             }
             // إذا كان لون واحد
             else if (typeof variant === 'string') {
-              console.log('🔍 saveProduct - Returning single color as array:', [variant]);
               return [variant];
             }
             // إذا كان null أو undefined
             else {
-              console.log('🔍 saveProduct - Returning empty array for null/undefined variant');
               return [];
             }
           }).filter((colors: string[]) => colors.length > 0); // إزالة المصفوفات الفارغة
           
-          console.log('🔍 saveProduct - Final processed colors:', processedColors);
           return processedColors;
         } else {
-          console.log('🔍 saveProduct - form.colors is not an array, returning empty array');
           return [];
         }
       })(),
-      productLabels: form.tags || [],
+      productLabels: (() => {
+        // Use tags if available, otherwise use productLabels
+        const labels = form.productLabels || [];
+        return labels;
+      })(),
       attributes: form.attributes || [],
       specifications: (() => {
-        console.log('🔍 saveProduct - form.selectedSpecifications:', form.selectedSpecifications);
-        console.log('🔍 saveProduct - form.specifications:', form.specifications);
-        
         // أولاً: محاولة استخدام specifications الموجودة في form
         if (form.specifications && Array.isArray(form.specifications)) {
-          console.log('🔍 saveProduct - Using existing form.specifications:', form.specifications);
           return form.specifications;
         }
         
@@ -184,11 +252,9 @@ const useProducts = () => {
         if (form.selectedSpecifications) {
           try {
             const parsed = JSON.parse(form.selectedSpecifications);
-            console.log('🔍 saveProduct - Parsed selectedSpecifications:', parsed);
             if (Array.isArray(parsed)) {
               // استخراج IDs المواصفات فقط (بدون القيم)
               const specificationIds = [...new Set(parsed.map((spec: any) => spec._id.split('_')[0]))];
-              console.log('🔍 saveProduct - Specification IDs from selectedSpecifications:', specificationIds);
               return specificationIds;
             }
           } catch (error) {
@@ -198,20 +264,14 @@ const useProducts = () => {
         
         // ثالثاً: إذا كانت المواصفات موجودة في form.productSpecifications
         if (form.productSpecifications && Array.isArray(form.productSpecifications)) {
-          console.log('🔍 saveProduct - Using productSpecifications:', form.productSpecifications);
           return form.productSpecifications;
         }
         
-        console.log('🔍 saveProduct - No specifications found, returning empty array');
         return [];
       })(),
       specificationValues: (() => {
-        console.log('🔍 saveProduct - form.specificationValues:', form.specificationValues);
-        console.log('🔍 saveProduct - Processing specificationValues from selectedSpecifications:', form.selectedSpecifications);
-        
         // أولاً: محاولة استخدام specificationValues الموجودة في form
         if (form.specificationValues && Array.isArray(form.specificationValues)) {
-          console.log('🔍 saveProduct - Using existing form.specificationValues:', form.specificationValues);
           // Ensure each specification value has the required title field
           return form.specificationValues.map((spec: any) => {
             if (!spec.title && spec.specificationId) {
@@ -230,7 +290,6 @@ const useProducts = () => {
         if (form.selectedSpecifications) {
           try {
             const parsed = JSON.parse(form.selectedSpecifications);
-            console.log('🔍 saveProduct - Parsed for specificationValues:', parsed);
             if (Array.isArray(parsed)) {
               // تحويل المواصفات إلى التنسيق المطلوب للـ API
               const formattedSpecs = parsed.map((spec: any) => {
@@ -259,7 +318,6 @@ const useProducts = () => {
                   title: title  // عنوان المواصفة (مثل: "اللون"، "الحجم")
                 };
               });
-              console.log('🔍 saveProduct - Formatted specification values from selectedSpecifications:', formattedSpecs);
               return formattedSpecs;
             }
           } catch (error) {
@@ -267,7 +325,6 @@ const useProducts = () => {
           }
         }
         
-        console.log('🔍 saveProduct - No specification values found, returning empty array');
         return [];
       })(),
               storeId: form.storeId || getStoreId(),
@@ -287,16 +344,7 @@ const useProducts = () => {
     //CONSOLE.log('🔍 Final payload barcodes type:', typeof payload.barcodes);
     //CONSOLE.log('🔍 Final payload barcodes is array:', Array.isArray(payload.barcodes));
 
-                    console.log('🔍 saveProduct - Final payload specifications:', payload.specifications);
-    console.log('🔍 saveProduct - Final payload specificationValues:', payload.specificationValues);
-    console.log('🔍 saveProduct - Final payload specifications type:', typeof payload.specifications);
-    console.log('🔍 saveProduct - Final payload specificationValues type:', typeof payload.specificationValues);
-    console.log('🔍 saveProduct - Final payload specifications is array:', Array.isArray(payload.specifications));
-    console.log('🔍 saveProduct - Final payload specificationValues is array:', Array.isArray(payload.specificationValues));
-    console.log('🔍 saveProduct - Final payload colors:', payload.colors);
-    console.log('🔍 saveProduct - Final payload colors type:', typeof payload.colors);
-    console.log('🔍 saveProduct - Final payload colors is array:', Array.isArray(payload.colors));
-    //CONSOLE.log('Final payload to send:', payload);
+     
       //CONSOLE.log('Barcodes in payload:', payload.barcodes);
       //CONSOLE.log('Barcodes type:', typeof payload.barcodes);
       //CONSOLE.log('Barcodes is array:', Array.isArray(payload.barcodes));
@@ -318,7 +366,6 @@ const useProducts = () => {
         //CONSOLE.log('🔍 Updating product with ID:', editId);
         //CONSOLE.log('🔍 Update URL:', `${BASE_URL}meta/products/${editId}`);
         const response = await axios.put(`${BASE_URL}meta/products/${editId}`, payload);
-        console.log('Product updated successfully:', payload);
         showSuccess('تم تعديل المنتج بنجاح', 'نجح التحديث');
       } else {
         //CONSOLE.log('🔍 Creating new product');
@@ -478,20 +525,10 @@ const useProducts = () => {
 
   // رفع الصورة الأساسية
   const uploadMainImage = async (file: File): Promise<string> => {
-    console.log('🔍 uploadMainImage called with file:', file);
-    console.log('🔍 STORE_ID:', getStoreId());
-    console.log('🔍 BASE_URL:', BASE_URL);
-    
     try {
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', getStoreId());
-
-      console.log('🔍 Sending request to:', `${BASE_URL}products/upload-main-image`);
-      console.log('🔍 FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log('🔍', key, ':', value);
-      }
 
       const response = await axios.post(`${BASE_URL}products/upload-main-image`, formData, {
         headers: {
@@ -499,19 +536,11 @@ const useProducts = () => {
         },
       });
 
-      console.log('🔍 Main image uploaded successfully:', response.data);
-      console.log('🔍 Response status:', response.status);
-      console.log('🔍 Response headers:', response.headers);
-      
       // API يعيد imageUrl مباشرة، وليس في data.url
       const imageUrl = response.data.imageUrl || response.data.data?.url;
-      console.log('🔍 Extracted imageUrl:', imageUrl);
       
       return imageUrl;
     } catch (err: any) {
-      console.error('🔍 Error uploading main image:', err);
-      console.error('🔍 Error response:', err?.response?.data);
-      console.error('🔍 Error status:', err?.response?.status);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة الأساسية';
       showError(errorMessage, 'خطأ في رفع الصورة الأساسية');
       throw err;
@@ -612,7 +641,9 @@ const useProducts = () => {
   // Add new variant to existing product
   const addVariant = async (productId: string, variantData: any): Promise<any> => {
     try {
-      console.log('🔍 addVariant - Starting to add variant for product:', productId);
+      
+      // Clean variant data to prevent ObjectId casting errors
+      variantData = cleanVariantData(variantData);
       
       // حذف specifications إذا كانت مصفوفة فارغة
       if (Array.isArray(variantData.specifications) && variantData.specifications.length === 0) {
@@ -646,9 +677,32 @@ const useProducts = () => {
       const cleanReference = (val: any) => {
         if (!val) return val;
         if (typeof val === 'object' && (val._id || val.id)) return val._id || val.id;
+        // If it's a string that looks like a number, it might be a numeric ID that needs to be converted to ObjectId
+        if (typeof val === 'string' && /^\d+$/.test(val)) {
+          // This is a numeric string ID, we need to ensure it's a valid ObjectId
+          // For now, we'll return it as is and let the backend handle the conversion
+          return val;
+        }
         return val;
       };
-      variantData.category = cleanReference(variantData.category);
+      
+      // Handle categories - use categoryIds if available, otherwise use categoryId
+      if (variantData.categoryIds && Array.isArray(variantData.categoryIds) && variantData.categoryIds.length > 0) {
+        variantData.categories = variantData.categoryIds.map(cleanReference);
+        delete variantData.category;
+        delete variantData.categoryId;
+        delete variantData.categoryIds;
+      } else if (variantData.categoryId) {
+        variantData.categories = [cleanReference(variantData.categoryId)];
+        delete variantData.category;
+        delete variantData.categoryId;
+      } else if (variantData.category) {
+        variantData.categories = [cleanReference(variantData.category)];
+        delete variantData.category;
+      } else {
+        variantData.categories = [];
+      }
+      
       // variantData.unit = cleanReference(variantData.unit);
       variantData.store = cleanReference(variantData.store);
       // --- FIX: Ensure productLabels is always an array of IDs ---
@@ -663,9 +717,7 @@ const useProducts = () => {
         delete variantData.variants;
       }
 
-      // Debug: print productLabels before FormData
-      console.log('🔍 productLabels before FormData (addVariant):', variantData.productLabels, Array.isArray(variantData.productLabels));
-      console.log('🔍 allColors before FormData (addVariant):', variantData.allColors, Array.isArray(variantData.allColors));
+
 
       const formData = new FormData();
       
@@ -679,6 +731,17 @@ const useProducts = () => {
           formData.append('mainImage', variantData[key]);
         } else if (key === 'barcodes' && Array.isArray(variantData[key])) {
           formData.append('barcodes', JSON.stringify(variantData[key]));
+        } else if (key === 'categories' && Array.isArray(variantData[key])) {
+          // Send each category ID separately to avoid double JSON stringification
+          variantData[key].forEach((categoryId: any) => {
+            // Ensure categoryId is a valid ObjectId string
+            if (typeof categoryId === 'string' && /^\d+$/.test(categoryId)) {
+              // This is a numeric string, we need to convert it to a proper ObjectId format
+              // For now, we'll send it as is and let the backend handle the conversion
+              console.warn('Category ID is numeric string, may need ObjectId conversion:', categoryId);
+            }
+            formData.append('categories', categoryId);
+          });
         } else if (key === 'specifications' && Array.isArray(variantData[key])) {
           if (variantData[key].length > 0) {
             formData.append('specifications', JSON.stringify(variantData[key]));
@@ -769,7 +832,6 @@ const useProducts = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ addVariant - API Error:', errorData);
         // Show all validation errors
         if (errorData?.errors) {
           const errors = errorData.errors;
@@ -796,7 +858,6 @@ const useProducts = () => {
       }
       
       const data = await response.json();
-      console.log('✅ addVariant - Variant added successfully:', data);
       
       // Show success toast
       showSuccess('تم إضافة المتغير بنجاح', 'نجح الإضافة');
@@ -806,7 +867,6 @@ const useProducts = () => {
       
       return data;
     } catch (error) {
-      console.error('❌ addVariant - Error:', error);
       throw error;
     }
   };
@@ -814,7 +874,6 @@ const useProducts = () => {
   // Delete variant
   const deleteVariant = async (productId: string, variantId: string): Promise<any> => {
     try {
-      console.log('🔍 deleteVariant - Starting to delete variant:', variantId, 'from product:', productId);
       
       // Get store ID from localStorage
       const storeId = localStorage.getItem('storeId');
@@ -828,7 +887,6 @@ const useProducts = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ deleteVariant - API Error:', errorData);
         // Show all validation errors
         if (errorData?.errors) {
           const errors = errorData.errors;
@@ -855,7 +913,6 @@ const useProducts = () => {
       }
       
       const data = await response.json();
-      console.log('✅ deleteVariant - Variant deleted successfully:', data);
       
       // Show success toast
       showSuccess('تم حذف المتغير بنجاح', 'نجح الحذف');
@@ -865,7 +922,6 @@ const useProducts = () => {
       
       return data;
     } catch (error) {
-      console.error('❌ deleteVariant - Error:', error);
       throw error;
     }
   };
@@ -873,7 +929,13 @@ const useProducts = () => {
   // Update variant
   const updateVariant = async (productId: string, variantId: string, variantData: any): Promise<any> => {
     try {
-      console.log('🔍 updateVariant - Starting to update variant:', variantId, 'for product:', productId);
+      
+      // Clean variant data to prevent ObjectId casting errors
+      variantData = cleanVariantData(variantData);
+      
+      // Debug: Log the cleaned variant data
+      console.log('Cleaned variant data:', variantData);
+      console.log('Variant data keys:', Object.keys(variantData));
       
       // حذف specifications إذا كانت مصفوفة فارغة
       if (Array.isArray(variantData.specifications) && variantData.specifications.length === 0) {
@@ -907,9 +969,42 @@ const useProducts = () => {
       const cleanReference = (val: any) => {
         if (!val) return val;
         if (typeof val === 'object' && (val._id || val.id)) return val._id || val.id;
+        // If it's a string that looks like a number, it might be a numeric ID that needs to be converted to ObjectId
+        if (typeof val === 'string' && /^\d+$/.test(val)) {
+          // This is a numeric string ID, we need to ensure it's a valid ObjectId
+          // For now, we'll return it as is and let the backend handle the conversion
+          return val;
+        }
         return val;
       };
-      variantData.category = cleanReference(variantData.category);
+      
+      // Handle categories - use categoryIds if available, otherwise use categoryId
+      if (variantData.categoryIds && Array.isArray(variantData.categoryIds) && variantData.categoryIds.length > 0) {
+        variantData.categories = variantData.categoryIds.map(cleanReference);
+        delete variantData.category;
+        delete variantData.categoryId;
+        delete variantData.categoryIds;
+      } else if (variantData.categoryId) {
+        variantData.categories = [cleanReference(variantData.categoryId)];
+        delete variantData.category;
+        delete variantData.categoryId;
+      } else if (variantData.category) {
+        variantData.categories = [cleanReference(variantData.category)];
+        delete variantData.category;
+      } else {
+        variantData.categories = [];
+      }
+      
+      // Ensure category field is completely removed to prevent conflicts
+      delete variantData.category;
+      
+      // Additional fix: Ensure no category field is sent to prevent ObjectId casting errors
+      // The backend expects categories array, not a single category field
+      if ('category' in variantData) {
+        console.warn('Removing category field to prevent ObjectId casting error');
+        delete variantData.category;
+      }
+      
       variantData.unit = cleanReference(variantData.unit);
       variantData.store = cleanReference(variantData.store);
       // --- FIX: Ensure productLabels is always an array of IDs ---
@@ -924,13 +1019,7 @@ const useProducts = () => {
         delete variantData.variants;
       }
 
-      // Debug: print productLabels before FormData
-      console.log('🔍 productLabels before FormData (updateVariant):', variantData.productLabels, Array.isArray(variantData.productLabels));
-      console.log('🔍 allColors before FormData (updateVariant):', variantData.allColors, Array.isArray(variantData.allColors));
-      console.log('🔍 specifications before FormData (updateVariant):', variantData.specifications, Array.isArray(variantData.specifications));
-      console.log('🔍 specificationValues before FormData (updateVariant):', variantData.specificationValues, Array.isArray(variantData.specificationValues));
-      console.log('🔍 selectedSpecifications before FormData (updateVariant):', variantData.selectedSpecifications);
-      console.log('🔍 Full variantData before FormData:', variantData);
+
 
       const formData = new FormData();
       
@@ -947,6 +1036,32 @@ const useProducts = () => {
         } else if (key === 'barcodes' && Array.isArray(variantData[key])) {
           // Handle barcodes array
           formData.append('barcodes', JSON.stringify(variantData[key]));
+        } else if (key === 'categories' && Array.isArray(variantData[key])) {
+          console.log('Processing categories array:', variantData[key]);
+          // Only process if categories array has valid items
+          if (variantData[key].length > 0) {
+            // Send each category ID separately to avoid double JSON stringification
+            variantData[key].forEach((categoryId: any) => {
+              console.log('Processing categoryId:', categoryId, 'type:', typeof categoryId);
+              // Ensure categoryId is a valid ObjectId string
+              if (typeof categoryId === 'string' && /^\d+$/.test(categoryId)) {
+                // This is a numeric string, we need to convert it to a proper ObjectId format
+                // For now, we'll send it as is and let the backend handle the conversion
+                console.warn('Category ID is numeric string, may need ObjectId conversion:', categoryId);
+              }
+              // Only append if categoryId is not null, undefined, or empty
+              if (categoryId !== null && categoryId !== undefined && categoryId !== '') {
+                formData.append('categories', categoryId);
+                console.log('Added category to FormData:', categoryId);
+              } else {
+                console.warn('Skipping invalid categoryId:', categoryId);
+              }
+            });
+          } else {
+            console.log('Categories array is empty, not sending to backend');
+          }
+        } else if (key === 'categories') {
+          console.log('Categories field exists but is not an array:', variantData[key]);
         } else if (key === 'specifications' && Array.isArray(variantData[key])) {
           // فقط إذا فيها عناصر أرسلها كسلسلة IDs
           if (variantData[key].length > 0) {
@@ -1013,6 +1128,10 @@ const useProducts = () => {
         ) {
           // stringify any object (like seo, dimensions, etc.)
           formData.append(key, JSON.stringify(variantData[key]));
+        } else if (key === 'category' || key === 'categoryId' || key === 'categoryIds') {
+          // Skip category-related fields - we only use categories array
+          // This prevents the ObjectId casting error
+          console.log(`Skipping ${key} field to prevent ObjectId error`);
         } else {
           // Handle other fields
           formData.append(key, variantData[key]);
@@ -1026,16 +1145,33 @@ const useProducts = () => {
       }
       formData.append('storeId', storeId);
 
-      // Debug: print FormData contents
-      console.log('🔍 FormData contents:');
+      // Debug: Log the request details
+      console.log('Update variant request details:');
+      console.log('URL:', `${BASE_URL}products/${productId}/variants/${variantId}`);
+      console.log('Method: PUT');
+      console.log('Product ID:', productId);
+      console.log('Variant ID:', variantId);
+      console.log('Store ID:', storeId);
+      
+      // Debug: Log FormData contents
+      console.log('FormData contents:');
       for (let [key, value] of formData.entries()) {
-        console.log(`🔍 ${key}:`, value);
+        console.log(`${key}:`, value);
       }
       
-      // Debug: check specific fields in FormData
-      console.log('🔍 FormData specifications:', formData.get('specifications'));
-      console.log('🔍 FormData specificationValues:', formData.get('specificationValues'));
-      console.log('🔍 FormData selectedSpecifications:', formData.get('selectedSpecifications'));
+      // Debug: Check for potential issues
+      console.log('Debug checks:');
+      console.log('- Product ID is valid:', !!productId && productId !== 'undefined' && productId !== 'null');
+      console.log('- Variant ID is valid:', !!variantId && variantId !== 'undefined' && variantId !== 'null');
+      console.log('- Store ID is valid:', !!storeId && storeId !== 'undefined' && storeId !== 'null');
+      console.log('- FormData has entries:', formData.entries().next().done === false);
+      
+      // Ensure categories are always sent, even if empty
+      if (!formData.has('categories')) {
+        console.log('No categories found in FormData, adding empty array');
+        // Don't send empty categories array - let the backend handle it
+        // formData.append('categories', JSON.stringify([]));
+      }
       
       const response = await fetch(`${BASE_URL}products/${productId}/variants/${variantId}`, {
         method: 'PUT',
@@ -1043,8 +1179,20 @@ const useProducts = () => {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('❌ updateVariant - API Error:', errorData);
+        console.error('Update variant failed with status:', response.status);
+        console.error('Response headers:', response.headers);
+        
+        let errorData;
+        try {
+          errorData = await response.json();
+          console.error('Error response data:', errorData);
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError);
+          const errorText = await response.text();
+          console.error('Raw error response:', errorText);
+          throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
+        }
+        
         // Show all validation errors
         if (errorData?.errors) {
           const errors = errorData.errors;
@@ -1067,11 +1215,13 @@ const useProducts = () => {
         } else {
           showError('حدث خطأ غير متوقع', 'خطأ');
         }
-        throw new Error(errorData.message || 'Failed to update variant');
+        
+        // Throw a more descriptive error
+        const errorMessage = errorData?.message || errorData?.error || `HTTP ${response.status}: Update variant failed`;
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
-      console.log('✅ updateVariant - Variant updated successfully:', data);
       
       // Show success toast
       showSuccess('تم تحديث المتغير بنجاح', 'نجح التحديث');
@@ -1080,9 +1230,21 @@ const useProducts = () => {
       await fetchProducts(true);
       
       return data;
-    } catch (error) {
-      console.error('❌ updateVariant - Error:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Update variant error:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name
+      });
+      
+      // If it's already a descriptive error, re-throw it
+      if (error?.message && error.message !== 'Failed to update variant') {
+        throw error;
+      }
+      
+      // Otherwise, provide more context
+      throw new Error(`Failed to update variant: ${error?.message || 'Unknown error'}`);
     }
   };
 
@@ -1106,16 +1268,12 @@ const useProducts = () => {
   // Add colors to product
   const addColorsToProduct = async (productId: string, colors: string[][]): Promise<any> => {
     try {
-      console.log('🎨 addColorsToProduct - Adding colors to product:', productId);
-      console.log('🎨 Colors to add:', colors);
-
       const response = await axios.post(`${BASE_URL}products/${productId}/colors`, {
         storeId: getStoreId(),
         colors: colors
       });
 
       if (response.data && response.data.success) {
-        console.log('✅ Colors added successfully:', response.data);
         showSuccess('تم إضافة الألوان بنجاح', 'نجح الإضافة');
         
         // Refresh products list
@@ -1126,7 +1284,6 @@ const useProducts = () => {
       
       throw new Error('Failed to add colors');
     } catch (err: any) {
-      console.error('❌ Error adding colors:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في إضافة الألوان';
       showError(errorMessage, 'خطأ في إضافة الألوان');
       throw err;
@@ -1136,9 +1293,6 @@ const useProducts = () => {
   // Remove colors from product
   const removeColorsFromProduct = async (productId: string, colorIndexes: number[]): Promise<any> => {
     try {
-      console.log('🗑️ removeColorsFromProduct - Removing colors from product:', productId);
-      console.log('🗑️ Color indexes to remove:', colorIndexes);
-
       const response = await axios.delete(`${BASE_URL}products/${productId}/colors`, {
         data: {
           storeId: getStoreId(),
@@ -1147,7 +1301,6 @@ const useProducts = () => {
       });
 
       if (response.data && response.data.success) {
-        console.log('✅ Colors removed successfully:', response.data);
         showSuccess('تم حذف الألوان بنجاح', 'نجح الحذف');
         
         // Refresh products list
@@ -1158,7 +1311,6 @@ const useProducts = () => {
       
       throw new Error('Failed to remove colors');
     } catch (err: any) {
-      console.error('❌ Error removing colors:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حذف الألوان';
       showError(errorMessage, 'خطأ في حذف الألوان');
       throw err;
@@ -1168,16 +1320,12 @@ const useProducts = () => {
   // Replace all colors for product
   const replaceProductColors = async (productId: string, colors: string[][]): Promise<any> => {
     try {
-      console.log('🔄 replaceProductColors - Replacing colors for product:', productId);
-      console.log('🔄 New colors:', colors);
-
       const response = await axios.put(`${BASE_URL}products/${productId}/colors`, {
         storeId: getStoreId(),
         colors: colors
       });
 
       if (response.data && response.data.success) {
-        console.log('✅ Colors replaced successfully:', response.data);
         showSuccess('تم استبدال الألوان بنجاح', 'نجح الاستبدال');
         
         // Refresh products list
@@ -1188,7 +1336,6 @@ const useProducts = () => {
       
       throw new Error('Failed to replace colors');
     } catch (err: any) {
-      console.error('❌ Error replacing colors:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في استبدال الألوان';
       showError(errorMessage, 'خطأ في استبدال الألوان');
       throw err;
@@ -1210,7 +1357,6 @@ const useProducts = () => {
         const parsed = JSON.parse(product.colors);
         return Array.isArray(parsed) ? parsed : [];
       } catch (error) {
-        console.error('Error parsing product colors:', error);
         return [];
       }
     }

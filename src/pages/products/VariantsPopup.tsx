@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
+import CustomBarcode from '../../components/common/CustomBarcode';
 
 interface VariantsPopupProps {
   isOpen: boolean;
@@ -24,15 +25,54 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
   isRTL,
   isLoading = false
 }) => {
+  const [expandedVariants, setExpandedVariants] = useState<Set<string>>(new Set());
+  const [localVariants, setLocalVariants] = useState<any[]>(variants);
+
+  // تحديث البيانات المحلية عند تغيير variants prop
+  useEffect(() => {
+    console.log('🔍 VariantsPopup - variants prop changed:', variants);
+    setLocalVariants(variants);
+  }, [variants]);
+
+  // دالة لتحديث متغير محدد في البوب أب
+  const updateVariantInPopup = (updatedVariant: any) => {
+    setLocalVariants(prevVariants => 
+      prevVariants.map(variant => 
+        variant._id === updatedVariant._id || variant.id === updatedVariant._id
+          ? { ...variant, ...updatedVariant }
+          : variant
+      )
+    );
+  };
+
+  // دالة لحذف متغير من البوب أب
+  const removeVariantFromPopup = (variantId: string) => {
+    setLocalVariants(prevVariants => 
+      prevVariants.filter(v => 
+        v._id !== variantId && v.id !== variantId
+      )
+    );
+  };
+
+  const toggleVariant = (variantId: string) => {
+    const newExpanded = new Set(expandedVariants);
+    if (newExpanded.has(variantId)) {
+      newExpanded.delete(variantId);
+    } else {
+      newExpanded.add(variantId);
+    }
+    setExpandedVariants(newExpanded);
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 flex `}>
+      <div className={`${isRTL ? 'justify-end' : 'justify-start'} bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto`}>
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-lg">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-800">
+        <div className={` sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-lg`}>
+          <div className={`flex justify-between items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+            <h2 className="text-xl font-bold text-gray-800 ">
               {isRTL ? 'متغيرات المنتج' : 'Product Variants'}
             </h2>
             <button
@@ -44,24 +84,28 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
             </button>
           </div>
           {parentProduct && (
-            <div className="mt-2 text-sm text-gray-600">
-              <span className="font-semibold">{isRTL ? 'المنتج الأساسي:' : 'Parent Product:'}</span>{' '}
-              {isRTL ? parentProduct.nameAr : parentProduct.nameEn}
+            <div className={`flex  mt-2 text-sm text-gray-600 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+              <span className={`font-semibold ${isRTL ? 'mr-2' : 'ml-2'}`}>
+                {isRTL ? 'المنتج الأساسي' : 'Parent Product:'}
+              </span>
+              <span className={`font-semibold ${isRTL ? 'mr-2' : 'ml-2'}`}>
+                {isRTL ? parentProduct.nameAr : parentProduct.nameEn}
+              </span>
             </div>
           )}
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 ">
           {isLoading ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 ${isRTL ? 'flex-row-reverse' : 'flex-row'} ">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
               <p className="text-gray-600">
                 {isRTL ? 'جاري تحميل المتغيرات...' : 'Loading variants...'}
               </p>
             </div>
-          ) : variants.length === 0 ? (
-            <div className="text-center py-12">
+          ) : localVariants.length === 0 ? (
+            <div className="text-center py-12 ${isRTL ? 'flex-row-reverse' : 'flex-row'} ">
               <div className="text-gray-400 text-6xl mb-4">📦</div>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
                 {isRTL ? 'لا يوجد متغيرات' : 'No Variants Found'}
@@ -95,159 +139,280 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
               </div>
               
               {/* Variants List */}
-              <div className="grid gap-6">
-                {variants.map((variant, idx) => (
-                  <div key={variant._id || variant.id || idx} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                    <div className="flex flex-col lg:flex-row gap-6">
-                      {/* Product Image */}
-                      <div className="flex-shrink-0">
-                        <img
-                          src={variant.mainImage || (variant.images && variant.images[0]) || DEFAULT_PRODUCT_IMAGE}
-                          alt={isRTL ? variant.nameAr : variant.nameEn}
-                          className="w-32 h-32 object-cover rounded-lg border border-gray-200"
-                        />
-                      </div>
-
-                      {/* Product Details */}
-                      <div className="flex-1 space-y-4">
-                        {/* Name and Description with Actions */}
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-800 mb-2">
+              <div className="space-y-4">
+                {localVariants.map((variant, idx) => {
+                  const variantId = variant._id || variant.id || idx.toString();
+                  const isExpanded = expandedVariants.has(variantId);
+                  
+                  return (
+                    <div key={variantId} className={`border border-gray-200 rounded-lg overflow-hidden `}>
+                      {/* Collapsible Header */}
+                      <div 
+                        className={`flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}
+                        onClick={() => toggleVariant(variantId)}
+                      >
+                        <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                          {/* Product Image */}
+                          <div className={`flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'} `}>
+                            <img
+                              src={variant.mainImage || (variant.images && variant.images[0]) || DEFAULT_PRODUCT_IMAGE}
+                              alt={variant.nameAr}
+                              className={`w-16 h-16 object-cover rounded-lg border border-gray-200 ${isRTL ? 'mr-2' : 'ml-2'} `}
+                            />
+                          </div>
+                          
+                          {/* Product Name and Price */}
+                          <div className={`flex-1 ${isRTL ? 'mr-2' : 'ml-2'} `}>
+                            <h3 className={`text-lg font-bold text-gray-800 ${isRTL ? 'mr-2' : 'ml-2'} `}>
                               {isRTL ? variant.nameAr : variant.nameEn}
                             </h3>
-                            <p className="text-gray-600 text-sm">
-                              {isRTL ? variant.descriptionAr : variant.descriptionEn}
+                            <p className={`text-gray-600 text-sm ${isRTL ? 'mr-2' : 'ml-2' } ${isRTL ? 'text-right' : 'text-left'} `}>
+                              {isRTL ? 'السعر:' : 'Price:'} ${variant.price || 0}
                             </p>
+                          </div>
+                        </div>
+                        
+                        {/* Expand/Collapse Icon */}
+                        <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditVariant(variant);
+                            }}
+                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                            title={isRTL ? 'تعديل المتغير' : 'Edit Variant'}
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteVariant(variant);
+                            }}
+                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                            title={isRTL ? 'حذف المتغير' : 'Delete Variant'}
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                          <svg 
+                            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      {/* Collapsible Content */}
+                      {isExpanded && (
+                        <div className={`p-6 bg-white flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                          <div className={`space-y-4 `}>
+                            {/* Description */}
+                            <div className={`${isRTL ? 'text-right' : 'text-left'} `}>
+                              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                {isRTL ? 'الوصف' : 'Description'}
+                              </h4>
+                              <p className="text-gray-600 text-sm">
+                                {isRTL ? variant.descriptionAr : variant.descriptionEn}
+                              </p>
+                            </div>
+ {/* Additional Images */}
+ {variant.images && variant.images.length > 0 && (
+                              <div className={`${isRTL ? 'text-right' : 'text-left'} `}>
+                                <div className={`text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                  {isRTL ? 'الصور الإضافية' : 'Additional Images'}
+                                </div>
+                                <div className={`flex flex-wrap gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                  {variant.images.slice(0, 8).map((img: string, imgIdx: number) => (
+                                                                      <img
+                                    key={imgIdx}
+                                    src={img}
+                                    alt={`${isRTL ? 'صورة إضافية' : 'Additional image'} ${imgIdx + 1}`}
+                                    className="w-16 h-16 object-cover rounded border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer"
+                                    onClick={() => window.open(img, '_blank')}
+                                    title={isRTL ? 'انقر لعرض الصورة' : 'Click to view image'}
+                                  />
+                                  ))}
+                                </div>
+                                {variant.images.length > 8 && (
+                                                                  <div className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                  +{variant.images.length - 8} {isRTL ? 'أخرى' : 'more'}
+                                </div>
+                                )}
+                              </div>
+                            )}
                             {/* Barcodes Section */}
                             {Array.isArray(variant.barcodes) && variant.barcodes.length > 0 && (
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {variant.barcodes.map((barcode: string, idx: number) => (
-                                  <span
-                                    key={idx}
-                                    className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-lg border border-purple-200 font-mono"
-                                    title="Barcode"
-                                    style={{ direction: 'ltr' }}
-                                  >
-                                    {barcode}
-                                    <button
-                                      type="button"
-                                      className="ml-1 text-purple-500 hover:text-purple-700"
-                                      onClick={() => {
-                                        navigator.clipboard.writeText(barcode);
+                              <div className={`${isRTL ? 'text-right' : 'text-left'} `}>
+                                <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                  {isRTL ? 'الباركود' : 'Barcodes'}
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {variant.barcodes.map((barcode: string, idx: number) => (
+                                    <div key={idx} className={`flex flex-col items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                      <CustomBarcode 
+                                        value={barcode} 
+                                        width={1.5} 
+                                        height={40} 
+                                        fontSize={8}
+                                        margin={4}
+                                        displayValue={false}
+                                        className="mb-1"
+                                      />
+                                      <span className={`font-mono bg-gray-100 px-2 py-1 rounded text-xs text-center ${isRTL ? 'mr-2' : 'ml-2'} `}>
+                                        {barcode}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+    
+                                                        {/* Price and Stock */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-blue-50 p-3 rounded-lg">
+                                <div className={`text-sm font-semibold text-blue-700 mb-1 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                  {isRTL ? 'السعر' : 'Price'}
+                                </div>
+                                <div className={`text-lg font-bold text-blue-800 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                  ${variant.price || 0}
+                                </div>
+                                {variant.compareAtPrice && variant.compareAtPrice > variant.price && (
+                                  <div className={`text-sm text-gray-500 line-through ${isRTL ? 'text-right' : 'text-left'} `}>
+                                    ${variant.compareAtPrice}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="bg-green-50 p-3 rounded-lg">
+                                <div className={`text-sm font-semibold text-green-700 mb-1 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                  {isRTL ? 'الكمية المتوفرة' : 'Available Quantity'}
+                                </div>
+                                <div className={`text-lg font-bold text-green-800 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                  {variant.availableQuantity || variant.stock || 0}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Product Labels */}
+                            <div className={`${isRTL ? 'text-right' : 'text-left'} `}>
+                              <div className={`text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                {isRTL ? 'علامات المنتج' : 'Product Labels'}
+                              </div>
+                              {variant.productLabels && variant.productLabels.length > 0 ? (
+                                <div className={`flex flex-wrap gap-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                  {variant.productLabels.map((label: any, labelIdx: number) => (
+                                    <span 
+                                      key={labelIdx}
+                                      className={`px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold ${isRTL ? 'mr-2' : 'ml-2'} `}
+                                      style={{ 
+                                        backgroundColor: label.color ? `${label.color}20` : '#dbeafe',
+                                        color: label.color || '#1d4ed8',
+                                        border: label.color ? `1px solid ${label.color}` : '1px solid #dbeafe'
                                       }}
-                                      title={isRTL ? 'نسخ الباركود' : 'Copy barcode'}
                                     >
-                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16h8M8 12h8m-8-4h8M4 6h16M4 10h16M4 14h16M4 18h16" />
-                                      </svg>
-                                    </button>
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          {/* Action Buttons */}
-                          <div className="flex space-x-2 rtl:space-x-reverse">
-                            <button
-                              onClick={() => {
-                                console.log('🔍 Edit button clicked', variant);
-                                onEditVariant(variant);
-                              }}
-                              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-                              title={isRTL ? 'تعديل المتغير' : 'Edit Variant'}
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => onDeleteVariant(variant)}
-                              className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
-                              title={isRTL ? 'حذف المتغير' : 'Delete Variant'}
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Price and Stock */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-blue-50 p-3 rounded-lg">
-                            <div className="text-sm font-semibold text-blue-700 mb-1">
-                              {isRTL ? 'السعر' : 'Price'}
-                            </div>
-                            <div className="text-lg font-bold text-blue-800">
-                              ${variant.price || 0}
-                            </div>
-                            {variant.compareAtPrice && variant.compareAtPrice > variant.price && (
-                              <div className="text-sm text-gray-500 line-through">
-                                ${variant.compareAtPrice}
-                              </div>
-                            )}
-                          </div>
-                          <div className="bg-green-50 p-3 rounded-lg">
-                            <div className="text-sm font-semibold text-green-700 mb-1">
-                              {isRTL ? 'الكمية المتوفرة' : 'Available Quantity'}
-                            </div>
-                            <div className="text-lg font-bold text-green-800">
-                              {variant.availableQuantity || variant.stock || 0}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Specifications */}
-                        <div>
-                          <div className="text-sm font-semibold text-gray-700 mb-2">
-                            {isRTL ? 'المواصفات' : 'Specifications'}
-                          </div>
-                          {variant.specificationValues && variant.specificationValues.length > 0 ? (
-                            <div className="flex flex-wrap gap-2">
-                              {variant.specificationValues.map((spec: any, specIdx: number) => (
-                                <span
-                                  key={specIdx}
-                                  className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium"
-                                >
-                                  {spec.title}: {spec.value}
+                                      {isRTL ? label.nameAr : label.nameEn}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className={`text-gray-500 text-sm ${isRTL ? 'text-right' : 'text-left'} `}>
+                                  {isRTL ? 'لا توجد علامات' : 'No Labels'}
                                 </span>
-                              ))}
+                              )}
                             </div>
-                          ) : (
-                            <span className="text-gray-500 text-sm">
-                              {isRTL ? 'لا توجد مواصفات' : 'No specifications'}
-                            </span>
-                          )}
-                        </div>
 
-                        {/* Colors Section */}
-                        {(() => {
-                          // استخدم allColors إذا كانت موجودة
-                          let colorArrs: string[][] = [];
-                          if (Array.isArray(variant.allColors) && variant.allColors.length > 0) {
-                            colorArrs = variant.allColors.flatMap((c: any) => {
-                              try {
-                                const parsed = typeof c === 'string' ? JSON.parse(c) : c;
-                                if (Array.isArray(parsed) && Array.isArray(parsed[0])) return parsed;
-                                if (Array.isArray(parsed)) return [parsed];
-                                return [];
-                              } catch {
-                                return [];
-                              }
-                            });
-                          } else if (Array.isArray(variant.colors)) {
-                            colorArrs = variant.colors;
-                          }
-                          return colorArrs.length > 0 ? (
-                            <div>
-                              <div className="text-sm font-semibold text-gray-700 mb-2 mt-4">
+                            {/* Specifications */}
+                            <div className={`${isRTL ? 'text-right' : 'text-left'} `}>
+                              <div className={`text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                {isRTL ? 'المواصفات' : 'Specifications'}
+                              </div>
+                              {variant.specificationValues && variant.specificationValues.length > 0 ? (
+                                <div className={`space-y-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                  {variant.specificationValues.map((spec: any, specIdx: number) => (
+                                    <div key={specIdx} className={`flex items-center justify-between p-2 bg-purple-50 rounded-lg border border-purple-200 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                      <div className="flex-1">
+                                        <span className={`text-sm font-medium text-purple-800 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                          {spec.title}: {spec.value}
+                                        </span>
+                                        <div className={`text-xs text-purple-600 mt-1 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                          {isRTL ? 'الكمية:' : 'Quantity:'} {spec.quantity || 0} | {isRTL ? 'السعر الإضافي:' : 'Additional Price:'} ${spec.price || 0}
+                                        </div>
+                                      </div>
+                                      <div className={`text-right ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                        <span className={`text-sm font-medium text-purple-600 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                          ${((spec.quantity || 0) * (spec.price || 0)).toFixed(2)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {/* Total for specifications */}
+                                  <div className={`mt-2 pt-2 border-t border-purple-200 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                      <span className={`text-sm text-gray-600 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                        {isRTL ? 'مجموع المواصفات:' : 'Specifications Total:'}
+                                      </span>
+                                      <span className={`font-medium text-purple-600 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                        ${variant.specificationValues.reduce((total: number, spec: any) => 
+                                          total + ((spec.quantity || 0) * (spec.price || 0)), 0).toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className={`text-gray-500 text-sm ${isRTL ? 'text-right' : 'text-left'} `}>
+                                  {isRTL ? 'لا توجد مواصفات' : 'No specifications'}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Categories Section */}
+                            <div className={`${isRTL ? 'text-right' : 'text-left'} `}>
+                              <div className={`text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'} `}>
+                                {isRTL ? 'الفئات' : 'Categories'}
+                              </div>
+                              {variant.categories && variant.categories.length > 0 ? (
+                                <div className={`flex flex-wrap gap-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                  {variant.categories.map((category: any, categoryIdx: number) => (
+                                    <span 
+                                      key={categoryIdx}
+                                      className={`px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold border border-indigo-200 ${isRTL ? 'mr-2' : 'ml-2'} `}
+                                    >
+                                      {isRTL ? category.nameAr : category.nameEn}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className={`text-gray-500 text-sm ${isRTL ? 'text-right' : 'text-left'} `}>
+                                  {isRTL ? 'لا توجد فئات' : 'No Categories'}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Colors Section */}
+                              <div className={`${isRTL ? 'text-right' : 'text-left'} `}>
+                              <div className={`text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'} `}>
                                 <svg className="w-4 h-4 inline-block mr-1 rtl:ml-1 rtl:mr-0 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
                                 </svg>
                                 {isRTL ? 'الألوان' : 'Colors'}
                               </div>
-                              <div className={`flex flex-wrap gap-1 mb-2 ${isRTL ? 'justify-end' : 'justify-start'}`} style={{ minHeight: 28 }}>
+                          {(() => {
+                            // استخدم allColors إذا كانت موجودة
+                            let colorArrs: string[][] = [];
+                            if (Array.isArray(variant.allColors) && variant.allColors.length > 0) {
+                              // allColors is an array of strings, convert to array of arrays
+                              colorArrs = variant.allColors.map((color: string) => [color]);
+                            } else if (Array.isArray(variant.colors)) {
+                              colorArrs = variant.colors;
+                            }
+                            return colorArrs.length > 0 ? (
+                                <div className={`flex flex-wrap gap-1 ${isRTL ? 'justify-end' : 'justify-start'}`} style={{ minHeight: 28 }}>
                                 {colorArrs.map((arr: string[], idx: number) => {
                                   let style = {};
                                   if (arr.length > 1) {
@@ -271,39 +436,21 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                                   );
                                 })}
                               </div>
-                            </div>
-                          ) : null;
-                        })()}
+                            ) : (
+                              <span className="text-gray-500 text-sm">
+                                {isRTL ? 'لا توجد ألوان' : 'No Colors'}
+                              </span>
+                            );
+                          })()}
+                        </div>
 
-                        {/* Additional Images */}
-                        {variant.images && variant.images.length > 0 && (
-                          <div>
-                            <div className="text-sm font-semibold text-gray-700 mb-2">
-                              {isRTL ? 'الصور الإضافية' : 'Additional Images'}
+                           
                             </div>
-                            <div className="grid grid-cols-4 gap-2">
-                              {variant.images.slice(0, 8).map((img: string, imgIdx: number) => (
-                                <img
-                                  key={imgIdx}
-                                  src={img}
-                                  alt={`${isRTL ? 'صورة إضافية' : 'Additional image'} ${imgIdx + 1}`}
-                                  className="w-16 h-16 object-cover rounded border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer"
-                                  onClick={() => window.open(img, '_blank')}
-                                  title={isRTL ? 'انقر لعرض الصورة' : 'Click to view image'}
-                                />
-                              ))}
-                            </div>
-                            {variant.images.length > 8 && (
-                              <div className="text-xs text-gray-500 mt-1">
-                                +{variant.images.length - 8} {isRTL ? 'أخرى' : 'more'}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

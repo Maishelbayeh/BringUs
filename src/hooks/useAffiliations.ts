@@ -75,7 +75,7 @@ export interface CreateAffiliateData {
 export interface UpdateAffiliateData extends Partial<CreateAffiliateData> {
   _id: string;
 }
-
+const token = localStorage.getItem('token');
 export default function usAffiliations() {
   const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,7 +86,11 @@ export default function usAffiliations() {
     setLoading(true);
     setError(null);
     try {   
-      const response = await axios.get(`${BASE_URL}affiliations/store/${getStoreId()}`);
+      const response = await axios.get(`${BASE_URL}affiliations/store/${getStoreId()}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       setAffiliates(response.data.data || response.data);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'خطأ في جلب بيانات المسوقين');
@@ -101,7 +105,11 @@ export default function usAffiliations() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(`${BASE_URL}affiliations`, data);
+      const response = await axios.post(`${BASE_URL}affiliations`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       await fetchAffiliates(); // Refresh the list
       return response.data;
     } catch (err: any) {
@@ -117,7 +125,11 @@ export default function usAffiliations() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.put(`${BASE_URL}affiliations/${data._id}`, data);
+      const response = await axios.put(`${BASE_URL}affiliations/${data._id}`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       await fetchAffiliates(); // Refresh the list
       return response.data;
     } catch (err: any) {
@@ -133,7 +145,11 @@ export default function usAffiliations() {
     setLoading(true);
     setError(null);
     try {
-      await axios.delete(`${BASE_URL}affiliations/${id}`);
+      await axios.delete(`${BASE_URL}affiliations/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       await fetchAffiliates(); // Refresh the list
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'خطأ في حذف المسوق';
@@ -148,7 +164,11 @@ export default function usAffiliations() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${BASE_URL}affiliations/${id}`);
+      const response = await axios.get(`${BASE_URL}affiliations/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       return response.data;
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'خطأ في جلب بيانات المسوق';
@@ -163,7 +183,11 @@ export default function usAffiliations() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.put(`${BASE_URL}affiliations/${id}`, updatedData);
+      const response = await axios.put(`${BASE_URL}affiliations/${id}`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       
       // Update the specific affiliate in the local state
       setAffiliates(prev => prev.map(affiliate => 

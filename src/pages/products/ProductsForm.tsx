@@ -5,7 +5,9 @@ import CustomSelect from '../../components/common/CustomSelect';
 import CustomSwitch from '../../components/common/CustomSwitch';
 import CustomColorPicker from '../../components/common/CustomColorPicker';
 import CustomTextArea from '../../components/common/CustomTextArea';
-import { CheckboxSpecificationSelector } from '../../components/common';
+import SpecificationSelector from '../../components/common/SpecificationSelector';
+import CustomBarcode from '../../components/common/CustomBarcode';
+import CustomCategorySelector from '../../components/common/CustomCategorySelector';
 
 import { useTranslation } from 'react-i18next';
 import MultiSelect from '@/components/common/MultiSelect';
@@ -91,7 +93,53 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const { specifications: apiSpecifications, fetchSpecifications } = useProductSpecifications();
   
   // state للمواصفات المختارة
-  const [selectedSpecifications, setSelectedSpecifications] = useState<any[]>([]);
+  const [specificationDetails, setSpecificationDetails] = useState<any[]>([]);
+  
+  // state للفئات المختارة (دعم متعدد)
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(() => {
+    console.log('🔍 ProductsForm - Initializing selectedCategoryIds with form data:', {
+      formCategoryId: form.categoryId,
+      formCategoryIds: form.categoryIds,
+      formCategory: form.category
+    });
+    
+    // Handle categoryId as comma-separated string
+    if (form.categoryId && typeof form.categoryId === 'string' && form.categoryId.includes(',')) {
+      const ids = form.categoryId.split(',').map((id: string) => id.trim()).filter((id: string) => id);
+      console.log('🔍 ProductsForm - Parsed categoryId as comma-separated:', ids);
+      return ids;
+    }
+    // Handle categoryIds array
+    if (form.categoryIds && Array.isArray(form.categoryIds)) {
+      console.log('🔍 ProductsForm - Using categoryIds array:', form.categoryIds);
+      return form.categoryIds;
+    }
+    // Handle single categoryId
+    if (form.categoryId) {
+      console.log('🔍 ProductsForm - Using single categoryId:', form.categoryId);
+      return [form.categoryId];
+    }
+    console.log('🔍 ProductsForm - No categories found, returning empty array');
+    return [];
+  });
+
+  // دالة لحساب مجموع الكميات من الصفات
+  const calculateTotalQuantity = (specifications: any[]): number => {
+    const total = specifications.reduce((total, spec) => total + (spec.quantity || 0), 0);
+    console.log('🔍 calculateTotalQuantity - specifications:', specifications, 'total:', total);
+    return total;
+  };
+
+  // دالة لتحديث الكمية المتاحة بناءً على الصفات
+  const updateAvailableQuantity = (specifications: any[]) => {
+    const totalQuantity = calculateTotalQuantity(specifications);
+    onFormChange({
+      target: {
+        name: 'availableQuantity',
+        value: totalQuantity.toString()
+      }
+    } as any);
+  };
   const [showBarcodeSuccess, setShowBarcodeSuccess] = useState(false);
   const [localNewBarcode, setLocalNewBarcode] = useState('');
   const [mainImageUploading, setMainImageUploading] = useState(false);
@@ -199,7 +247,6 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   // تحويل البيانات من النموذج إلى التنسيق المطلوب (مرة واحدة فقط عند التحميل)
   useEffect(() => {
     if (!hasLoadedSpecifications.current) {
-      console.log('🔍 ProductsForm - Initial load - form.selectedSpecifications:', form.selectedSpecifications);
       console.log('🔍 ProductsForm - Initial load - form.specificationValues:', form.specificationValues);
       
       // محاولة استخدام specificationValues أولاً (من API)
@@ -211,47 +258,34 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
           const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec.specificationId}`);
           
           return {
-            _id: spec.valueId || spec._id,
-            title: title,
-            value: spec.value || ''
+            specId: spec.specificationId,
+            valueId: spec.valueId || spec._id,
+            value: spec.value || '',
+            quantity: spec.quantity || 0,
+            price: spec.price || 0
           };
         });
         console.log('🔍 ProductsForm - Cleaned specificationValues:', cleaned);
-        setSelectedSpecifications(cleaned);
-      }
-      // إذا لم تكن specificationValues موجودة، استخدم selectedSpecifications
-      else if (form.selectedSpecifications) {
-        try {
-          let parsed;
-          if (typeof form.selectedSpecifications === 'string') {
-            parsed = JSON.parse(form.selectedSpecifications);
-          } else {
-            parsed = form.selectedSpecifications;
-          }
-          if (Array.isArray(parsed)) {
-            // تنظيف الداتا هنا أيضاً
-            const cleaned = parsed.map(spec => ({
-              _id: spec._id,
-              title: typeof spec.title === 'string' ? spec.title : JSON.stringify(spec.title),
-              value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
-            }));
-            console.log('🔍 ProductsForm - Cleaned selectedSpecifications:', cleaned);
-            setSelectedSpecifications(cleaned);
-          } else {
-            setSelectedSpecifications([]);
-          }
-        } catch (error) {
-          console.error('Error parsing selectedSpecifications:', error);
-          setSelectedSpecifications([]);
-        }
+        setSpecificationDetails(cleaned);
+        // تحديث الكمية المتاحة عند تحميل البيانات الأولية
+        updateAvailableQuantity(cleaned);
       } else {
         console.log('🔍 ProductsForm - No specifications found, setting empty array');
-        setSelectedSpecifications([]);
+        setSpecificationDetails([]);
+        // تحديث الكمية المتاحة إلى صفر عند عدم وجود صفات
+        updateAvailableQuantity([]);
       }
       
       hasLoadedSpecifications.current = true;
     }
   }, []); // تشغيل مرة واحدة فقط عند التحميل
+
+  // مراقبة تغييرات specificationDetails وتحديث الكمية المتاحة
+  useEffect(() => {
+    if (hasLoadedSpecifications.current) {
+      updateAvailableQuantity(specificationDetails);
+    }
+  }, [specificationDetails]);
 
   // تحويل الألوان من API إلى التنسيق المطلوب
   useEffect(() => {
@@ -338,6 +372,69 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     }
   }, [form.category, form.unit]);
 
+  // تحديث الفئات المختارة عند تغيير بيانات النموذج
+  useEffect(() => {
+    let newSelectedIds: string[] = [];
+    
+    console.log('🔍 ProductsForm - useEffect: Updating selectedCategoryIds from form data:', {
+      formCategoryIds: form.categoryIds,
+      formCategoryId: form.categoryId,
+      formCategory: form.category
+    });
+    
+    if (form.categoryIds && Array.isArray(form.categoryIds)) {
+      newSelectedIds = form.categoryIds;
+      console.log('🔍 ProductsForm - useEffect: Using categoryIds array:', newSelectedIds);
+    } else if (form.categoryId) {
+      // Handle categoryId as comma-separated string
+      if (typeof form.categoryId === 'string' && form.categoryId.includes(',')) {
+        newSelectedIds = form.categoryId.split(',').map((id: string) => id.trim()).filter((id: string) => id);
+        console.log('🔍 ProductsForm - useEffect: Parsed categoryId as comma-separated:', newSelectedIds);
+      } else {
+        newSelectedIds = [form.categoryId];
+        console.log('🔍 ProductsForm - useEffect: Using single categoryId:', newSelectedIds);
+      }
+    } else if (form.category && form.category._id) {
+      newSelectedIds = [form.category._id];
+      console.log('🔍 ProductsForm - useEffect: Using form.category._id:', newSelectedIds);
+    }
+    
+    console.log('🔍 ProductsForm - useEffect: Final selectedCategoryIds:', newSelectedIds);
+    setSelectedCategoryIds(newSelectedIds);
+  }, [form.categoryIds, form.categoryId, form.category, form]);
+
+  // useEffect إضافي لمراقبة تغييرات form prop
+  useEffect(() => {
+    console.log('🔍 ProductsForm - form prop changed:', {
+      formCategoryIds: form.categoryIds,
+      formCategoryId: form.categoryId,
+      formCategories: form.categories
+    });
+  }, [form]);
+
+  // تحديث categoryId في الفورم عند تغيير selectedCategoryIds
+  useEffect(() => {
+    console.log('🔍 useEffect for selectedCategoryIds triggered:', {
+      selectedCategoryIds,
+      currentFormCategoryId: form.categoryId
+    });
+    
+    if (selectedCategoryIds.length > 0) {
+      // تحديث categoryId ليشمل جميع الفئات المختارة
+      const newCategoryId = selectedCategoryIds.join(',');
+      if (form.categoryId !== newCategoryId) {
+        console.log('🔍 Updating categoryId from selectedCategoryIds:', newCategoryId);
+        handleInputChange('categoryId', newCategoryId);
+      }
+    } else {
+      // إذا لم تكن هناك فئات مختارة، تأكد من مسح categoryId
+      if (form.categoryId !== '') {
+        console.log('🔍 Clearing categoryId as no categories are selected');
+        handleInputChange('categoryId', '');
+      }
+    }
+  }, [selectedCategoryIds, form.categoryId]);
+
   // Debug: طباعة بيانات النموذج
   useEffect(() => {
     // //CONSOLE.log('🔍 Form data in ProductsForm:', {
@@ -365,10 +462,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const formattedSpecifications = Array.isArray(apiSpecifications) ? apiSpecifications.map((spec: ProductSpecification) => ({
     _id: spec._id,
     title: isRTL ? spec.titleAr : spec.titleEn,
+    titleAr: spec.titleAr,
+    titleEn: spec.titleEn,
     values: spec.values.map((value, index) => ({
-      _id: `${spec._id}_${index}`,
-      value: isRTL ? value.valueAr : value.valueEn,
-      title: isRTL ? spec.titleAr : spec.titleEn
+      valueAr: value.valueAr,
+      valueEn: value.valueEn
     }))
   })) : [];
 
@@ -376,10 +474,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const formattedSpecificationsProp = Array.isArray(specifications) ? specifications.map((spec: any) => ({
     _id: spec._id,
     title: isRTL ? spec.titleAr : spec.titleEn,
-    values: spec.values.map((value: any, index: number) => ({
-      _id: `${spec._id}_${index}`,
-      value: isRTL ? value.valueAr : value.valueEn,
-      title: isRTL ? spec.titleAr : spec.titleEn
+    titleAr: spec.titleAr,
+    titleEn: spec.titleEn,
+    values: spec.values.map((value: any) => ({
+      valueAr: value.valueAr,
+      valueEn: value.valueEn
     }))
   })) : [];
 
@@ -452,6 +551,16 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   //-------------------------------------------- handleInputChange -------------------------------------------
   const handleInputChange = (name: string, value: string | any[]) => {
     //CONSOLE.log('🔍 ProductsForm - handleInputChange:', { name, value });
+    
+    // Debug logging for categoryId changes
+    if (name === 'categoryId') {
+      console.log('🔍 handleInputChange - categoryId:', { 
+        name, 
+        value, 
+        currentFormCategoryId: form.categoryId,
+        valueType: typeof value 
+      });
+    }
     
     // التحقق من صحة البيانات للحقل المحدث
     if (showValidation) {
@@ -527,8 +636,38 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   
   // handle multi-select for product labels
   const handleTagsChange = (values: string[]) => {
-    //CONSOLE.log('🔍 ProductsForm - handleTagsChange:', values);
+    console.log('🔍 ProductsForm - handleTagsChange called with values:', values);
+    console.log('🔍 ProductsForm - handleTagsChange - values type:', typeof values);
+    console.log('🔍 ProductsForm - handleTagsChange - values is array:', Array.isArray(values));
     onTagsChange(values);
+  };
+
+  // دالة معالجة تغيير الفئات المختارة
+  const handleCategorySelectionChange = (categoryIds: string[]) => {
+    console.log('🔍 handleCategorySelectionChange called with:', categoryIds);
+    console.log('🔍 Current form.categoryId before update:', form.categoryId);
+    
+    setSelectedCategoryIds(categoryIds);
+    
+    // تحديث الفورم مع الفئات المختارة
+    if (categoryIds.length === 1) {
+      // إذا كانت فئة واحدة فقط، استخدم categoryId للتوافق مع النظام الحالي
+      console.log('🔍 Setting single categoryId:', categoryIds[0]);
+      handleInputChange('categoryId', categoryIds[0]);
+      handleInputChange('categoryIds', categoryIds);
+    } else if (categoryIds.length > 1) {
+      // إذا كانت أكثر من فئة، استخدم أول فئة كـ categoryId للتوافق مع النظام الحالي
+      console.log('🔍 Setting multiple categories, using first as categoryId:', categoryIds[0]);
+      handleInputChange('categoryId', categoryIds[0]);
+      handleInputChange('categoryIds', categoryIds);
+    } else {
+      // إذا لم تكن هناك فئات مختارة
+      console.log('🔍 Clearing categories');
+      handleInputChange('categoryId', '');
+      handleInputChange('categoryIds', []);
+    }
+    
+    console.log('🔍 handleCategorySelectionChange completed');
   };
 
   // دالة إضافة باركود جديد
@@ -635,7 +774,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
   //-------------------------------------------- return -------------------------------------------
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-4 max-h-[70vh] space-y-6">
+    <div className="flex-1 overflow-y-auto px-6 py-4 max-h-[70vh] space-y-6" onClick={(e) => e.stopPropagation()}>
       
       {/* ==================== Basic Information Section ==================== */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -703,22 +842,29 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <CustomSelect
+            {(() => {
+              console.log('🔍 ProductsForm - CustomCategorySelector props:', {
+                selectedCategories: selectedCategoryIds,
+                categoriesCount: categories?.length || 0
+              });
+              return null;
+            })()}
+            <CustomCategorySelector
+              categories={categories as CategoryNode[] || []}
+              selectedCategories={selectedCategoryIds}
+              onSelectionChange={handleCategorySelectionChange}
+              isRTL={isRTL}
               label={isRTL ? t('products.category') : 'Category'}
-              value={form.categoryId || ''}
-              onChange={(e) => handleSelectChange('categoryId', e.target.value)}
+              placeholder={isRTL ? t('products.selectCategory') : 'Select Category'}
               className={getFieldErrorClass('categoryId')}
-              options={createCategorySelectOptions(
-                categories as CategoryNode[] || [],
-                isRTL,
-                true,
-                isRTL ? t('products.selectCategory') : 'Select Category'
-              )}
+              maxSelections={10}
+              showSearch={true}
+              showCount={true}
             />
             <p className="text-xs text-gray-500 mt-1">
               {isRTL 
-                ? '❖ فئات أساسية | › فئات فرعية | » فئات فرعية متقدمة' 
-                : '❖ Main categories | › Subcategories | » Sub-subcategories'
+                ? 'يمكنك اختيار عدة فئات مع دعم حتى 10 مستويات من الفئات الفرعية' 
+                : 'You can select multiple categories with support for up to 10 levels of subcategories'
               }
             </p>
             {renderFieldError('categoryId')}
@@ -746,19 +892,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         </div>
         
         {/* Debug info for category and unit */}
-        {/* <div className="mt-4 p-3 bg-blue-100 rounded-lg text-xs">
-          <p><strong>Debug Category & Unit:</strong></p>
-          <p>form.category: {form.category ? JSON.stringify(form.category) : 'null'}</p>
-          <p>form.categoryId: {form.categoryId || 'null'}</p>
-          <p>form.unit: {form.unit ? JSON.stringify(form.unit) : 'null'}</p>
-          <p>form.unit type: {typeof form.unit}</p>
-          <p>Unit value for select: {typeof form.unit === 'object' && form.unit && form.unit._id ? form.unit._id : (form.unit || '')}</p>
-          <p>Available units count: {Array.isArray(units) ? units.length : 0}</p>
-          <p>Available categories count: {Array.isArray(categories) ? categories.length : 0}</p>
-          {Array.isArray(units) && units.length > 0 && (
-            <p>First unit: {JSON.stringify(units[0])}</p>
-          )}
-        </div> */}
+       
       </div>
 
       {/* ==================== Pricing Section ==================== */}
@@ -770,7 +904,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
           {isRTL ? 'الأسعار' : 'Pricing'}
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
           <div>
             <CustomInput
               label={isRTL ? t('products.price') : 'Price'}
@@ -806,6 +940,56 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
             {renderFieldError('compareAtPrice')}
           </div>
         </div>
+
+        {/* سويتش تفعيل الخصم */}
+        <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <svg className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-orange-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">
+                {isRTL ? 'تفعيل الخصم' : 'Enable Sale'}
+              </span>
+            </div>
+            <CustomSwitch
+              name="isOnSale"
+              checked={form.isOnSale === 'true' || form.isOnSale === true}
+              onChange={(e) => handleInputChange('isOnSale', e.target.checked.toString())}
+              label=""
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            {isRTL 
+              ? 'قم بتفعيل هذا الخيار لتفعيل خصم المنتج' 
+              : 'Enable this option to activate product discount'
+            }
+          </p>
+        </div>
+
+        {/* حقل نسبة الخصم - يظهر فقط عند تفعيل السويتش */}
+        {(form.isOnSale === 'true' || form.isOnSale === true) && (
+          <div className="mt-4">
+            <CustomInput
+              label={isRTL ? 'نسبة الخصم (%)' : 'Discount Percentage (%)'}
+              name="salePercentage"
+              value={form.salePercentage || ''}
+              onChange={(e) => handleInputChange('salePercentage', e.target.value)}
+              className={getFieldErrorClass('salePercentage')}
+              type="number"
+              min="0"
+              max="100"
+              placeholder={isRTL ? 'أدخل نسبة الخصم من 0 إلى 100' : 'Enter discount percentage from 0 to 100'}
+            />
+            {renderFieldError('salePercentage')}
+            <p className="text-xs text-gray-500 mt-1">
+              {isRTL 
+                ? 'سيتم تطبيق الخصم على السعر الأساسي للمنتج' 
+                : 'The discount will be applied to the product\'s base price'
+              }
+            </p>
+          </div>
+        )}
       </div>
 
       {/* ==================== Barcode Section ==================== */}
@@ -851,6 +1035,27 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
             </button>
           </div>
           
+          {/* عرض الباركود المُنشأ تحت الحقل */}
+          {localNewBarcode && localNewBarcode.trim() && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">
+                {isRTL ? 'معاينة الباركود:' : 'Barcode Preview:'}
+              </h4>
+              <div className="flex justify-center">
+                <CustomBarcode
+                  value={localNewBarcode.trim()}
+                  width={2}
+                  height={80}
+                  fontSize={14}
+                  margin={5}
+                  displayValue={true}
+                  format="CODE128"
+                  className="max-w-full"
+                />
+              </div>
+            </div>
+          )}
+          
           {/* رسالة النجاح */}
           {showBarcodeSuccess && (
             <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded-lg flex items-center text-sm">
@@ -863,25 +1068,51 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
           
           {/* عرض الباركود الموجودة مباشرة تحت الحقل */}
           {Array.isArray(form.barcodes) && form.barcodes.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {form.barcodes.map((barcode: string, index: number) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-3 py-2 bg-purple-100 text-purple-800 text-sm rounded-lg border border-purple-200 hover:bg-purple-150 transition-colors"
-                >
-                  <span className="font-mono mr-2">{barcode}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeBarcode(index)}
-                    className="w-5 h-5 bg-purple-200 hover:bg-purple-300 rounded-full flex items-center justify-center transition-colors"
-                    title={isRTL ? 'حذف الباركود' : 'Remove barcode'}
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {form.barcodes.map((barcode: string, index: number) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-2 bg-purple-100 text-purple-800 text-sm rounded-lg border border-purple-200 hover:bg-purple-150 transition-colors"
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </span>
-              ))}
+                    <span className="font-mono mr-2">{barcode}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeBarcode(index)}
+                      className="w-5 h-5 bg-purple-200 hover:bg-purple-300 rounded-full flex items-center justify-center transition-colors"
+                      title={isRTL ? 'حذف الباركود' : 'Remove barcode'}
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+              </div>
+              
+              {/* عرض الباركود المُنشأ للباركود المضافة */}
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">
+                  {isRTL ? 'الباركود المُنشأ:' : 'Generated Barcodes:'}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {form.barcodes.map((barcode: string, index: number) => (
+                    <div key={index} className="flex flex-col items-center p-3 bg-white rounded-lg border border-gray-200">
+                      <span className="text-xs text-gray-600 mb-2 font-mono">{barcode}</span>
+                      <CustomBarcode
+                        value={barcode}
+                        width={1.5}
+                        height={60}
+                        fontSize={10}
+                        margin={2}
+                        displayValue={false}
+                        format="CODE128"
+                        className="max-w-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="text-gray-500 text-sm">
@@ -924,7 +1155,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
             />
           </div> */}
           
-          <div className="space-y-4">
+          <div className="space-y-4 col-span-2 ">
             <div>
               <CustomInput
                 label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
@@ -933,9 +1164,26 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                 onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
                 className={getFieldErrorClass('availableQuantity')}
                 type="number"
-                disabled={false}
+                disabled={specificationDetails.length > 0}
+                placeholder={
+                  specificationDetails.length > 0 
+                    ? (isRTL ? 'سيتم الحساب تلقائياً من الصفات' : 'Will be calculated automatically from specifications')
+                    : (isRTL ? 'أدخل الكمية المتاحة' : 'Enter available quantity')
+                }
               />
               {renderFieldError('availableQuantity')}
+              <p className="text-xs text-gray-500 mt-1">
+                {specificationDetails.length > 0 
+                  ? (isRTL 
+                      ? 'يتم حساب الكمية المتاحة تلقائياً من مجموع كميات الصفات المختارة' 
+                      : 'Available quantity is automatically calculated from the sum of selected specification quantities'
+                    )
+                  : (isRTL 
+                      ? 'يمكنك إدخال الكمية المتاحة يدوياً عندما لا توجد صفات مختارة' 
+                      : 'You can manually enter the available quantity when no specifications are selected'
+                    )
+                }
+              </p>
             </div>
             
             <div className="space-y-1">
@@ -970,8 +1218,18 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                     : []
               }
               onChange={(values) => {
+                console.log('🔍 MultiSelect onChange called with values:', values);
+                console.log('🔍 MultiSelect - values type:', typeof values);
+                console.log('🔍 MultiSelect - values is array:', Array.isArray(values));
+                
                 const ids = values.map((v: any) => typeof v === 'object' ? v._id || v.id : v);
-                if ('productLabels' in form) {
+                console.log('🔍 MultiSelect - processed ids:', ids);
+                console.log('🔍 MultiSelect - form has productLabels:', 'productLabels' in form);
+                        console.log('🔍 MultiSelect - form.productLabels:', form.productLabels);
+        console.log('🔍 MultiSelect - form.tags:', form.tags);
+        
+        if ('productLabels' in form) {
+                  console.log('🔍 MultiSelect - calling onFormChange with productLabels');
                   onFormChange({
                     target: {
                       name: 'productLabels',
@@ -979,6 +1237,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                     }
                   } as any);
                 } else {
+                  console.log('🔍 MultiSelect - calling handleTagsChange with tags');
                   handleTagsChange(ids);
                 }
               }}
@@ -1006,31 +1265,23 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
         </h3>
         
         {formattedSpecificationsProp.length > 0 || formattedSpecifications.length > 0 ? (
-          <CheckboxSpecificationSelector
+          <SpecificationSelector
             specifications={formattedSpecificationsProp.length > 0 ? formattedSpecificationsProp : formattedSpecifications}
-            selectedSpecifications={selectedSpecifications}
-            onSelectionChange={(selected) => {
-              console.log('🔍 ProductsForm - onSelectionChange called with:', selected);
-              console.log('🔍 ProductsForm - Current form state before update:', {
-                selectedSpecifications: form.selectedSpecifications,
-                specifications: form.specifications,
-                specificationValues: form.specificationValues
-              });
+            selectedSpecifications={specificationDetails}
+            onSpecificationChange={(specifications) => {
+              console.log('🔍 ProductsForm - New specification selector called with:', specifications);
               
-              // تنظيف المواصفات المختارة قبل حفظها مع البحث عن العنوان الصحيح
-              const cleaned = selected.map(spec => {
-                // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
-                const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec._id.split('_')[0]) : null;
-                const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec._id.split('_')[0]}`);
-                
-                return {
-                  _id: spec._id,
-                  title: title,
-                  value: typeof spec.value === 'string' ? spec.value : JSON.stringify(spec.value)
-                };
-              });
-              console.log('🔍 ProductsForm - Cleaned specifications:', cleaned);
-              setSelectedSpecifications(cleaned);
+              setSpecificationDetails(specifications);
+              
+              // تحديث الكمية المتاحة تلقائياً
+              updateAvailableQuantity(specifications);
+              
+              // تحويل البيانات إلى التنسيق المطلوب للنموذج
+              const cleaned = specifications.map(spec => ({
+                _id: spec.valueId,
+                title: spec.value,
+                value: spec.value
+              }));
               
               // تحديث form.selectedSpecifications
               onFormChange({
@@ -1041,7 +1292,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
               } as any);
               
               // تحديث form.specifications (IDs فقط)
-              const specificationIds = [...new Set(cleaned.map(spec => spec._id.split('_')[0]))];
+              const specificationIds = [...new Set(specifications.map(spec => spec.specId))];
               console.log('🔍 ProductsForm - Specification IDs:', specificationIds);
               onFormChange({
                 target: {
@@ -1050,20 +1301,22 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                 }
               } as any);
               
-              // تحديث form.specificationValues (القيم الكاملة)
-              const specificationValues = cleaned.map(spec => {
+              // تحديث form.specificationValues (القيم الكاملة مع الكمية والسعر)
+              const specificationValues = specifications.map(spec => {
                 // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
-                const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec._id.split('_')[0]) : null;
-                const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec._id.split('_')[0]}`);
+                const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec.specId) : null;
+                const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : `Specification ${spec.specId}`;
                 
                 return {
-                  specificationId: spec._id.split('_')[0],
-                  valueId: spec._id,
+                  specificationId: spec.specId,
+                  valueId: spec.valueId,
                   value: spec.value,
-                  title: title
+                  title: title,
+                  quantity: spec.quantity,
+                  price: spec.price
                 };
               });
-              console.log('🔍 ProductsForm - Specification values:', specificationValues);
+              console.log('🔍 ProductsForm - Specification values with quantity and price:', specificationValues);
               onFormChange({
                 target: {
                   name: 'specificationValues',
@@ -1071,12 +1324,13 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                 }
               } as any);
               
-              console.log('🔍 ProductsForm - Form updates completed. New values will be available on next render.');
+              console.log('🔍 ProductsForm - Form updates completed with new specification selector.');
             }}
+            isRTL={isRTL}
           />
         ) : (
           <div className="text-center py-8 text-gray-500">
-            <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-12 h-12 mx-auto mb-4 text-gray-300 mr-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
                 <p className="text-lg font-medium">{isRTL ? 'لا توجد مواصفات متاحة' : 'No specifications available'}</p>

@@ -49,6 +49,21 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL, is
         required
       />
 
+      {/* Password */}
+      <CustomInput
+        label={t('wholesalers.password')}
+        name="password"
+        type="password"
+        value={form.password || ''}
+        onChange={onFormChange}
+        error={errors.password}
+        required={!isEdit}
+        placeholder={isEdit 
+          ? (isRTL ? 'اتركه فارغاً للاحتفاظ بكلمة السر الحالية' : 'Leave empty to keep current password')
+          : (isRTL ? 'أدخل كلمة السر' : 'Enter password')
+        }
+      />
+
       {/* Mobile */}
       <CustomInput
         label={t('wholesalers.mobile')}
