@@ -84,7 +84,7 @@ const UsersPage: React.FC = () => {
       
       // فلترة المستخدمين حسب المتجر الحالي
       const storeUsers = allUsers.filter((user: any) => 
-        user.store === storeId || (typeof user.store === 'object' && user.store._id === storeId)
+        user.store === storeId || (typeof user.store === 'object' && user.store._id === storeId && user.role === 'admin')
       );
       
       setUsers(storeUsers);
@@ -172,13 +172,13 @@ const UsersPage: React.FC = () => {
     const statusColors = {
       active: 'bg-green-100 text-green-800',
       inactive: 'bg-gray-100 text-gray-800',
-      banned: 'bg-red-100 text-red-800'
+    
     };
     
     const statusLabels = {
       active: t('users.status.active'),
       inactive: t('users.status.inactive'),
-      banned: t('users.status.banned')
+    
     };
 
     return (

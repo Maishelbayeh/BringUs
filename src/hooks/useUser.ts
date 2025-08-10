@@ -343,6 +343,27 @@ export const useUser = () => {
     }
   };
 
+  // التحقق من وجود رقم الهاتف
+  const checkPhoneExists = async (phone: string): Promise<boolean> => {
+    console.log('🔍 جاري التحقق من رقم الهاتف:', phone);
+    
+    try {
+      const users = await getAllUsers();
+      const phoneExists = users.some(user => user.phone === phone);
+      
+      if (phoneExists) {
+        console.log('❌ رقم الهاتف مستخدم بالفعل:', phone);
+      } else {
+        console.log('✅ رقم الهاتف متاح:', phone);
+      }
+      
+      return phoneExists;
+    } catch (error) {
+      console.error('❌ خطأ في التحقق من رقم الهاتف:', error);
+      return false; // في حالة الخطأ، نعتبر أن الرقم متاح
+    }
+  };
+
   return {
     loading,
     error,
@@ -356,6 +377,7 @@ export const useUser = () => {
     resetPassword,
     getAllUsers,
     checkEmailExists,
+    checkPhoneExists,
   };
 };
  

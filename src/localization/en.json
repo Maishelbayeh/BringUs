@@ -1024,6 +1024,7 @@
     "emailEnglishOnly": "Email must contain English characters only",
     "emailInvalid": "Please enter a valid email address",
     "phoneInvalid": "Please enter a valid phone number starting with + and country code",
+    "phoneAlreadyExists": "Phone number is already in use by another user",
     "passwordsNotMatch": "Passwords do not match",
     "alreadyExists": "This value already exists",
     "mustBeGreater": "Value must be greater than the other value",

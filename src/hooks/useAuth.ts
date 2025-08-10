@@ -8,6 +8,7 @@ interface LoginResponse {
   message: string;
   token: string;
   storeId: string;
+  userStatus: string;
   user: {
     id: string;
     firstName: string;
@@ -72,7 +73,7 @@ export const useAuth = () => {
         throw new Error(data.message || 'فشل في تسجيل الدخول');
       }
 
-      if (data.success && data.user.role === 'admin') {
+      if (data.success && data.user.role === 'admin' && data.userStatus === 'active') {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('isOwner', data.user.store.isOwner.toString());

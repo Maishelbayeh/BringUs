@@ -12,6 +12,8 @@ import useLanguage from '@/hooks/useLanguage';
 import { getStoreId } from '@/hooks/useLocalStorage';
 import { useUser } from '@/hooks/useUser';
 import { useToastContext } from '@/contexts/ToastContext';
+import CustomSwitch from '@/components/common/CustomSwitch';
+import CustomRadioGroup from '@/components/common/CustomRadioGroup';
 
 interface UserFormProps {
   user?: any; // المستخدم للتعديل
@@ -33,7 +35,8 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
     email: '',
     password: '',
     // confirmPassword: '',
-    phone: ''
+    phone: '',
+    status: 'active'
   });
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -51,7 +54,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [isLoading, setIsLoading] = useState(false);
   
-  const { createUser, updateUser, loading: apiLoading, error: apiError, checkEmailExists } = useUser();
+  const { createUser, updateUser, loading: apiLoading, error: apiError, checkEmailExists, checkPhoneExists, getAllUsers } = useUser();
   const { showSuccess, showError } = useToastContext();
 
   const isEditMode = !!user;
@@ -67,7 +70,8 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
         email: user.email || '',
         password: '',
         // confirmPassword: '',
-        phone: user.phone || ''
+        phone: user.phone || '',
+        status: user.status || 'active'
       });
 
       // تحميل العنوان
@@ -126,6 +130,29 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
           [name]: undefined
         }));
       }
+
+      // validation فوري لرقم الهاتف
+      if (name === 'phone' && value.trim()) {
+        const cleanPhone = value.replace(/[\s\-\(\)]/g, '');
+        
+        if (!/^\+[1-9]\d{1,14}$/.test(cleanPhone)) {
+          setErrors(prev => ({
+            ...prev,
+            phone: t('validation.phoneInvalid')
+          }));
+        } else if (cleanPhone.length > 15) {
+          setErrors(prev => ({
+            ...prev,
+            phone: t('validation.phoneMaxLength')
+          }));
+        } else {
+          // مسح خطأ رقم الهاتف إذا كان صحيحاً
+          setErrors(prev => ({
+            ...prev,
+            phone: undefined
+          }));
+        }
+      }
     }
   };
 
@@ -167,6 +194,17 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
     if (!formData.phone.trim()) {
       newErrors.phone = t('newUser.phoneRequired');
       console.log('❌ Phone validation failed');
+    } else {
+      // التحقق من صحة تنسيق رقم الهاتف
+      const cleanPhone = formData.phone.replace(/[\s\-\(\)]/g, '');
+      
+      if (!/^\+[1-9]\d{1,14}$/.test(cleanPhone)) {
+        newErrors.phone = t('validation.phoneInvalid');
+        console.log('❌ Phone format validation failed');
+      } else if (cleanPhone.length > 15) {
+        newErrors.phone = t('validation.phoneMaxLength');
+        console.log('❌ Phone length validation failed');
+      }
     }
 
     // التحقق من العنوان
@@ -231,14 +269,37 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
         }
       }
 
+      // التحقق من تكرار رقم الهاتف (للمستخدمين الجدد والتعديل)
+      console.log('🔍 Checking if phone exists...');
+      const phoneExists = await checkPhoneExists(formData.phone);
+      console.log('📱 Phone exists check result:', phoneExists);
+      
+      // إذا كان رقم الهاتف موجود، تحقق من أنه ليس لنفس المستخدم (في حالة التعديل)
+      if (phoneExists) {
+        if (isEditMode) {
+          // في حالة التعديل، تحقق من أن الرقم ليس لنفس المستخدم
+          const currentUser = await getAllUsers().then(users => users.find(u => u._id === user._id));
+          if (currentUser && currentUser.phone === formData.phone) {
+            console.log('✅ Phone number belongs to the same user, allowing update');
+          } else {
+            setErrors(prev => ({ ...prev, phone: t('validation.phoneAlreadyExists') }));
+            return;
+          }
+        } else {
+          // في حالة الإضافة الجديدة
+          setErrors(prev => ({ ...prev, phone: t('validation.phoneAlreadyExists') }));
+          return;
+        }
+      }
+
       const newUserData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        phone: formData.phone,
         role: 'admin' as const,
-        status: 'active' as const,
+        phone: formData.phone,
+        status: formData.status as 'active' | 'inactive',
         addresses: [{
           type: 'home' as const,
           street: addressData.street,
@@ -362,7 +423,13 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
             {showPassword ? <VisibilityOff className="h-5 w-5 text-gray-400" /> : <Visibility className="h-5 w-5 text-gray-400" />}
           </button>
         </div>
-        
+        <CustomRadioGroup
+          label={t('users.columns.status')}
+          name="status"
+          options={[{label: t('general.active'), value: 'active'}, {label: t('general.inactive'), value: 'inactive'}]}
+          value={formData.status}
+          onChange={(e) => handleInputChange(e)}
+        />  
         {/* <div className="relative">
           <CustomInput
             label={t('signup.confirmPassword')}
