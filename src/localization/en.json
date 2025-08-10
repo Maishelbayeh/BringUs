@@ -626,7 +626,13 @@
     "orderStatusStatistics": "Order Status Statistics",
     "paymentStatistics": "Payment Statistics",
     "totalAmount": "Total Amount",
-    "orders": "Orders"
+    "orders": "Orders",
+    "deleteOrder": "Delete Order",
+    "deleteOrderConfirmTitle": "Confirm Delete Order",
+    "deleteOrderConfirmMessage": "Are you sure you want to delete this order? This action cannot be undone.",
+    "orderDeletedSuccessfully": "Order deleted successfully",
+    "orderDeleteFailed": "Failed to delete order",
+    "actions": "Actions"
   
     
 
