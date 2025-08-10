@@ -106,6 +106,7 @@ export function useWholesalers(storeId: string, token: string) {
 
   // Create wholesaler
   const createWholesaler = useCallback(async (wholesaler: Partial<Wholesaler>) => {
+    console.log(wholesaler);
     try {
       const url = `${API_BASE}/stores/${storeId}/wholesalers`;
       const data = await fetchWithAuth(url, {
