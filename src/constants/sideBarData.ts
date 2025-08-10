@@ -12,7 +12,8 @@ import {
   ChartBarIcon,
   Squares2X2Icon,
   ChatBubbleLeftRightIcon,
-  CubeIcon
+  CubeIcon,
+  UserPlusIcon
 } from '@heroicons/react/24/outline';
 
 export const getMenuAsText = (): MenuItem[] => [
@@ -105,6 +106,12 @@ export const getMenuAsText = (): MenuItem[] => [
         title: 'sideBar.storeVideos',
         icon: VideoCameraIcon,
         path: '/store-videos',
+      },
+      {
+        id: 64,
+        title: 'sideBar.users',
+        icon: UsersIcon,
+        path: '/users',
       },
 
     ],

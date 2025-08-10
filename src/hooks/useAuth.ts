@@ -7,12 +7,14 @@ interface LoginResponse {
   success: boolean;
   message: string;
   token: string;
+  storeId: string;
   user: {
     id: string;
     firstName: string;
     lastName: string;
     email: string;
     role: string;
+    
     avatar: {
       public_id: string | null;
       url: string;
@@ -26,6 +28,7 @@ interface LoginResponse {
       isPrimaryOwner: boolean;
       isOwner: boolean;
       permissions: string[];
+      _id: string;
     };
     stores: Array<{
       id: string;
@@ -72,8 +75,9 @@ export const useAuth = () => {
       if (data.success && data.user.role === 'admin') {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('isOwner', data.user.store.isOwner.toString());
         if (data.user.store?.id) {
-          updateStoreId(data.user.store.id);
+          updateStoreId(data.storeId);
         
         }
 
