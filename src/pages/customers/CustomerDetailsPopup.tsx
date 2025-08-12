@@ -1,5 +1,41 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Customer, Order } from '../../hooks/useCustomers';
+
+// CSS styles لإخفاء شريط السكرول
+const scrollbarHideStyles = `
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+  
+  /* إضافة scroll للـ tbody */
+  tbody.scrollbar-hide {
+    display: block;
+    max-height: 12rem;
+    overflow-y: auto;
+  }
+  
+  thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+  
+  tbody {
+    display: block;
+    width: 100%;
+  }
+  
+  tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+`;
 
 interface CustomerDetailsPopupProps {
   open: boolean;
@@ -26,6 +62,8 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
   getAverageOrderValue,
   ordersLoading = false,
 }) => {
+  const navigate = useNavigate();
+  
   if (!open || !customer) return null;
   
   // Get customer display name
@@ -35,7 +73,11 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
 
   // Get customer initials
   const getCustomerInitials = (customer: Customer) => {
-    return `${customer.firstName[0]}${customer.lastName[0]}`.toUpperCase();
+    const firstName = customer.firstName || '';
+    const lastName = customer.lastName || '';
+    const firstInitial = firstName.length > 0 ? firstName[0] : '';
+    const lastInitial = lastName.length > 0 ? lastName[0] : '';
+    return `${firstInitial}${lastInitial}`.toUpperCase() || 'GU';
   };
 
   const customerOrders = orders;
@@ -49,11 +91,14 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
     'bg-purple-100 text-purple-700',
     'bg-orange-100 text-orange-700',
   ];
-  const colorIdx = customer._id.charCodeAt(customer._id.length - 1) % colors.length;
+  // استخدم _id للعملاء الضيوف أيضاً
+  const customerId = customer._id || customer.email || `${customer.firstName}-${customer.lastName}`;
+  const colorIdx = customerId.charCodeAt(customerId.length - 1) % colors.length;
   
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-lg relative shadow-xl border border-primary/20">
+      <style>{scrollbarHideStyles}</style>
+      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl relative shadow-xl border border-primary/20">
         <button
           className="absolute top-2 left-2 text-gray-400 hover:text-primary text-2xl"
           onClick={onClose}
@@ -108,52 +153,66 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
             <span className="ml-2 text-gray-600">{isRTL ? 'جاري تحميل الطلبات...' : 'Loading orders...'}</span>
           </div>
         ) : customerOrders.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg border border-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="bg-primary/10 text-primary">
-                  <th className="py-2 px-3 border-b">{t('customers.orderNumber')}</th>
-                  <th className="py-2 px-3 border-b">{t('customers.orderDate')}</th>
-                  <th className="py-2 px-3 border-b">{t('customers.orderPrice')}</th>
-                  <th className="py-2 px-3 border-b">{t('customers.orderStatus')}</th>
-                  <th className="py-2 px-3 border-b">{t('customers.orderPaid')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {customerOrders.map((order) => (
-                  <tr key={order.id} className={`text-center hover:bg-primary/5 transition ${order.paid ? 'bg-green-50' : 'bg-red-50'}`}>
-                    <td className="py-2 px-3 border-b font-semibold">{order.orderNumber}</td>
-                    <td className="py-2 px-3 border-b">{new Date(order.date).toLocaleDateString()}</td>
-                    <td className="py-2 px-3 border-b">
-                      {order.items.reduce((sum, item) => sum + item.total, 0)} {order.currency}
-                    </td>
-                    <td className="py-2 px-3 border-b">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3 border-b">
-                      {order.paid ? (
-                        <span className="inline-flex items-center gap-1 text-green-700 font-semibold">
-                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                          {t('customers.orderPaid')}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-red-600 font-semibold">
-                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                          {t('customers.orderUnpaid')}
-                        </span>
-                      )}
-                    </td>
+          <div className="rounded-lg border border-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="bg-primary/10 text-primary">
+                    <th className="py-3 px-4 border-b text-left font-semibold">{t('customers.orderNumber')}</th>
+                    <th className="py-3 px-4 border-b text-left font-semibold">{t('customers.orderDate')}</th>
+                    <th className="py-3 px-4 border-b text-left font-semibold">{t('customers.orderPrice')}</th>
+                    <th className="py-3 px-4 border-b text-left font-semibold">{t('customers.orderStatus')}</th>
+                    <th className="py-3 px-4 border-b text-left font-semibold">{t('customers.orderPaid')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="max-h-64 overflow-y-auto scrollbar-hide">
+                  {customerOrders.map((order) => (
+                    <tr key={order.id} className={`hover:bg-primary/5 transition ${(order.paymentStatus === 'paid' || order.paid) ? 'bg-green-50' : 'bg-red-50'}`}>
+                      <td className="py-3 px-4 border-b font-semibold">
+                        <button
+                          onClick={() => navigate(`/orders/${order.id}`)}
+                          className="text-primary hover:underline"
+                        >
+                          {order.orderNumber}
+                        </button>
+                      </td>
+                      <td className="py-3 px-4 border-b">{new Date(order.date || order.createdAt).toLocaleDateString()}</td>
+                      <td className="py-3 px-4 border-b font-medium">
+                        {(() => {
+                          const price = order.pricing?.total || order.price || order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0);
+                          return `${Math.round(price * 100) / 100} ${order.currency}`;
+                        })()}
+                      </td>
+                      <td className="py-3 px-4 border-b">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                          order.status === 'delivered' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 border-b">
+                        {(order.paymentStatus === 'paid' || order.paid) ? (
+                          <span className="inline-flex items-center gap-1 text-green-700 font-semibold">
+                            <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            {t('customers.orderPaid')}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-red-600 font-semibold">
+                            <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            {t('customers.orderUnpaid')}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">

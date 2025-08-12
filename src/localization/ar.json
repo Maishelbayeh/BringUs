@@ -756,6 +756,8 @@
     "subtotal": "المجموع الفرعي",
     "shipping": "الشحن",
     "tax": "الضريبة",
+    "discount": "الخصم",
+    "discountPercentage": "نسبة الخصم",
     "itemsCount": "عدد المنتجات",
     "notes": "ملاحظات",
     "notFound": "الطلب غير موجود",

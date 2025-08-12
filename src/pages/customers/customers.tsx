@@ -44,6 +44,7 @@ const CustomersPage: React.FC = () => {
     fetchCustomers,
     deleteCustomer,
     fetchCustomerOrders,
+    fetchGuestOrders,
   } = useCustomers();
 
   // State for customer orders
@@ -81,8 +82,10 @@ const CustomersPage: React.FC = () => {
     }
   }, [storeId, fetchCustomers]);
 
-  const getTotalSpent = (orders: Order[]) =>
-    orders.reduce((sum, order) => sum + ( order.totalSpent || 0 ), 0);
+  const getTotalSpent = (orders: Order[]) => {
+    const total = orders.reduce((sum, order) => sum + (order.pricing?.total || order.price || order.items.reduce((itemSum, item) => itemSum + (item.totalPrice || item.total || 0), 0)), 0);
+    return Math.round(total * 100) / 100;
+  };
   
   const getAverageOrderValue = (orders: Order[]) => {
     if (orders.length === 0) return 0;
@@ -92,16 +95,25 @@ const CustomersPage: React.FC = () => {
 
   const getLastOrderDate = (orders: Order[]) => {
     if (!orders.length) return '-';
-    return orders.reduce((latest, order) => new Date(order.date) > new Date(latest) ? order.date : latest, orders[0].date);
+    return orders.reduce((latest, order) => {
+      const orderDate = order.date || order.createdAt;
+      return new Date(orderDate) > new Date(latest) ? orderDate : latest;
+    }, orders[0].date || orders[0].createdAt);
   };
 
   const handleCustomerClick = async (customer: Customer) => {
     setSelectedCustomer(customer);
     setOrdersLoading(true);
     try {
-      // Skip fetching orders for guests (they don't have _id)
       if (customer._id && !customer.isGuest) {
+        // للعملاء المسجلين
         const orders = await fetchCustomerOrders(customer._id, storeId);
+        if (orders) {
+          setCustomerOrders(orders);
+        }
+      } else if (customer.isGuest && customer._id) {
+        // للعملاء الضيوف - استخدم _id الخاص بهم
+        const orders = await fetchGuestOrders(customer._id, storeId);
         if (orders) {
           setCustomerOrders(orders);
         }
@@ -242,7 +254,7 @@ const CustomersPage: React.FC = () => {
         {filteredCustomers.map((customer) => {
           return (
             <div
-              key={customer._id || `guest-${customer.email}-${customer.firstName}`}
+              key={customer._id}
               className={`border bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 flex items-center gap-6 group relative cursor-pointer `}
               onClick={() => handleCustomerClick(customer)}
             >
@@ -258,7 +270,7 @@ const CustomersPage: React.FC = () => {
                     'bg-purple-100 text-purple-700',
                     'bg-orange-100 text-orange-700',
                   ];
-                  const colorIdx = (customer._id || 'guest').charCodeAt((customer._id || 'guest').length - 1) % colors.length;
+                  const colorIdx = customer._id.charCodeAt(customer._id.length - 1) % colors.length;
                   return (
                     <div className={`h-20 w-20 flex items-center justify-center rounded-full text-3xl font-bold shadow ${colors[colorIdx]}`}>
                       {getCustomerInitials(customer)}

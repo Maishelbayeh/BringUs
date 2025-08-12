@@ -13,10 +13,10 @@ interface Order {
   id: string;
   orderNumber?: string;
   storeName: string;
-  storePhone: string;
+  storePhone?: string;
   storeUrl: string;
-  customer: string;
-  customerPhone: string;
+  customer?: string;
+  customerPhone?: string;
   customerEmail?: string;
   user?: {
     firstName: string;
@@ -24,7 +24,7 @@ interface Order {
     email: string;
     phone: string;
   };
-  affiliate: string;
+  affiliate?: string;
   deliveryArea?: {
     locationAr?: string;
     locationEn?: string;
@@ -32,22 +32,52 @@ interface Order {
     estimatedDays?: number;
   };
   currency: string;
-  date: string;
+  date?: string;
+  createdAt?: string;
+  price?: number;
   paymentStatus?: string;
+  paid?: boolean;
   status: string;
-  itemsCount: number;
-  notes: string;
+  itemsCount?: number;
+  notes?: string | { customer: string; admin?: string };
   items: Array<{
+    id?: string;
     productId?: string;
     name?: string;
     sku?: string;
     quantity?: number;
     price?: number;
+    pricePerUnit?: number;
     totalPrice?: number;
+    total?: number;
     image?: string;
     variant?: any;
     productSnapshot?: any;
+    selectedSpecifications?: Array<{
+      specificationId: string;
+      valueId: string;
+      valueAr: string;
+      valueEn: string;
+      titleAr: string;
+      titleEn: string;
+      _id: string;
+      id: string;
+    }>;
+    selectedColors?: string[];
   }>;
+  pricing?: {
+    subtotal: number;
+    tax: number;
+    shipping: number;
+    discount: number;
+    total: number;
+  };
+  affiliateTracking?: {
+    isAffiliateOrder: boolean;
+    commissionEarned: number;
+    commissionPercentage: number;
+  };
+  isGift?: boolean;
 }
 
 const OrderDetailPage: React.FC = () => {
@@ -88,14 +118,23 @@ const OrderDetailPage: React.FC = () => {
         
         if (result.success) {
           console.log('Found order:', result.data); // Debug log
+          console.log('Notes data:', result.data.notes); // Debug notes
+          console.log('Pricing data:', result.data.pricing); // Debug pricing
+          console.log('Price data:', result.data.price); // Debug price
+          console.log('Discount calculation:', {
+            subtotal: result.data.pricing?.subtotal,
+            total: result.data.pricing?.total,
+            discount: result.data.pricing?.discount,
+            price: result.data.price
+          }); // Debug discount calculation
           // Map the order data to match our interface
           const mappedOrder = {
             _id: result.data.id,
-            id: result.data.orderNumber,
+            id: result.data.id,
             orderNumber: result.data.orderNumber,
-            storeName: result.data.store?.nameEn || '',
+            storeName: result.data.storeName || '',
             storePhone: result.data.store?.phone || '',
-            storeUrl: result.data.store ? `/store/${result.data.store.slug}` : '',
+            storeUrl: result.data.storeUrl || '',
             customer: result.data.user ? `${result.data.user.firstName} ${result.data.user.lastName}` : '',
             customerPhone: result.data.user?.phone || '',
             customerEmail: result.data.user?.email || '',
@@ -108,18 +147,26 @@ const OrderDetailPage: React.FC = () => {
             affiliate: result.data.affiliate ? 
               `${result.data.affiliate.snapshot?.firstName || ''} ${result.data.affiliate.snapshot?.lastName || ''}`.trim() || 'لا يوجد' : 'لا يوجد',
             deliveryArea: result.data.deliveryArea ? {
-              locationAr: result.data.deliveryArea.snapshot?.locationAr,
-              locationEn: result.data.deliveryArea.snapshot?.locationEn,
-              price: result.data.deliveryArea.snapshot?.price,
-              estimatedDays: result.data.deliveryArea.snapshot?.estimatedDays
+              locationAr: result.data.deliveryArea.locationAr,
+              locationEn: result.data.deliveryArea.locationEn,
+              price: result.data.deliveryArea.price,
+              estimatedDays: result.data.deliveryArea.estimatedDays
             } : undefined,
             currency: result.data.currency || '',
-            date: result.data.createdAt,
-            paymentStatus: result.data.paymentStatus || 'unpaid',
+            date: result.data.date || result.data.createdAt,
+            createdAt: result.data.createdAt,
+            price: result.data.price,
+            paymentStatus: result.data.paymentStatus || (result.data.paid ? 'paid' : 'unpaid'),
+            paid: result.data.paid,
             status: result.data.status || '',
             itemsCount: result.data.itemsCount || 0,
-            notes: result.data.notes?.customer || result.data.notes?.admin || '',
-            items: result.data.items || []
+            notes: typeof result.data.notes === 'string' ? result.data.notes : 
+                   typeof result.data.notes === 'object' && result.data.notes ? 
+                   (result.data.notes.customer || result.data.notes.admin || '') : '',
+            items: result.data.items || [],
+            pricing: result.data.pricing,
+            affiliateTracking: result.data.affiliateTracking,
+            isGift: result.data.isGift
           };
           setOrder(mappedOrder);
         } else {
@@ -173,8 +220,8 @@ const OrderDetailPage: React.FC = () => {
               </button>
             </div>
             <div id="print-section">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4">
-                <div className={`bg-primary/5 rounded-lg p-4 flex flex-col items-start shadow`} dir={isArabic ? 'rtl' : 'ltr'}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4">
+                {/* <div className={`bg-primary/5 rounded-lg p-4 flex flex-col items-start shadow`} dir={isArabic ? 'rtl' : 'ltr'}>
                   <div className="flex items-center gap-2 mb-2">
                     <BuildingStorefrontIcon className="h-5 w-5 text-primary" />
                     <span className="font-bold">{t('orders.storeInfo')}</span>
@@ -184,7 +231,7 @@ const OrderDetailPage: React.FC = () => {
                   <div className="mb-1 flex items-center gap-1">
                     <span className="font-semibold">{t('orders.storePhone')}:</span> {order.storePhone || '-'}</div>
                   <a href={order.storeUrl} target="_blank" rel="noopener noreferrer" className="mt-2 px-3 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition">{t('orders.visitStore')}</a>
-                </div>
+                </div> */}
                 <div className={`bg-primary/5 rounded-lg p-4 flex flex-col items-start shadow`} dir={isArabic ? 'rtl' : 'ltr'}>
                   <div className="flex items-center gap-2 mb-2">
                     <UserIcon className="h-5 w-5 text-primary" />
@@ -207,7 +254,18 @@ const OrderDetailPage: React.FC = () => {
                     minute: '2-digit',
                     calendar: 'gregory'
                   }) : '-'}</div>
-                  <div className="mb-1"><span className="font-semibold">{t('orders.orderPrice')}:</span> {order.items && order.items.length > 0 ? order.items[0].totalPrice : '-'} {order.currency || ''}</div>
+                  <div className="mb-1"><span className="font-semibold">{t('orders.orderPrice')}:</span> {order.price || order.pricing?.total || order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0)} {order.currency || ''}</div>
+                  <div className="mb-1"><span className="font-semibold">{t('orders.discountPercentage')}:</span> <span className="text-green-600 font-medium">
+                    {(() => {
+                      if (order.pricing?.discount) {
+                        // discount هو النسبة المئوية (مثل 14 = 14%)
+                        const discountPercentage = order.pricing.discount;
+                        const discountAmount = order.pricing.subtotal ? (order.pricing.subtotal * discountPercentage) / 100 : 0;
+                        return `${discountPercentage}% (خصم ${discountAmount.toFixed(2)} ${order.currency})`;
+                      }
+                      return `0%`;
+                    })()}
+                  </span></div>
                   <div className="mb-1 flex items-center gap-1">
                     <span className="font-semibold">{t('orders.paymentStatus')}:</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -266,11 +324,11 @@ const OrderDetailPage: React.FC = () => {
                     { key: 'totalPrice', label: { ar: 'الإجمالي', en: 'Total' }, type: 'number' },
                   ]}
                   data={order.items.map(item => ({
-                    image: item.productSnapshot?.images?.[0] || item.image || '',
+                    image: item.image || item.productSnapshot?.images?.[0] || '',
                     name: item.name || item.productSnapshot?.nameEn || 'غير محدد',
                     quantity: item.quantity || 0,
-                    price: item.price || 0,
-                    totalPrice: item.totalPrice || 0,
+                    price: item.price || item.pricePerUnit || 0,
+                    totalPrice: item.totalPrice || item.total || 0,
                     currency: order.currency
                   }))}
                 />
@@ -288,23 +346,41 @@ const OrderDetailPage: React.FC = () => {
               </div>
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
                 <span className="font-semibold">{t('orders.subtotal') || 'Subtotal'}</span>
-                <span>{order.items.reduce((sum, item) => sum + (item.totalPrice || 0), 0)} {order.currency || ''}</span>
+                <span>{order.pricing?.subtotal || order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0)} {order.currency || ''}</span>
               </div>
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
                 <span className="font-semibold">{t('orders.shipping') || 'Shipping'}</span>
-                <span>{order.deliveryArea?.price || 0} {order.currency || ''}</span>
+                <span>{order.pricing?.shipping || order.deliveryArea?.price || 0} {order.currency || ''}</span>
               </div>
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
                 <span className="font-semibold">{t('orders.tax') || 'Tax'}</span>
-                <span>-</span>
+                <span>{order.pricing?.tax || 0} {order.currency || ''}</span>
+              </div>
+              <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
+                <span className="font-semibold">{t('orders.discountPercentage') || 'Discount Percentage'}</span>
+                <span className="text-green-600 font-medium">
+                  {(() => {
+                    if (order.pricing?.discount) {
+                      // discount هو النسبة المئوية (مثل 14 = 14%)
+                      const discountPercentage = order.pricing.discount;
+                      const discountAmount = order.pricing.subtotal ? (order.pricing.subtotal * discountPercentage) / 100 : 0;
+                      return `${discountPercentage}% (${discountAmount.toFixed(2)} ${order.currency})`;
+                    }
+                    return `0%`;
+                  })()}
+                </span>
               </div>
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''} font-bold text-lg border-t-2 pt-2`}> 
                 <span>{t('orders.total') || 'Total'}</span>
-                <span>{order.items.reduce((sum, item) => sum + (item.totalPrice || 0), 0) + (order.deliveryArea?.price || 0)} {order.currency || ''}</span>
+                <span>{order.price || order.pricing?.total || (order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0) + (order.deliveryArea?.price || 0))} {order.currency || ''}</span>
               </div>
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
                 <span className="font-semibold">{t('orders.notes') || 'Notes'}</span>
-                <span className="text-sm text-gray-600 max-w-xs truncate">{order.notes || '-'}</span>
+                <span className="text-sm text-gray-600 max-w-xs truncate">
+                  {typeof order.notes === 'string' ? order.notes : 
+                   typeof order.notes === 'object' && order.notes ? 
+                   (order.notes.customer || order.notes.admin || '-') : '-'}
+                </span>
               </div>
             </div>
           </div>

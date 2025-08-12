@@ -75,24 +75,24 @@ export interface Order {
   storeName: string;
   storeUrl: string;
   currency: string;
-  date: string;
-  paid: boolean;
   status: string;
-  itemsCount: number;
-  totalSpent: number;
-  notes: string;
-  deliveryArea: {
-    locationAr: string;
-    locationEn: string;
-    price: number;
-    estimatedDays: number;
-  };
+  paymentStatus?: string; // للعملاء الضيوف
+  paid?: boolean; // للعملاء المسجلين
+  date?: string; // للعملاء المسجلين
+  price?: number; // للعملاء الضيوف - السعر الإجمالي للطلب
+  createdAt: string;
+  updatedAt: string;
+  itemsCount?: number; // للعملاء المسجلين
   items: Array<{
-    image?: string;
+    id?: string; // للعملاء الضيوف
+    image?: string; // للعملاء المسجلين
     name: string;
     quantity: number;
-    pricePerUnit: number;
-    total: number;
+    price?: number; // للعملاء الضيوف
+    pricePerUnit?: number; // للعملاء المسجلين
+    totalPrice?: number; // للعملاء الضيوف
+    total?: number; // للعملاء المسجلين
+    variant?: any; // للعملاء الضيوف
     selectedSpecifications: Array<{
       specificationId: string;
       valueId: string;
@@ -105,18 +105,44 @@ export interface Order {
     }>;
     selectedColors: string[];
   }>;
-  pricing: any;
+  deliveryArea: {
+    locationAr: string;
+    locationEn: string;
+    price: number;
+    estimatedDays: number;
+  };
+  notes: {
+    customer: string;
+  };
   isGift: boolean;
-  affiliate: any;
-  createdAt: string;
-  updatedAt: string;
+  affiliateTracking?: {
+    isAffiliateOrder: boolean;
+    commissionEarned: number;
+    commissionPercentage: number;
+  };
+  pricing?: {
+    subtotal: number;
+    tax: number;
+    shipping: number;
+    discount: number;
+    total: number;
+  }; // للعملاء المسجلين
+  affiliate?: any; // للعملاء المسجلين
+  actualDeliveryDate?: string; // للعملاء المسجلين
 }
 
+// للعملاء المسجلين
 export interface CustomerOrdersResponse {
   success: boolean;
   data: Order[];
   count: number;
   total: number;
+  customerStats: {
+    totalSpending: number;
+    averageSpending: number;
+    lastOrderDate: string;
+    totalOrders: number;
+  };
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -124,6 +150,30 @@ export interface CustomerOrdersResponse {
     itemsPerPage: number;
     hasNextPage: boolean;
     hasPrevPage: boolean;
+  };
+}
+
+// للعملاء الضيوف
+export interface GuestOrdersResponse {
+  success: boolean;
+  message: string;
+  data: {
+    orders: Order[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      itemsPerPage: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+    statistics: {
+      totalOrders: number;
+      totalSpending: number;
+      averageSpending: number;
+      lastOrderDate: string;
+      guestId: string;
+    };
   };
 }
 
@@ -138,6 +188,7 @@ export interface UseCustomersReturn {
   updateCustomer: (storeId: string, id: string, data: Partial<Customer>) => Promise<boolean>;
   createCustomer: (storeId: string, data: Omit<Customer, '_id'>) => Promise<boolean>;
   fetchCustomerOrders: (customerId: string, storeId: string, page?: number, limit?: number) => Promise<Order[] | void>;
+  fetchGuestOrders: (guestId: string, storeId: string, page?: number, limit?: number) => Promise<Order[] | void>;
   setCustomers: React.Dispatch<React.SetStateAction<Customer[]>>;
 }
 
@@ -300,6 +351,40 @@ export const useCustomers = (): UseCustomersReturn => {
     }
   };
 
+  const fetchGuestOrders = async (
+    guestId: string,
+    storeId: string,
+    page = 1,
+    limit = 10
+  ): Promise<Order[] | void> => {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        storeId: storeId
+      });
+      
+      const url = `${BASE_URL}orders/guest/${guestId}?${params}`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      const result: GuestOrdersResponse = response.data;
+      if (result.success) {
+        return result.data.orders;
+      } else {
+        throw new Error('Failed to fetch guest orders');
+      }
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      console.error('Error fetching guest orders:', err);
+      return [];
+    }
+  };
+
   return {
     customers,
     setCustomers,
@@ -312,5 +397,6 @@ export const useCustomers = (): UseCustomersReturn => {
     updateCustomer,
     createCustomer,
     fetchCustomerOrders,
+    fetchGuestOrders,
   };
 }; 

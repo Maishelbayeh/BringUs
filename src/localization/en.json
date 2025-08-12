@@ -618,6 +618,8 @@
     "subtotal": "Subtotal",
     "shipping": "Shipping",
     "tax": "Tax",
+    "discount": "Discount",
+    "discountPercentage": "Discount Percentage",
     "itemsCount": "Items Count",
     "notes": "Notes",
     "notFound": "Order not found",
