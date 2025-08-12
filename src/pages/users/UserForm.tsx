@@ -46,6 +46,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
     state: '',
     zipCode: '',
     country: ''
+    
   });
   const [showPassword, setShowPassword] = useState(false);
   // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
