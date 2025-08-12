@@ -82,13 +82,12 @@ const CustomersPage: React.FC = () => {
   }, [storeId, fetchCustomers]);
 
   const getTotalSpent = (orders: Order[]) =>
-    orders.reduce((sum, order) => sum + (order.paid ? order.items.reduce((itemSum, item) => itemSum + item.total, 0) : 0), 0);
+    orders.reduce((sum, order) => sum + ( order.totalSpent || 0 ), 0);
   
   const getAverageOrderValue = (orders: Order[]) => {
-    const paidOrders = orders.filter(order => order.paid);
-    if (paidOrders.length === 0) return 0;
+    if (orders.length === 0) return 0;
     const totalSpent = getTotalSpent(orders);
-    return Math.round(totalSpent / paidOrders.length);
+    return Math.round(totalSpent / orders.length);
   };
 
   const getLastOrderDate = (orders: Order[]) => {
@@ -100,9 +99,14 @@ const CustomersPage: React.FC = () => {
     setSelectedCustomer(customer);
     setOrdersLoading(true);
     try {
-      const orders = await fetchCustomerOrders(customer._id, storeId);
-      if (orders) {
-        setCustomerOrders(orders);
+      // Skip fetching orders for guests (they don't have _id)
+      if (customer._id && !customer.isGuest) {
+        const orders = await fetchCustomerOrders(customer._id, storeId);
+        if (orders) {
+          setCustomerOrders(orders);
+        }
+      } else {
+        setCustomerOrders([]);
       }
     } catch (error) {
       console.error('Error fetching customer orders:', error);
@@ -113,12 +117,16 @@ const CustomersPage: React.FC = () => {
 
   const handleDelete = (customer: Customer, e: React.MouseEvent) => {
     e.stopPropagation();
+    // Don't allow deletion of guests (they don't have _id)
+    if (!customer._id || customer.isGuest) {
+      return;
+    }
     setCustomerToDelete(customer);
     setShowDeleteModal(true);
   };
   
   const handleDeleteConfirm = async () => {
-    if (customerToDelete && storeId) {
+    if (customerToDelete && storeId && customerToDelete._id) {
       const success = await deleteCustomer(storeId, customerToDelete._id);
       if (success) {
         //CONSOLE.log('Customer deleted successfully');
@@ -137,11 +145,12 @@ const CustomersPage: React.FC = () => {
       rows.push({
         [isRTL ? 'الاسم الأول' : 'First Name']: customer.firstName,
         [isRTL ? 'الاسم الأخير' : 'Last Name']: customer.lastName,
-        //[isRTL ? 'البريد الإلكتروني' : 'Email']: customer.email, // احذف هذا السطر
+        [isRTL ? 'البريد الإلكتروني' : 'Email']: customer.email || '',
         [isRTL ? 'رقم الهاتف' : 'Phone']: customer.phone,
         [isRTL ? 'العنوان' : 'Address']: customer.addressSummary || (isRTL ? 'لا يوجد عنوان' : 'No address'),
         [isRTL ? 'الدور' : 'Role']: customer.role,
         [isRTL ? 'الحالة' : 'Status']: customer.status,
+        [isRTL ? 'نوع العميل' : 'Customer Type']: customer.isGuest ? (isRTL ? 'ضيف' : 'Guest') : (isRTL ? 'مسجل' : 'Registered'),
       });
     });
     
@@ -158,7 +167,11 @@ const CustomersPage: React.FC = () => {
 
   // Get customer initials
   const getCustomerInitials = (customer: Customer) => {
-    return `${customer.firstName[0]}${customer.lastName[0]}`.toUpperCase();
+    const firstName = customer.firstName || '';
+    const lastName = customer.lastName || '';
+    const firstInitial = firstName.length > 0 ? firstName[0] : '';
+    const lastInitial = lastName.length > 0 ? lastName[0] : '';
+    return `${firstInitial}${lastInitial}`.toUpperCase() || 'GU';
   };
 
   if (loading && customers.length === 0) {
@@ -229,7 +242,7 @@ const CustomersPage: React.FC = () => {
         {filteredCustomers.map((customer) => {
           return (
             <div
-              key={customer._id}
+              key={customer._id || `guest-${customer.email}-${customer.firstName}`}
               className={`border bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 flex items-center gap-6 group relative cursor-pointer `}
               onClick={() => handleCustomerClick(customer)}
             >
@@ -245,7 +258,7 @@ const CustomersPage: React.FC = () => {
                     'bg-purple-100 text-purple-700',
                     'bg-orange-100 text-orange-700',
                   ];
-                  const colorIdx = customer._id.charCodeAt(customer._id.length - 1) % colors.length;
+                  const colorIdx = (customer._id || 'guest').charCodeAt((customer._id || 'guest').length - 1) % colors.length;
                   return (
                     <div className={`h-20 w-20 flex items-center justify-center rounded-full text-3xl font-bold shadow ${colors[colorIdx]}`}>
                       {getCustomerInitials(customer)}
@@ -256,7 +269,7 @@ const CustomersPage: React.FC = () => {
                   <svg className="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14l-1.68 9.39A2 2 0 0 1 15.34 19H8.66a2 2 0 0 1-1.98-1.61L5 8zm2-3a3 3 0 0 1 6 0" />
                   </svg>
-                  {customerOrders.length}
+                  { customer.orderCount }
                 </span>
               </div>
               <div className="flex-1 min-w-0">
@@ -285,14 +298,16 @@ const CustomersPage: React.FC = () => {
               >
                 {t('common.details') || 'Details'}
               </button>
-              {/* Delete Button */}
-              <button
-                onClick={e => handleDelete(customer, e)}
-                className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 p-2 rounded-full hover:bg-red-100 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
-                title={t('common.delete') || 'Delete'}
-              >
-                <FiTrash2 className="w-4 h-4" />
-              </button>
+              {/* Delete Button - Only show for registered customers */}
+              {!customer.isGuest && customer._id && (
+                <button
+                  onClick={e => handleDelete(customer, e)}
+                  className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} z-10 p-2 rounded-full hover:bg-red-100 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
+                  title={t('common.delete') || 'Delete'}
+                >
+                  <FiTrash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
           );
         })}

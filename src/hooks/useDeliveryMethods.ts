@@ -4,6 +4,7 @@ import { BASE_URL } from '../constants/api';
 import { handleApiError } from '../utils/handleApiError';
 import useLanguage from './useLanguage';
 import { useToastContext } from '../contexts/ToastContext';
+import { get } from 'http';
 
 interface DeliveryMethodsResponse extends ApiResponse<DelieveryMethod[]> {
   pagination?: {
@@ -23,7 +24,7 @@ interface UseDeliveryMethodsOptions {
   isDefault?: boolean;
   storeId?: string;
 }
-
+const storeId = localStorage.getItem('storeId');
 const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
   const { t } = useLanguage();
   const { showSuccess, showError } = useToastContext();
@@ -167,7 +168,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
         storeId: fetchOptions.storeId || options.storeId,
       });
 
-      const response = await makeRequest(`${BASE_URL}delivery-methods/store/687505893fbf3098648bfe16`, {
+      const response = await makeRequest(`${BASE_URL}delivery-methods/store/${storeId}`, {
         method: 'GET',
         headers: getAuthHeaders(),
       });

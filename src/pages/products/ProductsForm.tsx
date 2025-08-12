@@ -135,11 +135,15 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     const totalQuantity = calculateTotalQuantity(specifications);
     onFormChange({
       target: {
-        name: 'availableQuantity',
+        name: 'stock',
         value: totalQuantity.toString()
       }
     } as any);
   };
+
+
+
+  
   const [showBarcodeSuccess, setShowBarcodeSuccess] = useState(false);
   const [localNewBarcode, setLocalNewBarcode] = useState('');
   const [mainImageUploading, setMainImageUploading] = useState(false);
@@ -1159,10 +1163,10 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
             <div>
               <CustomInput
                 label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
-                name="availableQuantity"
-                value={form.availableQuantity || ''}
-                onChange={(e) => handleInputChange('availableQuantity', e.target.value)}
-                className={getFieldErrorClass('availableQuantity')}
+                name="stock"
+                value={form.stock || ''}
+                onChange={(e) => handleInputChange('stock', e.target.value)}
+                className={getFieldErrorClass('stock')}
                 type="number"
                 disabled={specificationDetails.length > 0}
                 placeholder={

@@ -73,7 +73,7 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
                 <svg className="w-4 h-4 mr-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14l-1.68 9.39A2 2 0 0 1 15.34 19H8.66a2 2 0 0 1-1.98-1.61L5 8zm2-3a3 3 0 0 1 6 0" />
                 </svg>
-                {customerOrders.length} {t('customers.orders')}
+                {customer.orderCount} {t('customers.orders')}
               </span>
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                 customer.status === 'active' ? 'bg-green-100 text-green-800' :
@@ -93,9 +93,9 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
             </div>
             <div className="flex flex-wrap gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
               <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.role')}: <span className="font-semibold">{customer.role}</span></span>
-              <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.lastOrder')}: <span className="font-semibold">{getLastOrderDate(customerOrders)}</span></span>
-              <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.totalSpent')}: <span className="font-semibold">{getTotalSpent(customerOrders)}</span></span>
-              <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.averageOrderValue')}: <span className="font-semibold">{getAverageOrderValue(customerOrders)}</span></span>
+              <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.lastOrder')}: <span className="font-semibold">{customer.lastOrderDate ? new Date(customer.lastOrderDate).toLocaleDateString() : '-'}</span></span>
+              <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.totalSpent')}: <span className="font-semibold">{customer.totalSpent || 0}</span></span>
+              <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.averageOrderValue')}: <span className="font-semibold">{customer.orderCount ? Math.round((customer.totalSpent || 0) / customer.orderCount) : 0}</span></span>
             </div>
           </div>
         </div>

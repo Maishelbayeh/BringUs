@@ -9,6 +9,9 @@ export interface RawCustomer {
   lastName: string;
   email?: string;
   role: string;
+  isGuest?: boolean;
+  orderCount?: number;
+  totalSpent?: number;
   status: 'active' | 'inactive' | 'banned';
   phone: string;
   avatar?: {
@@ -32,6 +35,7 @@ export interface Customer {
   _id: string;
   firstName: string;
   lastName: string;
+  email?: string;
   role: string;
   status: 'active' | 'inactive' | 'banned';
   phone: string;
@@ -39,6 +43,10 @@ export interface Customer {
     url: string;
   };
   addressSummary?: string;
+  isGuest?: boolean;
+  orderCount?: number;
+  totalSpent?: number;
+  lastOrderDate?: string;
 }
 
 export interface CustomersResponse {
@@ -71,6 +79,7 @@ export interface Order {
   paid: boolean;
   status: string;
   itemsCount: number;
+  totalSpent: number;
   notes: string;
   deliveryArea: {
     locationAr: string;
@@ -159,7 +168,7 @@ export const useCustomers = (): UseCustomersReturn => {
         limit: limit.toString(),
         ...(search && { search })
       });
-      const url = `${BASE_URL}stores/${storeId}/customers?${params}`;
+      const url = `${BASE_URL}stores/${storeId}/customers?includeGuests=true`;
         const res = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -169,7 +178,7 @@ export const useCustomers = (): UseCustomersReturn => {
       if (result.success) {
         // فلترة الحقول: لا تعرض email أو password، وأضف addressSummary، وفلتر role === 'client'
         const filtered: Customer[] = (result.data as RawCustomer[])
-          .filter(c => c.role === 'client')
+        
           .map(({ password, email, addresses, ...rest }) => {
             let addressSummary = '';
             if (addresses && addresses.length > 0) {
@@ -219,6 +228,7 @@ export const useCustomers = (): UseCustomersReturn => {
 
   const updateCustomer = async (storeId: string, id: string, data: Partial<Customer>): Promise<boolean> => {
     try {
+      //GET /api/stores/{storeId}/customers?includeGuests=true
       const response = await axios.put(`${BASE_URL}stores/${storeId}/customers/${id}`, data);
       const result = response.data;
       if (result.success) {
