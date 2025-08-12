@@ -92,11 +92,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
         <form id="product-form" onSubmit={onSubmit} className="flex-1 " onClick={(e) => e.stopPropagation()}>
           <div className="h-full overflow-y-auto">
             {(() => {
-              console.log('🔍 ProductsDrawer - Passing form to ProductsForm:', {
-                formCategoryIds: form.categoryIds,
-                formCategoryId: form.categoryId,
-                formCategories: form.categories
-              });
+              console.log('🔍 ProductsDrawer - form:', form);
               return null;
             })()}
             <ProductsForm

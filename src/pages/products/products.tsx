@@ -527,14 +527,67 @@ const ProductsPage: React.FC = () => {
                            (colorGroup && colorGroup.colors && Array.isArray(colorGroup.colors)) ? colorGroup.colors : 
                            [colorGroup];
           
-          return colorArray.map((color: string, colorIndex: number) => (
+          // If there's only one color, display as a simple circle
+          if (colorArray.length === 1) {
+            return (
+              <div
+                key={`${groupIndex}-0`}
+                className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
+                style={{ backgroundColor: colorArray[0] }}
+                title={colorArray[0]}
+              />
+            );
+          }
+          
+          // If there are multiple colors, create a divided circle
+          return (
             <div
-              key={`${groupIndex}-${colorIndex}`}
-              className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
-              style={{ backgroundColor: color }}
-              title={color}
-            />
-          ));
+              key={`${groupIndex}-divided`}
+              className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm relative overflow-hidden"
+              title={colorArray.join(', ')}
+            >
+              {colorArray.map((color: string, colorIndex: number) => {
+                const angle = (360 / colorArray.length);
+                const startAngle = colorIndex * angle;
+                const endAngle = (colorIndex + 1) * angle;
+                
+                // Create SVG path for the pie slice
+                const radius = 12; // Half of w-6 (24px)
+                const centerX = radius;
+                const centerY = radius;
+                
+                const startRadians = (startAngle - 90) * (Math.PI / 180);
+                const endRadians = (endAngle - 90) * (Math.PI / 180);
+                
+                const x1 = centerX + radius * Math.cos(startRadians);
+                const y1 = centerY + radius * Math.sin(startRadians);
+                const x2 = centerX + radius * Math.cos(endRadians);
+                const y2 = centerY + radius * Math.sin(endRadians);
+                
+                const largeArcFlag = angle > 180 ? 1 : 0;
+                
+                const pathData = [
+                  `M ${centerX} ${centerY}`,
+                  `L ${x1} ${y1}`,
+                  `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                  'Z'
+                ].join(' ');
+                
+                return (
+                  <svg
+                    key={colorIndex}
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d={pathData}
+                      fill={color}
+                    />
+                  </svg>
+                );
+              })}
+            </div>
+          );
         })}
       </div>
     );
@@ -744,10 +797,7 @@ const ProductsPage: React.FC = () => {
     const newForm = {
       ...originalProduct,
       colors: formColors,
-      nameAr: originalProduct.nameAr || '',
-      nameEn: originalProduct.nameEn || '',
-      descriptionAr: originalProduct.descriptionAr || '',
-      descriptionEn: originalProduct.descriptionEn || '',
+   
       maintainStock,
       unit: String(unitId),
       unitId: String(unitId),
@@ -767,6 +817,10 @@ const ProductsPage: React.FC = () => {
       // إفراغ الباركود للمتغير الجديد
       barcodes: [],
       newBarcode: '',
+      nameAr: '',
+      nameEn:  '',
+      descriptionAr:  '',
+      descriptionEn: '',
       // إفراغ الأسعار للمتغير الجديد
       price: '',
       // إفراغ الكمية المتاحة
@@ -1381,6 +1435,7 @@ const ProductsPage: React.FC = () => {
         compareAtPrice: parseFloat(form.compareAtPrice) || 0,
         originalPrice: parseFloat(form.originalPrice) || 0,
         availableQuantity: parseInt(String(form.availableQuantity)) || 0,
+        stock: parseInt(String(form.availableQuantity)) || 0,
         productOrder: parseInt(String(form.productOrder)) || 0,
         visibility: form.visibility === 'Y',
         unitId: form.unitId || form.unit || null,
