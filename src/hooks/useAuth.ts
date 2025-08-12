@@ -7,12 +7,15 @@ interface LoginResponse {
   success: boolean;
   message: string;
   token: string;
+  storeId: string;
+  userStatus: string;
   user: {
     id: string;
     firstName: string;
     lastName: string;
     email: string;
     role: string;
+    
     avatar: {
       public_id: string | null;
       url: string;
@@ -26,6 +29,7 @@ interface LoginResponse {
       isPrimaryOwner: boolean;
       isOwner: boolean;
       permissions: string[];
+      _id: string;
     };
     stores: Array<{
       id: string;
@@ -69,11 +73,12 @@ export const useAuth = () => {
         throw new Error(data.message || 'فشل في تسجيل الدخول');
       }
 
-      if (data.success && data.user.role === 'admin') {
+      if (data.success && data.user.role === 'admin' && data.userStatus === 'active') {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('isOwner', data.user.store.isOwner.toString());
         if (data.user.store?.id) {
-          updateStoreId(data.user.store.id);
+          updateStoreId(data.storeId);
         
         }
 

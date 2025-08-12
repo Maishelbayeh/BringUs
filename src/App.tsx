@@ -22,9 +22,32 @@ const AppContent: React.FC = () => {
   const { isSidebarOpen, toggleSidebar } = useSidebar();
   const [activeMenu, ] = useState<'text' | 'model'>('text');
 
-  const getMenuItems = (): MenuItem[] =>
-    activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();
-
+  const getMenuItems = (): MenuItem[] => {
+    const isOwner = localStorage.getItem('isOwner') === 'true';
+  
+    const menu = activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();
+  
+    
+    // فلترة عنصر /users من children و العناصر الرئيسية
+    const filteredMenu = menu.map(item => {
+      if (item.children) {
+        const filteredChildren = item.children.filter(child => {
+          if (child.path === '/users') {
+            return isOwner;
+          }
+          return true;
+        });
+        return { ...item, children: filteredChildren };
+      }
+      if (item.path === '/users') {
+        return isOwner ? item : null;
+      }
+      return item;
+    }).filter(Boolean) as MenuItem[];
+  
+    return filteredMenu;
+  };
+  
   const handleItemClick = (path: string) => {
     //CONSOLE.log('path', path);
   };

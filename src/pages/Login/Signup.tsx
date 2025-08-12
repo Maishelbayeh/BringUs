@@ -2,19 +2,17 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Visibility, 
-  VisibilityOff, 
-
+ 
   CheckCircle,
   Language,
   Security,
   Support,
   TrendingUp,
   Speed,
-  Check,
+ 
   Store
 } from '@mui/icons-material';
-import CustomInput from '@/components/common/CustomInput';
+
 import CustomButton from '@/components/common/CustomButton';
 import useLanguage from '@/hooks/useLanguage';
 import StoreRegistrationWizard from '../../pages/store/StoreRegistrationWizard';

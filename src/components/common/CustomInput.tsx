@@ -12,6 +12,12 @@ interface CustomInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const CustomInput: React.FC<CustomInputProps> = ({ label, error, errorColor = 'text-red-600', id, type = 'text', options, className = '', ...props }) => {
   const { i18n } = useTranslation();
+  
+  // Debug logging
+  if (error) {
+    console.log('🚨 CustomInput error for', label, ':', error);
+  }
+  
   // const labelAlignClass = labelAlign === 'right' ? 'text-right' : labelAlign === 'center' ? 'text-center' : 'text-left';
   return (
     <div className="w-full">

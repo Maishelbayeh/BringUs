@@ -97,8 +97,10 @@ export const updateUserData = (userData: any) => {
 export const getUserData = () => {
   const userInfo = localStorage.getItem('userInfo');
   const userAvatar = localStorage.getItem('userAvatar');
+  const isOwner = localStorage.getItem('isOwner');
   return {
     info: userInfo ? JSON.parse(userInfo) : null,
     avatar: userAvatar,
+    isOwner: isOwner,
   };
 }; 

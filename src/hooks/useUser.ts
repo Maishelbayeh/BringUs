@@ -68,27 +68,46 @@ export const useUser = () => {
     setLoading(true);
     setError(null);
 
+    console.log('🚀 بدء إنشاء المستخدم...');
+    console.log('📤 البيانات المرسلة:', userData);
+    console.log('🌐 API URL:', `${BASE_URL}users`);
+
+    // فحص التوكن
+    const token = localStorage.getItem('token');
+    console.log('🔑 التوكن:', token ? 'موجود' : 'غير موجود');
+
     try {
+      const headers: any = {
+        'Content-Type': 'application/json',
+      };
+
+      // إضافة التوكن إذا كان موجوداً
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await axios.post<ApiResponse<UserResponse>>(
         `${BASE_URL}users`,
         userData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+        { headers }
       );
 
+      console.log('📥 استجابة API:', response.data);
+
       if (response.data.success) {
-        //CONSOLE.log('✅ تم إنشاء المستخدم بنجاح:', response.data.data);
+        console.log('✅ تم إنشاء المستخدم بنجاح:', response.data.data);
         return response.data.data || null;
       } else {
+        console.log('❌ فشل في إنشاء المستخدم:', response.data.message);
         throw new Error(response.data.message || 'فشل في إنشاء المستخدم');
       }
     } catch (err: any) {
+      console.log('💥 خطأ في API:', err);
+      console.log('📋 تفاصيل الخطأ:', err.response?.data);
+      
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء إنشاء المستخدم';
       setError(errorMessage);
-      //CONSOLE.error('❌ خطأ في إنشاء المستخدم:', errorMessage);
+      console.error('❌ خطأ في إنشاء المستخدم:', errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -267,11 +286,14 @@ export const useUser = () => {
 
   // جلب جميع المستخدمين
   const getAllUsers = async (): Promise<UserResponse[]> => {
+    console.log('🔄 useUser: بدء getAllUsers، تعيين loading إلى true');
     setLoading(true);
     setError(null);
 
     try {
       const token = localStorage.getItem('token');
+      console.log('🔑 useUser: التوكن:', token ? 'موجود' : 'غير موجود');
+      
       const response = await axios.get<ApiResponse<UserResponse[]>>(
         `${BASE_URL}users`,
         {
@@ -281,8 +303,10 @@ export const useUser = () => {
         }
       );
 
+      console.log('📥 useUser: استجابة API:', response.data);
+
       if (response.data.success) {
-        //CONSOLE.log('✅ تم جلب المستخدمين بنجاح:', response.data.data);
+        console.log('✅ useUser: تم جلب المستخدمين بنجاح:', response.data.data);
         return response.data.data || [];
       } else {
         throw new Error(response.data.message || 'فشل في جلب المستخدمين');
@@ -290,9 +314,10 @@ export const useUser = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء جلب المستخدمين';
       setError(errorMessage);
-      //CONSOLE.error('❌ خطأ في جلب المستخدمين:', errorMessage);
+      console.error('❌ useUser: خطأ في جلب المستخدمين:', errorMessage);
       return [];
     } finally {
+      console.log('🏁 useUser: إنهاء getAllUsers، تعيين loading إلى false');
       setLoading(false);
     }
   };
@@ -318,6 +343,27 @@ export const useUser = () => {
     }
   };
 
+  // التحقق من وجود رقم الهاتف
+  const checkPhoneExists = async (phone: string): Promise<boolean> => {
+    console.log('🔍 جاري التحقق من رقم الهاتف:', phone);
+    
+    try {
+      const users = await getAllUsers();
+      const phoneExists = users.some(user => user.phone === phone);
+      
+      if (phoneExists) {
+        console.log('❌ رقم الهاتف مستخدم بالفعل:', phone);
+      } else {
+        console.log('✅ رقم الهاتف متاح:', phone);
+      }
+      
+      return phoneExists;
+    } catch (error) {
+      console.error('❌ خطأ في التحقق من رقم الهاتف:', error);
+      return false; // في حالة الخطأ، نعتبر أن الرقم متاح
+    }
+  };
+
   return {
     loading,
     error,
@@ -331,6 +377,7 @@ export const useUser = () => {
     resetPassword,
     getAllUsers,
     checkEmailExists,
+    checkPhoneExists,
   };
 };
  
