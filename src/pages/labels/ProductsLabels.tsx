@@ -136,7 +136,7 @@ import useProductLabel from '../../hooks/useProductLabel';
 
   // Breadcrumb
   const breadcrumb = [
-    { name: t('sideBar.products') || 'Products', href: '/products' },
+    { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
     { name: t('productsLabels.title') || 'Products Labels', href: '/products-labels' },
   ];
 

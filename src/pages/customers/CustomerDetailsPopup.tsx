@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Customer, Order } from '../../hooks/useCustomers';
-
+import { useStoreUrls } from '../../hooks/useStoreUrls';
 // CSS styles لإخفاء شريط السكرول
 const scrollbarHideStyles = `
   .scrollbar-hide {
@@ -63,7 +63,7 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
   ordersLoading = false,
 }) => {
   const navigate = useNavigate();
-  
+  const { storeSlug } = useStoreUrls();
   if (!open || !customer) return null;
   
   // Get customer display name
@@ -170,7 +170,7 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
                     <tr key={order.id} className={`hover:bg-primary/5 transition ${(order.paymentStatus === 'paid' || order.paid) ? 'bg-green-50' : 'bg-red-50'}`}>
                       <td className="py-3 px-4 border-b font-semibold">
                         <button
-                          onClick={() => navigate(`/orders/${order.id}`)}
+                          onClick={() => navigate(`/${storeSlug}/orders/${order.id}`)}
                           className="text-primary hover:underline"
                         >
                           {order.orderNumber}

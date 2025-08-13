@@ -9,6 +9,7 @@ import { MenuItem } from './Types';
 import Sidebar from './components/common/navigation/sidebar';
 import TopNavbar from './components/common/navigation/topNav';
 import { ToastProvider } from './contexts/ToastContext';
+import { StoreProvider } from './contexts/StoreContext';
 import { useAuth } from './hooks/useAuth';
 
 // Component to check if we're on login page
@@ -115,7 +116,9 @@ function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <AppContent />
+        <StoreProvider>
+          <AppContent />
+        </StoreProvider>
       </ToastProvider>
     </BrowserRouter>
   );

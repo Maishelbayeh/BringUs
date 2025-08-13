@@ -113,6 +113,11 @@ export const useAuth = () => {
           localStorage.setItem('isOwner', 'false');
         }
         
+        // Dispatch custom event for store context update
+        window.dispatchEvent(new CustomEvent('userLoggedIn', { 
+          detail: { user: data.user, store: data.user.store } 
+        }));
+        
         //CONSOLE.log('✅ تم تسجيل الدخول بنجاح:', data.user);
         return data;
       } else {
@@ -138,6 +143,9 @@ export const useAuth = () => {
     localStorage.removeItem('storeLogo');
     localStorage.removeItem('isOwner');
     updateStoreId("");
+    
+    // Dispatch custom event for store context update
+    window.dispatchEvent(new CustomEvent('userLoggedOut'));
   };
 // -----------------------------------------------getCurrentUser---------------------------------------------------------
   const getCurrentUser = () => {

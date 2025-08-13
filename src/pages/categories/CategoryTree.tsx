@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FiChevronLeft, FiChevronRight, FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { useStoreUrls } from '../../hooks/useStoreUrls';
 
 interface CategoryTreeProps {
   categories: any[]; 
@@ -20,6 +21,7 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, isRTL, onAdd, o
   const { i18n } = useTranslation();
   const lang = i18n.language;
   const navigate = useNavigate();
+  const { storeSlug } = useStoreUrls();
   //CONSOLE.log(categories);
   const storeId = typeof window !== 'undefined' ? (localStorage.getItem(STORE_ID_KEY) || DEFAULT_STORE_ID) : DEFAULT_STORE_ID;
   const toggleExpand = (id: number) => {
@@ -67,7 +69,7 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, isRTL, onAdd, o
                 onClick={e => {
                   e.stopPropagation();
                   if (cat.id) {
-                    navigate(`/products?categoryId=${cat.id}`);
+                    navigate(`/${storeSlug}/products?categoryId=${cat.id}`);
                   }
                 }}
                 title={lang === 'ar' || lang === 'ARABIC' ? cat.nameAr : cat.nameEn}

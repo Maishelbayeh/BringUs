@@ -14,6 +14,7 @@ import logo from '../../../assets/bringus.svg';
 import { FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '../../../hooks/useAuth';
 import { getStoreName, getStoreLogo, getUserAvatar } from '../../../hooks/useLocalStorage';
+import { useStoreUrls } from '../../../hooks/useStoreUrls';
 
 interface SidebarProps {
   userName: string;
@@ -47,6 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { urls, generateUrl } = useStoreUrls();
 
   const [expandedRegion, setExpandedRegion] = useState<number | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -93,7 +95,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleItemClick = (path: string) => {
     onItemClick(path);
-    navigate(path);
+    
+    // Generate store-based URL
+    const storeUrl = generateUrl(path);
+    navigate(storeUrl);
+    
     if (window.innerWidth < 1024) toggleSidebar();
   };
 
