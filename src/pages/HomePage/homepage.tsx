@@ -6,7 +6,6 @@ import useDashboardStats from '../../hooks/useDashboardStats';
 import DashboardStatCard from './components/DashboardStatCard';
 import RevenueChart from './components/RevenueChart';
 import TopCategories from './components/TopCategories';
-import StoreDebugger from '../../components/common/StoreDebugger';
 import { 
   ShoppingCartIcon, 
   CurrencyDollarIcon, 

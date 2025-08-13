@@ -35,13 +35,18 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
     const storeData = getStoreData();
     const storeId = getStoreId();
     
+    console.log('StoreContext - updateStoreFromStorage - storeData:', storeData);
+    console.log('StoreContext - updateStoreFromStorage - storeId:', storeId);
+    
     if (storeData.info) {
       setCurrentStore(storeData.info);
       setStoreSlug(storeData.info.slug);
+      console.log('StoreContext - Setting storeSlug to:', storeData.info.slug);
     } else {
       // Clear store data if no store info found
       setCurrentStore(null);
       setStoreSlug(null);
+      console.log('StoreContext - No store data found, clearing storeSlug');
     }
   };
 

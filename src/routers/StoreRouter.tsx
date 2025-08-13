@@ -66,8 +66,13 @@ export default function StoreRouter() {
   const { isAuthenticated, isAuthenticatedSuperAdmin } = useAuth();
   const { storeSlug } = useStoreContext();
 
+  console.log('StoreRouter - isAuthenticated:', isAuthenticated());
+  console.log('StoreRouter - storeSlug:', storeSlug);
+  console.log('StoreRouter - current URL:', window.location.pathname);
+
   // If user is not authenticated, redirect to login
   if (!isAuthenticated()) {
+    console.log('StoreRouter - User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
@@ -225,6 +230,16 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
+      {/* Add route for affiliate with code - must come first and be more specific */}
+      <Route path={`/${storeSlug}/affiliate/:affiliateCode`} element={
+        <StoreRouteWrapper>
+          <AdminRoute>
+            <AffiliationPage />
+          </AdminRoute>
+        </StoreRouteWrapper>
+      } />
+      
+      {/* Basic affiliate route - must come after the specific one */}
       <Route path={`/${storeSlug}/affiliate`} element={
         <StoreRouteWrapper>
           <AdminRoute>
