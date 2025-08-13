@@ -37,7 +37,37 @@
     "error": "Error",
     "create": "Create",
     "update": "Update"
-},
+  },
+  "subscription": {
+    "title": "Subscription Renewal",
+    "amount": "Amount",
+    "currency": "Currency",
+    "email": "Email",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "sendPaymentRequest": "Send Payment Request",
+    "processing": "Processing...",
+    "paymentSuccess": "Payment request sent successfully",
+    "paymentError": "Payment error",
+    "renewSubscription": "Renew Subscription",
+    "enterAmount": "Enter amount",
+    "enterEmail": "Enter email",
+    "enterFirstName": "Enter first name",
+    "enterLastName": "Enter last name"
+  },
+  "payment": {
+    "verificationTitle": "Payment Verification",
+    "verifying": "Verifying Payment...",
+    "success": "Payment Successful",
+    "failed": "Payment Failed",
+    "pending": "Payment Pending",
+    "unknown": "Unknown Status",
+    "details": "Payment Details",
+    "reference": "Reference",
+    "amount": "Amount",
+    "status": "Status",
+    "close": "Close"
+  },
   "admin": {
     "accessDenied": "Access Denied",
     "adminRequired": "This page requires administrator privileges",

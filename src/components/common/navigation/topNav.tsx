@@ -10,6 +10,9 @@ import { GlobeAltIcon } from '@heroicons/react/24/outline';
 import logo from '../../../assets/bringus.svg';
 
 import { getStoreName, getStoreLogo } from '../../../hooks/useLocalStorage';
+import SubscriptionRenewalPopup from '../SubscriptionRenewalPopup';
+import { useUserStore } from '../../../hooks/useUserStore';
+import { useSubscription } from '../../../hooks/useSubscription';
 type TopNavbarProps = {
   // userName: string;
   userPosition: string;
@@ -29,6 +32,9 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
   
   const [storeName, setStoreName] = useState(getStoreName(language) || 'bring us');
   const [storeLogo, setStoreLogo] = useState(getStoreLogo());
+  const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
+  const { storeId, userId } = useUserStore();
+  const { subscriptionStatus, isExpired, isExpiringSoon } = useSubscription();
 
   // الاستماع لتحديث بيانات المتجر
   useEffect(() => {
@@ -59,6 +65,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
         >
           <Bars3Icon className="h-6 w-6" />
         </button>
+
         <div onClick={() => navigate('/store-info-container')} className={`cursor-pointer flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
           <img 
             src={storeLogo || logo} 
@@ -78,6 +85,22 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
             title={t('paymentMethods.title') || 'Payment Methods'}
           >
             <CreditCardIcon className="h-6 w-6 text-primary" />
+          </button>
+
+
+          <button
+            onClick={() => setShowSubscriptionPopup(true)}
+            className={`p-2 rounded-full hover:bg-primary/10 transition relative ${
+              isExpired() ? 'bg-red-100' : isExpiringSoon() ? 'bg-yellow-100' : ''
+            }`}
+            title={t('subscription.renewSubscription')}
+          >
+            <CreditCardIcon className={`h-6 w-6 ${
+              isExpired() ? 'text-red-600' : isExpiringSoon() ? 'text-yellow-600' : 'text-primary'
+            }`} />
+            {(isExpired() || isExpiringSoon()) && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            )}
           </button>
           <button
             onClick={() => navigate('/delivery-settings')}
@@ -100,6 +123,15 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Subscription Renewal Popup */}
+      <SubscriptionRenewalPopup
+        isOpen={showSubscriptionPopup}
+        onClose={() => setShowSubscriptionPopup(false)}
+        isRTL={language === 'ARABIC'}
+        storeId={storeId}
+        userId={userId}
+      />
     </header>
   );
 };

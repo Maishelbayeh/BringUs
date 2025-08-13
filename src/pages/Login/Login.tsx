@@ -68,7 +68,14 @@ const Login: React.FC = () => {
         email: formData.email,
         password: formData.password
       });
-      
+      localStorage.setItem('userId', result?.user.id || '');
+      localStorage.setItem('storeId', result?.storeId || '');
+      localStorage.setItem('userName', result?.user.firstName || '');
+      localStorage.setItem('email', result?.user.email || '');
+
+      localStorage.setItem('userLastName', result?.user.lastName || '');
+
+
       if (result) {
         // التحقق من دور المستخدم والتوجيه المناسب
         const user = result.user;

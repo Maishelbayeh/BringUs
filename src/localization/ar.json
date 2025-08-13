@@ -38,6 +38,36 @@
     "create": "إنشاء",
     "update": "تحديث"
   },
+  "subscription": {
+    "title": "تجديد الاشتراك",
+    "amount": "المبلغ",
+    "currency": "العملة",
+    "email": "البريد الإلكتروني",
+    "firstName": "الاسم الأول",
+    "lastName": "الاسم الأخير",
+    "sendPaymentRequest": "إرسال طلب الدفع",
+    "processing": "جاري الإرسال...",
+    "paymentSuccess": "تم إرسال طلب الدفع بنجاح",
+    "paymentError": "خطأ في إرسال طلب الدفع",
+    "renewSubscription": "تجديد الاشتراك",
+    "enterAmount": "أدخل المبلغ",
+    "enterEmail": "أدخل البريد الإلكتروني",
+    "enterFirstName": "أدخل الاسم الأول",
+    "enterLastName": "أدخل الاسم الأخير"
+  },
+  "payment": {
+    "verificationTitle": "التحقق من الدفع",
+    "verifying": "جاري التحقق من الدفع...",
+    "success": "تم الدفع بنجاح",
+    "failed": "فشل الدفع",
+    "pending": "الدفع معلق",
+    "unknown": "حالة غير معروفة",
+    "details": "تفاصيل الدفع",
+    "reference": "المرجع",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "close": "إغلاق"
+  },
   "admin": {
     "accessDenied": "الوصول مرفوض",
     "adminRequired": "هذه الصفحة تتطلب صلاحيات مدير النظام",
