@@ -10,6 +10,7 @@ import { useStore } from '@/hooks/useStore';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { currencyOptions } from '../../data/currencyOptions';
+import { getStoreInfo } from '@/utils/storeUtils';
 
 // ============================================================================
 // CONSTANTS
@@ -578,14 +579,13 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
   useEffect(() => {
     const fetchStoreData = async () => {
       const storeId = getCurrentStoreId();
-      
+      const storeSlug = getStoreInfo().slug;
       if (storeId && !isDataLoaded && !hasFetchedData.current) {
         hasFetchedData.current = true; // منع استدعاء متكرر
         setIsEditMode(true);
-        
-        try {
+          try {
           //CONSOLE.log('🔄 جلب بيانات المتجر مرة واحدة فقط...');
-          const store = await getStore(storeId);
+          const store = await getStore(storeId,storeSlug);
           if (store) {
             setStoreData(store);
             

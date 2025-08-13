@@ -17,6 +17,7 @@ import { useToastContext } from '@/contexts/ToastContext';
 import useLanguage from '@/hooks/useLanguage';
 
 import StoreStatusModal from './StoreStatusModal';
+import AddSubscriptionPlanModal from './AddSubscriptionPlanModal';
 
 interface StoreOwner {
   _id: string;
@@ -88,6 +89,7 @@ const StoresManagement: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showAddPlanModal, setShowAddPlanModal] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // جلب المتاجر
@@ -323,6 +325,16 @@ const StoresManagement: React.FC = () => {
     }
   };
 
+  // معالجة إضافة خطة اشتراك جديدة
+  const handleAddSubscriptionPlan = () => {
+    setShowAddPlanModal(true);
+  };
+
+  // معالجة نجاح إضافة الخطة
+  const handlePlanAdded = () => {
+    showSuccess('Subscription plan added successfully', t('general.success'));
+  };
+
   // تعريف أعمدة الجدول
   const columns: any[] = [
     {
@@ -444,6 +456,19 @@ const StoresManagement: React.FC = () => {
           loading={isLoading}
         />
 
+        {/* Add Subscription Plan Button */}
+        <div className="mb-6">
+          <button
+            onClick={handleAddSubscriptionPlan}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            {t('subscriptionPlans.addNewPlan')}
+          </button>
+        </div>
+
         {/* Table */}
         <div className="">
                      <CustomTable
@@ -464,6 +489,13 @@ const StoresManagement: React.FC = () => {
           onConfirm={handleStatusUpdate}
           currentStatus={selectedStore?.status || 'active'}
           storeName={selectedStore ? (isRTL ? selectedStore.nameAr : selectedStore.nameEn) : ''}
+        />
+
+        {/* Add Subscription Plan Modal */}
+        <AddSubscriptionPlanModal
+          isOpen={showAddPlanModal}
+          onClose={() => setShowAddPlanModal(false)}
+          onSuccess={handlePlanAdded}
         />
       </div>
     </div>

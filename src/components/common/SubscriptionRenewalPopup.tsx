@@ -24,6 +24,25 @@ interface PaymentFormData {
   metadata: string;
 }
 
+interface SubscriptionPlan {
+  id: string;
+  name: string;
+  nameAr: string;
+  type: string;
+  duration: number;
+  durationText: string;
+  durationTextAr: string;
+  price: number;
+  currency: string;
+  formattedPrice: string;
+  isActive: boolean;
+  isPopular: boolean;
+  features: Array<{
+    name: string;
+    nameAr: string;
+  }>;
+}
+
 const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
   isOpen,
   onClose,
@@ -45,6 +64,8 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
     callback_url: PAYMENT_API_CONFIG.CALLBACK_URL,
     metadata: JSON.stringify({ storeId, userId })
   });
+
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
 
   // إعادة تعيين النموذج عند فتح الـ popup
   useEffect(() => {
@@ -68,6 +89,24 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  // معالجة اختيار الخطة
+  const handlePlanSelect = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setFormData(prev => ({
+      ...prev,
+      amount: plan.price.toString(),
+      currency: plan.currency as 'ILS' | 'JOD' | 'USD'
+    }));
+  };
+
+  // معالجة تغيير السعر
+  const handlePriceChange = (price: number) => {
+    setFormData(prev => ({
+      ...prev,
+      amount: price.toString()
     }));
   };
 
@@ -137,7 +176,7 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto ${isRTL ? 'text-right' : 'text-left'}`}>
+      <div className={`bg-white rounded-lg shadow-xl max-w-lg w-full h-[80vh] overflow-y-auto ${isRTL ? 'text-right' : 'text-left'}`}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className={`text-xl font-semibold text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -155,7 +194,12 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
 
         {/* Subscription Details */}
         <div className="p-6 border-b border-gray-200">
-          <SubscriptionDetails isRTL={isRTL} />
+          <SubscriptionDetails 
+            isRTL={isRTL} 
+            selectedPlanId={selectedPlan?.id}
+            onPlanSelect={handlePlanSelect}
+            onPriceChange={handlePriceChange}
+          />
         </div>
 
         {/* Form */}
@@ -173,9 +217,17 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
               step="0.01"
               min="0"
               required
-              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${isRTL ? 'text-right' : 'text-left'}`}
-              placeholder={t('subscription.enterAmount')}
+              disabled={selectedPlan !== null}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                isRTL ? 'text-right' : 'text-left'
+              } ${selectedPlan !== null ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+              placeholder={selectedPlan ? (isRTL ? 'السعر محدد من الخطة المختارة' : 'Price set from selected plan') : t('subscription.enterAmount')}
             />
+            {selectedPlan && (
+              <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                {isRTL ? 'السعر محدد من الخطة المختارة' : 'Price is set from the selected plan'}
+              </p>
+            )}
           </div>
 
           {/* Currency */}
@@ -188,7 +240,10 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
               value={formData.currency}
               onChange={handleInputChange}
               required
-              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${isRTL ? 'text-right' : 'text-left'}`}
+              disabled={selectedPlan !== null}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                isRTL ? 'text-right' : 'text-left'
+              } ${selectedPlan !== null ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             >
               {SUPPORTED_CURRENCIES.map(currency => (
                 <option key={currency.code} value={currency.code}>
@@ -196,6 +251,11 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
                 </option>
               ))}
             </select>
+            {selectedPlan && (
+              <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                {isRTL ? 'العملة محددة من الخطة المختارة' : 'Currency is set from the selected plan'}
+              </p>
+            )}
           </div>
 
           {/* Email */}
