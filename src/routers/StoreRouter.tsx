@@ -231,14 +231,14 @@ export default function StoreRouter() {
       } />
       
       {/* Add route for affiliate with code - must come first and be more specific */}
-      <Route path={`/${storeSlug}/affiliate/:affiliateCode`} element={
+      {/* <Route path={`/${storeSlug}/affiliate/:affiliateCode`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <AffiliationPage />
           </AdminRoute>
         </StoreRouteWrapper>
       } />
-      
+       */}
       {/* Basic affiliate route - must come after the specific one */}
       <Route path={`/${storeSlug}/affiliate`} element={
         <StoreRouteWrapper>
