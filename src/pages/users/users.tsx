@@ -1,63 +1,56 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+
 import PermissionModal from '@/components/common/PermissionModal';
 import { 
-  Edit, 
-  Delete, 
-  Visibility, 
-  VisibilityOff,
-  Person,
   Email,
   Phone,
-  LocationOn,
-  AdminPanelSettings,
-  PersonAdd
+
 } from '@mui/icons-material';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import { CustomTable } from '../../components/common/CustomTable';
 import { useUser } from '../../hooks/useUser';
 import { useToastContext } from '@/contexts/ToastContext';
-import { getUserData, getStoreId } from '@/hooks/useLocalStorage';
+import {  getStoreId } from '@/hooks/useLocalStorage';
 import useLanguage from '@/hooks/useLanguage';
 import UserForm from './UserForm';
 import CustomButton from '@/components/common/CustomButton';
 
-interface User {
-  _id: string;
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  role: string;
-  status: string;
-  store?: string | { _id: string };
-  avatar: {
-    public_id: string | null;
-    url: string;
-  };
-  addresses: Array<{
-    type: string;
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    isDefault: boolean;
-  }>;
-  createdAt: string;
-  updatedAt: string;
-}
+// interface User {
+//   _id: string;
+//   id: string;
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   phone: string;
+//   role: string;
+//   status: string;
+//   store?: string | { _id: string };
+//   avatar: {
+//     public_id: string | null;
+//     url: string;
+//   };
+//   addresses: Array<{
+//     type: string;
+//     street: string;
+//     city: string;
+//     state: string;
+//     zipCode: string;
+//     country: string;
+//     isDefault: boolean;
+//   }>;
+//   createdAt: string;
+//   updatedAt: string;
+// }
 
 const UsersPage: React.FC = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const navigate = useNavigate();
+  
   const isRTL = language === 'ARABIC';
   
-  const { getAllUsers, deleteUser, error } = useUser();
+  const { getAllUsers, deleteUser} = useUser();
   const { showSuccess, showError } = useToastContext();
   
   const [users, setUsers] = useState<any[]>([]);
@@ -67,7 +60,7 @@ const UsersPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<any | null>(null);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  // const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
  
 
@@ -112,29 +105,29 @@ const UsersPage: React.FC = () => {
   }, [fetchUsers, showSuccess, t]);
 
   // عرض الأفاتار
-  const renderAvatar = (value: any, item: any) => {
-    if (item.avatar && item.avatar.url) {
-      return (
-        <div className="flex items-center justify-center">
-          <img 
-            src={item.avatar.url} 
-            alt={`${item.firstName} ${item.lastName}`}
-            className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
-            onError={(e) => {
-              e.currentTarget.src = '/user.jpg';
-            }}
-          />
-        </div>
-      );
-    }
-    return (
-      <div className="flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-          <Person className="w-4 h-4 text-gray-600" />
-        </div>
-      </div>
-    );
-  };
+  // const renderAvatar = (value: any, item: any) => {
+  //   if (item.avatar && item.avatar.url) {
+  //     return (
+  //       <div className="flex items-center justify-center">
+  //         <img 
+  //           src={item.avatar.url} 
+  //           alt={`${item.firstName} ${item.lastName}`}
+  //           className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+  //           onError={(e) => {
+  //             e.currentTarget.src = '/user.jpg';
+  //           }}
+  //         />
+  //       </div>
+  //     );
+  //   }
+  //   return (
+  //     <div className="flex items-center justify-center">
+  //       <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+  //         <Person className="w-4 h-4 text-gray-600" />
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
   // عرض الاسم الكامل
   const renderFullName = (value: any, item: any) => (

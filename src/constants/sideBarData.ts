@@ -10,10 +10,11 @@ import {
   VideoCameraIcon,
   EyeIcon,
   ChartBarIcon,
-  Squares2X2Icon,
+ 
   ChatBubbleLeftRightIcon,
   CubeIcon,
-  UserPlusIcon
+ 
+  BuildingStorefrontIcon
 } from '@heroicons/react/24/outline';
 
 export const getMenuAsText = (): MenuItem[] => [
@@ -22,12 +23,14 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.dashboard',
     icon: ChartBarIcon,
     path: '/',
+    roles: ['admin']
   },
   {
     id: 2,
     title: 'sideBar.categories',
     icon: ViewColumnsIcon,
     path: '/categories',
+    roles: ['admin']
     // children: [
     //   {
     //     id: 21,
@@ -42,18 +45,21 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.units',
     icon: CubeIcon,
     path: '/units',
+    roles: ['admin']
   },
   {
     id: 2.6,
     title: 'sideBar.labels',
     icon: ViewColumnsIcon,
     path: '/labels',
+    roles: ['admin']
   },  
   {
     id: 3,
     title: 'sideBar.products',
     icon: DocumentDuplicateIcon,
     path: '/products',
+    roles: ['admin'],
     children: [
       // {
       //   id: 31,
@@ -66,7 +72,7 @@ export const getMenuAsText = (): MenuItem[] => [
         title: 'sideBar.productSpecifications',
         icon: DocumentTextIcon,
         path: '/products/specifications',
-        
+        roles: ['admin']
       },
       
     ]
@@ -76,42 +82,48 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.customers',
     icon: UsersIcon,
     path: '/customers',
+    roles: ['admin']
   },
   {
     id: 5,
     title: 'sideBar.orders',
     icon: ShoppingCartIcon,
     path: '/orders',
+    roles: ['admin']
   },
   {
     id: 6,
     title: 'sideBar.store',
     icon: AdjustmentsHorizontalIcon,
-   
+    roles: ['admin'],
     children: [
       {
         id: 61,
         title: 'sideBar.storeSlider',
         icon: AdjustmentsHorizontalIcon,
         path: '/store-slider',
+        roles: ['admin']
       },
       {
         id: 62,
         title: 'sideBar.storePreview',
         icon: EyeIcon,
         path: '/store-preview',
+        roles: ['admin']
       },
       {
         id: 63,
         title: 'sideBar.storeVideos',
         icon: VideoCameraIcon,
         path: '/store-videos',
+        roles: ['admin']
       },
       {
         id: 64,
         title: 'sideBar.users',
         icon: UsersIcon,
         path: '/users',
+        roles: ['admin']
       },
 
     ],
@@ -122,7 +134,7 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.wholesalers',
     icon: AdjustmentsHorizontalIcon,
     path: '/wholesalers',
- 
+    roles: ['admin']
   },
 
 
@@ -132,7 +144,7 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.affiliate',
     icon: DocumentTextIcon,
     path: '/affiliate',
-  
+    roles: ['admin']
   },
 
   {
@@ -140,24 +152,35 @@ export const getMenuAsText = (): MenuItem[] => [
     title: 'sideBar.stockPreview',
     icon: ChartBarIcon,
     path: '/stock-preview',
+    roles: ['admin']
   },
   {
     id: 12,
     title: 'sideBar.advertisement',
     icon: DocumentTextIcon,
     path: '/advertisement',
+    roles: ['admin']
   },
   {
     id: 13,
     title: 'sideBar.termsConditions',
     icon: DocumentTextIcon,
     path: '/terms-conditions',
+    roles: ['admin']
   },
   {
     id: 1001,
     title: 'sideBar.testimonials',
     icon: ChatBubbleLeftRightIcon,
     path: '/testimonials',
+    roles: ['admin']
+  },
+  {
+    id: 1002,
+    title: 'sideBar.storesManagement',
+    icon: BuildingStorefrontIcon,
+    path: '/superadmin/stores',
+    roles: ['superadmin']
   },
 ];
 

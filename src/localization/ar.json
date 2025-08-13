@@ -41,12 +41,38 @@
   "admin": {
     "accessDenied": "الوصول مرفوض",
     "adminRequired": "هذه الصفحة تتطلب صلاحيات مدير النظام",
+    "superAdminRequired": "هذه الصفحة تتطلب صلاحيات السوبر أدمن",
     "goBack": "العودة للصفحة السابقة",
     "insufficientPermissions": "صلاحيات غير كافية",
     "contactAdmin": "يرجى التواصل مع مدير النظام للحصول على الصلاحيات المطلوبة",
     "currentRole": "الدور الحالي",
     "requiredRole": "الدور المطلوب"
   },
+  "stores": {
+    "management": "إدارة المتاجر",
+    "store": "المتجر",
+    "fetchError": "فشل في جلب المتاجر",
+    "statusUpdateSuccess": "تم تحديث حالة المتجر بنجاح",
+    "statusUpdateError": "فشل في تحديث حالة المتجر",
+    "editStatus": "تعديل الحالة",
+    "updateStatusTitle": "تحديث حالة المتجر",
+    "updateStatusMessage": "هل أنت متأكد من تحديث حالة هذا المتجر؟",
+    "newStatus": "الحالة الجديدة",
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "columns": {
+      "logo": "الشعار",
+      "name": "اسم المتجر",
+      "status": "الحالة",
+      "contact": "معلومات الاتصال",
+      "address": "العنوان",
+      "owners": "المالك",
+      "createdAt": "تاريخ الإنشاء",
+      "updatedAt": "آخر تحديث"
+    }
+  },   
   "auth":{
     "since_2024":"منذ 2024",
     "login":"تسجيل دخول",
@@ -302,7 +328,8 @@
        "productSpecifications": "الصفات",
        "testimonials": "التعليقات",
        "subcategories": "الفئات الفرعية",
-       "units": "الوحدات"
+       "units": "الوحدات",
+       "storesManagement": "إدارة المتاجر"
    },
   "chart": {
     "salesByProductType": "المبيعات حسب نوع المنتج",
@@ -688,6 +715,18 @@
     "saving": "جاري الحفظ...",
     "pleaseCompleteForm": "يرجى إكمال جميع الحقول المطلوبة",
     "copy": "نسخ",
+    "toggleColumns": "تبديل الأعمدة",
+    "columnVisibility": "رؤية الأعمدة",
+    "selectColumnsToShow": "اختر الأعمدة المراد عرضها",
+    "selectAll": "اختيار الكل",
+    "selectNone": "عدم اختيار شيء",
+    "reset": "إعادة تعيين",
+    "required": "مطلوب",
+    "of": "من",
+    "columns": "أعمدة",
+    "apply": "تطبيق",
+    "removeFilter": "إزالة الفلتر",
+    "clearAll": "مسح الكل",
    
     "noOptions": "لا توجد خيارات",
     "selectOption": "اختر خياراً"

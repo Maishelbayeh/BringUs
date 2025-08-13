@@ -41,13 +41,38 @@
   "admin": {
     "accessDenied": "Access Denied",
     "adminRequired": "This page requires administrator privileges",
+    "superAdminRequired": "This page requires super admin privileges",
     "goBack": "Go Back",
     "insufficientPermissions": "Insufficient Permissions",
     "contactAdmin": "Please contact the system administrator for required permissions",
     "currentRole": "Current Role",
     "requiredRole": "Required Role"
   },
- 
+  "stores": {
+    "management": "Stores Management",
+    "store": "Store",
+    "fetchError": "Failed to fetch stores",
+    "statusUpdateSuccess": "Store status updated successfully",
+    "statusUpdateError": "Failed to update store status",
+    "editStatus": "Edit Status",
+    "updateStatusTitle": "Update Store Status",
+    "updateStatusMessage": "Are you sure you want to update the status of this store?",
+    "newStatus": "New Status",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "logo": "Logo",
+      "name": "Store Name",
+      "status": "Status",
+      "contact": "Contact Info",
+      "address": "Address",
+      "owners": "Owners",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    }
+  },
   "login": {
     "welcomeTitle": "Welcome to BringUs",
     "welcomeSubtitle": "Your comprehensive e-commerce management platform. Manage orders, customers, products, and analytics all in one place.",
@@ -551,6 +576,18 @@
     "saving": "Saving...",
     "yes": "Yes",
     "copy": "Copy",
+    "toggleColumns": "Toggle Columns",
+    "columnVisibility": "Column Visibility",
+    "selectColumnsToShow": "Select columns to show",
+    "selectAll": "Select All",
+    "selectNone": "Select None",
+    "reset": "Reset",
+    "required": "Required",
+    "of": "of",
+    "columns": "columns",
+    "apply": "Apply",
+    "removeFilter": "Remove Filter",
+    "clearAll": "Clear All",
     "search": "Search...",
     "noOptions": "No options found"
   },

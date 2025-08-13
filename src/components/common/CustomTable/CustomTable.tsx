@@ -43,7 +43,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>(() => {
     const initial: ColumnVisibilityState = {};
     columns.forEach(col => {
-      initial[col.key] = col.hidden ? false : true;
+      initial[col.key] = col.hidden !== true; // إذا كان hidden = true، اجعل العمود مخفي، وإلا اجعله ظاهر
     });
     return initial;
   });
@@ -58,7 +58,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   }, [columnVisibility]);
 
   // الأعمدة الظاهرة فقط
-  const visibleColumns = columns.filter(col => columnVisibility[col.key]);
+  const visibleColumns = columns.filter(col => columnVisibility[col.key] === true);
 
   // دالة استخراج القيم الفريدة من أي مصدر بيانات
   const getUniqueColumnValuesFromData = (source: any[], colKey: string): string[] => {
@@ -219,11 +219,18 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
   // Effects
   useEffect(() => {
-    if (onFilteredDataChange) {
-      const isSame = lastSent.current.length === filteredData.length;
+    if (onFilteredDataChange && typeof onFilteredDataChange === 'function') {
+      // تحقق من أن البيانات قد تغيرت فعلاً قبل إرسالها
+      const isSame = lastSent.current.length === filteredData.length && 
+                    JSON.stringify(lastSent.current) === JSON.stringify(filteredData);
       if (!isSame) {
-        onFilteredDataChange(filteredData);
-        lastSent.current = filteredData;
+        // تأخير قليل لتجنب الاستدعاءات المتكررة
+        const timeoutId = setTimeout(() => {
+          onFilteredDataChange(filteredData);
+          lastSent.current = [...filteredData];
+        }, 200); // زيادة التأخير إلى 200 مللي ثانية
+        
+        return () => clearTimeout(timeoutId);
       }
     }
   }, [filteredData, onFilteredDataChange]);

@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [expandedRegion, setExpandedRegion] = useState<number | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
-  const { getCurrentUser } = useAuth();
+  const { getCurrentUser, logout } = useAuth();
   
   // الحصول على بيانات المستخدم والمتجر
   const user = getCurrentUser();
@@ -87,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleCloseDialog = () => setDialogOpen(false);
   const handleConfirmLogout = () => {
     setDialogOpen(false);
-    localStorage.clear();
+    logout();
     navigate('/login');
   };
 
@@ -149,7 +149,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <nav className="flex flex-col gap-2 w-full">
-        {menu.map((item, idx) => {
+        {menu.filter(item => {
+          // إذا كان العنصر يحتوي على أدوار محددة، تحقق من أن المستخدم لديه أحد هذه الأدوار
+          if (item.roles && item.roles.length > 0) {
+            return item.roles.includes(userRole);
+          }
+          // إذا لم يكن هناك أدوار محددة، اعرض العنصر للجميع
+          return true;
+        }).map((item, idx) => {
           const isActive = item.path === currentPath;
           const Icon = item.icon;
           const hasChildren = item.children && item.children.length > 0;
@@ -201,7 +208,13 @@ const Sidebar: React.FC<SidebarProps> = ({
               {/* Submenu */}
               {isOpen && hasChildren && isExpanded && (
                 <div className="ml-8 mt-1 flex flex-col gap-1">
-                  {item.children?.map((child) => {
+                  {item.children?.filter(child => {
+                    // تصفية العناصر الفرعية حسب الأدوار أيضاً
+                    if (child.roles && child.roles.length > 0) {
+                      return child.roles.includes(userRole);
+                    }
+                    return true;
+                  }).map((child) => {
                     const ChildIcon = child.icon;
                     const isChildActive = child.path === currentPath;
                     return (

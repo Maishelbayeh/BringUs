@@ -36,6 +36,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bringus',
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/stores', require('./routes/stores'));
 app.use('/api/store-sliders', require('./routes/storeSliders'));
+app.use('/api/superadmin', require('./routes/superadmin'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

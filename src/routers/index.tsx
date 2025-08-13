@@ -29,6 +29,9 @@ import Units from "../pages/units/Units";
 import ProductsLabels from "../pages/labels/ProductsLabels";
 import StoreGeneralInfo from "@/pages/store/StoreGeneralInfo";
 import StoreInfo from "@/pages/store/StoreInfo";
+import StoresManagement from "@/pages/superadmin/StoresManagement";
+import SuperAdminRoute from "@/hoc/SuperAdminRoute";
+import AdminRoute from "@/hoc/AdminRoute";
 
 export default function Routers() {
   return (
@@ -38,32 +41,141 @@ export default function Routers() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/new-user-registration" element={<NewUserRegistration />} />
-      <Route path="/users" element={<UsersPage />} />
-      <Route path="/" element={<Homepage />} />
-      <Route path="/payment-methods" element={<PaymentMethods />} />
-      <Route path="/delivery-settings" element={<DeliveryMethods />} />
-      <Route path="/categories" element={<CategoriesPage />} />
-      <Route path="/subcategories" element={<SubcategoriesPage />} />
-      <Route path="/products" element={<ProductsPage />} />
-      <Route path="/product-variants" element={<ProductVariants />} />  
-      <Route path="/customers" element={<CustomersPage />} />
-      <Route path="/orders" element={<OrdersPage />} />
-      <Route path="/orders/:id" element={<OrderDetailPage />} />
-      <Route path="/stock-preview" element={<StockTable />} />
-      <Route path="/store-slider" element={<StoreSliderPage />} />
-      <Route path="/store-preview" element={<StorePreview />} />
-      <Route path="/store-videos" element={<StoreVideoPage />} />
-      <Route path="/wholesalers" element={<WholesallersPage />} />
-      <Route path="/store-info" element={<StoreGeneralInfo   />} />
-      <Route path="/store-info-container" element={<StoreInfo />} />
-      <Route path="/affiliate" element={<AffiliationPage />} />
-      <Route path="/advertisement" element={<AdvertisementPage />} />
-      <Route path="/terms-conditions" element={<TermsConditionsPage />} />
-      <Route path="/products/specifications" element={<ProductSpecifications />} />
-      <Route path="/test-checkbox-specifications" element={<CheckboxSpecificationTest />} />
-      <Route path="/units" element={<Units />} />
-      <Route path="/labels" element={<ProductsLabels />} /> 
-       <Route path="/testimonials" element={<Testimonial />} /> 
+      <Route path="/users" element={
+        <AdminRoute>
+          <UsersPage />
+        </AdminRoute>
+      } />
+      <Route path="/" element={
+        <AdminRoute>
+          <Homepage />
+        </AdminRoute>
+      } />
+      <Route path="/payment-methods" element={
+        <AdminRoute>
+          <PaymentMethods />
+        </AdminRoute>
+      } />
+      <Route path="/delivery-settings" element={
+        <AdminRoute>
+          <DeliveryMethods />
+        </AdminRoute>
+      } />
+      <Route path="/categories" element={
+        <AdminRoute>
+          <CategoriesPage />
+        </AdminRoute>
+      } />
+      <Route path="/subcategories" element={
+        <AdminRoute>
+          <SubcategoriesPage />
+        </AdminRoute>
+      } />
+      <Route path="/products" element={
+        <AdminRoute>
+          <ProductsPage />
+        </AdminRoute>
+      } />
+      <Route path="/product-variants" element={
+        <AdminRoute>
+          <ProductVariants />
+        </AdminRoute>
+      } />  
+      <Route path="/customers" element={
+        <AdminRoute>
+          <CustomersPage />
+        </AdminRoute>
+      } />
+      <Route path="/orders" element={
+        <AdminRoute>
+          <OrdersPage />
+        </AdminRoute>
+      } />
+      <Route path="/orders/:id" element={
+        <AdminRoute>
+          <OrderDetailPage />
+        </AdminRoute>
+      } />
+      <Route path="/stock-preview" element={
+        <AdminRoute>
+          <StockTable />
+        </AdminRoute>
+      } />
+      <Route path="/store-slider" element={
+        <AdminRoute>
+          <StoreSliderPage />
+        </AdminRoute>
+      } />
+      <Route path="/store-preview" element={
+        <AdminRoute>
+          <StorePreview />
+        </AdminRoute>
+      } />
+      <Route path="/store-videos" element={
+        <AdminRoute>
+          <StoreVideoPage />
+        </AdminRoute>
+      } />
+      <Route path="/wholesalers" element={
+        <AdminRoute>
+          <WholesallersPage />
+        </AdminRoute>
+      } />
+      <Route path="/store-info" element={
+        <AdminRoute>
+          <StoreGeneralInfo />
+        </AdminRoute>
+      } />
+      <Route path="/store-info-container" element={
+        <AdminRoute>
+          <StoreInfo />
+        </AdminRoute>
+      } />
+      <Route path="/affiliate" element={
+        <AdminRoute>
+          <AffiliationPage />
+        </AdminRoute>
+      } />
+      <Route path="/advertisement" element={
+        <AdminRoute>
+          <AdvertisementPage />
+        </AdminRoute>
+      } />
+      <Route path="/terms-conditions" element={
+        <AdminRoute>
+          <TermsConditionsPage />
+        </AdminRoute>
+      } />
+      <Route path="/products/specifications" element={
+        <AdminRoute>
+          <ProductSpecifications />
+        </AdminRoute>
+      } />
+      <Route path="/test-checkbox-specifications" element={
+        <AdminRoute>
+          <CheckboxSpecificationTest />
+        </AdminRoute>
+      } />
+      <Route path="/units" element={
+        <AdminRoute>
+          <Units />
+        </AdminRoute>
+      } />
+      <Route path="/labels" element={
+        <AdminRoute>
+          <ProductsLabels />
+        </AdminRoute>
+      } /> 
+      <Route path="/testimonials" element={
+        <AdminRoute>
+          <Testimonial />
+        </AdminRoute>
+      } /> 
+      <Route path="/superadmin/stores" element={
+        <SuperAdminRoute>
+          <StoresManagement />
+        </SuperAdminRoute>
+      } />
     </Routes>
   );
 }

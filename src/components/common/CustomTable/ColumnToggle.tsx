@@ -101,45 +101,46 @@ const ColumnToggle: React.FC<ColumnToggleProps> = ({
       </button>
 
       {isOpen && (
-        <div
-          ref={menuRef}
-          className={`absolute z-30 min-w-[280px] bg-white border border-gray-200 rounded-lg shadow-lg py-3 mt-2 ${
-            i18n.language === 'ARABIC' ? 'left-0' : 'right-0'
-          }`}
-        >
-          {/* Header */}
-          <div className="px-4 pb-2 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 text-sm">
-              {t('common.columnVisibility') || 'Column Visibility'}
-            </h3>
-            <p className="text-xs text-gray-500 mt-1">
-              {t('common.selectColumnsToShow') || 'Select columns to show'}
-            </p>
-          </div>
+                 <div
+           ref={menuRef}
+           className={`absolute z-30 min-w-[280px] bg-white border border-gray-200 rounded-lg shadow-lg py-3 mt-2 ${
+             i18n.language === 'ARABIC' ? 'left-0' : 'right-0'
+           }`}
+           dir={i18n.language === 'ARABIC' ? 'rtl' : 'ltr'}
+         >
+                     {/* Header */}
+           <div className="px-4 pb-2 border-b border-gray-200">
+             <h3 className={`font-semibold text-gray-800 text-sm ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+               {t('common.columnVisibility') || 'Column Visibility'}
+             </h3>
+             <p className={`text-xs text-gray-500 mt-1 ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+               {t('common.selectColumnsToShow') || 'Select columns to show'}
+             </p>
+           </div>
 
-          {/* Quick Actions */}
-          <div className="px-4 py-2 border-b border-gray-200">
-            <div className="flex gap-2">
-              <button
-                onClick={handleSelectAll}
-                className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
-              >
-                {t('common.selectAll') || 'Select All'}
-              </button>
-              <button
-                onClick={handleSelectNone}
-                className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-              >
-                {t('common.selectNone') || 'Select None'}
-              </button>
-              <button
-                onClick={handleReset}
-                className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-              >
-                {t('common.reset') || 'Reset'}
-              </button>
-            </div>
-          </div>
+                     {/* Quick Actions */}
+           <div className="px-4 py-2 border-b border-gray-200">
+             <div className={`flex gap-2 ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
+               <button
+                 onClick={handleSelectAll}
+                 className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
+               >
+                 {t('common.selectAll') || 'Select All'}
+               </button>
+               <button
+                 onClick={handleSelectNone}
+                 className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+               >
+                 {t('common.selectNone') || 'Select None'}
+               </button>
+               <button
+                 onClick={handleReset}
+                 className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+               >
+                 {t('common.reset') || 'Reset'}
+               </button>
+             </div>
+           </div>
 
           {/* Column List */}
           <div className="max-h-60 overflow-y-auto">
@@ -151,51 +152,54 @@ const ColumnToggle: React.FC<ColumnToggleProps> = ({
                 }`}
                 onClick={() => column.hideable && handleToggleColumn(column.key)}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={localVisibility[column.key] || false}
-                      onChange={() => column.hideable && handleToggleColumn(column.key)}
-                      disabled={!column.hideable}
-                      className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                    />
-                    <span className="text-sm text-gray-700">
-                      {i18n.language === 'ARABIC' ? column.label.ar : column.label.en}
-                    </span>
-                  </div>
-                  {!column.hideable && (
-                    <span className="text-xs text-gray-400">
-                      {t('common.required') || 'Required'}
-                    </span>
-                  )}
-                </div>
+                                 <div className={`flex items-center justify-between ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
+                   <div className={`flex items-center gap-2 ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
+                     <input
+                       type="checkbox"
+                       checked={localVisibility[column.key] || false}
+                       onChange={() => column.hideable && handleToggleColumn(column.key)}
+                       disabled={!column.hideable}
+                       className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                     />
+                     <span className={`text-sm text-gray-700 ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+                       {typeof column.label === 'string' 
+                         ? column.label 
+                         : (i18n.language === 'ARABIC' ? column.label.ar : column.label.en)
+                       }
+                     </span>
+                   </div>
+                   {!column.hideable && (
+                     <span className={`text-xs text-gray-400 ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+                       {t('common.required') || 'Required'}
+                     </span>
+                   )}
+                 </div>
               </div>
             ))}
           </div>
 
-          {/* Footer */}
-          <div className="px-4 pt-2 border-t border-gray-200">
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">
-                {visibleColumnsCount} {t('common.of') || 'of'} {totalColumnsCount} {t('common.columns') || 'columns'}
-              </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="text-xs px-3 py-1 text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  {t('common.cancel') || 'Cancel'}
-                </button>
-                <button
-                  onClick={handleApply}
-                  className="text-xs px-3 py-1 bg-primary text-white rounded hover:bg-primary-dark transition-colors"
-                >
-                  {t('common.apply') || 'Apply'}
-                </button>
-              </div>
-            </div>
-          </div>
+                     {/* Footer */}
+           <div className="px-4 pt-2 border-t border-gray-200">
+             <div className={`flex justify-between items-center ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
+               <span className={`text-xs text-gray-500 ${i18n.language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+                 {visibleColumnsCount} {t('common.of') || 'of'} {totalColumnsCount} {t('common.columns') || 'columns'}
+               </span>
+               <div className={`flex gap-2 ${i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
+                 <button
+                   onClick={() => setIsOpen(false)}
+                   className="text-xs px-3 py-1 text-gray-600 hover:text-gray-800 transition-colors"
+                 >
+                   {t('common.cancel') || 'Cancel'}
+                 </button>
+                 <button
+                   onClick={handleApply}
+                   className="text-xs px-3 py-1 bg-primary text-white rounded hover:bg-primary-dark transition-colors"
+                 >
+                   {t('common.apply') || 'Apply'}
+                 </button>
+               </div>
+             </div>
+           </div>
         </div>
       )}
     </div>

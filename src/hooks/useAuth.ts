@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { BASE_URL, LOGIN } from '../constants/api';
 import { updateUserData, updateStoreData, updateStoreId } from './useLocalStorage';
-import { useStore } from './useStore';
 
 interface LoginResponse {
   success: boolean;
@@ -52,7 +51,6 @@ interface LoginCredentials {
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { getStore } = useStore();
 // -----------------------------------------------login---------------------------------------------------------
   const login = async (credentials: LoginCredentials): Promise<LoginResponse | null> => {
     setIsLoading(true);
@@ -73,31 +71,46 @@ export const useAuth = () => {
         throw new Error(data.message || 'فشل في تسجيل الدخول');
       }
 
-      if (data.success && data.user.role === 'admin' && data.userStatus === 'active') {
+      if (data.success && data.userStatus === 'active') {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('isOwner', data.user.store.isOwner.toString());
-        if (data.user.store?.id) {
-          updateStoreId(data.storeId);
+        localStorage.setItem('userInfo', JSON.stringify(data.user));
         
-        }
-
-        
+        // حفظ بيانات المستخدم
         updateUserData(data.user);
-        if (data.user.store) {
-          updateStoreData(data.user.store);
-        }
         
-       
-        if (data.user.store?.id) {
-          try {
-            const fullStoreData = await getStore(data.user.store.id);
-            if (fullStoreData) {
-             updateStoreData(fullStoreData);
-            }
-          } catch (error) {
-            //CONSOLE.error('❌ خطأ في جلب بيانات المتجر الكاملة:', error);
+        // إذا كان المستخدم admin وليس superadmin، احفظ بيانات المتجر
+        if (data.user.role === 'admin' && data.user.store) {
+          localStorage.setItem('isOwner', data.user.store.isOwner.toString());
+          if (data.user.store?.id) {
+            updateStoreId(data.storeId);
           }
+          
+          updateStoreData(data.user.store);
+          
+          if (data.user.store?.id) {
+            try {
+              // جلب بيانات المتجر الكاملة باستخدام fetch مباشرة
+              const token = localStorage.getItem('token');
+              const storeResponse = await fetch(`${BASE_URL}stores/${data.user.store.id}`, {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              
+              if (storeResponse.ok) {
+                const storeData = await storeResponse.json();
+                if (storeData.success && storeData.data) {
+                  updateStoreData(storeData.data);
+                }
+              }
+            } catch (error) {
+              //CONSOLE.error('❌ خطأ في جلب بيانات المتجر الكاملة:', error);
+            }
+          }
+        } else if (data.user.role === 'superadmin') {
+          // السوبر أدمن لا يملك متجر
+          localStorage.setItem('isOwner', 'false');
         }
         
         //CONSOLE.log('✅ تم تسجيل الدخول بنجاح:', data.user);
@@ -116,13 +129,14 @@ export const useAuth = () => {
   };
 // -----------------------------------------------logout---------------------------------------------------------
   const logout = () => {
-   
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     localStorage.removeItem('userInfo');
     localStorage.removeItem('userAvatar');
     localStorage.removeItem('storeId');
     localStorage.removeItem('storeInfo');
     localStorage.removeItem('storeLogo');
+    localStorage.removeItem('isOwner');
     updateStoreId("");
   };
 // -----------------------------------------------getCurrentUser---------------------------------------------------------
@@ -148,6 +162,15 @@ export const useAuth = () => {
   const isAuthenticatedAdmin = () => {
     return isAuthenticated() && isAdmin();
   };
+// -----------------------------------------------isSuperAdmin---------------------------------------------------------
+  const isSuperAdmin = () => {
+    const user = getCurrentUser();
+    return user && user.role === 'superadmin';
+  };
+// -----------------------------------------------isAuthenticatedSuperAdmin---------------------------------------------------------
+  const isAuthenticatedSuperAdmin = () => {
+    return isAuthenticated() && isSuperAdmin();
+  };
 // -----------------------------------------------return---------------------------------------------------------
   return {
     login,
@@ -157,6 +180,8 @@ export const useAuth = () => {
     isAuthenticated,
     isAdmin,
     isAuthenticatedAdmin,
+    isSuperAdmin,
+    isAuthenticatedSuperAdmin,
     isLoading,
     error,
   };

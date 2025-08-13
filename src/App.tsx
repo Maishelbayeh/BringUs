@@ -9,6 +9,7 @@ import { MenuItem } from './Types';
 import Sidebar from './components/common/navigation/sidebar';
 import TopNavbar from './components/common/navigation/topNav';
 import { ToastProvider } from './contexts/ToastContext';
+import { useAuth } from './hooks/useAuth';
 
 // Component to check if we're on login page
 const AppContent: React.FC = () => {
@@ -21,13 +22,15 @@ const AppContent: React.FC = () => {
   const { language, toggleLanguage } = useLanguage();
   const { isSidebarOpen, toggleSidebar } = useSidebar();
   const [activeMenu, ] = useState<'text' | 'model'>('text');
+  const { getCurrentUser } = useAuth();
+  const user = getCurrentUser();
 
   const getMenuItems = (): MenuItem[] => {
     const isOwner = localStorage.getItem('isOwner') === 'true';
+    const userRole = user?.role;
   
     const menu = activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();
   
-    
     // فلترة عنصر /users من children و العناصر الرئيسية
     const filteredMenu = menu.map(item => {
       if (item.children) {
@@ -81,7 +84,7 @@ const AppContent: React.FC = () => {
           >
             <Sidebar 
               menu={getMenuItems()}
-              userName="Mai Shalabi"
+              userName={user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'User'}
               isOpen={isSidebarOpen}
               toggleSidebar={toggleSidebar}
               isRTL={language === 'ARABIC'}

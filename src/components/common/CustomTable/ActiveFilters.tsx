@@ -50,33 +50,36 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
             key={key} 
             className="active-filter flex items-center bg-primary/10 text-primary rounded-full px-3 py-1 text-sm font-medium"
           >
-            <span className="mr-1">
-              {(i18n.language === 'ARABIC' ? col?.label.ar : col?.label.en) + ': ' + displayValue}
-            </span>
-            <button
-              className="ml-2 text-primary hover:text-red-500 focus:outline-none transition-colors"
-              onClick={() => {
-                if (isDateRange) {
-                  onRemoveFilter(`${displayKey}_from`);
-                  onRemoveFilter(`${displayKey}_to`);
-                } else {
-                  onRemoveFilter(key);
-                }
-              }}
-              title={t('common.removeFilter')}
-            >
-              ×
-            </button>
+                         <span className={i18n.language === 'ARABIC' ? 'ml-1' : 'mr-1'}>
+               {(typeof col?.label === 'string' 
+                 ? col.label 
+                 : (i18n.language === 'ARABIC' ? col?.label.ar : col?.label.en)
+               ) + ': ' + displayValue}
+             </span>
+                         <button
+               className={`${i18n.language === 'ARABIC' ? 'mr-2' : 'ml-2'} text-primary hover:text-red-500 focus:outline-none transition-colors`}
+               onClick={() => {
+                 if (isDateRange) {
+                   onRemoveFilter(`${displayKey}_from`);
+                   onRemoveFilter(`${displayKey}_to`);
+                 } else {
+                   onRemoveFilter(key);
+                 }
+               }}
+               title={t('common.removeFilter')}
+             >
+               ×
+             </button>
           </span>
         );
       })}
       
-      <button
-        className="ml-4 text-xs text-gray-500 hover:text-red-600 underline transition-colors"
-        onClick={onClearAll}
-      >
-        {t('common.clearAll')}
-      </button>
+             <button
+         className={`${i18n.language === 'ARABIC' ? 'mr-4' : 'ml-4'} text-xs text-gray-500 hover:text-red-600 underline transition-colors`}
+         onClick={onClearAll}
+       >
+         {t('common.clearAll')}
+       </button>
     </div>
   );
 };

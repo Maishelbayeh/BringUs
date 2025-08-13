@@ -79,7 +79,10 @@ const TableHeader: React.FC<TableHeaderProps> = ({
                   ? 'text-primary' 
                   : ''
               }`}>
-                {i18n.language === 'ARABIC' ? column.label.ar : column.label.en}
+                {typeof column.label === 'string' 
+                  ? column.label 
+                  : (i18n.language === 'ARABIC' ? column.label.ar : column.label.en)
+                }
               </span>
               
               {/* أيقونة سهم الترتيب - لا تظهر لعمود العمليات */}

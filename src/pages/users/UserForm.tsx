@@ -7,12 +7,12 @@ import {
 } from '@mui/icons-material';
 import CustomInput from '@/components/common/CustomInput';
 
-import CustomFileInput from '@/components/common/CustomFileInput';
+
 import useLanguage from '@/hooks/useLanguage';
 import { getStoreId } from '@/hooks/useLocalStorage';
 import { useUser } from '@/hooks/useUser';
 import { useToastContext } from '@/contexts/ToastContext';
-import CustomSwitch from '@/components/common/CustomSwitch';
+
 import CustomRadioGroup from '@/components/common/CustomRadioGroup';
 
 interface UserFormProps {
@@ -22,7 +22,7 @@ interface UserFormProps {
   formId?: string; // لربط زر الحفظ في الفوتر من الخارج
 }
 
-const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }) => {
+const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
@@ -39,7 +39,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
     status: 'active'
   });
 
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  
   const [addressData, setAddressData] = useState({
     street: '',
     city: '',
@@ -50,7 +50,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, onCancel, formId }
   });
   const [showPassword, setShowPassword] = useState(false);
   // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
+
   // Allow dynamic keys like 'address.street'
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [isLoading, setIsLoading] = useState(false);

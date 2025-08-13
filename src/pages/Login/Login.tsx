@@ -70,8 +70,15 @@ const Login: React.FC = () => {
       });
       
       if (result) {
-      // Navigate to dashboard on success
-      navigate('/');
+        // التحقق من دور المستخدم والتوجيه المناسب
+        const user = result.user;
+        if (user.role === 'superadmin') {
+          // السوبر أدمن يذهب مباشرة إلى إدارة المتاجر
+          navigate('/superadmin/stores');
+        } else {
+          // المستخدمون العاديون يذهبون إلى الداشبورد
+          navigate('/');
+        }
       }
     } catch (error) {
       //CONSOLE.error('Login error:', error);

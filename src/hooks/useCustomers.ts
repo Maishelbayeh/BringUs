@@ -203,9 +203,9 @@ export const useCustomers = (): UseCustomersReturn => {
   const fetchCustomers = useCallback(async (
     storeId: string,
     forceRefresh: boolean = false,
-    page = 1,
-    limit = 10,
-    search = ''
+    // page = 1,
+    // limit = 10,
+    // search = ''
   ) => {
     console.log('Fetching customers...'); // Debug: to see when API is called
     if (hasLoaded && !forceRefresh && customers.length > 0) {
@@ -214,11 +214,11 @@ export const useCustomers = (): UseCustomersReturn => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...(search && { search })
-      });
+      // const params = new URLSearchParams({
+      //   page: page.toString(),
+      //   limit: limit.toString(),
+      //   ...(search && { search })
+      // });
       const url = `${BASE_URL}stores/${storeId}/customers?includeGuests=true`;
         const res = await axios.get(url, {
         headers: {

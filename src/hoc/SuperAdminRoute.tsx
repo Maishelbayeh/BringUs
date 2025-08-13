@@ -3,37 +3,33 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 
-interface AdminRouteProps {
+interface SuperAdminRouteProps {
   children: React.ReactNode;
   fallbackPath?: string;
 }
 
 /**
- * مكون لحماية الصفحات التي تحتاج دور admin
- * يتحقق من أن المستخدم مسجل دخول ودوره admin
+ * مكون لحماية الصفحات التي تحتاج دور superadmin
+ * يتحقق من أن المستخدم مسجل دخول ودوره superadmin
  */
-const AdminRoute: React.FC<AdminRouteProps> = ({ 
+const SuperAdminRoute: React.FC<SuperAdminRouteProps> = ({ 
   children, 
   fallbackPath = '/login' 
 }) => {
-  const { isAuthenticated, isAuthenticatedAdmin, getCurrentUser } = useAuth();
+  const { isAuthenticated, getCurrentUser } = useAuth();
   const { t } = useTranslation();
 
   // التحقق من تسجيل الدخول
   if (!isAuthenticated()) {
-    //CONSOLE.log('🚫 المستخدم غير مسجل دخول، التوجيه لصفحة تسجيل الدخول');
+    console.log('🚫 المستخدم غير مسجل دخول، التوجيه لصفحة تسجيل الدخول');
     return <Navigate to={fallbackPath} replace />;
   }
 
-  // التحقق من دور admin
-  if (!isAuthenticatedAdmin()) {
-    const user = getCurrentUser();
-    //CONSOLE.log('🚫 المستخدم ليس admin، الدور الحالي:', user?.role);
-    
-    // إذا كان المستخدم سوبر أدمن، وجهه إلى صفحة إدارة المتاجر
-    if (user?.role === 'superadmin') {
-      return <Navigate to="/superadmin/stores" replace />;
-    }
+  const user = getCurrentUser();
+  
+  // التحقق من دور superadmin
+  if (user?.role !== 'superadmin') {
+    console.log('🚫 المستخدم ليس superadmin، الدور الحالي:', user?.role);
     
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -48,7 +44,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({
               {t('admin.accessDenied') || 'الوصول مرفوض'}
             </h2>
             <p className="text-gray-600 mb-4">
-              {t('admin.adminRequired') || 'هذه الصفحة تتطلب صلاحيات مدير النظام'}
+              {t('admin.superAdminRequired') || 'هذه الصفحة تتطلب صلاحيات السوبر أدمن'}
             </p>
             <div className="bg-gray-100 rounded-lg p-3 mb-4">
               <p className="text-sm text-gray-700">
@@ -70,9 +66,9 @@ const AdminRoute: React.FC<AdminRouteProps> = ({
     );
   }
 
-  // المستخدم مسجل دخول ودوره admin
-  //CONSOLE.log('✅ المستخدم مسجل دخول ودوره admin، السماح بالوصول');
+  // المستخدم مسجل دخول ودوره superadmin
+  console.log('✅ المستخدم مسجل دخول ودوره superadmin، السماح بالوصول');
   return <>{children}</>;
 };
 
-export default AdminRoute; 
+export default SuperAdminRoute; 

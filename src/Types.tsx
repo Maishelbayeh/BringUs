@@ -24,6 +24,7 @@ export interface LogInFormValues {
     icon?: React.ElementType;
     path?: string;
     children?: MenuItem[];
+    roles?: string[];
   }
 
   export interface PaymentImage {
