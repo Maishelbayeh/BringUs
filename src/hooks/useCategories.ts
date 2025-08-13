@@ -47,7 +47,9 @@ const STORE_ID = getStoreId() || '';
     
     try {
       const url = `http://localhost:5001/api/categories/store/${STORE_ID}`;
-      const res = await axios.get(url);
+      const res = await axios.get(url, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
       // //CONSOLE.log('FETCHED CATEGORIES FROM API:', res.data.data);
       const data = Array.isArray(res.data.data) ? res.data.data : [];
       const treeData = buildCategoryTree(data);
@@ -99,11 +101,15 @@ const STORE_ID = getStoreId() || '';
     //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
-        const response = await axios.put(`http://localhost:5001/api/categories/${editId}`, payload);
+        const response = await axios.put(`http://localhost:5001/api/categories/${editId}`, payload, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
         //CONSOLE.log('Category updated successfully:', response.data);
         showSuccess('تم تعديل التصنيف بنجاح', 'نجح التحديث');
       } else {
-        const response = await axios.post('http://localhost:5001/api/categories', payload);
+        const response = await axios.post('http://localhost:5001/api/categories', payload, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
         //CONSOLE.log('Category created successfully:', response.data);
         showSuccess('تم إضافة التصنيف بنجاح', 'نجح الإضافة');
       }
@@ -129,7 +135,10 @@ const STORE_ID = getStoreId() || '';
   // حذف تصنيف
   const deleteCategory = async (categoryId: string | number) => {
     try {
-      const response = await axios.delete(`http://localhost:5001/api/categories/${categoryId}?storeId=${STORE_ID}`);
+      const response = await axios.delete(`http://localhost:5001/api/categories/${categoryId}?storeId=${STORE_ID}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      }); 
+        
       //CONSOLE.log('Category deleted successfully:', response.data);
       showSuccess('تم حذف التصنيف بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
@@ -158,7 +167,7 @@ const STORE_ID = getStoreId() || '';
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
       const res = await axios.post('http://localhost:5001/api/categories/upload-image', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       //CONSOLE.log('Image uploaded successfully:', res.data);
       showSuccess('تم رفع الصورة بنجاح', 'نجح رفع الصورة');

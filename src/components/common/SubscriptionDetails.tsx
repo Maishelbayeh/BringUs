@@ -136,7 +136,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
         {/* Current Subscription Status */}
         <div className="space-y-3">
           {/* Status */}
-          <div className="flex items-center justify-between">
+          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
             <span className={`text-sm font-medium text-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
               {isRTL ? 'الحالة' : 'Status'}
             </span>
@@ -146,18 +146,11 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
           </div>
 
           {/* Current Plan */}
-          <div className="flex items-center justify-between">
-            <span className={`text-sm font-medium text-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
-              {isRTL ? 'الخطة الحالية' : 'Current Plan'}
-            </span>
-            <span className="text-sm text-gray-900">
-              {subscriptionStatus.plan}
-            </span>
-          </div>
+         
 
           {/* Current Amount */}
           {subscriptionStatus.amount > 0 && (
-            <div className="flex items-center justify-between">
+            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
               <span className={`text-sm font-medium text-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
                 {isRTL ? 'المبلغ الحالي' : 'Current Amount'}
               </span>
@@ -169,7 +162,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
 
           {/* Expiry Date */}
           {subscriptionStatus.expiresAt && (
-            <div className="flex items-center justify-between">
+            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
               <span className={`text-sm font-medium text-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
                 {isRTL ? 'تاريخ الانتهاء' : 'Expiry Date'}
               </span>
@@ -181,7 +174,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
         </div>
 
         {/* Available Plans */}
-        <div className="border-t pt-4">
+        <div className={`border-t pt-4 ${isRTL ? 'text-right' : 'text-left'}`}>
           <h4 className={`text-md font-semibold text-gray-900 mb-3 ${isRTL ? 'text-right' : 'text-left'}`}>
             {isRTL ? 'خطط الاشتراك المتاحة' : 'Available Plans'}
           </h4>
@@ -202,7 +195,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
                   }`}
                   onClick={() => handlePlanSelect(plan)}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
                       <div className="font-medium text-gray-900">
                         {isRTL ? plan.nameAr : plan.name}
@@ -230,7 +223,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
 
         {/* Custom Price Input */}
         <div className="border-t pt-4">
-          <label className={`block text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          {/* <label className={`block text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
             {isRTL ? 'السعر المخصص' : 'Custom Price'}
           </label>
           <input
@@ -243,7 +236,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
               isRTL ? 'text-right' : 'text-left'
             }`}
             placeholder={isRTL ? 'أدخل السعر' : 'Enter price'}
-          />
+          /> */}
         </div>
 
         {/* Warning Messages */}
