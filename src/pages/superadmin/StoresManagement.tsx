@@ -116,7 +116,7 @@ const StoresManagement: React.FC = () => {
   }, [isInitialized]); // جلب البيانات مرة واحدة فقط عند تحميل الصفحة
 
   // عرض شعار المتجر
-  const renderStoreLogo = (value: any, item: Store) => {
+  const renderStoreLogo = ( item: Store) => {
     if (item.logo && item.logo.url) {
       return (
         <div className="flex items-center justify-center">
@@ -141,7 +141,7 @@ const StoresManagement: React.FC = () => {
   };
 
   // عرض اسم المتجر
-  const renderStoreName = (value: any, item: Store) => (
+  const renderStoreName = ( item: Store) => (
     <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
       <span className="font-medium text-gray-900">
         {isRTL ? item.nameAr : item.nameEn}
@@ -172,7 +172,7 @@ const StoresManagement: React.FC = () => {
   };
 
   // عرض معلومات الاتصال
-  const renderContactInfo = (value: any, item: Store) => (
+  const renderContactInfo = ( item: Store) => (
     <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
       <div className="flex items-center gap-1 mb-1">
         <Email className="w-3 h-3 text-gray-400" />
@@ -186,7 +186,7 @@ const StoresManagement: React.FC = () => {
   );
 
   // عرض العنوان
-  const renderAddress = (value: any, item: Store) => (
+  const renderAddress = ( item: Store) => (
     <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
       <div className="flex items-center gap-1 mb-1">
         <LocationOn className="w-3 h-3 text-gray-400" />
@@ -201,7 +201,7 @@ const StoresManagement: React.FC = () => {
   );
 
   // عرض الملاك
-  const renderOwners = (value: any, item: Store) => {
+  const renderOwners = ( item: Store) => {
     const primaryOwner = item.owners.find(owner => owner.isPrimaryOwner);
     const otherOwners = item.owners.filter(owner => !owner.isPrimaryOwner);
     

@@ -9,7 +9,7 @@
     "add":"Add",
     "save":"Save",
     "saving":"Saving...",
-    "update": "Update",
+    
     "active":"Active",
     "inactive":"Inactive",
     "yes":"Yes",
@@ -540,7 +540,7 @@
     "cancel": "Cancel",
     "save": "Save",
     "none": "None",
-    "required": "This field is required",
+    
     "invalidValue": "Invalid value",
     "invalidRange": "Invalid range",
     "currentImage": "Current image",
@@ -549,7 +549,7 @@
     "pleaseCompleteForm": "Please complete all required fields",
     "ACTIONS": "Actions",
     "showing": "Showing",
-    "of": "of",
+   
     "results": "results",
     "filter": "Filter",
     "from": "From date",
@@ -557,7 +557,7 @@
     "all": "All values",
     "clearSort": "Clear sort",
     "close": "Close",
-    "apply": "Apply",
+    
     "clear": "Clear",
     "downloadExcel": "Download as Excel",
     "downloadCSV": "Download as CSV",
@@ -614,7 +614,7 @@
     "finalTotal":"Final Total",
     "orderPrice":"Order Price",
     "ordersPhone":"Orders Phone",
-    "product":"Product",
+    
     "quantity":"Quantity",
     "unit":"Unit",
     "unitPrice":"Unit Price",
@@ -643,8 +643,7 @@
     "deleteConfirmTitle": "Confirm Delete Product from Order",
     "deleteConfirmMessage": "Are you sure you want to delete this product from the order?",
     "order": "order",
-    "deleteOrderConfirmTitle": "Confirm Delete Order",
-    "deleteOrderConfirmMessage": "Are you sure you want to delete this order?",
+   
     "paymentStatusUpdated": "Payment status updated for order",
     "paymentStatusUpdateFailed": "Failed to update payment status",
     "orderStatusUpdated": "Order status updated for order ",
@@ -1159,7 +1158,7 @@
     "taxEnabled": "Enable Tax",
     "socialMedia": "Social Media Links",
     "save": "Save",
-    "registerMerchant": "Register Merchant",
+    "registerMerchant": "Register",
     "createStore": "Create Store",
     "merchantStepDesc": "Step 2: Register your merchant account",
     "storeStepDesc": "Step 1: Create your store",
@@ -1191,7 +1190,12 @@
     "addNewStore": "Add New Store",
     "editModeDescription": "You can edit the current store information",
     "updateStore": "Update Store",
-    "updateSuccess": "Store information updated successfully!"
+    "updateSuccess": "Store information updated successfully!",
+    "currentLogo": "Current Logo",
+    "logoPreview": "Logo Preview",
+    "noLogoSelected": "No logo selected",
+    "selectLogo": "Select Logo",
+    "selectedFile": "Selected File"
   },
   "newUser": {
     "title": "New User Registration",

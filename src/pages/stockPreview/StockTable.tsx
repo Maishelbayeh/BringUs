@@ -6,9 +6,8 @@ import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import PermissionModal from '../../components/common/PermissionModal';
 import useProducts from '../../hooks/useProducts';
 import useCategories from '../../hooks/useCategories';
-import { productLabelOptions } from '../../data/productLabelOptions';
 import CircularIndeterminate from '../../components/common/loading/CircularIndeterminate';
-import { CheckCircle, Inventory2, WarningAmber, ExpandMore, ExpandLess } from '@mui/icons-material';
+import { CheckCircle, Inventory2, WarningAmber} from '@mui/icons-material';
 
 const StockTable: React.FC = () => {
   const { i18n, t } = useTranslation();
@@ -30,7 +29,7 @@ const StockTable: React.FC = () => {
       key: 'stockInfo', 
       label: { ar: 'المخزون والحالة', en: 'Stock & Status' }, 
       type: 'custom',
-      render: (value: any, row: any) => {
+      render: ( row: any) => {
         const currentQuantity = row.availableQuantity;
         let quantityColorClass = 'bg-green-100 text-green-800';
         let statusColorClass = 'bg-green-100 text-green-800';
@@ -83,7 +82,7 @@ const StockTable: React.FC = () => {
       key: 'specifications',
       label: { ar: 'المواصفات', en: 'Specifications' },
       type: 'custom',
-      render: (value: any, row: any) => {
+      render: ( row: any) => {
         const hasSpecifications = row.specificationValues && row.specificationValues.length > 0;
         
         if (!hasSpecifications) {
@@ -133,22 +132,22 @@ const StockTable: React.FC = () => {
 
 
 //------------------------------------------- getCategoryName -------------------------------------------
-  const getCategoryName = (categoryId: string | number) => {
-    if (!categories || categories.length === 0) return '-';
+  // const getCategoryName = (categoryId: string | number) => {
+  //   if (!categories || categories.length === 0) return '-';
     
-    const category = categories.find((c: any) => c._id === categoryId || c.id === categoryId);
-    if (!category) return '-';
+  //   const category = categories.find((c: any) => c._id === categoryId || c.id === categoryId);
+  //   if (!category) return '-';
     
-    return i18n.language === 'ar' || i18n.language === 'ARABIC' 
-      ? category.nameAr || category.name
-      : category.nameEn || category.name;
-  };
+  //   return i18n.language === 'ar' || i18n.language === 'ARABIC' 
+  //     ? category.nameAr || category.name
+  //     : category.nameEn || category.name;
+  // };
 
 //------------------------------------------- getLabelName -------------------------------------------
-  const getLabelName = (labelId: number | string) => {
-    const label = productLabelOptions.find((l: any) => l.id === labelId || l._id === labelId);
-    return label ? (i18n.language === 'ar' || i18n.language === 'ARABIC' ? label.nameAr : label.nameEn) : '-';
-  };
+  // const getLabelName = (labelId: number | string) => {
+  //   const label = productLabelOptions.find((l: any) => l.id === labelId || l._id === labelId);
+  //   return label ? (i18n.language === 'ar' || i18n.language === 'ARABIC' ? label.nameAr : label.nameEn) : '-';
+  // };
 
 //------------------------------------------- tableData -------------------------------------------
   const tableData = React.useMemo(() => {
@@ -202,10 +201,10 @@ const StockTable: React.FC = () => {
   }, [tableData]);
   
   //-------------------------------------------- handleDelete -------------------------------------------
-  const handleDelete = (product: any) => {
-    setProductToDelete(product);
-    setShowDeleteModal(true);
-  };
+  // const handleDelete = (product: any) => {
+  //   setProductToDelete(product);
+  //   setShowDeleteModal(true);
+  // };
   
   //-------------------------------------------- handleDeleteConfirm -------------------------------------------
   const handleDeleteConfirm = () => {

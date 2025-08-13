@@ -302,57 +302,14 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
     }
     
     try {
-      // 1. إنشاء المتجر أولاً بدون لوجو
-      const storeDataWithoutLogo = {
-        ...storeData,
-        logo: { public_id: null, url: null } // بدون لوجو في البداية
-      };
-      
-      console.log('🔍 البيانات المرسلة للخادم:', storeDataWithoutLogo);
-      console.log('🔍 contact.email:', storeDataWithoutLogo.contact?.email);
-      console.log('🔍 nameAr:', storeDataWithoutLogo.nameAr);
-      console.log('🔍 nameEn:', storeDataWithoutLogo.nameEn);
-      console.log('🔍 slug:', storeDataWithoutLogo.slug);
-      
-      console.log('🔄 إنشاء المتجر بدون لوجو...');
-      const store = await createStore(storeDataWithoutLogo);
-      
-      if (!store) {
-        //CONSOLE.error('❌ فشل في إنشاء المتجر');
-      
-        return;
-      }
-      
-      console.log('✅ تم إنشاء المتجر بنجاح:', store);
-      
-      // 2. إذا كان هناك ملف لوجو، ارفعه للمتجر الجديد
-      if (storeLogoFile) {
-        console.log('🔄 رفع اللوجو للمتجر الجديد:', store.id || store._id);
-        try {
-          const logoResult = await uploadStoreLogo(storeLogoFile, store.id || store._id);
-          if (logoResult) {
-            console.log('✅ تم رفع اللوجو بنجاح:', logoResult);
-            // تحديث المتجر باللوجو الجديد
-            const updatedStore = await updateStore(store.id || store._id || '', { logo: logoResult });
-            if (updatedStore) {
-              console.log('✅ تم تحديث المتجر باللوجو الجديد:', updatedStore);
-              // تحديث store في state
-              setStoreData((prev: any) => ({ ...prev, createdStore: updatedStore }));
-            }
-          }
-        } catch (logoError) {
-          console.error('❌ خطأ في رفع اللوجو:', logoError);
-        }
-      }
-      
-      // حفظ بيانات المتجر للاستخدام في الخطوة التالية
-      setStoreData((prev: any) => ({ ...prev, createdStore: store }));
+      // حفظ بيانات المتجر محلياً فقط (بدون إنشاء في الباك إند)
+      console.log('✅ تم حفظ بيانات المتجر محلياً، جاري الانتقال للخطوة التالية...');
       
       // الانتقال للخطوة الثانية
       setCurrentStep(2);
       
     } catch (error) {
-      //CONSOLE.error('❌ خطأ في إنشاء المتجر:', error);
+      //CONSOLE.error('❌ خطأ في حفظ بيانات المتجر:', error);
      
     }
   };
@@ -428,13 +385,59 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
 
   const handleFinalSubmit = async () => {
     try {
-      if (!storeData || !storeData.createdStore) {
+      if (!storeData) {
         alert('يرجى إكمال بيانات المتجر أولاً');
         return;
       }
 
       if (!isMerchantValid) {
         alert('يرجى إكمال جميع الحقول المطلوبة في بيانات المالك بشكل صحيح');
+        return;
+      }
+
+      // 1. إنشاء المتجر أولاً بدون لوجو
+      console.log('🔄 إنشاء المتجر بدون لوجو...');
+      const storeDataWithoutLogo = {
+        ...storeData,
+        logo: { public_id: null, url: null } // بدون لوجو في البداية
+      };
+      
+      const store = await createStore(storeDataWithoutLogo);
+      
+      if (!store) {
+        console.error('❌ فشل في إنشاء المتجر');
+        alert('فشل في إنشاء المتجر، يرجى المحاولة مرة أخرى');
+        return;
+      }
+      
+      console.log('✅ تم إنشاء المتجر بنجاح:', store);
+      
+      // 2. إذا كان هناك ملف لوقو، ارفعه للمتجر الجديد
+      if (storeLogoFile) {
+        console.log('🔄 رفع اللوقو للمتجر الجديد:', store.id || store._id);
+        try {
+          const logoResult = await uploadStoreLogo(storeLogoFile, store.id || store._id);
+          if (logoResult) {
+            console.log('✅ تم رفع اللوقو بنجاح:', logoResult);
+            // تحديث المتجر باللوقو الجديد
+            const updatedStore = await updateStore(store.id || store._id || '', { logo: logoResult });
+            if (updatedStore) {
+              console.log('✅ تم تحديث المتجر باللوقو الجديد:', updatedStore);
+              // تحديث store في state
+              setStoreData((prev: any) => ({ ...prev, createdStore: updatedStore }));
+            }
+          }
+        } catch (logoError) {
+          console.error('❌ خطأ في رفع اللوقو:', logoError);
+          // لا نوقف العملية إذا فشل رفع اللوقو
+        }
+      }
+
+      // التأكد من وجود store ID
+      const storeId = store.id || store._id;
+      if (!storeId) {
+        console.error('❌ خطأ: لم يتم العثور على ID للمتجر');
+        alert('خطأ في بيانات المتجر. يرجى المحاولة مرة أخرى.');
         return;
       }
 
@@ -449,15 +452,15 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         status: 'active' as const,
         addresses: merchantData.addresses,
         store: {
-          _id: storeData.createdStore.id || storeData.createdStore._id // إرسال كـ object
+          _id: storeId // إرسال كـ object
         }
       };
 
-      //CONSOLE.log('Created Store:', storeData.createdStore);
-      //CONSOLE.log('Store ID being sent:', storeData.createdStore.id || storeData.createdStore._id);
+      //CONSOLE.log('Created Store:', store);
+      //CONSOLE.log('Store ID being sent:', storeId);
       //CONSOLE.log('Merchant Data with Store ID:', merchantDataForBackend);
 
-      // 1. تسجيل المستخدم مع store ID
+      // 3. تسجيل المستخدم مع store ID
       //CONSOLE.log('🔄 جاري تسجيل المستخدم مع store ID...');
       const user = await createUser(merchantDataForBackend);
       
@@ -466,21 +469,19 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         return;
       }
 
-      // 2. ربط المستخدم بالمتجر كمالك
+      // 4. ربط المستخدم بالمتجر كمالك
       //CONSOLE.log('🔄 جاري ربط المستخدم بالمتجر...');
       
       // التأكد من استخدام الـ ID الصحيح
       const userId = user.id;
-      const storeId = storeData.createdStore.id || storeData.createdStore._id;
       
       //CONSOLE.log('🔍 User ID:', { id: user.id, finalId: userId });
-      //CONSOLE.log('🔍 Store ID:', { id: storeData.createdStore.id, finalId: storeId });
+      //CONSOLE.log('🔍 Store ID:', { id: store.id, finalId: storeId });
       
-      if (!userId || !storeId) {
-        //CONSOLE.error('❌ خطأ: لم يتم العثور على ID للمستخدم أو المتجر');
+      if (!userId) {
+        //CONSOLE.error('❌ خطأ: لم يتم العثور على ID للمستخدم');
         //CONSOLE.error('User:', user);
-        //CONSOLE.error('Store:', storeData.createdStore);
-        alert('خطأ في البيانات. يرجى المحاولة مرة أخرى.');
+        alert('خطأ في بيانات المستخدم. يرجى المحاولة مرة أخرى.');
         return;
       }
       
@@ -514,7 +515,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       // نجاح العملية
       //CONSOLE.log('🎉 تم التسجيل الكامل بنجاح!');
       //CONSOLE.log('User:', user);
-      //CONSOLE.log('Store:', storeData.createdStore);
+      //CONSOLE.log('Store:', store);
       //CONSOLE.log('Owner:', owner);
       
       alert('تم التسجيل بنجاح!');

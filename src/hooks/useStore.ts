@@ -3,13 +3,7 @@ import axios from 'axios';
 import { BASE_URL } from '../constants/api';
 import { updateStoreData } from './useLocalStorage';
 
-// ============================================================================
-// TYPES & INTERFACES
-// ============================================================================
 
-/**
- * روابط السوشال ميديا للمتجر
- */
 interface StoreSocials {
   facebook?: string;
   instagram?: string;
@@ -22,9 +16,6 @@ interface StoreSocials {
   tiktok?: string;
 }
 
-/**
- * إعدادات المتجر
- */
 interface StoreSettings {
   mainColor: string;        // اللون الرئيسي للمتجر
   language: string;         // اللغة الافتراضية
@@ -36,9 +27,7 @@ interface StoreSettings {
   storeSocials: StoreSocials; // روابط السوشال ميديا
 }
 
-/**
- * معلومات التواصل للمتجر
- */
+
 interface StoreContact {
   email: string;
   phone: string;
@@ -51,9 +40,7 @@ interface StoreContact {
   };
 }
 
-/**
- * بيانات المتجر الأساسية (للإنشاء والتحديث)
- */
+
 interface StoreData {
   nameAr: string;           // اسم المتجر بالعربية
   nameEn: string;           // اسم المتجر بالإنجليزية
@@ -69,9 +56,7 @@ interface StoreData {
   contact: StoreContact;
 }
 
-/**
- * استجابة API للمتجر (يشمل البيانات الكاملة من قاعدة البيانات)
- */
+
 interface StoreResponse {
   _id?: string;
   id?: string;
@@ -98,9 +83,7 @@ interface StoreResponse {
   updatedAt?: string;
 }
 
-/**
- * استجابة API عامة
- */
+
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -108,29 +91,13 @@ interface ApiResponse<T> {
   error?: string;
 }
 
-// ============================================================================
-// MAIN HOOK
-// ============================================================================
 
-/**
- * Hook لإدارة عمليات المتجر (CRUD)
- * يوفر وظائف إنشاء، قراءة، تحديث، حذف المتاجر
- */
 export const useStore = () => {
-  // ========================================================================
-  // STATE MANAGEMENT
-  // ========================================================================
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ========================================================================
-  // UTILITY FUNCTIONS
-  // ========================================================================
-
-  /**
-   * معالجة الأخطاء من API
-   */
+ 
   const handleApiError = (err: any, defaultMessage: string): string => {
     const errorMessage = err.response?.data?.message || err.message || defaultMessage;
     setError(errorMessage);
@@ -138,9 +105,7 @@ export const useStore = () => {
     return errorMessage;
   };
 
-  /**
-   * إعداد headers للـ API requests
-   */
+  
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
     return {
@@ -149,15 +114,7 @@ export const useStore = () => {
     };
   };
 
-  // ========================================================================
-  // CRUD OPERATIONS
-  // ========================================================================
-
-  /**
-   * إنشاء متجر جديد
-   * @param storeData - بيانات المتجر المراد إنشاؤه
-   * @returns StoreResponse | null
-   */
+ 
   const createStore = async (storeData: StoreData): Promise<StoreResponse | null> => {
     setLoading(true);
     setError(null);
@@ -185,10 +142,7 @@ export const useStore = () => {
     }
   };
 
-  /**
-   * جلب جميع المتاجر
-   * @returns StoreResponse[]
-   */
+ 
   const getStores = async (): Promise<StoreResponse[]> => {
     setLoading(true);
     setError(null);
@@ -312,10 +266,7 @@ export const useStore = () => {
     }
   };
 
-  // ========================================================================
-  // FILE UPLOAD OPERATIONS
-  // ========================================================================
-
+ 
 // -----------------------------------------------uploadStoreLogo---------------------------------------------------------
   const uploadStoreLogo = async (
     file: File, 
@@ -328,11 +279,11 @@ export const useStore = () => {
       //CONSOLE.log('📤 رفع لوجو المتجر:', file.name);
       //CONSOLE.log('🏪 معرف المتجر:', storeId || 'غير محدد');
       
-      const token = localStorage.getItem('token');
+    
       const formData = new FormData();
       
-      // إضافة الصورة باسم 'images' بدلاً من 'logo'
-      formData.append('images', file);
+      // إضافة الصورة باسم 'image' كما يتوقعه الباك إند
+      formData.append('image', file);
       
       // إضافة معرف المتجر إذا كان موجوداً
       if (storeId) {
@@ -345,15 +296,15 @@ export const useStore = () => {
       const response = await axios.post<ApiResponse<Array<{
         url: string;
         key: string;
-        originalName: string;
-        size: number;
-        mimetype: string;
+        // originalName: string;
+        // size: number;
+        // mimetype: string;
       }>>>(
-        `${BASE_URL}stores/upload-multiple-images`,
+        `${BASE_URL}stores/upload-image`,
         formData,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+           
             'Content-Type': 'multipart/form-data',
           },
         }
@@ -387,15 +338,11 @@ export const useStore = () => {
     // State
     loading,
     error,
-    
-    // CRUD Operations
     createStore,
     getStores,
     getStore,
     updateStore,
     deleteStore,
-    
-    // File Upload
     uploadStoreLogo,
   };
 }; 

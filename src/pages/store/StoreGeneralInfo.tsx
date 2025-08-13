@@ -230,7 +230,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         [name]: value,
       };
       
-      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      // حفظ البيانات محلياً فقط في الخطوة الأولى
       if (onSubmit && !isEditMode) {
         setTimeout(() => {
           const formData = {
@@ -262,7 +262,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         [field]: e.target.value,
       };
       
-      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      // حفظ البيانات محلياً فقط في الخطوة الأولى
       if (onSubmit && !isEditMode) {
         setTimeout(() => {
           const formData = {
@@ -308,7 +308,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
           }
         };
         
-        // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+        // حفظ البيانات محلياً فقط في الخطوة الأولى
         if (onSubmit && !isEditMode) {
           setTimeout(() => {
             const formData = {
@@ -337,7 +337,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
           logo: { public_id: null, url: null }
         };
         
-        // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+        // حفظ البيانات محلياً فقط في الخطوة الأولى
         if (onSubmit && !isEditMode) {
           setTimeout(() => {
             const formData = {
@@ -366,7 +366,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         }
       };
       
-      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      // حفظ البيانات محلياً فقط في الخطوة الأولى
       if (onSubmit && !isEditMode) {
         setTimeout(() => {
           const formData = {
@@ -391,7 +391,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         settings: { ...prev.settings, taxRate: value }
       };
       
-      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      // حفظ البيانات محلياً فقط في الخطوة الأولى
       if (onSubmit && !isEditMode) {
         setTimeout(() => {
           const formData = {
@@ -416,7 +416,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         settings: { ...prev.settings, storeDiscount: value }
       };
       
-      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      // حفظ البيانات محلياً فقط في الخطوة الأولى
       if (onSubmit && !isEditMode) {
         setTimeout(() => {
           const formData = {
@@ -458,7 +458,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         whatsappNumber: value
       };
       
-      // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+      // حفظ البيانات محلياً فقط في الخطوة الأولى
       if (onSubmit && !isEditMode) {
         setTimeout(() => {
           const formData = {
@@ -803,7 +803,6 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             }));
           }}
           alt="Store Logo"
-          helpText={t('store.logoHelpText')}
           file={logoFile}
           label={t('store.uploadLogo')}
           isEditMode={isEditMode}
@@ -835,7 +834,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
                       settings: { ...prev.settings, mainColor: e.target.value }
                     };
                     
-                    // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+                    // حفظ البيانات محلياً فقط في الخطوة الأولى
                     if (onSubmit && !isEditMode) {
                       setTimeout(() => {
                         const formData = {
@@ -881,7 +880,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
                     settings: { ...prev.settings, currency: e.target.value }
                   };
                   
-                  // إرسال البيانات تلقائياً في وضع إنشاء متجر جديد
+                  // حفظ البيانات محلياً فقط في الخطوة الأولى
                   if (onSubmit && !isEditMode) {
                     setTimeout(() => {
                       const formData = {

@@ -130,7 +130,7 @@ const UsersPage: React.FC = () => {
   // };
 
   // عرض الاسم الكامل
-  const renderFullName = (value: any, item: any) => (
+  const renderFullName = ( item: any) => (
     <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
       <span className="font-medium text-gray-900">
         {item.firstName} {item.lastName}
@@ -182,7 +182,7 @@ const UsersPage: React.FC = () => {
   };
 
   // عرض العنوان
-  const renderAddress = (value: any, item: any) => {
+  const renderAddress = ( item: any) => {
     const defaultAddress = item.addresses?.find((addr: any) => addr.isDefault) || item.addresses?.[0];
     
     if (!defaultAddress) {

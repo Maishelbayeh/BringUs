@@ -10,7 +10,7 @@
     "save":"حفظ",
     "saving":"جاري الحفظ...",
     "active":"نشط",
-    "update": "تعديل",
+    
     "inactive":"غير نشط",
     "yes":"نعم",
     "no":"لا",
@@ -680,7 +680,7 @@
     "next": "التالي",
     "previous": "السابق",
     "submit": "إرسال",
-    "reset": "إعادة تعيين",
+    
     "update": "تحديث",
     "create": "إنشاء",
     "remove": "إزالة",
@@ -754,7 +754,7 @@
     "finalTotal":"الإجمالي النهائي",
     "orderPrice":"سعر الطلب",
     "ordersPhone":"رقم العميل",
-    "product":"المنتج",
+    
     "quantity":"الكمية",
     "unit":"الوحدة",
     "unitPrice":"سعر الوحدة",
@@ -783,8 +783,7 @@
     "deleteConfirmTitle": "تأكيد حذف المنتج من الطلب",
     "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المنتج من الطلب؟",
     "order": "طلب",
-    "deleteOrderConfirmTitle": "تأكيد حذف الطلب",
-    "deleteOrderConfirmMessage": "هل أنت متأكد من حذف هذا الطلب؟",
+    
     "paymentStatusUpdated": "تم تحديث حالة الدفع للطلب ",
     "paymentStatusUpdateFailed": "فشل في تحديث حالة الدفع",
     "orderStatusUpdated": "تم تحديث حالة الطلب ",
@@ -1158,8 +1157,7 @@
     "discountPlaceholder": "أدخل نسبة الخصم",
     "taxRate": "نسبة الضريبة (%)",
     "taxRatePlaceholder": "أدخل نسبة الضريبة",
-    "contactInfo": "معلومات التواصل",
-    
+    "contactInfo": "معلومات التواصل",   
     "whatsappPlaceholder": "أدخل رقم الواتساب",
     "email": "البريد الإلكتروني",
     "emailPlaceholder": "أدخل البريد الإلكتروني",
@@ -1213,8 +1211,7 @@
     "selectLogo": "اختيار اللوجو",
     "selectedFile": "الملف المختار",
     "fileSize": "حجم الملف",
-    "removeLogo": "حذف اللوجو",
-    "logoHelpText": "انقر على اللوجو لتغييره. الصيغ المدعومة: PNG, JPG, JPEG. الحد الأقصى للحجم: 5 ميجابايت."
+    "removeLogo": "حذف اللوجو"
   },
   "newUser": {
     "title": "تسجيل مستخدم جديد",
