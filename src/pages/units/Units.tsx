@@ -111,7 +111,7 @@ const Units: React.FC = () => {
 
   // Breadcrumb
   const breadcrumb = [
-    { name: t('sideBar.products') || 'Products', href: '/products' },
+    { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
     { name: t('units.title') || 'Units', href: '/units' },
   ];
 

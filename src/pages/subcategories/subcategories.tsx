@@ -8,6 +8,7 @@ import SubcategoriesDrawer from './SubcategoriesDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import SubcategoryCard from './components/SubcategoryCard';
+import { useStoreUrls } from '@/hooks/useStoreUrls';
 
 const initialCategories = [
   { id: 1, name: 'Electronics' },
@@ -47,7 +48,7 @@ const SubcategoriesPage: React.FC = () => {
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const categoryIdParam = params.get('categoryId');
-
+  const { storeSlug } = useStoreUrls();
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);
   }, [categoryIdParam]);
@@ -131,7 +132,7 @@ const SubcategoriesPage: React.FC = () => {
             isRTL={isRTL}
             onEdit={() => handleEdit(sub)}
             onDelete={() => {/* TODO: handleDelete(sub) */}}
-            onClick={() => navigate(`/products?subcategoryId=${sub.id}`)}
+            onClick={() => navigate(`/${storeSlug}/products?subcategoryId=${sub.id}`)}
           />
         ))}
       </div>

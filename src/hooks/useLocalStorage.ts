@@ -19,11 +19,21 @@ export const updateStoreData = (storeData: any) => {
         localStorage.setItem('storeLogo', logoUrl);
       }
     }
+    
+    // Dispatch custom event for store context update
+    window.dispatchEvent(new CustomEvent('storeDataUpdated', { 
+      detail: { storeData } 
+    }));
   }
 };
 
 export const updateStoreId = (storeId: string) => {
   localStorage.setItem('storeId', storeId);
+  
+  // Dispatch custom event for store context update
+  window.dispatchEvent(new CustomEvent('storeDataUpdated', { 
+    detail: { storeId } 
+  }));
 };
 
 export const getStoreId = () => {

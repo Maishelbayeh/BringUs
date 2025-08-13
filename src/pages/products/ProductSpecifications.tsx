@@ -7,6 +7,7 @@ import HeaderWithAction from '../../components/common/HeaderWithAction';
 import { PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import CustomButton from '../../components/common/CustomButton';
 import PermissionModal from '../../components/common/PermissionModal';
+import { useStoreUrls } from '@/hooks/useStoreUrls';
 // import { validateSpecificationWithDuplicates } from '../../validation/specificationsValidation'; // No longer needed here
 
 const ProductSpecifications: React.FC = () => {
@@ -18,7 +19,7 @@ const ProductSpecifications: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [specToDelete, setSpecToDelete] = useState<any>(null);
   const [search, setSearch] = useState('');
-
+  const { storeSlug } = useStoreUrls();
   const {
     specifications,
     loading,
@@ -76,7 +77,7 @@ const ProductSpecifications: React.FC = () => {
   // Breadcrumb
   const breadcrumb = [
     { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
-    { name: t('sideBar.products') || 'Products', href: '/products' },
+    { name: t('sideBar.products') || 'Products', href: `/${storeSlug}/products` },
     { name: t('sideBar.productSpecifications') || 'Product Specifications', href: '/products/specifications' },
   ];
 

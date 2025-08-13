@@ -9,6 +9,7 @@ import { MenuItem } from './Types';
 import Sidebar from './components/common/navigation/sidebar';
 import TopNavbar from './components/common/navigation/topNav';
 import { ToastProvider } from './contexts/ToastContext';
+import { StoreProvider } from './contexts/StoreContext';
 import { useAuth } from './hooks/useAuth';
 import PaymentVerificationHandler from './components/common/PaymentVerificationHandler';
 
@@ -119,7 +120,9 @@ function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <AppContent />
+        <StoreProvider>
+          <AppContent />
+        </StoreProvider>
       </ToastProvider>
     </BrowserRouter>
   );

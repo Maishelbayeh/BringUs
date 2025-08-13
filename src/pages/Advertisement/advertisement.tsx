@@ -7,11 +7,12 @@ import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import PermissionModal from '@/components/common/PermissionModal';
 import { useAdvertisements } from '../../hooks/useAdvertisements';
+import { useStoreUrls } from '@/hooks/useStoreUrls';
 
 const AdvertisementPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
-
+  const { storeSlug } = useStoreUrls();
   // TODO: Replace with actual storeId from context/auth if needed
   const storeId = localStorage.getItem('storeId') || '';
   const token = localStorage.getItem('token') || '';
@@ -214,8 +215,8 @@ const AdvertisementPage = () => {
   return (
     <div className="sm:p-4" >
       <CustomBreadcrumb items={[
-        { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
-        { name: t('sideBar.advertisement') || 'Advertisement', href: '/advertisement' }
+        { name: t('sideBar.dashboard') || 'Dashboard', href: `/${storeSlug}/` },
+        { name: t('sideBar.advertisement') || 'Advertisement', href: `/${storeSlug}/advertisement` }
       ]} isRtl={isRTL} />
       <HeaderWithAction
         title={t('sideBar.advertisement') || 'Advertisement'}

@@ -1,4 +1,5 @@
-import  { useState } from 'react';
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import AffiliationDrawer from './component/AffiliationDrawer';
@@ -10,7 +11,10 @@ import AffiliatePaymentDrawer from './AffiliatePaymentDrawer';
 
 //------------------------------------------- AffiliationPage -------------------------------------------
 const AffiliationPage = () => {
+  console.log('AffiliationPage component loaded');
   const { t, i18n } = useTranslation();
+  const { affiliateCode } = useParams<{ affiliateCode?: string }>();
+  console.log('Current affiliateCode:', affiliateCode);
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingAffiliate, setEditingAffiliate] = useState<any>(null);
@@ -26,6 +30,22 @@ const AffiliationPage = () => {
     deleteAffiliate, 
     fetchAffiliates
   } = useAffiliations();
+
+  // Handle affiliate code from URL if present
+  React.useEffect(() => {
+    console.log('AffiliationPage useEffect - affiliateCode:', affiliateCode);
+    console.log('AffiliationPage useEffect - current URL:', window.location.pathname);
+    
+    if (affiliateCode) {
+      console.log('Affiliate code from URL:', affiliateCode);
+      // You can add logic here to handle the affiliate code
+      // For example, filter the table to show only this affiliate
+      // or open a specific modal/drawer
+    } else {
+      console.log('No affiliate code in URL');
+    }
+  }, [affiliateCode]);
+
 //------------------------------------------- columns -------------------------------------------
   const columns = [
     {

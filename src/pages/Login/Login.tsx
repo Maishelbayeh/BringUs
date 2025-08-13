@@ -16,13 +16,14 @@ import CustomInput from '@/components/common/CustomInput';
 import CustomButton from '@/components/common/CustomButton';
 import useLanguage from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
+import { useStoreUrls } from '@/hooks/useStoreUrls';
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const { login, isLoading: authLoading, error: authError } = useAuth();
-  
+  const { storeSlug } = useStoreUrls();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -81,10 +82,10 @@ const Login: React.FC = () => {
         const user = result.user;
         if (user.role === 'superadmin') {
           // السوبر أدمن يذهب مباشرة إلى إدارة المتاجر
-          navigate('/superadmin/stores');
+          navigate(`/${storeSlug}/superadmin/stores`);
         } else {
           // المستخدمون العاديون يذهبون إلى الداشبورد
-          navigate('/');
+          navigate(`/${storeSlug}/`);
         }
       }
     } catch (error) {

@@ -4,6 +4,7 @@ import CountUp from 'react-countup';
 
 import useLanguage from '../../../hooks/useLanguage';
 import { useNavigate } from 'react-router-dom';
+import { useStoreUrls } from '../../../hooks/useStoreUrls';
 
 interface DashboardStatCardProps {
   title: string;
@@ -36,6 +37,7 @@ const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
   const navigate = useNavigate();
+  const { generateUrl } = useStoreUrls();
   if (isLoading) {
     return (
       <motion.div
@@ -63,7 +65,8 @@ const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
       transition={{ duration: 0.5 }}
       onClick={() => {
         if (link) {
-          navigate(link);
+          const storeUrl = generateUrl(link);
+          navigate(storeUrl);
         }
       }}
       className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 group"

@@ -10,6 +10,7 @@ import { GlobeAltIcon } from '@heroicons/react/24/outline';
 import logo from '../../../assets/bringus.svg';
 
 import { getStoreName, getStoreLogo } from '../../../hooks/useLocalStorage';
+import { useStoreUrls } from '../../../hooks/useStoreUrls';
 import SubscriptionRenewalPopup from '../SubscriptionRenewalPopup';
 import { useUserStore } from '../../../hooks/useUserStore';
 import { useSubscription } from '../../../hooks/useSubscription';
@@ -29,7 +30,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  
+  const { storeSlug } = useStoreUrls();
   const [storeName, setStoreName] = useState(getStoreName(language) || 'bring us');
   const [storeLogo, setStoreLogo] = useState(getStoreLogo());
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
@@ -65,6 +66,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
         >
           <Bars3Icon className="h-6 w-6" />
         </button>
+        <div onClick={() => navigate(`/${storeSlug}/store-info-container`)} className={`cursor-pointer flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
 
         <div onClick={() => navigate('/store-info-container')} className={`cursor-pointer flex items-center gap-2 ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}> 
           <img 
@@ -80,7 +82,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
         <div className={`flex items-center gap-4 justify-center flex-row ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}>
           {/* Payment & Delivery Icons */}
           <button
-            onClick={() => navigate('/payment-methods')}
+            onClick={() => navigate(`/${storeSlug}/payment-methods`)}
             className="p-2 rounded-full hover:bg-primary/10 transition"
             title={t('paymentMethods.title') || 'Payment Methods'}
           >
@@ -103,7 +105,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
             )}
           </button>
           <button
-            onClick={() => navigate('/delivery-settings')}
+            onClick={() => navigate(`/${storeSlug}/delivery-settings`)}
             className="p-2 rounded-full hover:bg-primary/10 transition"
             title={t('deliveryDetails.title') || 'Delivery Methods'}
           >

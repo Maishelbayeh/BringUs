@@ -86,6 +86,8 @@ const Homepage: React.FC = () => {
           </div>
         </motion.div>
 
+     
+     
         {/* Total Revenue Section */}
         <motion.div 
           variants={itemVariants}
