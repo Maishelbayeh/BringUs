@@ -6,81 +6,6 @@ import { BASE_URL } from '../constants/api';
 // Import the store utility function
 import { getStoreId } from '../utils/storeUtils';
 
-/**
- * IMPORTANT: ObjectId Conversion Issue
- * 
- * The backend expects MongoDB ObjectIds (24-character hexadecimal strings) for category fields,
- * but the frontend is sending numeric string values (like "6"). This causes the error:
- * "Cast to ObjectId failed for value '6' (type string) at path 'category' because of 'BSONError'"
- * 
- * Solutions:
- * 1. Backend should handle conversion from numeric strings to ObjectIds
- * 2. Frontend should convert numeric strings to proper ObjectIds before sending
- * 3. Category IDs should be stored as ObjectIds in the database
- * 
- * For now, we're sending the data as-is and letting the backend handle the conversion.
- * If the backend doesn't handle this, you'll need to implement one of the above solutions.
- */
-
-// Utility function to convert numeric string IDs to proper ObjectId format
-const convertToObjectId = (val: any): any => {
-  if (!val) return val;
-  if (typeof val === 'object' && (val._id || val.id)) return val._id || val.id;
-  // If it's a string that looks like a number, it might be a numeric ID that needs to be converted to ObjectId
-  if (typeof val === 'string' && /^\d+$/.test(val)) {
-    // This is a numeric string ID, we need to ensure it's a valid ObjectId
-    // For now, we'll return it as is and let the backend handle the conversion
-    console.warn('Numeric string ID detected, may need ObjectId conversion:', val);
-    console.warn('Backend should handle conversion from numeric string to ObjectId');
-    return val;
-  }
-  return val;
-};
-
-// Function to validate and clean category data before sending to backend
-const validateCategoryData = (categoryData: any): any => {
-  if (!categoryData) return categoryData;
-  
-  if (Array.isArray(categoryData)) {
-    return categoryData.map(validateCategoryData);
-  }
-  
-  if (typeof categoryData === 'string' && /^\d+$/.test(categoryData)) {
-    console.warn('Category ID is numeric string, backend should handle ObjectId conversion:', categoryData);
-    return categoryData;
-  }
-  
-  return categoryData;
-};
-
-// Function to clean variant data and prevent ObjectId casting errors
-const cleanVariantData = (variantData: any): any => {
-  const cleaned = { ...variantData };
-  
-  // Ensure category field is completely removed to prevent ObjectId casting errors
-  // The backend expects categories array, not a single category field
-  delete cleaned.category;
-  
-  // Additional safety check
-  if ('category' in cleaned) {
-    console.warn('Removing category field to prevent ObjectId casting error');
-    delete cleaned.category;
-  }
-  
-  // Preserve categoryIds but remove categoryId to prevent conflicts
-  // categoryIds will be converted to categories array later
-  if ('categoryId' in cleaned) {
-    console.warn('Removing categoryId field to prevent ObjectId casting error');
-    delete cleaned.categoryId;
-  }
-  
-  // Don't remove categoryIds - it will be converted to categories array
-  // The categoryIds field is needed for the form to work properly
-  console.log('Preserving categoryIds for processing:', cleaned.categoryIds);
-  
-  return cleaned;
-};
-
 const useProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -642,9 +567,6 @@ const useProducts = () => {
   const addVariant = async (productId: string, variantData: any): Promise<any> => {
     try {
       
-      // Clean variant data to prevent ObjectId casting errors
-      variantData = cleanVariantData(variantData);
-      
       // حذف specifications إذا كانت مصفوفة فارغة
       if (Array.isArray(variantData.specifications) && variantData.specifications.length === 0) {
         delete variantData.specifications;
@@ -677,12 +599,6 @@ const useProducts = () => {
       const cleanReference = (val: any) => {
         if (!val) return val;
         if (typeof val === 'object' && (val._id || val.id)) return val._id || val.id;
-        // If it's a string that looks like a number, it might be a numeric ID that needs to be converted to ObjectId
-        if (typeof val === 'string' && /^\d+$/.test(val)) {
-          // This is a numeric string ID, we need to ensure it's a valid ObjectId
-          // For now, we'll return it as is and let the backend handle the conversion
-          return val;
-        }
         return val;
       };
       
@@ -734,12 +650,6 @@ const useProducts = () => {
         } else if (key === 'categories' && Array.isArray(variantData[key])) {
           // Send each category ID separately to avoid double JSON stringification
           variantData[key].forEach((categoryId: any) => {
-            // Ensure categoryId is a valid ObjectId string
-            if (typeof categoryId === 'string' && /^\d+$/.test(categoryId)) {
-              // This is a numeric string, we need to convert it to a proper ObjectId format
-              // For now, we'll send it as is and let the backend handle the conversion
-              console.warn('Category ID is numeric string, may need ObjectId conversion:', categoryId);
-            }
             formData.append('categories', categoryId);
           });
         } else if (key === 'specifications' && Array.isArray(variantData[key])) {
@@ -930,13 +840,6 @@ const useProducts = () => {
   const updateVariant = async (productId: string, variantId: string, variantData: any): Promise<any> => {
     try {
       
-      // Clean variant data to prevent ObjectId casting errors
-      variantData = cleanVariantData(variantData);
-      
-      // Debug: Log the cleaned variant data
-      console.log('Cleaned variant data:', variantData);
-      console.log('Variant data keys:', Object.keys(variantData));
-      
       // حذف specifications إذا كانت مصفوفة فارغة
       if (Array.isArray(variantData.specifications) && variantData.specifications.length === 0) {
         delete variantData.specifications;
@@ -969,12 +872,6 @@ const useProducts = () => {
       const cleanReference = (val: any) => {
         if (!val) return val;
         if (typeof val === 'object' && (val._id || val.id)) return val._id || val.id;
-        // If it's a string that looks like a number, it might be a numeric ID that needs to be converted to ObjectId
-        if (typeof val === 'string' && /^\d+$/.test(val)) {
-          // This is a numeric string ID, we need to ensure it's a valid ObjectId
-          // For now, we'll return it as is and let the backend handle the conversion
-          return val;
-        }
         return val;
       };
       
@@ -993,16 +890,6 @@ const useProducts = () => {
         delete variantData.category;
       } else {
         variantData.categories = [];
-      }
-      
-      // Ensure category field is completely removed to prevent conflicts
-      delete variantData.category;
-      
-      // Additional fix: Ensure no category field is sent to prevent ObjectId casting errors
-      // The backend expects categories array, not a single category field
-      if ('category' in variantData) {
-        console.warn('Removing category field to prevent ObjectId casting error');
-        delete variantData.category;
       }
       
       variantData.unit = cleanReference(variantData.unit);
@@ -1037,31 +924,10 @@ const useProducts = () => {
           // Handle barcodes array
           formData.append('barcodes', JSON.stringify(variantData[key]));
         } else if (key === 'categories' && Array.isArray(variantData[key])) {
-          console.log('Processing categories array:', variantData[key]);
-          // Only process if categories array has valid items
-          if (variantData[key].length > 0) {
-            // Send each category ID separately to avoid double JSON stringification
-            variantData[key].forEach((categoryId: any) => {
-              console.log('Processing categoryId:', categoryId, 'type:', typeof categoryId);
-              // Ensure categoryId is a valid ObjectId string
-              if (typeof categoryId === 'string' && /^\d+$/.test(categoryId)) {
-                // This is a numeric string, we need to convert it to a proper ObjectId format
-                // For now, we'll send it as is and let the backend handle the conversion
-                console.warn('Category ID is numeric string, may need ObjectId conversion:', categoryId);
-              }
-              // Only append if categoryId is not null, undefined, or empty
-              if (categoryId !== null && categoryId !== undefined && categoryId !== '') {
-                formData.append('categories', categoryId);
-                console.log('Added category to FormData:', categoryId);
-              } else {
-                console.warn('Skipping invalid categoryId:', categoryId);
-              }
-            });
-          } else {
-            console.log('Categories array is empty, not sending to backend');
-          }
-        } else if (key === 'categories') {
-          console.log('Categories field exists but is not an array:', variantData[key]);
+          // Send each category ID separately to avoid double JSON stringification
+          variantData[key].forEach((categoryId: any) => {
+            formData.append('categories', categoryId);
+          });
         } else if (key === 'specifications' && Array.isArray(variantData[key])) {
           // فقط إذا فيها عناصر أرسلها كسلسلة IDs
           if (variantData[key].length > 0) {
@@ -1128,10 +994,6 @@ const useProducts = () => {
         ) {
           // stringify any object (like seo, dimensions, etc.)
           formData.append(key, JSON.stringify(variantData[key]));
-        } else if (key === 'category' || key === 'categoryId' || key === 'categoryIds') {
-          // Skip category-related fields - we only use categories array
-          // This prevents the ObjectId casting error
-          console.log(`Skipping ${key} field to prevent ObjectId error`);
         } else {
           // Handle other fields
           formData.append(key, variantData[key]);
@@ -1145,33 +1007,7 @@ const useProducts = () => {
       }
       formData.append('storeId', storeId);
 
-      // Debug: Log the request details
-      console.log('Update variant request details:');
-      console.log('URL:', `${BASE_URL}products/${productId}/variants/${variantId}`);
-      console.log('Method: PUT');
-      console.log('Product ID:', productId);
-      console.log('Variant ID:', variantId);
-      console.log('Store ID:', storeId);
-      
-      // Debug: Log FormData contents
-      console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
-      
-      // Debug: Check for potential issues
-      console.log('Debug checks:');
-      console.log('- Product ID is valid:', !!productId && productId !== 'undefined' && productId !== 'null');
-      console.log('- Variant ID is valid:', !!variantId && variantId !== 'undefined' && variantId !== 'null');
-      console.log('- Store ID is valid:', !!storeId && storeId !== 'undefined' && storeId !== 'null');
-      console.log('- FormData has entries:', formData.entries().next().done === false);
-      
-      // Ensure categories are always sent, even if empty
-      if (!formData.has('categories')) {
-        console.log('No categories found in FormData, adding empty array');
-        // Don't send empty categories array - let the backend handle it
-        // formData.append('categories', JSON.stringify([]));
-      }
+
       
       const response = await fetch(`${BASE_URL}products/${productId}/variants/${variantId}`, {
         method: 'PUT',
@@ -1179,20 +1015,7 @@ const useProducts = () => {
       });
       
       if (!response.ok) {
-        console.error('Update variant failed with status:', response.status);
-        console.error('Response headers:', response.headers);
-        
-        let errorData;
-        try {
-          errorData = await response.json();
-          console.error('Error response data:', errorData);
-        } catch (parseError) {
-          console.error('Failed to parse error response:', parseError);
-          const errorText = await response.text();
-          console.error('Raw error response:', errorText);
-          throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
-        }
-        
+        const errorData = await response.json();
         // Show all validation errors
         if (errorData?.errors) {
           const errors = errorData.errors;
@@ -1215,10 +1038,7 @@ const useProducts = () => {
         } else {
           showError('حدث خطأ غير متوقع', 'خطأ');
         }
-        
-        // Throw a more descriptive error
-        const errorMessage = errorData?.message || errorData?.error || `HTTP ${response.status}: Update variant failed`;
-        throw new Error(errorMessage);
+        throw new Error(errorData.message || 'Failed to update variant');
       }
       
       const data = await response.json();
@@ -1230,21 +1050,8 @@ const useProducts = () => {
       await fetchProducts(true);
       
       return data;
-    } catch (error: any) {
-      console.error('Update variant error:', error);
-      console.error('Error details:', {
-        message: error?.message,
-        stack: error?.stack,
-        name: error?.name
-      });
-      
-      // If it's already a descriptive error, re-throw it
-      if (error?.message && error.message !== 'Failed to update variant') {
-        throw error;
-      }
-      
-      // Otherwise, provide more context
-      throw new Error(`Failed to update variant: ${error?.message || 'Unknown error'}`);
+    } catch (error) {
+      throw error;
     }
   };
 

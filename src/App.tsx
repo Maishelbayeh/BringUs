@@ -11,6 +11,7 @@ import TopNavbar from './components/common/navigation/topNav';
 import { ToastProvider } from './contexts/ToastContext';
 import { StoreProvider } from './contexts/StoreContext';
 import { useAuth } from './hooks/useAuth';
+import PaymentVerificationHandler from './components/common/PaymentVerificationHandler';
 
 // Component to check if we're on login page
 const AppContent: React.FC = () => {
@@ -62,11 +63,13 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className={
-        `flex h-screen w-full bg-main_bg_w overflow-x-hidden ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
-      }>
-      {/* Sidebar for all screens, but with different style for mobile */}
-      {isSidebarOpen && (
+    <>
+      <PaymentVerificationHandler />
+      <div className={
+          `flex h-screen w-full bg-main_bg_w overflow-x-hidden ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
+        }>
+        {/* Sidebar for all screens, but with different style for mobile */}
+        {isSidebarOpen && (
         <>
           {/* Overlay for mobile and tablets only (less than lg) */}
           <div
@@ -109,6 +112,7 @@ const AppContent: React.FC = () => {
         </main>
       </div>
     </div>
+    </>
   );
 };
 

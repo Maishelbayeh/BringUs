@@ -31,6 +31,8 @@ import ProductsLabels from "../pages/labels/ProductsLabels";
 import StoreGeneralInfo from "@/pages/store/StoreGeneralInfo";
 import StoreInfo from "@/pages/store/StoreInfo";
 import StoresManagement from "@/pages/superadmin/StoresManagement";
+import SubscriptionPlans from "@/pages/superadmin/SubscriptionPlans";
+import SubscriptionHistory from "@/pages/subscription/SubscriptionHistory";
 import SuperAdminRoute from "@/hoc/SuperAdminRoute";
 import AdminRoute from "@/hoc/AdminRoute";
 
@@ -81,20 +83,47 @@ export default function StoreRouter() {
     return (
       <Routes>
         <Route path="/superadmin/stores" element={<StoresManagement />} />
+        <Route path="/superadmin/subscription-plans" element={<SubscriptionPlans />} />
         <Route path="*" element={<Navigate to="/superadmin/stores" replace />} />
       </Routes>
     );
   }
 
-  // For admin users, use store-based routing
-  if (!storeSlug) {
+  // For admin users, get store slug from URL or localStorage
+  const getStoreSlugFromURL = () => {
+    const pathSegments = window.location.pathname.split('/').filter(Boolean);
+    return pathSegments[0] || null;
+  };
+
+  const getStoreSlugFromLocalStorage = () => {
+    try {
+      const storeData = getStoreData();
+      return storeData?.info?.slug || null;
+    } catch (error) {
+      console.error('Error getting store data from localStorage:', error);
+      return null;
+    }
+  };
+
+  // Get store slug from URL first, then localStorage
+  const currentStoreSlug = getStoreSlugFromURL() || getStoreSlugFromLocalStorage();
+
+  // If no store slug found and user is admin, redirect to login
+  if (!currentStoreSlug) {
+    console.log('StoreRouter - No store slug found, redirecting to login');
     return <Navigate to="/login" replace />;
+  }
+
+  // Update context with current store slug if it's different
+  if (storeSlug !== currentStoreSlug) {
+    // This will be handled by StoreRouteWrapper when the route loads
+    console.log('StoreRouter - Store slug mismatch, will be updated by StoreRouteWrapper');
   }
 
   return (
     <Routes>
       {/* Store-based routes with slug */}
-      <Route path={`/${storeSlug}`} element={
+      <Route path={`/${currentStoreSlug}`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <Homepage />
@@ -102,7 +131,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/payment-methods`} element={
+      <Route path={`/${currentStoreSlug}/payment-methods`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <PaymentMethods />
@@ -110,7 +139,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/delivery-settings`} element={
+      <Route path={`/${currentStoreSlug}/delivery-settings`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <DeliveryMethods />
@@ -118,7 +147,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/categories`} element={
+      <Route path={`/${currentStoreSlug}/categories`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <CategoriesPage />
@@ -126,7 +155,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/subcategories`} element={
+      <Route path={`/${currentStoreSlug}/subcategories`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <SubcategoriesPage />
@@ -134,7 +163,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/products`} element={
+      <Route path={`/${currentStoreSlug}/products`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <ProductsPage />
@@ -142,7 +171,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/product-variants`} element={
+      <Route path={`/${currentStoreSlug}/product-variants`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <ProductVariants />
@@ -150,7 +179,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/customers`} element={
+      <Route path={`/${currentStoreSlug}/customers`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <CustomersPage />
@@ -158,7 +187,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/orders`} element={
+      <Route path={`/${currentStoreSlug}/orders`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <OrdersPage />
@@ -166,7 +195,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/orders/:id`} element={
+      <Route path={`/${currentStoreSlug}/orders/:id`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <OrderDetailPage />
@@ -174,7 +203,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/stock-preview`} element={
+      <Route path={`/${currentStoreSlug}/stock-preview`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <StockTable />
@@ -182,7 +211,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/store-slider`} element={
+      <Route path={`/${currentStoreSlug}/store-slider`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <StoreSliderPage />
@@ -190,7 +219,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/store-preview`} element={
+      <Route path={`/${currentStoreSlug}/store-preview`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <StorePreview />
@@ -198,7 +227,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/store-videos`} element={
+      <Route path={`/${currentStoreSlug}/store-videos`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <StoreVideoPage />
@@ -206,7 +235,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/wholesalers`} element={
+      <Route path={`/${currentStoreSlug}/wholesalers`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <WholesallersPage />
@@ -214,7 +243,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/store-info`} element={
+      <Route path={`/${currentStoreSlug}/store-info`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <StoreGeneralInfo />
@@ -222,7 +251,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/store-info-container`} element={
+      <Route path={`/${currentStoreSlug}/store-info-container`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <StoreInfo />
@@ -240,7 +269,7 @@ export default function StoreRouter() {
       } />
        */}
       {/* Basic affiliate route - must come after the specific one */}
-      <Route path={`/${storeSlug}/affiliate`} element={
+      <Route path={`/${currentStoreSlug}/affiliate`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <AffiliationPage />
@@ -248,7 +277,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/advertisement`} element={
+      <Route path={`/${currentStoreSlug}/advertisement`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <AdvertisementPage />
@@ -256,7 +285,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/terms-conditions`} element={
+      <Route path={`/${currentStoreSlug}/terms-conditions`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <TermsConditionsPage />
@@ -264,7 +293,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/products/specifications`} element={
+      <Route path={`/${currentStoreSlug}/products/specifications`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <ProductSpecifications />
@@ -272,7 +301,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/test-checkbox-specifications`} element={
+      <Route path={`/${currentStoreSlug}/test-checkbox-specifications`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <CheckboxSpecificationTest />
@@ -280,7 +309,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/units`} element={
+      <Route path={`/${currentStoreSlug}/units`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <Units />
@@ -288,7 +317,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/labels`} element={
+      <Route path={`/${currentStoreSlug}/labels`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <ProductsLabels />
@@ -296,15 +325,23 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${storeSlug}/testimonials`} element={
-        <StoreRouteWrapper>
-          <AdminRoute>
-            <Testimonial />
-          </AdminRoute>
-        </StoreRouteWrapper>
-      } />
+             <Route path={`/${currentStoreSlug}/testimonials`} element={
+         <StoreRouteWrapper>
+           <AdminRoute>
+             <Testimonial />
+           </AdminRoute>
+         </StoreRouteWrapper>
+       } />
+       
+       <Route path={`/${currentStoreSlug}/subscription-history`} element={
+         <StoreRouteWrapper>
+           <AdminRoute>
+             <SubscriptionHistory />
+           </AdminRoute>
+         </StoreRouteWrapper>
+       } />
       
-      <Route path={`/${storeSlug}/users`} element={
+      <Route path={`/${currentStoreSlug}/users`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <UsersPage />
@@ -313,10 +350,10 @@ export default function StoreRouter() {
       } />
       
       {/* Redirect root to store dashboard */}
-      <Route path="/" element={<Navigate to={`/${storeSlug}`} replace />} />
+      <Route path="/" element={<Navigate to={`/${currentStoreSlug}`} replace />} />
       
       {/* Catch all other routes and redirect to store dashboard */}
-      <Route path="*" element={<Navigate to={`/${storeSlug}`} replace />} />
+      <Route path="*" element={<Navigate to={`/${currentStoreSlug}`} replace />} />
     </Routes>
   );
 } 

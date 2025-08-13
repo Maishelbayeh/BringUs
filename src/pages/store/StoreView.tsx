@@ -5,6 +5,7 @@ import { useStoreSlider } from '@/hooks/useStoreSlider';
 import { STORE_ID } from '@/constants/api';
 import CollapsibleSection from '@/components/common/CollapsibleSection';
 import StoreSlider from '@/components/common/StoreSlider';
+import { getStoreInfo } from '@/utils/storeUtils';
 
 /**
  * مكون لعرض معلومات المتجر (للقراءة فقط) مع أقسام قابلة للطي
@@ -74,7 +75,7 @@ const StoreView: React.FC = () => {
   useEffect(() => {
     const fetchStoreData = async () => {
       if (STORE_ID) {
-        const store = await getStore(STORE_ID);
+        const store = await getStore(STORE_ID,getStoreInfo().slug);
         if (store) {
           setStoreData(store);
         }

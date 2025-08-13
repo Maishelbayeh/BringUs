@@ -94,7 +94,6 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
           password: '', // لا نعرض كلمة المرور في التعديل
           mobile: initialData.mobile || '',
           address: initialData.address || '',
-          affiliateLink: initialData.affiliateLink || '',
           percent: initialData.percent || 0,
           status: initialData.status || 'Active',
           bankInfo: initialData.bankInfo || {

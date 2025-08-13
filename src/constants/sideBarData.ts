@@ -14,7 +14,8 @@ import {
   ChatBubbleLeftRightIcon,
   CubeIcon,
  
-  BuildingStorefrontIcon
+  BuildingStorefrontIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline';
 
 export const getMenuAsText = (): MenuItem[] => [
@@ -181,6 +182,20 @@ export const getMenuAsText = (): MenuItem[] => [
     icon: BuildingStorefrontIcon,
     path: '/superadmin/stores',
     roles: ['superadmin']
+  },
+  {
+    id: 1003,
+    title: 'sideBar.subscriptionPlans',
+    icon: CreditCardIcon,
+    path: '/superadmin/subscription-plans',
+    roles: ['superadmin']
+  },
+  {
+    id: 1004,
+    title: 'sideBar.subscriptionHistory',
+    icon: CreditCardIcon,
+    path: '/subscription-history',
+    roles: ['admin']
   },
 ];
 

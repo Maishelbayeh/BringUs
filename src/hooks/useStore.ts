@@ -170,7 +170,7 @@ export const useStore = () => {
   };
 
 // -----------------------------------------------getStore---------------------------------------------------------
-  const getStore = async (storeId: string): Promise<StoreResponse | null> => {
+  const getStore = async (storeId: string,slug: string): Promise<StoreResponse | null> => {
     setLoading(true);
     setError(null);
 
@@ -178,7 +178,7 @@ export const useStore = () => {
       //CONSOLE.log('🔍 جلب متجر واحد:', storeId);
       
       const response = await axios.get<ApiResponse<StoreResponse>>(
-        `${BASE_URL}stores/${storeId}`,
+        `${BASE_URL}stores/slug/${slug}`,
         { headers: getAuthHeaders() }
       );
 
