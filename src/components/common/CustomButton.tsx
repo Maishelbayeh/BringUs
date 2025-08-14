@@ -19,7 +19,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   label,
   color = '#1976d2',
   text,
-  textColor = '#fff',
+  textColor = 'white',
   alignment = 'center',
   action,
   icon,

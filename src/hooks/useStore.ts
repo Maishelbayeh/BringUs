@@ -283,7 +283,7 @@ export const useStore = () => {
       const formData = new FormData();
       
       // إضافة الصورة باسم 'image' كما يتوقعه الباك إند
-      formData.append('image', file);
+      formData.append('logo', file);
       
       // إضافة معرف المتجر إذا كان موجوداً
       if (storeId) {
