@@ -61,23 +61,14 @@ export const getMenuAsText = (): MenuItem[] => [
     icon: DocumentDuplicateIcon,
     path: '/products',
     roles: ['admin'],
-    children: [
-      // {
-      //   id: 31,
-      //   title: 'sideBar.productVariants',
-      //   icon: Squares2X2Icon,
-      //   path: '/product-variants',
-      // },
-      {
+   
+  },      {
         id: 32,
         title: 'sideBar.productSpecifications',
         icon: DocumentTextIcon,
-        path: '/products/specifications',
+        path: '/specifications',
         roles: ['admin']
       },
-      
-    ]
-  },
   {
     id: 4,
     title: 'sideBar.customers',

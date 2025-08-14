@@ -17,14 +17,7 @@ interface CategoriesFormProps {
 // تم نقل جميع دوال الفالديشين إلى نظام الفالديشين العام في src/validation/categoryValidation.ts
 
 const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onImageChange, isSubcategory, isRTL, categories, validationErrors = {} }) => {
-  // Debug: طباعة قيمة الصورة
-  //CONSOLE.log('CategoriesForm - form.image value:', form.image);
-  //CONSOLE.log('CategoriesForm - form.image type:', typeof form.image);
-  //CONSOLE.log('CategoriesForm - validation errors:', validationErrors);
-  
-  // استخراج الفئات الرئيسية فقط
-  // const mainCategories = categories ? categories.filter(cat => !('parentId' in cat) || cat.parentId === null) : [];
-  // إيجاد اسم الفئة الرئيسية إذا كان parentId موجودًا
+
   const parentCategory = form.parentId !== null && categories ? categories.find(cat => String(cat.id) === String(form.parentId)) : null;
   
   // دالة لعرض رسالة الخطأ

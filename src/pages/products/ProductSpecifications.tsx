@@ -77,8 +77,7 @@ const ProductSpecifications: React.FC = () => {
   // Breadcrumb
   const breadcrumb = [
     { name: t('sideBar.dashboard') || 'Dashboard', href: '/' },
-    { name: t('sideBar.products') || 'Products', href: `/${storeSlug}/products` },
-    { name: t('sideBar.productSpecifications') || 'Product Specifications', href: '/products/specifications' },
+    { name: t('sideBar.productSpecifications') || 'Product Specifications', href: `/${storeSlug}/specifications` },
   ];
 
   return (
