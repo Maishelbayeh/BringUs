@@ -108,6 +108,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     
     // إعدادات المتجر
     settings: {
+      lahzaToken: '',
       mainColor: '#1976d2',
       language: 'ar',
       currency: 'ILS',
@@ -524,6 +525,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
                 nameAr: result.nameAr,
                 nameEn: result.nameEn,
                 logo: result.logo
+               
               };
               localStorage.setItem('storeData', JSON.stringify(updatedStoreData));
               console.log('✅ تم تحديث بيانات المتجر في localStorage');
@@ -612,6 +614,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
               slug: store.slug || '',
               logo: logoData,
               settings: {
+                lahzaToken: store.settings?.lahzaToken || '',
                 mainColor: store.settings?.mainColor || '#1976d2',
                 language: store.settings?.language || 'ar',
                 currency: store.settings?.currency || 'ILS',
@@ -657,7 +660,13 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     fetchStoreData();
   }, [isDataLoaded, getCurrentStoreId]); // إضافة getCurrentStoreId
 
-  
+    const handleLahzaTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setForm(prev => ({
+      ...prev,
+      settings: { ...prev.settings, lahzaToken: value }
+    }));
+  };  
 
   /**
    * إرسال حالة الفالديشن للويزرد
@@ -866,7 +875,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         </div>
 
         {/* عملة المتجر */}
-        <div className="mb-4">
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={`flex flex-col gap-2`}>
             <label className="block mb-1 text-sm font-medium text-gray-900">
               {t('store.currency')}
@@ -908,6 +917,15 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
               ))}
             </select>
           </div>
+          <div className="mb-4">
+            <CustomInput
+              label={t('stores.lahzaToken')}
+              name="lahzaToken"
+              value={form.settings.lahzaToken}
+              onChange={handleLahzaTokenChange}
+              placeholder={t('stores.lahzaTokenPlaceholder')}
+            />
+            </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* نسبة الخصم */}

@@ -95,8 +95,15 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
           }
         }
       );
+      if(response.status === 200){
+        onClose();
+        onClose();
 
-      showSuccess(t('subscription.setupSuccess'), t('subscription.setupSuccessMessage'));
+        showSuccess(t('subscription.setupSuccess'), t('subscription.setupSuccessMessage'));
+        onClose();
+      }else{
+        showError(t('subscription.setupError'), response.data.message);
+      }
       
       // حفظ إعدادات التجديد التلقائي في localStorage
       localStorage.setItem('auto_renewal_enabled', autoRenew.toString());

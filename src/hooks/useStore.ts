@@ -25,6 +25,7 @@ interface StoreSettings {
   taxRate: number;          // نسبة الضريبة
   shippingEnabled: boolean; // تفعيل الشحن
   storeSocials: StoreSocials; // روابط السوشال ميديا
+  lahzaToken: string;
 }
 
 
@@ -249,7 +250,12 @@ export const useStore = () => {
       
       const response = await axios.delete<ApiResponse<null>>(
         `${BASE_URL}stores/${storeId}`,
-        { headers: getAuthHeaders() }
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+     
       );
 
       if (response.data.success) {

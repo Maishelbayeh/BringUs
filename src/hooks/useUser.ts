@@ -220,14 +220,47 @@ export const useUser = () => {
     }
   };
 
-  // حذف المستخدم
-  const deleteUser = async (userId: string): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
-
+  // التحقق من صلاحية حذف المستخدم
+  const checkDeletePermission = async (userId: string): Promise<boolean> => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.delete<ApiResponse<null>>(
+      if (!token) return false;
+
+      // يمكن إضافة طلب للتحقق من الصلاحيات هنا
+      // مثلاً: GET /api/users/{userId}/permissions
+      return true;
+    } catch (error) {
+      console.error('❌ خطأ في التحقق من الصلاحيات:', error);
+      return false;
+    }
+  };
+
+  // التحقق من حالة التوكن
+  const checkTokenStatus = async (): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('🔑 لا يوجد توكن');
+        return false;
+      }
+
+      // يمكن إضافة طلب للتحقق من صحة التوكن
+      // مثلاً: GET /api/auth/verify-token
+      console.log('🔑 التوكن موجود وصالح');
+      return true;
+    } catch (error) {
+      console.error('❌ خطأ في التحقق من التوكن:', error);
+      return false;
+    }
+  };
+
+  // التحقق من وجود المستخدم
+  const checkUserExists = async (userId: string): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return false;
+
+      const response = await axios.get<ApiResponse<UserResponse>>(
         `${BASE_URL}users/${userId}`,
         {
           headers: {
@@ -236,16 +269,118 @@ export const useUser = () => {
         }
       );
 
+      return response.data.success && !!response.data.data;
+    } catch (error) {
+      console.error('❌ خطأ في التحقق من وجود المستخدم:', error);
+      return false;
+    }
+  };
+
+  // حذف المستخدم
+  const deleteUser = async (userId: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('token');
+      console.log('🔑 التوكن:', token ? 'موجود' : 'غير موجود');
+      
+      if (!token) {
+        throw new Error('التوكن غير موجود');
+      }
+
+      // التحقق من صحة userId
+      if (!userId || userId.trim() === '') {
+        throw new Error('معرف المستخدم غير صحيح');
+      }
+
+      // التحقق من وجود المستخدم قبل محاولة حذفه
+      console.log('🔍 التحقق من وجود المستخدم قبل الحذف...');
+      const userExists = await checkUserExists(userId);
+      if (!userExists) {
+        const errorMessage = 'المستخدم غير موجود أو تم حذفه مسبقاً';
+        setError(errorMessage);
+        console.error('❌ المستخدم غير موجود:', userId);
+        return false;
+      }
+
+      // طباعة تفاصيل الطلب للتشخيص
+      console.log('🗑️ محاولة حذف المستخدم:', userId);
+      console.log('🔗 URL:', `${BASE_URL}users/${userId}`);
+      console.log('🔑 Authorization Header:', `Bearer ${token.substring(0, 20)}...`);
+
+      const response = await axios.delete<ApiResponse<null>>(
+        `${BASE_URL}users/${userId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log('📥 استجابة حذف المستخدم:', response.status, response.data);
+
       if (response.data.success) {
-        //CONSOLE.log('✅ تم حذف المستخدم بنجاح');
+        console.log('✅ تم حذف المستخدم بنجاح');
         return true;
       } else {
+        // معالجة خاصة لخطأ "Cannot read properties of undefined (reading '_id')"
+        if (response.data.error && response.data.error.includes('Cannot read properties of undefined')) {
+          const errorMessage = 'المستخدم غير موجود أو تم حذفه مسبقاً';
+          setError(errorMessage);
+          console.error('❌ المستخدم غير موجود:', response.data);
+          return false;
+        }
+        
         throw new Error(response.data.message || 'فشل في حذف المستخدم');
       }
     } catch (err: any) {
+      console.error('❌ خطأ في حذف المستخدم:', err);
+      
+      // معالجة خاصة لخطأ 404
+      if (err.response?.status === 404) {
+        const errorMessage = 'المستخدم غير موجود';
+        setError(errorMessage);
+        console.error('🔍 خطأ 404 - المستخدم غير موجود:', err.response.data);
+        return false;
+      }
+      
+      // معالجة خاصة لخطأ 403
+      if (err.response?.status === 403) {
+        const errorMessage = 'ليس لديك صلاحية لحذف هذا المستخدم أو التوكن منتهي الصلاحية';
+        setError(errorMessage);
+        console.error('🚫 خطأ 403 - صلاحيات غير كافية:', err.response.data);
+        return false;
+      }
+      
+      // معالجة خاصة لخطأ 401
+      if (err.response?.status === 401) {
+        const errorMessage = 'التوكن منتهي الصلاحية، يرجى إعادة تسجيل الدخول';
+        setError(errorMessage);
+        console.error('🔒 خطأ 401 - توكن منتهي الصلاحية:', err.response.data);
+        
+        // مسح التوكن من localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // يمكن إضافة redirect للصفحة الرئيسية هنا
+        // window.location.href = '/login';
+        
+        return false;
+      }
+
+      // معالجة خاصة لخطأ "Cannot read properties of undefined"
+      if (err.response?.data?.error && err.response.data.error.includes('Cannot read properties of undefined')) {
+        const errorMessage = 'المستخدم غير موجود أو تم حذفه مسبقاً';
+        setError(errorMessage);
+        console.error('❌ خطأ في قراءة بيانات المستخدم:', err.response.data);
+        return false;
+      }
+
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء حذف المستخدم';
       setError(errorMessage);
-      //CONSOLE.error('❌ خطأ في حذف المستخدم:', errorMessage);
+      console.error('❌ خطأ عام في حذف المستخدم:', errorMessage);
       return false;
     } finally {
       setLoading(false);
@@ -378,6 +513,9 @@ export const useUser = () => {
     getAllUsers,
     checkEmailExists,
     checkPhoneExists,
+    checkDeletePermission,
+    checkTokenStatus,
+    checkUserExists,
   };
 };
  

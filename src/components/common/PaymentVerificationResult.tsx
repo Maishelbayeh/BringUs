@@ -206,7 +206,7 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
           isOpen={showAutoRenewalSetup}
           onClose={() => setShowAutoRenewalSetup(false)}
           isRTL={isRTL}
-          referenceId={result?.data?.data?.reference || result?.data?.data?.id || ''}
+          referenceId={result?.data?.data?.authorization.authorization_code  || ''}
         />
       )}
     </div>

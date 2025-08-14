@@ -163,7 +163,9 @@
       "owners": "المالك",
       "createdAt": "تاريخ الإنشاء",
       "updatedAt": "آخر تحديث"
-    }
+    },
+    "lahzaToken": "رمز لحظة",
+    "lahzaTokenPlaceholder": "أدخل رمز لحظة"
   },   
   "auth":{
     "since_2024":"منذ 2024",

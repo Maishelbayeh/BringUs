@@ -163,7 +163,9 @@
       "owners": "Owners",
       "createdAt": "Created At",
       "updatedAt": "Updated At"
-    }
+    },
+    "lahzaToken": "Lahza Token",
+    "lahzaTokenPlaceholder": "Enter Lahza Token"
   },
   "login": {
     "welcomeTitle": "Welcome to BringUs",

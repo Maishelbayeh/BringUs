@@ -12,6 +12,7 @@ import { useToastContext } from '@/contexts/ToastContext';
 import useLanguage from '@/hooks/useLanguage';
 import SubscriptionRenewalPopup from '@/components/common/SubscriptionRenewalPopup';
 import { useUserStore } from '@/hooks/useUserStore';
+import { CustomTable } from '../../components/common/CustomTable';
 import axios from 'axios';
 
 interface SubscriptionHistoryItem {
@@ -68,6 +69,80 @@ const SubscriptionHistory: React.FC = () => {
     filteredCount: 0
   });
 
+  // تعريف أعمدة الجدول
+  const columns = [
+    {
+      key: 'action',
+      label: { en: 'Action', ar: 'الإجراء' },
+      type: 'status' as const,
+      render: (value: string, item: SubscriptionHistoryItem) => (
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getActionColor(value)}`}>
+          {getActionText(value)}
+        </span>
+      )
+    },
+    {
+      key: 'planName',
+      label: { en: 'Plan Name', ar: 'اسم الخطة' },
+      type: 'text' as const,
+      render: (value: string, item: SubscriptionHistoryItem) => (
+        <div>
+          <div className="text-sm font-medium text-gray-900">
+            {isRTL ? item.details.planNameAr : item.details.planName}
+          </div>
+          <div className="text-sm text-gray-500">
+            {item.details.planType}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'price',
+      label: { en: 'Price', ar: 'السعر' },
+      type: 'text' as const,
+      render: (value: string, item: SubscriptionHistoryItem) => (
+        <div>
+          <div className="text-sm font-medium text-gray-900">
+            {getCurrencySymbol(item.details.currency)}{item.details.price}
+          </div>
+          <div className="text-sm text-gray-500">
+            {item.details.currency}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'startDate',
+      label: { en: 'Start Date', ar: 'تاريخ البداية' },
+      type: 'date' as const,
+      render: (value: string, item: SubscriptionHistoryItem) => (
+        <div className="text-sm text-gray-900">
+          {formatDate(item.details.startDate)}
+        </div>
+      )
+    },
+    {
+      key: 'endDate',
+      label: { en: 'End Date', ar: 'تاريخ الانتهاء' },
+      type: 'date' as const,
+      render: (value: string, item: SubscriptionHistoryItem) => (
+        <div className="text-sm text-gray-900">
+          {formatDate(item.details.endDate)}
+        </div>
+      )
+    },
+    {
+      key: 'performedAt',
+      label: { en: 'Performed At', ar: 'تاريخ التنفيذ' },
+      type: 'date' as const,
+      render: (value: string, item: SubscriptionHistoryItem) => (
+        <div className="text-sm text-gray-900">
+          {formatDate(item.performedAt)}
+        </div>
+      )
+    }
+  ];
+
   // جلب تاريخ الاشتراكات
   const fetchHistory = async (page = 1) => {
     if (!storeId) return;
@@ -102,6 +177,19 @@ const SubscriptionHistory: React.FC = () => {
   const handlePageChange = (newPage: number) => {
     fetchHistory(newPage);
   };
+
+  // تحويل البيانات لتتناسب مع CustomTable
+  const tableData = history.map(item => ({
+    action: item.action,
+    planName: item.details.planName,
+    price: item.details.price,
+    startDate: item.details.startDate,
+    endDate: item.details.endDate,
+    performedAt: item.performedAt,
+    // إضافة البيانات الأصلية للوصول إليها في render functions
+    details: item.details,
+    _id: item._id
+  }));
 
   // الحصول على نص الإجراء مترجم
   const getActionText = (action: string) => {
@@ -195,156 +283,12 @@ const SubscriptionHistory: React.FC = () => {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      isRTL ? 'text-right' : 'text-left'
-                    }`}>
-                      {t('subscriptionHistory.action')}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      isRTL ? 'text-right' : 'text-left'
-                    }`}>
-                      {t('subscriptionHistory.planName')}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      isRTL ? 'text-right' : 'text-left'
-                    }`}>
-                      {t('subscriptionHistory.price')}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      isRTL ? 'text-right' : 'text-left'
-                    }`}>
-                      {t('subscriptionHistory.startDate')}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      isRTL ? 'text-right' : 'text-left'
-                    }`}>
-                      {t('subscriptionHistory.endDate')}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      isRTL ? 'text-right' : 'text-left'
-                    }`}>
-                      {t('subscriptionHistory.performedAt')}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      isRTL ? 'text-right' : 'text-left'
-                    }`}>
-                      {t('subscriptionHistory.referenceId')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {history.map((item) => (
-                    <tr key={item._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getActionColor(item.action)}`}>
-                          {getActionText(item.action)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {isRTL ? item.details.planNameAr : item.details.planName}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {item.details.planType}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {getCurrencySymbol(item.details.currency)}{item.details.price}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {item.details.currency}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {formatDate(item.details.startDate)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {formatDate(item.details.endDate)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {formatDate(item.performedAt)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 font-mono">
-                          {item.details.referenceId}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {pagination.pages > 1 && (
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                <div className="flex-1 flex justify-between sm:hidden">
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page <= 1}
-                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isRTL ? 'التالي' : 'Previous'}
-                  </button>
-                  <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page >= pagination.pages}
-                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isRTL ? 'السابق' : 'Next'}
-                  </button>
-                </div>
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm text-gray-700">
-                      {isRTL ? 'عرض' : 'Showing'} <span className="font-medium">{((pagination.page - 1) * pagination.limit) + 1}</span> {isRTL ? 'إلى' : 'to'} <span className="font-medium">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> {isRTL ? 'من' : 'of'} <span className="font-medium">{pagination.total}</span> {isRTL ? 'نتيجة' : 'results'}
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                      <button
-                        onClick={() => handlePageChange(pagination.page - 1)}
-                        disabled={pagination.page <= 1}
-                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isRTL ? '→' : '←'}
-                      </button>
-                      {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                            page === pagination.page
-                              ? 'z-10 bg-primary border-primary text-white'
-                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => handlePageChange(pagination.page + 1)}
-                        disabled={pagination.page >= pagination.pages}
-                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isRTL ? '←' : '→'}
-                      </button>
-                    </nav>
-                  </div>
-                </div>
-              </div>
-            )}
+            <CustomTable
+              columns={columns}
+              data={tableData}
+              showColumnToggle={true}
+              showHiddenColumnsBar={true}
+            />
           </div>
         )}
 
