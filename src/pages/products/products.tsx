@@ -932,6 +932,7 @@ const ProductsPage: React.FC = () => {
     } catch (error) {
       console.error('🔍 handleDeleteVariant - Error:', error);
     }
+    
   };
 
   //-------------------------------------------- renderProductId -------------------------------------------
