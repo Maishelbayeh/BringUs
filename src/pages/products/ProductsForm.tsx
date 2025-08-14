@@ -52,6 +52,7 @@ interface ProductsFormProps {
   validationErrors?: { [key: string]: string };
   onFieldValidation?: (fieldName: string, value: any) => void;
   showValidation?: boolean;
+
 }
 
 //-------------------------------------------- ProductsForm -------------------------------------------
