@@ -8,14 +8,14 @@ import HeaderWithAction from '@/components/common/HeaderWithAction';
 import { useTermsConditions } from '../../hooks/useTermsConditions';
 import { getStoreId } from '@/utils/storeUtils';
 
-// Mock store ID - replace with actual store ID from context
-const STORE_ID =getStoreId();
-
 const initialHtml = `<h2>Terms & Conditions</h2><ul><li>All users must be 18+ years old.</li><li>Respect privacy and data policies.</li></ul>`;
 
 const TermsConditionsPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  
+  // Get store ID dynamically inside component
+  const storeId = getStoreId();
   
   const {
     terms,
@@ -23,17 +23,24 @@ const TermsConditionsPage = () => {
     getTermsByStore,
     createTerms,
     updateTerms,
-  } = useTermsConditions(STORE_ID);
+  } = useTermsConditions(storeId);
 
   const [html, setHtml] = useState(initialHtml);
   const [saving, setSaving] = useState(false);
 
   // Load active terms on component mount
   useEffect(() => {
-    loadActiveTerms();
-  }, []);
+    if (storeId && storeId.trim()) {
+      loadActiveTerms();
+    }
+  }, [storeId]);
 
   const loadActiveTerms = async () => {
+    if (!storeId || !storeId.trim()) {
+      console.warn('Store ID is not available, skipping terms load');
+      return;
+    }
+    
     try {
       const activeTerms = await getTermsByStore(false); // لا تظهر toast عند التحميل
       if (activeTerms) {
@@ -45,6 +52,11 @@ const TermsConditionsPage = () => {
   };
 
   const handleSave = async () => {
+    if (!storeId || !storeId.trim()) {
+      console.error('Store ID is not available, cannot save terms');
+      return;
+    }
+    
     setSaving(true);
     try {
       // Check if we have existing terms to update
@@ -103,7 +115,21 @@ const TermsConditionsPage = () => {
         </div>
       )}
 
-      {/* Error messages are now handled by toast notifications */}
+      {/* Store ID not available */}
+      {!storeId || !storeId.trim() ? (
+        <div className="flex justify-center items-center py-8">
+          <div className="text-center">
+            <div className="text-gray-500 text-lg mb-2">
+              {t('common.storeNotAvailable', 'Store information is not available')}
+            </div>
+            <div className="text-gray-400 text-sm">
+              {t('common.pleaseRefresh', 'Please refresh the page or try again later')}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Error messages are now handled by toast notifications */}
 
       {/* Card/Region */}
       <div className="bg-white rounded-lg  border-2 border-gray-200 mb-6 flex-1 flex flex-col">
@@ -139,6 +165,8 @@ const TermsConditionsPage = () => {
           />
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

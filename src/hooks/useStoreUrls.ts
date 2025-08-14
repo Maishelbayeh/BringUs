@@ -49,7 +49,7 @@ export const useStoreUrls = () => {
     affiliate: generateUrl('affiliate'),
     advertisement: generateUrl('advertisement'),
     termsConditions: generateUrl('terms-conditions'),
-    productSpecifications: generateUrl('products/specifications'),
+    productSpecifications: generateUrl('specifications'),
     testCheckboxSpecifications: generateUrl('test-checkbox-specifications'),
     units: generateUrl('units'),
     labels: generateUrl('labels'),

@@ -293,7 +293,7 @@ export default function StoreRouter() {
         </StoreRouteWrapper>
       } />
       
-      <Route path={`/${currentStoreSlug}/products/specifications`} element={
+      <Route path={`/${currentStoreSlug}/specifications`} element={
         <StoreRouteWrapper>
           <AdminRoute>
             <ProductSpecifications />

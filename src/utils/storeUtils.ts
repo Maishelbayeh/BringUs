@@ -9,6 +9,7 @@ export const getStoreId = (): string => {
   // أولاً: البحث في localStorage
   const storedStoreId = localStorage.getItem('storeId');
   if (storedStoreId && storedStoreId.trim()) {
+    console.log('Store ID found in localStorage:', storedStoreId);
     return storedStoreId;
   }
   
@@ -18,6 +19,7 @@ export const getStoreId = (): string => {
     if (userData) {
       const user = JSON.parse(userData);
       if (user?.store?.id) {
+        console.log('Store ID found in user data:', user.store.id);
         return user.store.id;
       }
     }
@@ -31,6 +33,7 @@ export const getStoreId = (): string => {
     if (storeData) {
       const store = JSON.parse(storeData);
       if (store?.id) {
+        console.log('Store ID found in store info:', store.id);
         return store.id;
       }
     }
@@ -39,7 +42,7 @@ export const getStoreId = (): string => {
   }
   
   // إذا لم نجد المعرف، نرجع نص فارغ
-  console.warn('Store ID not found in localStorage or user data');
+  console.warn('Store ID not found in localStorage or user data. Available keys:', Object.keys(localStorage));
   return '';
 };
 
