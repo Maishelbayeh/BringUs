@@ -297,15 +297,21 @@ export const useStore = () => {
       }
       
       // إضافة مجلد التخزين
-      formData.append('folder', 'stores');
-
-      const response = await axios.post<ApiResponse<Array<{
+      formData.append('folder', 'store-logos');
+    //   "data": {
+    //     "url": "https://pub-237eec0793554bacb7debfc287be3b32.r2.dev/store-logos/687c9bb0a7b3f2a0831c4675/1755159983136-355279465.png",
+    //     "key": "store-logos/687c9bb0a7b3f2a0831c4675/1755159983136-355279465.png",
+    //     "originalName": "ChatGPT Image Apr 23, 2025, 12_49_43 AM.png",
+    //     "size": 3012204,
+    //     "mimetype": "image/png"
+    // }
+      const response = await axios.post<ApiResponse<{
         url: string;
         key: string;
-        // originalName: string;
-        // size: number;
-        // mimetype: string;
-      }>>>(
+        originalName: string;
+        size: number;
+        mimetype: string;
+      }>>(
         `${BASE_URL}stores/upload-image`,
         formData,
         {
@@ -316,11 +322,12 @@ export const useStore = () => {
         }
       );
 
-      if (response.data.success && response.data.data && response.data.data.length > 0) {
-        const uploadedImage = response.data.data[0];
+      if (response.data.success ) {
+        const uploadedImage = response.data.data;
+        console.log('🔄 تم رفع لوجو المتجر بنجاح:', uploadedImage);
         const result = {
-          public_id: uploadedImage.key,
-          url: uploadedImage.url
+          public_id: uploadedImage?.key || '',   
+          url: uploadedImage?.url || ''
         };
         
         //CONSOLE.log('✅ تم رفع لوجو المتجر بنجاح:', result);
