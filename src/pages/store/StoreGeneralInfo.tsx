@@ -292,6 +292,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     }
     
     if (file) {
+      console.log('🔄 تم تحديث اللوجو:', file);
       setLogoFile(file);
       setLogoPreview(URL.createObjectURL(file));
       
@@ -504,8 +505,10 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         if (logoFile) {
           const currentStoreId = getCurrentStoreId();
           const logoResult = await uploadStoreLogo(logoFile, currentStoreId || undefined);
+          console.log('🔄 تم رفع اللوجو بنجاح:', logoResult);
           if (logoResult) {
             updatedForm.logo = logoResult;
+            console.log('🔄 تم رفع اللوجو بنجاح:', logoResult);
           }
         }
         
