@@ -75,17 +75,18 @@ const Login: React.FC = () => {
       localStorage.setItem('email', result?.user.email || '');
 
       localStorage.setItem('userLastName', result?.user.lastName || '');
+      localStorage.setItem('status', result?.user?.store?.status || '');
 
-
+      const storeslug=result?.user?.store?.slug;
       if (result) {
         // التحقق من دور المستخدم والتوجيه المناسب
         const user = result.user;
         if (user.role === 'superadmin') {
           // السوبر أدمن يذهب مباشرة إلى إدارة المتاجر
-          navigate(`/${storeSlug}/superadmin/stores`);
+          navigate(`/${storeslug}/superadmin/stores`);
         } else {
-          // المستخدمون العاديون يذهبون إلى الداشبورد
-          navigate(`/${storeSlug}/`);
+        
+          navigate(`/${storeslug}/`);
         }
       }
     } catch (error) {

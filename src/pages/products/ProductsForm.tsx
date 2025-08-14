@@ -133,10 +133,19 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   // دالة لتحديث الكمية المتاحة بناءً على الصفات
   const updateAvailableQuantity = (specifications: any[]) => {
     const totalQuantity = calculateTotalQuantity(specifications);
+    console.log('🔍 updateAvailableQuantity - specifications:', specifications);
+    console.log('🔍 updateAvailableQuantity - totalQuantity:', totalQuantity);
     onFormChange({
       target: {
         name: 'stock',
-        value: totalQuantity.toString()
+        value: totalQuantity
+      }
+    } as any);
+    // Also update availableQuantity field
+    onFormChange({
+      target: {
+        name: 'availableQuantity',
+        value: totalQuantity
       }
     } as any);
   };
@@ -151,7 +160,6 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const [formattedColors, setFormattedColors] = useState<ColorVariant[]>([]);
   const [hasLocalColorChanges, setHasLocalColorChanges] = useState(false);
   const hasFetchedSpecifications = useRef(false);
-  const hasLoadedSpecifications = useRef(false);
 
   // دالة تحويل الألوان من API إلى التنسيق المطلوب
   const convertColorsFromAPI = (colors: any[]): ColorVariant[] => {
@@ -250,46 +258,51 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
   // تحويل البيانات من النموذج إلى التنسيق المطلوب (مرة واحدة فقط عند التحميل)
   useEffect(() => {
-    if (!hasLoadedSpecifications.current) {
-      console.log('🔍 ProductsForm - Initial load - form.specificationValues:', form.specificationValues);
-      
-      // محاولة استخدام specificationValues أولاً (من API)
-      if (form.specificationValues && Array.isArray(form.specificationValues) && form.specificationValues.length > 0) {
-        console.log('🔍 ProductsForm - Using specificationValues from API');
-        const cleaned = form.specificationValues.map((spec: any) => {
-          // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
-          const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec.specificationId) : null;
-          const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec.specificationId}`);
-          
-          return {
-            specId: spec.specificationId,
-            valueId: spec.valueId || spec._id,
-            value: spec.value || '',
-            quantity: spec.quantity || 0,
-            price: spec.price || 0
-          };
-        });
-        console.log('🔍 ProductsForm - Cleaned specificationValues:', cleaned);
-        setSpecificationDetails(cleaned);
-        // تحديث الكمية المتاحة عند تحميل البيانات الأولية
-        updateAvailableQuantity(cleaned);
-      } else {
-        console.log('🔍 ProductsForm - No specifications found, setting empty array');
-        setSpecificationDetails([]);
-        // تحديث الكمية المتاحة إلى صفر عند عدم وجود صفات
-        updateAvailableQuantity([]);
-      }
-      
-      hasLoadedSpecifications.current = true;
+    console.log('🔍 ProductsForm - Initial load - form.specificationValues:', form.specificationValues);
+    
+    // محاولة استخدام specificationValues أولاً (من API)
+    if (form.specificationValues && Array.isArray(form.specificationValues) && form.specificationValues.length > 0) {
+      console.log('🔍 ProductsForm - Using specificationValues from API');
+      const cleaned = form.specificationValues.map((spec: any) => {
+        // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
+        const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec.specificationId) : null;
+        const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec.specificationId}`);
+        
+        return {
+          specId: spec.specificationId,
+          valueId: spec.valueId || spec._id,
+          value: spec.value || '',
+          quantity: spec.quantity || 0,
+          price: spec.price || 0
+        };
+      });
+      console.log('🔍 ProductsForm - Cleaned specificationValues:', cleaned);
+      setSpecificationDetails(cleaned);
+      // تحديث الكمية المتاحة عند تحميل البيانات الأولية
+      updateAvailableQuantity(cleaned);
+    } else {
+      console.log('🔍 ProductsForm - No specifications found, setting empty array');
+      setSpecificationDetails([]);
+      // تحديث الكمية المتاحة إلى صفر عند عدم وجود صفات
+      updateAvailableQuantity([]);
     }
-  }, []); // تشغيل مرة واحدة فقط عند التحميل
+  }, [form.specificationValues, apiSpecifications, isRTL]); // تشغيل عند تغيير specificationValues أو apiSpecifications
 
   // مراقبة تغييرات specificationDetails وتحديث الكمية المتاحة
   useEffect(() => {
-    if (hasLoadedSpecifications.current) {
-      updateAvailableQuantity(specificationDetails);
-    }
+    updateAvailableQuantity(specificationDetails);
   }, [specificationDetails]);
+
+  // مراقبة تغييرات productLabels للتصحيح
+  useEffect(() => {
+    console.log('🔍 ProductsForm - form.productLabels changed:', form.productLabels);
+    console.log('🔍 ProductsForm - form.productLabels type:', typeof form.productLabels);
+    console.log('🔍 ProductsForm - form.productLabels is array:', Array.isArray(form.productLabels));
+    if (Array.isArray(form.productLabels)) {
+      console.log('🔍 ProductsForm - form.productLabels length:', form.productLabels.length);
+      console.log('🔍 ProductsForm - form.productLabels sample:', form.productLabels[0]);
+    }
+  }, [form.productLabels]);
 
   // تحويل الألوان من API إلى التنسيق المطلوب
   useEffect(() => {
@@ -1221,6 +1234,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                     ? form.tags.map((l: any) => typeof l === 'object' ? l._id || l.id : l)
                     : []
               }
+      
               onChange={(values) => {
                 console.log('🔍 MultiSelect onChange called with values:', values);
                 console.log('🔍 MultiSelect - values type:', typeof values);

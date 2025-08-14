@@ -16,7 +16,6 @@ import { useUserStore } from '../../../hooks/useUserStore';
 import { useSubscription } from '../../../hooks/useSubscription';
 type TopNavbarProps = {
   // userName: string;
-  userPosition: string;
   language: string;
   onLanguageToggle: () => void;
   onMenuToggle: () => void;
@@ -38,7 +37,7 @@ console.log(role);
   const [storeLogo, setStoreLogo] = useState(getStoreLogo());
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
   const { storeId, userId } = useUserStore();
-  const { subscriptionStatus, isExpired, isExpiringSoon } = useSubscription();
+  const { isExpired, isExpiringSoon, getDaysUntilExpiry } = useSubscription();
 
   // الاستماع لتحديث بيانات المتجر
   useEffect(() => {
@@ -95,20 +94,7 @@ console.log(role);
           </button>
 
 
-          <button
-            onClick={() => setShowSubscriptionPopup(true)}
-            className={`p-2 rounded-full hover:bg-primary/10 transition relative ${
-              isExpired() ? 'bg-red-100' : isExpiringSoon() ? 'bg-yellow-100' : ''
-            }`}
-            title={t('subscription.renewSubscription')}
-          >
-            <CreditCardIcon className={`h-6 w-6 ${
-              isExpired() ? 'text-red-600' : isExpiringSoon() ? 'text-yellow-600' : 'text-primary'
-            }`} />
-            {(isExpired() || isExpiringSoon()) && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-            )}
-          </button>
+       
           <button
             onClick={() => navigate(`/${storeSlug}/delivery-settings`)}
             className="p-2 rounded-full hover:bg-primary/10 transition"
@@ -127,9 +113,38 @@ console.log(role);
               <GlobeAltIcon className="h-6 w-6 text-white" />
             </button>
           </Tooltip>
-          <span className="hidden sm:inline-block ml-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold shadow-sm border border-primary/20">
-            {language === 'ARABIC' ? 'العربية' : 'English'}
-          </span>
+          {role==='admin' && ( <>
+          <button
+            onClick={() => setShowSubscriptionPopup(true)}
+            className={`px-3 py-2 rounded-lg transition relative cursor-pointer hover:opacity-80 ${
+              isExpired() ? 'bg-red-100 text-red-700' : 
+              isExpiringSoon() ? 'bg-yellow-100 text-yellow-700' : 
+              'bg-green-100 text-green-700'
+            }`}
+            title={isExpired() ? t('subscription.expired') : 
+                   isExpiringSoon() ? t('subscription.expiringSoon') : 
+                   t('subscription.active')}
+          >
+            <div className="flex items-center gap-1">
+              <CreditCardIcon className={`h-4 w-4 ${
+                isExpired() ? 'text-red-600' : 
+                isExpiringSoon() ? 'text-yellow-600' : 
+                'text-green-600'
+              }`} />
+              <span className="text-xs font-semibold">
+                {isExpired() ? (
+                  language === 'ARABIC' ? 'منتهي' : 'Expired'
+                ) : (
+                  `${getDaysUntilExpiry()} ${language === 'ARABIC' ? 'يوم' : 'days'}`
+                )}
+              </span>
+            </div>
+            {(isExpired() || isExpiringSoon()) && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            )}
+          </button>
+          </>
+        )}
         </div>
 
       </div>

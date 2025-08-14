@@ -966,6 +966,8 @@ const ProductsPage: React.FC = () => {
     const subcategoryId = originalProduct.subcategory?._id || originalProduct.subcategoryId || (typeof originalProduct.subcategory === 'string' ? originalProduct.subcategory : '');
     const storeId = originalProduct.store?._id || originalProduct.storeId || (typeof originalProduct.store === 'string' ? originalProduct.store : '');
     const tags = (originalProduct.productLabels || []).map((l: any) => typeof l === 'object' ? String(l._id || l.id) : String(l));
+    console.log('🔍 handleEdit - originalProduct.productLabels:', originalProduct.productLabels);
+    console.log('🔍 handleEdit - processed tags:', tags);
 
     // Extract specifications and convert to the format expected by the form
     const specifications = originalProduct.specifications || [];
@@ -1033,7 +1035,7 @@ const ProductsPage: React.FC = () => {
       subcategoryId: String(subcategoryId),
       storeId: String(storeId),
       tags: tags,
-      productLabels: productLabels, 
+      productLabels: originalProduct.productLabels || [], 
       selectedSpecifications: typeof selectedSpecifications === 'string' ? selectedSpecifications : JSON.stringify(selectedSpecifications),
       images: Array.isArray(originalProduct.images) ? originalProduct.images : [],
       mainImage: originalProduct.mainImage || null,
@@ -1045,6 +1047,7 @@ const ProductsPage: React.FC = () => {
     };
     
     console.log('🔍 handleEdit - Final newForm:', newForm);
+    console.log('🔍 handleEdit - Final newForm.productLabels:', newForm.productLabels);
     console.log('🔍 handleEdit - newForm.categoryIds:', newForm.categoryIds);
     console.log('🔍 handleEdit - newForm.categoryId:', newForm.categoryId);
     

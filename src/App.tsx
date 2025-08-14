@@ -4,7 +4,7 @@ import { BrowserRouter, useLocation } from 'react-router-dom';
 import Routers from './routers';
 import useLanguage from './hooks/useLanguage';
 import useSidebar from './hooks/useSidebar';
-import { getMenuAsText, MenuModel } from './constants/sideBarData';
+import { getMenuAsText, MenuModel, getFilteredMenuItems } from './constants/sideBarData';
 import { MenuItem } from './Types';
 import Sidebar from './components/common/navigation/sidebar';
 import TopNavbar from './components/common/navigation/topNav';
@@ -23,15 +23,15 @@ const AppContent: React.FC = () => {
   
   const { language, toggleLanguage } = useLanguage();
   const { isSidebarOpen, toggleSidebar } = useSidebar();
-  const [activeMenu, ] = useState<'text' | 'model'>('text');
   const { getCurrentUser } = useAuth();
   const user = getCurrentUser();
 
   const getMenuItems = (): MenuItem[] => {
     const isOwner = localStorage.getItem('isOwner') === 'true';
-    const userRole = user?.role;
+    const userRole = user?.role || 'admin';
   
-    const menu = activeMenu === 'model' ? MenuModel.getInstance().getMenuItems() : getMenuAsText();
+    // Use filtered menu items based on store status and user role
+    const menu = getFilteredMenuItems(userRole);
   
     // فلترة عنصر /users من children و العناصر الرئيسية
     const filteredMenu = menu.map(item => {
