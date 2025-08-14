@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useValidation } from '../../../hooks/useValidation';
 import { deliveryValidationSchema, DeliveryFormData } from '../../../validation/deliveryValidation';
 import { useStore } from '../../../hooks/useStore';
-import { getStoreId } from '../../../utils/storeUtils';
+import { getStoreId, getStoreInfo } from '../../../utils/storeUtils';
 
 interface Props {
   area: DeliveryArea | null;
@@ -46,9 +46,9 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, language,
   useEffect(() => {
     const fetchStoreWhatsapp = async () => {
       try {
-        const storeId = getStoreId();
-        if (storeId) {
-          const storeData = await getStore(storeId);
+        const storeSlug = getStoreInfo().slug;
+        if (storeSlug) {
+          const storeData = await getStore(getStoreId(),storeSlug);
           if (storeData?.whatsappNumber) {
             setStoreWhatsappNumber(storeData.whatsappNumber);
             // إذا لم يكن هناك رقم واتساب محدد، استخدم رقم المتجر كافتراضي
@@ -63,7 +63,7 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, language,
     };
     
     fetchStoreWhatsapp();
-  }, [getStore, area?.whatsappNumber]);
+  }, [ area?.whatsappNumber]);
 
   useEffect(() => {
     setLocationAr(area?.locationAr || '');

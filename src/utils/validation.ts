@@ -28,8 +28,8 @@ export interface ValidationSchema {
 export const PATTERNS = {
   email: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]{2,}$/,
   phone: /^\+[1-9]\d{1,14}$/,  // يبدأ بـ + ويتبعه رمز دولة (1-9) ثم أرقام (إجمالي 15 رقم كحد أقصى)
-  arabicText: /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s\u0660-\u0669\u06F0-\u06F90-9.,،!؟]+$/,  // عربي مع أرقام إنجليزية
-  englishText: /^[a-zA-Z0-9\s\-_.,:;!?()'"&@#$%*+=/\\[\]{}|<>~`’^]+$/,  // أحرف إنجليزية + أرقام + رموز عادية
+  arabicText: /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s\u0660-\u0669\u06F0-\u06F90-9.,-_،!؟]+$/,  // عربي مع أرقام إنجليزية
+  englishText: /^[a-zA-Z0-9\s\-_.,:;!?()-_'"&@#$%*+=/\\[\]{}|<>~`’^]+$/,  // أحرف إنجليزية + أرقام + رموز عادية
   englishWithNumbers: /^[a-zA-Z0-9\s]+$/,  // احتفظ بالنمط القديم للتوافق مع الخلف
   url: /^https?:\/\/.+/,
   imageUrl: /^https?:\/\/.+\.(jpg|jpeg|png|gif|svg|webp)$/i,

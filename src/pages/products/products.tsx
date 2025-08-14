@@ -48,7 +48,7 @@ const initialForm: {
   maintainStock: string;
   availableQuantity: number;
   lowStockThreshold: number;
-  
+  totalSpecificationQuantities: number;
   descriptionAr: string;
   descriptionEn: string;
   barcodes: string[];
@@ -83,7 +83,7 @@ const initialForm: {
   maintainStock: 'Y',
   availableQuantity: 0,
   lowStockThreshold: 10,
-  
+  totalSpecificationQuantities: 0,
   descriptionAr: '',
   descriptionEn: '',
   barcodes: [],
@@ -1435,7 +1435,8 @@ const ProductsPage: React.FC = () => {
         compareAtPrice: parseFloat(form.compareAtPrice) || 0,
         originalPrice: parseFloat(form.originalPrice) || 0,
         availableQuantity: parseInt(String(form.availableQuantity)) || 0,
-        stock: parseInt(String(form.availableQuantity)) || 0,
+        stock: parseInt(String(form.totalSpecificationQuantities)) || 0,
+
         productOrder: parseInt(String(form.productOrder)) || 0,
         visibility: form.visibility === 'Y',
         unitId: form.unitId || form.unit || null,
