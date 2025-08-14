@@ -114,7 +114,7 @@ const useProducts = () => {
       })(),
       costPrice: parseFloat(form.costPrice) || 0,
       availableQuantity: parseInt(String(form.availableQuantity)) || 0,
-      stock: parseInt(String(form.totalSpecificationQuantities)) || 0,
+      stock: parseInt(String(form.availableQuantity)) || 0,
       lowStockThreshold: parseInt(String(form.lowStockThreshold)) || 5,
       productOrder: parseInt(String(form.productOrder)) || 0,
       visibility: form.visibility === 'Y' || form.visibility === true,
