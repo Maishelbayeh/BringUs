@@ -73,7 +73,8 @@ const Login: React.FC = () => {
       localStorage.setItem('storeId', result?.storeId || '');
       localStorage.setItem('userName', result?.user.firstName || '');
       localStorage.setItem('email', result?.user.email || '');
-
+      localStorage.setItem('storeNameAr', result?.user?.store?.nameAr || '');
+      localStorage.setItem('storeNameEn', result?.user?.store?.nameEn || '');
       localStorage.setItem('userLastName', result?.user.lastName || '');
       localStorage.setItem('status', result?.user?.store?.status || '');
 

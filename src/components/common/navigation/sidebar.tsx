@@ -69,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   useEffect(() => {
     const handleStoreDataUpdate = (event: CustomEvent) => {
       const { nameAr, nameEn, logo } = event.detail;
-      const newStoreName = language === 'ARABIC' ? nameAr : nameEn;
+      const newStoreName = language === 'ARABIC' ? localStorage.getItem('storeNameAr') : localStorage.getItem('storeNameEn');
       setStoreName(newStoreName || 'BringUs');
       if (logo?.url) {
         setStoreLogo(logo.url);
@@ -88,6 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleLogoutClick = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
   const handleConfirmLogout = () => {
+    localStorage.clear();
     setDialogOpen(false);
     logout();
     navigate('/login');

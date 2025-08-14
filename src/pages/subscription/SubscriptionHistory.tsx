@@ -14,6 +14,7 @@ import SubscriptionRenewalPopup from '@/components/common/SubscriptionRenewalPop
 import { useUserStore } from '@/hooks/useUserStore';
 import { CustomTable } from '../../components/common/CustomTable';
 import axios from 'axios';
+import { useStore } from '@/hooks/useStore';
 
 interface SubscriptionHistoryItem {
   _id: string;
@@ -57,10 +58,11 @@ const SubscriptionHistory: React.FC = () => {
   const isRTL = language === 'ARABIC';
   const { showSuccess, showError } = useToastContext();
   const { storeId, userId } = useUserStore();
-  
+  const { fetchSubscriptionStatus } = useStore();
   const [history, setHistory] = useState<SubscriptionHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showRenewPopup, setShowRenewPopup] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<any>(null);      
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -68,6 +70,7 @@ const SubscriptionHistory: React.FC = () => {
     pages: 0,
     filteredCount: 0
   });
+  const [isDisablingAutoRenew, setIsDisablingAutoRenew] = useState(false);
 
   // تعريف أعمدة الجدول
   const columns = [
@@ -171,7 +174,74 @@ const SubscriptionHistory: React.FC = () => {
 
   useEffect(() => {
     fetchHistory();
+    fetchSubscriptionStatus();
+    setSubscriptionStatus(fetchSubscriptionStatus());
   }, [storeId]);
+
+const autoRenew = subscriptionStatus?.autoRenew;
+const subscriptionEndDate = subscriptionStatus?.endDate;
+
+// حساب الأيام المتبقية حتى انتهاء الاشتراك
+const getDaysUntilExpiry = () => {
+  if (!subscriptionEndDate) return null;
+  const endDate = new Date(subscriptionEndDate);
+  const now = new Date();
+  const diffTime = endDate.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+};
+
+  const daysUntilExpiry = getDaysUntilExpiry();
+  const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 5;
+console.log(isExpiringSoon);
+  // دالة لإلغاء تفعيل التجديد التلقائي
+  const handleDisableAutoRenewal = async () => {
+    if (!storeId) return;
+    
+    // رسالة تأكيد
+    const confirmMessage = isRTL 
+      ? 'هل أنت متأكد من إلغاء التجديد التلقائي؟ لن يتم تجديد الاشتراك تلقائياً عند انتهاء الصلاحية.'
+      : 'Are you sure you want to disable auto-renewal? Your subscription will not renew automatically when it expires.';
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+    
+    setIsDisablingAutoRenew(true);
+    try {
+      const response = await axios.patch(
+        `http://localhost:5001/api/subscription/stores/${storeId}/disable-auto-renewal`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      if (response.data.success) {
+        showSuccess(
+          t('subscriptionHistory.autoRenewalDisabled'),
+          t('subscriptionHistory.autoRenewalDisabledMessage')
+        );
+        // تحديث حالة الاشتراك
+        fetchSubscriptionStatus();
+      } else {
+        showError(
+          t('subscriptionHistory.error'),
+          response.data.message || t('subscriptionHistory.disableAutoRenewalError')
+        );
+      }
+    } catch (error: any) {
+      console.error('Error disabling auto-renewal:', error);
+      showError(
+        t('subscriptionHistory.error'),
+        error.response?.data?.message || t('subscriptionHistory.disableAutoRenewalError')
+      );
+    } finally {
+      setIsDisablingAutoRenew(false);
+    }
+  };
 
   // معالجة تغيير الصفحة
   const handlePageChange = (newPage: number) => {
@@ -258,15 +328,112 @@ const SubscriptionHistory: React.FC = () => {
           loading={isLoading}
         />
 
-        {/* Renew Subscription Button */}
-        <div className="mb-6">
-          <button
-            onClick={() => setShowRenewPopup(true)}
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
-          >
-            <CreditCardIcon className="w-5 h-5" />
-            {t('subscriptionHistory.renewSubscription')}
-          </button>
+        {/* Subscription Status Summary */}
+        <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+            <CreditCardIcon className="w-5 h-5 mr-2 text-primary" />
+            {isRTL ? 'حالة الاشتراك' : 'Subscription Status'}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${autoRenew ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span className="text-sm text-gray-600">
+                {isRTL ? 'التجديد التلقائي:' : 'Auto-Renewal:'}
+              </span>
+              <span className={`text-sm font-medium ${autoRenew ? 'text-green-600' : 'text-red-600'}`}>
+                {autoRenew 
+                  ? (isRTL ? 'مفعل' : 'Enabled')
+                  : (isRTL ? 'معطل' : 'Disabled')
+                }
+              </span>
+            </div>
+            {daysUntilExpiry !== null && (
+              <div className="flex items-center gap-2">
+                <ClockIcon className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-600">
+                  {isRTL ? 'الأيام المتبقية:' : 'Days Remaining:'}
+                </span>
+                <span className={`text-sm font-medium ${
+                  daysUntilExpiry <= 5 ? 'text-red-600' : 'text-blue-600'
+                }`}>
+                  {daysUntilExpiry}
+                </span>
+              </div>
+            )}
+            {subscriptionEndDate && (
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-600">
+                  {isRTL ? 'تاريخ الانتهاء:' : 'End Date:'}
+                </span>
+                <span className="text-sm font-medium text-gray-800">
+                  {formatDate(subscriptionEndDate)}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Subscription Action Buttons */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          {/* Auto-Renewal Status Display */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
+            <div className={`w-2 h-2 rounded-full ${autoRenew ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span className="text-sm font-medium text-gray-700">
+              {autoRenew 
+                ? (isRTL ? 'التجديد التلقائي مفعل' : 'Auto-Renewal Enabled')
+                : (isRTL ? 'التجديد التلقائي معطل' : 'Auto-Renewal Disabled')
+              }
+            </span>
+          </div>
+
+          {/* Days Until Expiry Display */}
+          {daysUntilExpiry !== null && (
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+              daysUntilExpiry <= 5 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+            }`}>
+              <ClockIcon className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                {isRTL 
+                  ? `${daysUntilExpiry} يوم متبقي`
+                  : `${daysUntilExpiry} days remaining`
+                }
+              </span>
+            </div>
+          )}
+
+          {/* Disable Auto-Renewal Button */}
+          {autoRenew && (
+            <button
+              onClick={handleDisableAutoRenewal}
+              disabled={isDisablingAutoRenew}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isDisablingAutoRenew ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+              {isRTL ? 'إلغاء التجديد التلقائي' : 'Disable Auto-Renewal'}
+            </button>
+          )}
+
+          {/* Renew Subscription Button - Show when expiring soon or auto-renewal is disabled */}
+          {(  isExpiringSoon) && (
+            <button
+              onClick={() => setShowRenewPopup(true)}
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                isExpiringSoon 
+                  ? 'bg-red-600 text-white hover:bg-red-700' 
+                  : 'bg-primary text-white hover:bg-primary/90'
+              }`}
+            >
+              <CreditCardIcon className="w-5 h-5" />
+              {t('subscriptionHistory.renewSubscription')}
+            </button>
+          )}
         </div>
 
         {/* History Table */}

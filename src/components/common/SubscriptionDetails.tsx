@@ -70,7 +70,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
       setIsLoading(false);
     }
   };
-
+ 
   useEffect(() => {
     fetchPlans();
   }, [selectedPlanId]);
@@ -106,7 +106,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
   };
 
   const getStatusText = () => {
-    if (isExpired()) return isRTL ? 'منتهي الصلاحية' : 'Expired';
+    if (isExpired()) return isRTL ? 'منتهي الصلاحية' : 'inactive';
     if (isExpiringSoon()) return isRTL ? 'ينتهي قريباً' : 'Expiring Soon';
     return isRTL ? 'نشط' : 'Active';
   };
