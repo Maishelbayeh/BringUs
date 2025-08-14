@@ -87,11 +87,11 @@ export const useAuth = () => {
           
           updateStoreData(data.user.store);
           
-          if (data.user.store?.id) {
+          if (data.user.store?.slug) {
             try {
               // جلب بيانات المتجر الكاملة باستخدام fetch مباشرة
               const token = localStorage.getItem('token');
-              const storeResponse = await fetch(`${BASE_URL}stores/${data.user.store.id}`, {
+              const storeResponse = await fetch(`${BASE_URL}stores/slug/${data.user.store.slug}`, {
                 headers: {
                   'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json',
