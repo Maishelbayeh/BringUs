@@ -190,12 +190,104 @@ const CustomCategorySelector: React.FC<CustomCategorySelectorProps> = ({
     });
   };
 
-  const handleSelectCategory = (categoryId: string, checked: boolean) => {
-    const newSelectedIds = checked
-      ? [...selectedIds, categoryId].slice(0, maxSelections)
-      : selectedIds.filter(id => id !== categoryId);
+  // دالة لإيجاد جميع الفئات الأب لفئة معينة
+  const findParentCategories = (categoryId: string, cats: CategoryNode[], parentIds: string[] = []): string[] => {
+    for (const cat of cats) {
+      const catId = String(cat._id || cat.id);
+      if (catId === categoryId) {
+        return parentIds;
+      }
+      if (cat.children && cat.children.length > 0) {
+        const found = findParentCategories(categoryId, cat.children, [...parentIds, catId]);
+        if (found.length > 0) {
+          return found;
+        }
+      }
+    }
+    return [];
+  };
+
+  // دالة لإيجاد جميع الفئات الفرعية لفئة معينة
+  const findChildCategories = (categoryId: string, cats: CategoryNode[]): string[] => {
+    const childIds: string[] = [];
     
-    console.log('🔍 CustomCategorySelector - handleSelectCategory:', { categoryId, checked, newSelectedIds });
+    const findChildren = (cats: CategoryNode[]) => {
+      for (const cat of cats) {
+        const catId = String(cat._id || cat.id);
+        if (catId === categoryId) {
+          // إضافة جميع الفئات الفرعية
+          if (cat.children && cat.children.length > 0) {
+            cat.children.forEach(child => {
+              childIds.push(String(child._id || child.id));
+              // إضافة الفئات الفرعية للفئات الفرعية أيضاً
+              if (child.children && child.children.length > 0) {
+                findChildren(child.children);
+              }
+            });
+          }
+          return;
+        }
+        if (cat.children && cat.children.length > 0) {
+          findChildren(cat.children);
+        }
+      }
+    };
+    
+    findChildren(cats);
+    return childIds;
+  };
+
+  const handleSelectCategory = (categoryId: string, checked: boolean) => {
+    let newSelectedIds: string[];
+    
+    if (checked) {
+      // عند تحديد فئة، أضف الفئات الأب تلقائياً
+      const parentIds = findParentCategories(categoryId, categories);
+      const allIdsToAdd = [...parentIds, categoryId];
+      newSelectedIds = [...selectedIds, ...allIdsToAdd.filter(id => !selectedIds.includes(id))];
+      
+      // احترم الحد الأقصى للاختيارات
+      if (maxSelections && newSelectedIds.length > maxSelections) {
+        newSelectedIds = newSelectedIds.slice(0, maxSelections);
+      }
+    } else {
+      // عند إلغاء تحديد فئة، تحقق من الفئات الأب
+      const childIds = findChildCategories(categoryId, categories);
+      const hasSelectedChildren = childIds.some(childId => selectedIds.includes(childId));
+      
+      if (hasSelectedChildren) {
+        // إذا كان هناك فئات فرعية محددة، أزل الفئة الأب فقط
+        newSelectedIds = selectedIds.filter(id => id !== categoryId);
+      } else {
+        // إذا لم تكن هناك فئات فرعية محددة، أزل الفئة الأب والفئات الأب الأخرى التي لم تعد مطلوبة
+        const remainingIds = selectedIds.filter(id => id !== categoryId);
+        
+        // تحقق من الفئات الأب وأزلها إذا لم تعد مطلوبة
+        const idsToRemove = new Set<string>();
+        remainingIds.forEach(id => {
+          const parentIds = findParentCategories(id, categories);
+          parentIds.forEach(parentId => {
+            const parentChildIds = findChildCategories(parentId, categories);
+            const hasOtherSelectedChildren = parentChildIds.some(childId => 
+              childId !== id && remainingIds.includes(childId)
+            );
+            if (!hasOtherSelectedChildren) {
+              idsToRemove.add(parentId);
+            }
+          });
+        });
+        
+        newSelectedIds = remainingIds.filter(id => !idsToRemove.has(id));
+      }
+    }
+    
+    console.log('🔍 CustomCategorySelector - handleSelectCategory:', { 
+      categoryId, 
+      checked, 
+      parentIds: checked ? findParentCategories(categoryId, categories) : [],
+      childIds: !checked ? findChildCategories(categoryId, categories) : [],
+      newSelectedIds 
+    });
     setSelectedIds(newSelectedIds);
     onSelectionChange(newSelectedIds);
   };

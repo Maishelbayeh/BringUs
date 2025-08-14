@@ -25,6 +25,7 @@ export interface LogInFormValues {
     path?: string;
     children?: MenuItem[];
     roles?: string[];
+    requireActiveStore?: boolean;
   }
 
   export interface PaymentImage {
