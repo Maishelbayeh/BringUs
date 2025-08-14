@@ -68,6 +68,16 @@ export const useTermsConditions = (storeId: string) => {
 
   // Get terms by store
   const getTermsByStore = useCallback(async (showToast = false) => {
+    // Validate store ID before making API call
+    if (!storeId || !storeId.trim()) {
+      const errorMessage = 'Store ID is not available';
+      setError(errorMessage);
+      if (showToast) {
+        showError(errorMessage);
+      }
+      throw new Error(errorMessage);
+    }
+    
     setLoading(true);
     setError(null);
     
@@ -92,6 +102,16 @@ export const useTermsConditions = (storeId: string) => {
 
   // Create new terms
   const createTerms = useCallback(async (termsData: CreateTermsData, showToast = true) => {
+    // Validate store ID before making API call
+    if (!storeId || !storeId.trim()) {
+      const errorMessage = 'Store ID is not available';
+      setError(errorMessage);
+      if (showToast) {
+        showError(errorMessage);
+      }
+      throw new Error(errorMessage);
+    }
+    
     setLoading(true);
     setError(null);
     
@@ -120,6 +140,16 @@ export const useTermsConditions = (storeId: string) => {
 
   // Update terms
   const updateTerms = useCallback(async (termsId: string, termsData: UpdateTermsData, showToast = true) => {
+    // Validate store ID before making API call
+    if (!storeId || !storeId.trim()) {
+      const errorMessage = 'Store ID is not available';
+      setError(errorMessage);
+      if (showToast) {
+        showError(errorMessage);
+      }
+      throw new Error(errorMessage);
+    }
+    
     setLoading(true);
     setError(null);
     
