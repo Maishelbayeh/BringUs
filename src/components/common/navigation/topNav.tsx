@@ -43,7 +43,7 @@ console.log(role);
   useEffect(() => {
     const handleStoreDataUpdate = (event: CustomEvent) => {
       const { nameAr, nameEn, logo } = event.detail;
-      const newStoreName = language === 'ARABIC' ? nameAr : nameEn;
+      const newStoreName = language === 'ARABIC' ? localStorage.getItem('storeNameAr') : localStorage.getItem('storeNameEn');
       setStoreName(newStoreName || 'bring us');
       if (logo?.url) {
         setStoreLogo(logo.url);

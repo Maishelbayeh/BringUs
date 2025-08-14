@@ -343,6 +343,14 @@ export const useStore = () => {
     }
   };
 
+  const fetchSubscriptionStatus= async()=>{
+    const response=await axios.get(`${BASE_URL}subscription/stores/${localStorage.getItem('storeId')}`,{
+      headers:{
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    console.log(response.data.data);
+  };
   // ========================================================================
   // RETURN VALUES
   // ========================================================================
@@ -357,5 +365,6 @@ export const useStore = () => {
     updateStore,
     deleteStore,
     uploadStoreLogo,
+    fetchSubscriptionStatus
   };
 }; 
