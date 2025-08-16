@@ -383,8 +383,8 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
                 />
                 <CustomInput
                   label={isRTL ? 'رابط فيديو المتغير' : 'Variant Video URL'}
-                  name="productVideo"
-                  value={variant.productVideo || ''}
+                  name="videoUrl"
+                  value={variant.videoUrl || ''}
                   onChange={onFormChange}
                 />
               </div>

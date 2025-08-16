@@ -445,11 +445,11 @@ const VariantManager: React.FC<VariantManagerProps> = ({
         ...prev,
         lowStockThreshold: numVal
       }));
-    } else if (name === 'productVideo') {
+    } else if (name === 'videoUrl') {
       // التعامل مع productVideo
       setEditingVariant((prev: any) => ({
         ...prev,
-        productVideo: value
+        videoUrl: value
       }));
     } else if (name === 'isOnSale') {
       // التعامل مع isOnSale
@@ -635,7 +635,7 @@ const VariantManager: React.FC<VariantManagerProps> = ({
         salePercentage: parseFloat(editingVariant.salePercentage) || 0,
         productOrder: parseInt(String(editingVariant.productOrder)) || 0,
         isActive: true,
-        productVideo: editingVariant.productVideo || '',
+        videoUrl: editingVariant.videoUrl || '',
         colors: (() => {
           console.log('🔍 VariantManager - editingVariant.colors:', editingVariant.colors);
           console.log('🔍 VariantManager - editingVariant.colors type:', typeof editingVariant.colors);

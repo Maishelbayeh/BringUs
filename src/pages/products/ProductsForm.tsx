@@ -1563,9 +1563,9 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
             
             <CustomInput
               label={isRTL ? 'رابط الفيديو' : 'Video URL'}
-              name="productVideo"
-              value={form.productVideo || ''}
-              onChange={(e) => handleInputChange('productVideo', e.target.value)}
+              name="videoUrl"
+              value={form.videoUrl || ''}
+              onChange={(e) => handleInputChange('videoUrl', e.target.value)}
               placeholder={isRTL ? 'https://example.com/video.mp4' : 'https://example.com/video.mp4'}
             />
           </div>

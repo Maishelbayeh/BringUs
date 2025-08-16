@@ -252,8 +252,13 @@ const useProducts = () => {
         
         return [];
       })(),
-              storeId: form.storeId || getStoreId(),
+      videoUrl: form.videoUrl || '',
+      storeId: form.storeId || getStoreId(),
     };
+
+    // Debug logging for videoUrl
+    console.log('🔍 useProducts - saveProduct - form.videoUrl:', form.videoUrl);
+    console.log('🔍 useProducts - saveProduct - payload.videoUrl:', payload.videoUrl);
 
     // Remove unit if invalid
     if (

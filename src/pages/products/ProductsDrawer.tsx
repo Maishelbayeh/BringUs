@@ -36,7 +36,7 @@ interface ProductsDrawerProps {
     colors: ColorVariant[];
     images: string[];
     mainImage: string | null;
-    productVideo: string; 
+    videoUrl: string; 
   };
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onTagsChange: (values: string[]) => void;

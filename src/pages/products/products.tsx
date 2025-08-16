@@ -60,7 +60,7 @@ const initialForm: {
   colors: ColorVariant[];
   images: string[];
   mainImage: string | null;
-  productVideo: string;
+  videoUrl: string;
   isOnSale: string;
   salePercentage: string;
 } = {
@@ -95,7 +95,7 @@ const initialForm: {
   colors: [],
   images: [],
   mainImage: null,
-  productVideo: '',
+  videoUrl: '',
   isOnSale: 'false',
   salePercentage: '',
 };
@@ -827,6 +827,7 @@ const ProductsPage: React.FC = () => {
       availableQuantity: 0,
       // إفراغ المخزون
       stock: 0,
+      videoUrl: '',
     };
     delete newForm._id; // Ensure no _id for new variant
     // تعيين المنتج الأصلي كـ parent product للمتغير
@@ -932,7 +933,7 @@ const ProductsPage: React.FC = () => {
     } catch (error) {
       console.error('🔍 handleDeleteVariant - Error:', error);
     }
-    
+
   };
 
   //-------------------------------------------- renderProductId -------------------------------------------
@@ -1045,6 +1046,7 @@ const ProductsPage: React.FC = () => {
       compareAtPrice: originalProduct.compareAtPrice || '',
       barcodes: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [],
       newBarcode: '',
+      videoUrl: originalProduct.videoUrl || '',
     };
     
     console.log('🔍 handleEdit - Final newForm:', newForm);
@@ -1504,6 +1506,7 @@ const ProductsPage: React.FC = () => {
         isActive: true,
         isOnSale: form.isOnSale === 'true',
         salePercentage: parseFloat(form.salePercentage) || 0,
+        videoUrl: form.videoUrl || '',
       };
 
       //CONSOLE.log('🔍 handleSubmit - productData:', productData);
@@ -1560,6 +1563,8 @@ const ProductsPage: React.FC = () => {
         console.log('🔍 handleSubmit - productData.productLabels is array:', Array.isArray(productData.productLabels));
         console.log('🔍 handleSubmit - productData.specifications:', productData.specifications);
         console.log('🔍 handleSubmit - productData.specificationValues:', productData.specificationValues);
+        console.log('🔍 handleSubmit - productData.videoUrl:', productData.videoUrl);
+        console.log('🔍 handleSubmit - form.videoUrl:', form.videoUrl);
         await saveProduct(productData, editId);
       }
       

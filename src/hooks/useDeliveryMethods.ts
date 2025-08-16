@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+  import { useState, useEffect, useCallback, useRef } from 'react';
 import { DelieveryMethod, ApiResponse } from '../Types';
 import { BASE_URL } from '../constants/api';
 import { handleApiError } from '../utils/handleApiError';
 import useLanguage from './useLanguage';
 import { useToastContext } from '../contexts/ToastContext';
 import { get } from 'http';
+import { getStoreId } from '../utils/storeUtils';
 
 interface DeliveryMethodsResponse extends ApiResponse<DelieveryMethod[]> {
   pagination?: {
@@ -322,7 +323,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
       }
 
       // Get storeId from localStorage if not provided
-      const finalStoreId = storeId || "687505893fbf3098648bfe16";
+      const finalStoreId = storeId || getStoreId();
       
       if (!finalStoreId) {
         setError(t('deliveryDetails.errors.storeIdRequired'));
