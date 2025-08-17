@@ -71,6 +71,7 @@ const SubscriptionHistory: React.FC = () => {
     filteredCount: 0
   });
   const [isDisablingAutoRenew, setIsDisablingAutoRenew] = useState(false);
+  const [showDisableConfirmPopup, setShowDisableConfirmPopup] = useState(false);
 
   // تعريف أعمدة الجدول
   const columns = [
@@ -161,8 +162,12 @@ const SubscriptionHistory: React.FC = () => {
         }
       );
       
-      const data: SubscriptionHistoryResponse = response.data.data;
-      setHistory(data.history);
+             const data: SubscriptionHistoryResponse = response.data.data;
+             const filteredHistory = data.history.filter(item => 
+               item.action !== 'auto_renewal_enabled' &&
+               item.action !== 'auto_renewal_disabled'
+             );
+             setHistory(filteredHistory);
       setPagination(data.pagination);
     } catch (error: any) {
       console.error('Error fetching subscription history:', error);
@@ -174,12 +179,19 @@ const SubscriptionHistory: React.FC = () => {
 
   useEffect(() => {
     fetchHistory();
-    fetchSubscriptionStatus();
-    setSubscriptionStatus(fetchSubscriptionStatus());
+    const loadSubscriptionStatus = async () => {
+      try {
+        const status = await fetchSubscriptionStatus();
+        setSubscriptionStatus(status);
+      } catch (error) {
+        console.error('Error loading subscription status:', error);
+      }
+    };
+    loadSubscriptionStatus();
   }, [storeId]);
 
-const autoRenew = subscriptionStatus?.autoRenew;
-const subscriptionEndDate = subscriptionStatus?.endDate;
+const autoRenew = subscriptionStatus?.subscription?.autoRenew;
+const subscriptionEndDate = subscriptionStatus?.subscription?.endDate;
 
 // حساب الأيام المتبقية حتى انتهاء الاشتراك
 const getDaysUntilExpiry = () => {
@@ -191,21 +203,11 @@ const getDaysUntilExpiry = () => {
   return diffDays;
 };
 
-  const daysUntilExpiry = getDaysUntilExpiry();
+    const daysUntilExpiry = getDaysUntilExpiry();
   const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 5;
-console.log(isExpiringSoon);
   // دالة لإلغاء تفعيل التجديد التلقائي
   const handleDisableAutoRenewal = async () => {
     if (!storeId) return;
-    
-    // رسالة تأكيد
-    const confirmMessage = isRTL 
-      ? 'هل أنت متأكد من إلغاء التجديد التلقائي؟ لن يتم تجديد الاشتراك تلقائياً عند انتهاء الصلاحية.'
-      : 'Are you sure you want to disable auto-renewal? Your subscription will not renew automatically when it expires.';
-    
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
     
     setIsDisablingAutoRenew(true);
     try {
@@ -219,14 +221,16 @@ console.log(isExpiringSoon);
         }
       );
       
-      if (response.data.success) {
-        showSuccess(
-          t('subscriptionHistory.autoRenewalDisabled'),
-          t('subscriptionHistory.autoRenewalDisabledMessage')
-        );
-        // تحديث حالة الاشتراك
-        fetchSubscriptionStatus();
-      } else {
+             if (response.data.success) {
+         showSuccess(
+           t('subscriptionHistory.autoRenewalDisabled'),
+           t('subscriptionHistory.autoRenewalDisabledMessage')
+         );
+         // تحديث حالة الاشتراك
+         const updatedStatus = await fetchSubscriptionStatus();
+         setSubscriptionStatus(updatedStatus);
+         setShowDisableConfirmPopup(false);
+       } else {
         showError(
           t('subscriptionHistory.error'),
           response.data.message || t('subscriptionHistory.disableAutoRenewalError')
@@ -309,7 +313,7 @@ console.log(isExpiringSoon);
 
   return (
     <div className="min-h-screen p-4">
-      <div className="">
+      <div className={`${isRTL ? 'rtl' : 'ltr'}`}>
         {/* Breadcrumb */}
         <CustomBreadcrumb
           items={[
@@ -329,18 +333,18 @@ console.log(isExpiringSoon);
         />
 
         {/* Subscription Status Summary */}
-        <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+        <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4 flex flex-col ">
+          <h3 className={`text-lg font-semibold text-gray-800 mb-3 flex items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
             <CreditCardIcon className="w-5 h-5 mr-2 text-primary" />
             {isRTL ? 'حالة الاشتراك' : 'Subscription Status'}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${autoRenew ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className="text-sm text-gray-600">
+          <div className={` gap-4 flex ${isRTL ? 'flex-row-reverse ' : 'flex-row   '}`}>
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}  `}>
+              <div className={`w-3 h-3 rounded-full ${autoRenew ? 'bg-green-500' : 'bg-red-500'} ${isRTL ? ' flex flex-row-reverse' : 'flex flex-row'}`}></div>
+              <span className={`text-sm text-gray-600 ${isRTL ? 'flex flex-row-reverse' : 'flex flex-row'}`}>
                 {isRTL ? 'التجديد التلقائي:' : 'Auto-Renewal:'}
               </span>
-              <span className={`text-sm font-medium ${autoRenew ? 'text-green-600' : 'text-red-600'}`}>
+              <span className={`text-sm font-medium ${autoRenew ? 'text-green-600' : 'text-red-600'} ${isRTL ? 'flex flex-row-reverse' : 'flex flex-row'}`}>
                 {autoRenew 
                   ? (isRTL ? 'مفعل' : 'Enabled')
                   : (isRTL ? 'معطل' : 'Disabled')
@@ -348,12 +352,12 @@ console.log(isExpiringSoon);
               </span>
             </div>
             {daysUntilExpiry !== null && (
-              <div className="flex items-center gap-2">
+              <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}  `}>
                 <ClockIcon className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-600">
+                <span className={`text-sm text-gray-600 ${isRTL ? 'flex flex-row-reverse' : 'flex flex-row'}`}>
                   {isRTL ? 'الأيام المتبقية:' : 'Days Remaining:'}
                 </span>
-                <span className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${isRTL ? 'flex flex-row-reverse' : 'flex flex-row'} ${
                   daysUntilExpiry <= 5 ? 'text-red-600' : 'text-blue-600'
                 }`}>
                   {daysUntilExpiry}
@@ -361,9 +365,9 @@ console.log(isExpiringSoon);
               </div>
             )}
             {subscriptionEndDate && (
-              <div className="flex items-center gap-2">
+              <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}  `}>
                 <CalendarIcon className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-600">
+                <span className={`text-sm text-gray-600 ${isRTL ? 'flex flex-row-reverse' : 'flex flex-row'}`}>
                   {isRTL ? 'تاريخ الانتهاء:' : 'End Date:'}
                 </span>
                 <span className="text-sm font-medium text-gray-800">
@@ -375,7 +379,7 @@ console.log(isExpiringSoon);
         </div>
 
         {/* Subscription Action Buttons */}
-        <div className="mb-6 flex flex-wrap gap-3">
+        <div className={`mb-6 flex flex-wrap gap-3 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
           {/* Auto-Renewal Status Display */}
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
             <div className={`w-2 h-2 rounded-full ${autoRenew ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -402,38 +406,29 @@ console.log(isExpiringSoon);
             </div>
           )}
 
-          {/* Disable Auto-Renewal Button */}
-          {autoRenew && (
-            <button
-              onClick={handleDisableAutoRenewal}
-              disabled={isDisablingAutoRenew}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isDisablingAutoRenew ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              ) : (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-              {isRTL ? 'إلغاء التجديد التلقائي' : 'Disable Auto-Renewal'}
-            </button>
-          )}
+                     {/* Disable Auto-Renewal Button */}
+           {autoRenew && (
+             <button
+               onClick={() => setShowDisableConfirmPopup(true)}
+               className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+             >
+               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+               </svg>
+               {isRTL ? 'إلغاء التجديد التلقائي' : 'Disable Auto-Renewal'}
+             </button>
+           )}
 
-          {/* Renew Subscription Button - Show when expiring soon or auto-renewal is disabled */}
-          {(  isExpiringSoon) && (
-            <button
-              onClick={() => setShowRenewPopup(true)}
-              className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-                isExpiringSoon 
-                  ? 'bg-red-600 text-white hover:bg-red-700' 
-                  : 'bg-primary text-white hover:bg-primary/90'
-              }`}
-            >
-              <CreditCardIcon className="w-5 h-5" />
-              {t('subscriptionHistory.renewSubscription')}
-            </button>
-          )}
+                     {/* Renew Subscription Button - Show only when auto-renewal is disabled */}
+           {isExpiringSoon && (
+             <button
+               onClick={() => setShowRenewPopup(true)}
+               className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+             >
+               <CreditCardIcon className="w-5 h-5" />
+               {t('subscriptionHistory.renewSubscription')}
+             </button>
+           )}
         </div>
 
         {/* History Table */}
@@ -459,14 +454,107 @@ console.log(isExpiringSoon);
           </div>
         )}
 
-        {/* Renew Subscription Popup */}
-        <SubscriptionRenewalPopup
-          isOpen={showRenewPopup}
-          onClose={() => setShowRenewPopup(false)}
-          isRTL={isRTL}
-          storeId={storeId}
-          userId={userId}
-        />
+                 {/* Renew Subscription Popup */}
+         <SubscriptionRenewalPopup
+           isOpen={showRenewPopup}
+           onClose={() => setShowRenewPopup(false)}
+           isRTL={isRTL}
+           storeId={storeId}
+           userId={userId}
+         />
+
+         {/* Disable Auto-Renewal Confirmation Popup */}
+         {showDisableConfirmPopup && (
+           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+             <div className={`bg-white rounded-lg shadow-xl max-w-md w-full mx-4 ${isRTL ? 'rtl' : 'ltr'}`}>
+               {/* Header */}
+               <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                 <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                     <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <h3 className="text-lg font-semibold text-gray-900">
+                       {isRTL ? 'تأكيد إلغاء التجديد التلقائي' : 'Confirm Auto-Renewal Disable'}
+                     </h3>
+                     <p className="text-sm text-gray-500">
+                       {isRTL ? 'إجراء مهم' : 'Important Action'}
+                     </p>
+                   </div>
+                 </div>
+                 <button
+                   onClick={() => setShowDisableConfirmPopup(false)}
+                   className="text-gray-400 hover:text-gray-600 transition-colors"
+                 >
+                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                   </svg>
+                 </button>
+               </div>
+
+               {/* Content */}
+               <div className="p-6">
+                 <div className="mb-4">
+                   <p className="text-gray-700 leading-relaxed">
+                     {isRTL 
+                       ? 'هل أنت متأكد من إلغاء التجديد التلقائي؟'
+                       : 'Are you sure you want to disable auto-renewal?'
+                     }
+                   </p>
+                   <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                     <div className="flex items-start gap-2">
+                       <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                       </svg>
+                       <div>
+                         <p className="text-sm text-yellow-800 font-medium">
+                           {isRTL ? 'تنبيه مهم:' : 'Important Notice:'}
+                         </p>
+                         <p className="text-sm text-yellow-700 mt-1">
+                           {isRTL 
+                             ? 'لن يتم تجديد الاشتراك تلقائياً عند انتهاء الصلاحية. ستحتاج إلى تجديده يدوياً.'
+                             : 'Your subscription will not renew automatically when it expires. You will need to renew it manually.'
+                           }
+                         </p>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+
+               {/* Footer */}
+               <div className="flex gap-3 p-6 border-t border-gray-200">
+                 <button
+                   onClick={() => setShowDisableConfirmPopup(false)}
+                   className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                 >
+                   {isRTL ? 'إلغاء' : 'Cancel'}
+                 </button>
+                 <button
+                   onClick={handleDisableAutoRenewal}
+                   disabled={isDisablingAutoRenew}
+                   className="flex-1 px-4 py-2 bg-red-600 text-white hover:bg-red-700 disabled:bg-red-400 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                 >
+                   {isDisablingAutoRenew ? (
+                     <>
+                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                       {isRTL ? 'جاري الإلغاء...' : 'Disabling...'}
+                     </>
+                   ) : (
+                     <>
+                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                       </svg>
+                       {isRTL ? 'إلغاء التجديد التلقائي' : 'Disable Auto-Renewal'}
+                     </>
+                   )}
+                 </button>
+               </div>
+             </div>
+           </div>
+         )}
       </div>
     </div>
   );

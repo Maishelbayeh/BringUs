@@ -106,7 +106,22 @@
     "free": "مجاني",
     "popular": "شائع",
     "active": "نشط",
-    "inactive": "غير نشط"
+    "inactive": "غير نشط",
+    "editPlan": "تعديل خطة الاشتراك",
+    "updatePlan": "تحديث الخطة",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف الخطة \"{{planName}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deactivate": "إلغاء التفعيل",
+    "activate": "تفعيل",
+    "removePopular": "إلغاء الشعبية",
+    "makePopular": "جعل شائع",
+    "details": "تفاصيل الخطة",
+    "pricing": "معلومات التسعير",
+    "status": "معلومات الحالة",
+    "timestamps": "الطوابع الزمنية",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "days": "أيام",
+    "notPopular": "غير شائع"
   },
   "subscriptionHistory": {
     "title": "تاريخ الاشتراكات",

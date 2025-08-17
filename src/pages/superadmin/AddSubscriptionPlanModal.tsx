@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import useLanguage from '@/hooks/useLanguage';
 import axios from 'axios';
+import CustomSelect from './dropdown';
+import { useToastContext } from '@/contexts/ToastContext';
 
 interface Feature {
   name: string;
@@ -12,6 +14,7 @@ interface Feature {
 }
 
 interface SubscriptionPlan {
+  _id?: string;
   name: string;
   nameAr: string;
   description: string;
@@ -34,17 +37,22 @@ interface AddSubscriptionPlanModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  plan?: SubscriptionPlan;
+  isEdit?: boolean;
 }
 
 const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
+  plan,
+  isEdit = false
 }) => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
-  
+  const { showError } = useToastContext();  
+  const { showSuccess } = useToastContext();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<SubscriptionPlan>({
     name: '',
@@ -72,6 +80,50 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
     descriptionAr: '',
     included: true
   });
+
+  // Populate form when editing
+  useEffect(() => {
+    if (isEdit && plan) {
+      setFormData({
+        name: plan.name || '',
+        nameAr: plan.nameAr || '',
+        description: plan.description || '',
+        descriptionAr: plan.descriptionAr || '',
+        type: plan.type || 'monthly',
+        duration: plan.duration || 30,
+        price: plan.price || 0,
+        currency: plan.currency || 'USD',
+        features: plan.features || [],
+        isActive: plan.isActive !== undefined ? plan.isActive : true,
+        isPopular: plan.isPopular !== undefined ? plan.isPopular : false,
+        sortOrder: plan.sortOrder || 0,
+        maxProducts: plan.maxProducts || -1,
+        maxOrders: plan.maxOrders || -1,
+        maxUsers: plan.maxUsers || -1,
+        storageLimit: plan.storageLimit || -1
+      });
+    } else {
+      // Reset form for new plan
+      setFormData({
+        name: '',
+        nameAr: '',
+        description: '',
+        descriptionAr: '',
+        type: 'monthly',
+        duration: 30,
+        price: 0,
+        currency: 'USD',
+        features: [],
+        isActive: true,
+        isPopular: false,
+        sortOrder: 0,
+        maxProducts: -1,
+        maxOrders: -1,
+        maxUsers: -1,
+        storageLimit: -1
+      });
+    }
+  }, [isEdit, plan]);
 
   const planTypes = [
     { value: 'free', label: 'Free', labelAr: 'مجاني' },
@@ -126,56 +178,96 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5001/api/subscription-plans', formData,
-        {
+      let response;
+      if (isEdit && plan) {
+        // Update existing plan
+        response = await axios.put(`http://localhost:5001/api/subscription-plans/${plan._id}`, formData, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
-        }
-      );
-      console.log('Subscription plan created:', response.data);
+        });
+        console.log('Subscription plan updated:', response.data);
+        showSuccess(t('subscriptionPlans.planUpdated'));
+      } else {
+        // Create new plan
+        response = await axios.post('http://localhost:5001/api/subscription-plans', formData, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        console.log('Subscription plan created:', response.data);
+        showSuccess(t('subscriptionPlans.planCreated'));
+      }
+      
       onSuccess();
       onClose();
-      // Reset form
-      setFormData({
-        name: '',
-        nameAr: '',
-        description: '',
-        descriptionAr: '',
-        type: 'monthly',
-        duration: 30,
-        price: 0,
-        currency: 'USD',
-        features: [],
-        isActive: true,
-        isPopular: false,
-        sortOrder: 0,
-        maxProducts: -1,
-        maxOrders: -1,
-        maxUsers: -1,
-        storageLimit: -1
-      });
     } catch (error: any) {
-      console.error('Error creating subscription plan:', error);
-      alert(error.response?.data?.message || 'Error creating subscription plan');
+      console.error(`Error ${isEdit ? 'updating' : 'creating'} subscription plan:`, error);
+       showError(error.response?.data?.message || `Error ${isEdit ? 'updating' : 'creating'} subscription plan`);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Common input styling classes with purple theme
+  const inputClasses = `
+    w-full px-4 py-3.5 border border-gray-300 rounded-xl 
+    focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+    transition-all duration-200 ease-in-out
+    bg-white text-gray-900 placeholder-gray-500
+    ${isRTL ? 'text-right' : 'text-left'}
+    hover:border-purple-400 shadow-sm
+  `;
+
+  const labelClasses = `
+    block text-sm font-semibold text-gray-700 mb-3
+    ${isRTL ? 'text-right' : 'text-left'}
+  `;
+
+  const textareaClasses = `
+    w-full px-4 py-3.5 border border-gray-300 rounded-xl 
+    focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+    transition-all duration-200 ease-in-out
+    bg-white text-gray-900 placeholder-gray-500 resize-none
+    ${isRTL ? 'text-right' : 'text-left'}
+    hover:border-purple-400 shadow-sm
+  `;
+
+  const checkboxClasses = `
+    w-5 h-5 text-purple-600 bg-gray-100 border-gray-300 rounded-lg
+    focus:ring-purple-500 focus:ring-2
+    ${isRTL ? 'ml-3' : 'mr-3'}
+  `;
+
+  const sectionClasses = `
+    bg-gray-50 rounded-xl p-6 border border-gray-200
+  `;
+
+  const sectionHeaderClasses = `
+    text-lg font-bold text-gray-900 mb-6 flex items-center gap-2
+    ${isRTL ? 'text-right' : 'text-left'}
+  `;
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl mx-4 max-h-[95vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
-          <span className="text-xl font-bold text-primary">
-            {t('subscriptionPlans.addNewPlan')}
-          </span>
+        <div className="flex items-center justify-between border-b border-gray-200 px-8 py-6 bg-gradient-to-r from-gray-50 to-purple-50 rounded-t-2xl">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+              </svg>
+            </div>
+            <span className="text-2xl font-bold text-gray-900">
+              {isEdit ? t('subscriptionPlans.editPlan') : t('subscriptionPlans.addNewPlan')}
+            </span>
+          </div>
           <button
             onClick={onClose}
-            className="text-primary hover:text-red-500 text-2xl"
+            className="text-gray-400 hover:text-red-500 text-3xl transition-colors duration-200 p-2 hover:bg-red-50 rounded-xl"
             type="button"
           >
             ×
@@ -183,243 +275,216 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
         </div>
         
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Basic Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+            <div className={sectionClasses}>
+              <h3 className={sectionHeaderClasses}>
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 {t('subscriptionPlans.basicInfo')}
               </h3>
               
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('subscriptionPlans.name')} (English)
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <div className="space-y-6">
+                {/* Name */}
+                <div className="space-y-3">
+                  <label className={labelClasses}>
+                    {t('subscriptionPlans.name')} (English)
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Enter plan name in English"
+                    className={inputClasses}
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('subscriptionPlans.name')} (العربية)
-                </label>
-                <input
-                  type="text"
-                  name="nameAr"
-                  value={formData.nameAr}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+                <div className="space-y-3">
+                  <label className={labelClasses}>
+                    {t('subscriptionPlans.name')} (العربية)
+                  </label>
+                  <input
+                    type="text"
+                    name="nameAr"
+                    value={formData.nameAr}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="أدخل اسم الخطة بالعربية"
+                    className={inputClasses}
+                  />
+                </div>
 
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('subscriptionPlans.description')} (English)
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+                {/* Description */}
+                <div className="space-y-3">
+                  <label className={labelClasses}>
+                    {t('subscriptionPlans.description')} (English)
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows={3}
+                    placeholder="Enter plan description in English"
+                    className={textareaClasses}
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('subscriptionPlans.description')} (العربية)
-                </label>
-                <textarea
-                  name="descriptionAr"
-                  value={formData.descriptionAr}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+                <div className="space-y-3">
+                  <label className={labelClasses}>
+                    {t('subscriptionPlans.description')} (العربية)
+                  </label>
+                  <textarea
+                    name="descriptionAr"
+                    value={formData.descriptionAr}
+                    onChange={handleInputChange}
+                    rows={3}
+                    placeholder="أدخل وصف الخطة بالعربية"
+                    className={textareaClasses}
+                  />
+                </div>
 
-              {/* Plan Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('subscriptionPlans.type')}
-                </label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {planTypes.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {isRTL ? type.labelAr : type.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                {/* Plan Type */}
+                <div className="space-y-3">
+                  <label className={labelClasses}>
+                    {t('subscriptionPlans.type')}
+                  </label>
+                  <CustomSelect
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    options={planTypes.map(type => ({
+                      value: type.value,
+                      label: isRTL ? type.labelAr : type.label
+                    }))}
+                    isRTL={isRTL}
+                  />
+                </div>
 
-              {/* Duration */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('subscriptionPlans.duration')} (days)
-                </label>
-                <input
-                  type="number"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleInputChange}
-                  min="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                {/* Duration */}
+                <div className="space-y-3">
+                  <label className={labelClasses}>
+                    {t('subscriptionPlans.duration')} (days)
+                  </label>
+                  <input
+                    type="number"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleInputChange}
+                    min="1"
+                    placeholder="Enter duration in days"
+                    className={inputClasses}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Pricing & Limits */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t('subscriptionPlans.pricingAndLimits')}
-              </h3>
-              
-              {/* Price */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('subscriptionPlans.price')}
-                </label>
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  min="0"
-                  step="0.01"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+            {/* Pricing & Settings */}
+            <div className="space-y-6">
+              {/* Pricing Section */}
+              <div className={sectionClasses}>
+                <h3 className={sectionHeaderClasses}>
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                  {t('subscriptionPlans.pricingAndLimits')}
+                </h3>
+                
+                <div className="space-y-6">
+                  {/* Price */}
+                  <div className="space-y-3">
+                    <label className={labelClasses}>
+                      {t('subscriptionPlans.price')}
+                    </label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      className={inputClasses}
+                    />
+                  </div>
+
+                  {/* Currency */}
+                  <div className="space-y-3">
+                    <label className={labelClasses}>
+                      {t('subscriptionPlans.currency')}
+                    </label>
+                    <CustomSelect
+                      name="currency"
+                      value={formData.currency}
+                      onChange={handleInputChange}
+                      options={currencies.map(currency => ({
+                        value: currency.code,
+                        label: `${currency.symbol} - ${isRTL ? currency.nameAr : currency.name}`
+                      }))}
+                      isRTL={isRTL}
+                    />
+                  </div>
+
+                  {/* Sort Order */}
+                  <div className="space-y-3">
+                    <label className={labelClasses}>
+                      {t('subscriptionPlans.sortOrder')}
+                    </label>
+                    <input
+                      type="number"
+                      name="sortOrder"
+                      value={formData.sortOrder}
+                      onChange={handleInputChange}
+                      min="0"
+                      placeholder="Enter sort order"
+                      className={inputClasses}
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Currency */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('subscriptionPlans.currency')}
-                </label>
-                <select
-                  name="currency"
-                  value={formData.currency}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {currencies.map(currency => (
-                    <option key={currency.code} value={currency.code}>
-                      {currency.symbol} - {isRTL ? currency.nameAr : currency.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Limits */}
-              {/* <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('subscriptionPlans.maxProducts')}
+              {/* Settings Section */}
+              <div className={sectionClasses}>
+                <h3 className={sectionHeaderClasses}>
+                  <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Settings
+                </h3>
+                
+                <div className="space-y-4">
+                  <label className="flex items-center cursor-pointer hover:bg-white p-3 rounded-lg transition-colors duration-200 border border-transparent hover:border-gray-200">
+                    <input
+                      type="checkbox"
+                      name="isActive"
+                      checked={formData.isActive}
+                      onChange={handleInputChange}
+                      className={checkboxClasses}
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-gray-700">{t('subscriptionPlans.isActive')}</span>
+                      <p className="text-xs text-gray-500 mt-1">Enable or disable this subscription plan</p>
+                    </div>
                   </label>
-                  <input
-                    type="number"
-                    name="maxProducts"
-                    value={formData.maxProducts}
-                    onChange={handleInputChange}
-                    min="-1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('subscriptionPlans.maxOrders')}
+                  <label className="flex items-center cursor-pointer hover:bg-white p-3 rounded-lg transition-colors duration-200 border border-transparent hover:border-gray-200">
+                    <input
+                      type="checkbox"
+                      name="isPopular"
+                      checked={formData.isPopular}
+                      onChange={handleInputChange}
+                      className={checkboxClasses}
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-gray-700">{t('subscriptionPlans.isPopular')}</span>
+                      <p className="text-xs text-gray-500 mt-1">Mark this plan as popular to highlight it</p>
+                    </div>
                   </label>
-                  <input
-                    type="number"
-                    name="maxOrders"
-                    value={formData.maxOrders}
-                    onChange={handleInputChange}
-                    min="-1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('subscriptionPlans.maxUsers')}
-                  </label>
-                  <input
-                    type="number"
-                    name="maxUsers"
-                    value={formData.maxUsers}
-                    onChange={handleInputChange}
-                    min="-1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('subscriptionPlans.storageLimit')} (GB)
-                  </label>
-                  <input
-                    type="number"
-                    name="storageLimit"
-                    value={formData.storageLimit}
-                    onChange={handleInputChange}
-                    min="-1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div> */}
-
-              {/* Sort Order */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('subscriptionPlans.sortOrder')}
-                </label>
-                <input
-                  type="number"
-                  name="sortOrder"
-                  value={formData.sortOrder}
-                  onChange={handleInputChange}
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Checkboxes */}
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="isActive"
-                    checked={formData.isActive}
-                    onChange={handleInputChange}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">{t('subscriptionPlans.isActive')}</span>
-                </label>
-
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="isPopular"
-                    checked={formData.isPopular}
-                    onChange={handleInputChange}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">{t('subscriptionPlans.isPopular')}</span>
-                </label>
               </div>
             </div>
           </div>
@@ -430,10 +495,10 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
         </form>
         
         {/* Footer */}
-        <div className="flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl">
+        <div className="flex justify-between gap-4 px-8 py-6 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-purple-50 rounded-b-2xl">
           <button
             onClick={onClose}
-            className="bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg hover:bg-gray-300 transition-colors"
+            className="bg-white text-gray-700 px-8 py-3 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold border border-gray-300 shadow-sm"
           >
             {t('general.cancel')}
           </button>
@@ -441,9 +506,19 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+            className="bg-primary text-white px-8 py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg"
           >
-            {isLoading ? t('general.saving') : t('subscriptionPlans.createPlan')}
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {t('general.saving')}
+              </div>
+            ) : (
+              isEdit ? t('subscriptionPlans.updatePlan') : t('subscriptionPlans.createPlan')
+            )}
           </button>
         </div>
       </div>
