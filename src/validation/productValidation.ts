@@ -26,6 +26,7 @@ export interface ProductFormData {
   colors?: any[];
   images?: string[];
   mainImage?: string | null;
+  videoUrl?: string;
 }
 
 // Schema للتحقق من صحة بيانات المنتج
@@ -89,6 +90,11 @@ export const productValidationSchema: ValidationSchema = {
     type: 'number',
     min: 1,
     max: 1000,
+  },
+  videoUrl: {
+    required: false,
+    type: 'url',
+    maxLength: 500,
   },
 };
 
@@ -163,6 +169,23 @@ export const ProductSchemas = {
   
   // Schema كامل للمنتج
   full: productValidationSchema,
+  
+  // Schema للوسائط
+  media: {
+    images: {
+      required: false,
+      type: 'array' as const,
+    },
+    mainImage: {
+      required: false,
+      type: 'string' as const,
+    },
+    videoUrl: {
+      required: false,
+      type: 'url' as const,
+      maxLength: 500,
+    },
+  },
 };
 
 /**
