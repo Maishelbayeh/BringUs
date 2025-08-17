@@ -80,7 +80,7 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
         {/* Form Content */}
         <div className="flex-1 overflow-y-auto">
           <PaymentForm 
-            ref={formRef}
+            ref={formRef}   
             method={method} 
             onSubmit={handleFormSubmit} 
             onCancel={handleClose} 

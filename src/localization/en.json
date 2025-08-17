@@ -479,7 +479,8 @@
       "digital_wallet": "Digital Wallet",
       "bank_transfer": "Bank Transfer",
       "qr_code": "QR Code",
-      "other": "Other"
+      "other": "Other",
+      "lahza": "Lahza"
     },
     "imageTypes": {
       "logo": "Logo",

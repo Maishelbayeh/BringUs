@@ -611,7 +611,8 @@
       "digital_wallet": "محفظة رقمية",
       "bank_transfer": "تحويل بنكي",
       "qr_code": "رمز QR",
-      "other": "أخرى"
+      "other": "أخرى",
+      "lahza": "لحظة"
     },
     "imageTypes": {
       "logo": "شعار",
