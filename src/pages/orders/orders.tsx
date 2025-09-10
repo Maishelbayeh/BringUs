@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { useOrder } from '../../hooks/useOrder';
 import { getStoreId } from '../../utils/storeUtils';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useStoreUrls } from '../../hooks/useStoreUrls';
 import { 
   ShoppingCartIcon, 
   ClockIcon,
@@ -268,6 +269,7 @@ const OrderStatistics: React.FC<OrderStatisticsProps> = ({ data, isRtl, onFilter
 const OrdersPage: React.FC = () => {
   const { i18n, t } = useTranslation();
   const { showSuccess, showError } = useToastContext();
+  const { urls } = useStoreUrls();
 
   // Filter state
   const [activeFilter, setActiveFilter] = useState<{ type: 'status' | 'payment', value: string | null }>({
@@ -566,8 +568,7 @@ const OrdersPage: React.FC = () => {
           linkConfig={[{
             column: 'id',
             getPath: (row) => {
-              const path = `/orders/${row.id}`;
-              return path;
+              return urls.orderDetail(row.id);
             }
           }]}
         />

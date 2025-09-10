@@ -930,9 +930,9 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             />
             </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}
         {/* نسبة الخصم */}
-        <div className="">
+        {/* <div className="">
           <CustomNumberInput
             label={t('store.discount')}
             value={form.settings.storeDiscount}
@@ -941,10 +941,10 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             max={100}
             placeholder={t('store.discountPlaceholder')}
           />
-        </div>
+        </div> */}
 
         {/* الضريبة */}
-        <div className="">
+        {/* <div className="">
           <CustomNumberInput
             label={t('store.taxRate')}
             value={form.settings.taxRate}
@@ -953,8 +953,8 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             max={100}
             placeholder={t('store.taxRatePlaceholder')}
           />
-        </div>
-        </div>
+        </div> */}
+        {/* </div> */}
       </div>
 
       {/* معلومات التواصل */}

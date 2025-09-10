@@ -38,14 +38,12 @@ import AdminRoute from "@/hoc/AdminRoute";
 
 // Wrapper component to handle store slug parameter
 const StoreRouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { storeSlug } = useParams<{ storeSlug: string }>();
-  const { setStoreSlug, currentStore, setCurrentStore } = useStoreContext();
+  const { storeSlug, setStoreSlug, currentStore, setCurrentStore } = useStoreContext();
   const { getStore } = useStore();
   
   React.useEffect(() => {
+    // If we have a store slug in context, use it
     if (storeSlug) {
-      setStoreSlug(storeSlug);
-      
       // If we have a store slug but no current store data, try to fetch it
       if (!currentStore) {
         // Try to get store data from localStorage first
@@ -66,7 +64,7 @@ const StoreRouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }
 
 export default function StoreRouter() {
   const { isAuthenticated, isAuthenticatedSuperAdmin } = useAuth();
-  const { storeSlug } = useStoreContext();
+  const { storeSlug, setStoreSlug } = useStoreContext();
 
   console.log('StoreRouter - isAuthenticated:', isAuthenticated());
   console.log('StoreRouter - storeSlug:', storeSlug);
@@ -115,10 +113,12 @@ export default function StoreRouter() {
   }
 
   // Update context with current store slug if it's different
-  if (storeSlug !== currentStoreSlug) {
-    // This will be handled by StoreRouteWrapper when the route loads
-    console.log('StoreRouter - Store slug mismatch, will be updated by StoreRouteWrapper');
-  }
+  React.useEffect(() => {
+    if (storeSlug !== currentStoreSlug) {
+      console.log('StoreRouter - Updating store slug in context:', currentStoreSlug);
+      setStoreSlug(currentStoreSlug);
+    }
+  }, [currentStoreSlug, storeSlug, setStoreSlug]);
 
   return (
     <Routes>

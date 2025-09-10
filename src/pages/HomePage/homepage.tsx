@@ -5,7 +5,6 @@ import useLanguage from '../../hooks/useLanguage';
 import useDashboardStats from '../../hooks/useDashboardStats';
 import DashboardStatCard from './components/DashboardStatCard';
 import RevenueChart from './components/RevenueChart';
-import TopCategories from './components/TopCategories';
 import { 
   ShoppingCartIcon, 
   CurrencyDollarIcon, 
@@ -236,12 +235,12 @@ const Homepage: React.FC = () => {
           </motion.div>
 
           {/* Top Categories */}
-          <motion.div variants={itemVariants}>
+          {/* <motion.div variants={itemVariants}>
             <TopCategories 
               categories={stats?.topCategories || []} 
               isLoading={loading} 
             />
-          </motion.div>
+          </motion.div> */}
         </div>
       </motion.div>
     </div>
