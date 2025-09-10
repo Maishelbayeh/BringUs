@@ -1578,12 +1578,34 @@ const ProductsPage: React.FC = () => {
       //CONSOLE.error('Error saving product:', error);
     }
   };
+  //-------------------------------------------- renderDescription -------------------------------------------
+  const renderDescription = (value: string) => {
+    if (!value) return '';
+    
+    return (
+      <div 
+        className="max-w-xs overflow-hidden"
+        style={{
+          display: '-webkit-box',
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical',
+          lineHeight: '1.4',
+          maxHeight: '4.2em', // 3 lines * 1.4 line height
+          wordBreak: 'break-word'
+        }}
+        title={value} // Show full description on hover
+      >
+        {value}
+      </div>
+    );
+  };
+
   //-------------------------------------------- columns -------------------------------------------
   const columns = [
     { key: 'mainImage', label: { ar: 'الصورة الرئيسية', en: 'Main Image' }, type: 'image' as const, render: renderMainImage },
     { key: 'images', label: { ar: 'الصور الإضافية', en: 'Additional Images' }, type: 'text' as const, render: renderImages },
     { key: isRTL ? 'nameAr' : 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
-    { key: isRTL ? 'descriptionAr' : 'descriptionEn', label: { ar: 'الوصف', en: 'Description' }, type: 'text' as const },
+    { key: isRTL ? 'descriptionAr' : 'descriptionEn', label: { ar: 'الوصف', en: 'Description' }, type: 'text' as const, render: renderDescription },
     { key: 'categories', label: { ar: 'الفئات', en: 'Categories' }, type: 'text' as const, render: renderCategories },
     { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number' as const, render: renderPrice },
     { key: 'costPrice', label: { ar: 'سعر التكلفة', en: 'Cost Price' }, type: 'number' as const },
