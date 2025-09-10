@@ -24,6 +24,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   autoScrollToFirst = true,
   onColumnsChange,
 }) => {
+
   const { i18n } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<FilterState>({});
@@ -45,6 +46,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
     columns.forEach(col => {
       initial[col.key] = col.hidden !== true; // إذا كان hidden = true، اجعل العمود مخفي، وإلا اجعله ظاهر
     });
+  
     return initial;
   });
 
@@ -59,6 +61,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
   // الأعمدة الظاهرة فقط
   const visibleColumns = columns.filter(col => columnVisibility[col.key] === true);
+
+
 
   // دالة استخراج القيم الفريدة من أي مصدر بيانات
   const getUniqueColumnValuesFromData = (source: any[], colKey: string): string[] => {
@@ -107,6 +111,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
     return matchesSearch && matchesFilters;
   });
 
+
+
   // تطبيق الفرز الصحيح حسب نوع العمود
   let sortedData = [...filteredData];
   if (sortConfig) {
@@ -134,6 +140,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
   const totalPages = Math.ceil(sortedData.length / rowsPerPage);
   const paginatedData = sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+
 
   // معالجات الأحداث
   const handleApplyFilter = () => {
@@ -304,17 +312,25 @@ const CustomTable: React.FC<CustomTableProps> = ({
               filterIconRefs={filterIconRefs}
             />
             <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedData.map((item, idx) => (
-                <TableRow
-                  key={idx}
-                  item={item}
-                  columns={visibleColumns}
-                  linkConfig={linkConfig}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onImageClick={handleImageClick}
-                />
-              ))}
+              {paginatedData.length === 0 ? (
+                <tr>
+                  <td colSpan={visibleColumns.length} className="px-6 py-4 text-center text-gray-500">
+                    No data available
+                  </td>
+                </tr>
+              ) : (
+                paginatedData.map((item, idx) => (
+                  <TableRow
+                    key={idx}
+                    item={item}
+                    columns={visibleColumns}
+                    linkConfig={linkConfig}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onImageClick={handleImageClick}
+                  />
+                ))
+              )}
             </tbody>
           </table>
         </div>

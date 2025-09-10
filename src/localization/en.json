@@ -106,7 +106,22 @@
     "free": "Free",
     "popular": "Popular",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "editPlan": "Edit Subscription Plan",
+    "updatePlan": "Update Plan",
+    "deleteConfirmMessage": "Are you sure you want to delete the plan \"{{planName}}\"? This action cannot be undone.",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "removePopular": "Remove Popular",
+    "makePopular": "Make Popular",
+    "details": "Plan Details",
+    "pricing": "Pricing Information",
+    "status": "Status Information",
+    "timestamps": "Timestamps",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "days": "days",
+    "notPopular": "Not Popular"
   },
   "subscriptionHistory": {
     "title": "Subscription History",

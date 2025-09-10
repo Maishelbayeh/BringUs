@@ -349,7 +349,9 @@ export const useStore = () => {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     })
-    console.log(response.data.data);
+    const subscriptionStatus = response.data.data;
+    return subscriptionStatus;
+    // console.log(response.data.data);
   };
   // ========================================================================
   // RETURN VALUES
