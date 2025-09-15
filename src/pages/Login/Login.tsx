@@ -16,14 +16,14 @@ import CustomInput from '@/components/common/CustomInput';
 import CustomButton from '@/components/common/CustomButton';
 import useLanguage from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
-import { useStoreUrls } from '@/hooks/useStoreUrls';
+
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const { login, isLoading: authLoading, error: authError } = useAuth();
-  const { storeSlug } = useStoreUrls();
+  // const { storeSlug } = useStoreUrls();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -77,6 +77,7 @@ const Login: React.FC = () => {
       localStorage.setItem('storeNameEn', result?.user?.store?.nameEn || '');
       localStorage.setItem('userLastName', result?.user.lastName || '');
       localStorage.setItem('status', result?.user?.store?.status || '');
+      localStorage.setItem('UserPhone', result?.user.phone || '');
 
       const storeslug=result?.user?.store?.slug;
       if (result) {

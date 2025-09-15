@@ -171,7 +171,7 @@ export const useStore = () => {
   };
 
 // -----------------------------------------------getStore---------------------------------------------------------
-  const getStore = async (storeId: string,slug: string): Promise<StoreResponse | null> => {
+  const getStore = async (slug: string): Promise<StoreResponse | null> => {
     setLoading(true);
     setError(null);
 

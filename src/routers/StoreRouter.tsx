@@ -1,8 +1,7 @@
 import React from 'react';
-import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useStoreContext } from '../contexts/StoreContext';
 import { useAuth } from '../hooks/useAuth';
-import { useStore } from '../hooks/useStore';
 import { getStoreData } from '../hooks/useLocalStorage';
 import Homepage from "../pages/HomePage/homepage";
 import PaymentMethods from "../pages/payment/PaymentMethods";
@@ -33,13 +32,12 @@ import StoreInfo from "@/pages/store/StoreInfo";
 import StoresManagement from "@/pages/superadmin/StoresManagement";
 import SubscriptionPlans from "@/pages/superadmin/SubscriptionPlans";
 import SubscriptionHistory from "@/pages/subscription/SubscriptionHistory";
-import SuperAdminRoute from "@/hoc/SuperAdminRoute";
+import PointOfSale from "@/pages/pos/PointOfSale";
 import AdminRoute from "@/hoc/AdminRoute";
 
 // Wrapper component to handle store slug parameter
 const StoreRouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { storeSlug, setStoreSlug, currentStore, setCurrentStore } = useStoreContext();
-  const { getStore } = useStore();
   
   React.useEffect(() => {
     // If we have a store slug in context, use it
@@ -345,6 +343,14 @@ export default function StoreRouter() {
         <StoreRouteWrapper>
           <AdminRoute>
             <UsersPage />
+          </AdminRoute>
+        </StoreRouteWrapper>
+      } />
+      
+      <Route path={`/${currentStoreSlug}/pos`} element={
+        <StoreRouteWrapper>
+          <AdminRoute>
+            <PointOfSale />
           </AdminRoute>
         </StoreRouteWrapper>
       } />

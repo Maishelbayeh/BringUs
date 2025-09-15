@@ -10,10 +10,9 @@ import {
   VideoCameraIcon,
   EyeIcon,
   ChartBarIcon,
- 
+  CalculatorIcon,
   ChatBubbleLeftRightIcon,
   CubeIcon,
- 
   BuildingStorefrontIcon,
   CreditCardIcon
 } from '@heroicons/react/24/outline';
@@ -104,6 +103,14 @@ export const getMenuAsText = (): MenuItem[] => {
       title: 'sideBar.orders',
       icon: ShoppingCartIcon,
       path: '/orders',
+      roles: ['admin'],
+      requireActiveStore: true
+    },
+    {
+      id: 5.5,
+      title: 'sideBar.pointOfSale',
+      icon: CalculatorIcon,
+      path: '/pos',
       roles: ['admin'],
       requireActiveStore: true
     },

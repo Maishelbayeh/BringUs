@@ -162,3 +162,13 @@ body {
     display: none !important;
   }
 }
+
+/* Toast Progress Animation */
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
