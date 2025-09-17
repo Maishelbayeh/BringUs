@@ -950,32 +950,21 @@ const ProductsPage: React.FC = () => {
   //-------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (product: any) => {
     const originalProduct = product.originalProduct || product;
-    
-    console.log('🔍 handleEdit - originalProduct:', originalProduct);
-    console.log('🔍 handleEdit - originalProduct.categoryIds:', originalProduct.categoryIds);
-    console.log('🔍 handleEdit - originalProduct.categories:', originalProduct.categories);
-    console.log('🔍 handleEdit - originalProduct.category:', originalProduct.category);
-    
-    // Handle colors from original product data - pass raw colors data to let ProductsForm handle conversion
+  
     const productColors = originalProduct.colors || [];
-    console.log('🔍 handleEdit - originalProduct.colors:', originalProduct.colors);
-    console.log('🔍 handleEdit - productColors type:', typeof productColors);
-    console.log('🔍 handleEdit - productColors is array:', Array.isArray(productColors));
-    
+
     const maintainStock = (originalProduct.availableQuantity || originalProduct.stock || 0) > 0 ? 'Y' : 'N';
     const unitId = originalProduct.unit?._id || originalProduct.unitId || (typeof originalProduct.unit === 'string' ? originalProduct.unit : '');
     const categoryId = originalProduct.category?._id || originalProduct.categoryId || (typeof originalProduct.category === 'string' ? originalProduct.category : '');
     const subcategoryId = originalProduct.subcategory?._id || originalProduct.subcategoryId || (typeof originalProduct.subcategory === 'string' ? originalProduct.subcategory : '');
     const storeId = originalProduct.store?._id || originalProduct.storeId || (typeof originalProduct.store === 'string' ? originalProduct.store : '');
     const tags = (originalProduct.productLabels || []).map((l: any) => typeof l === 'object' ? String(l._id || l.id) : String(l));
-    console.log('🔍 handleEdit - originalProduct.productLabels:', originalProduct.productLabels);
-    console.log('🔍 handleEdit - processed tags:', tags);
+  
 
     // Extract specifications and convert to the format expected by the form
     const specifications = originalProduct.specifications || [];
     const specificationValues = originalProduct.specificationValues || [];
-    
-    // استخدام قيم المواصفات المختارة إذا كانت موجودة
+
     const selectedSpecifications = Array.isArray(specificationValues) && specificationValues.length > 0
       ? specificationValues.map((spec: any) => {
           const foundSpec = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec.specificationId) : null;
@@ -1047,13 +1036,11 @@ const ProductsPage: React.FC = () => {
       barcodes: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [],
       newBarcode: '',
       videoUrl: originalProduct.videoUrl || '',
+      isOnSale: originalProduct.isOnSale === true || originalProduct.isOnSale === 'true' ? 'true' : 'false',
+      salePercentage: originalProduct.salePercentage ? String(originalProduct.salePercentage) : '',
     };
     
-    console.log('🔍 handleEdit - Final newForm:', newForm);
-    console.log('🔍 handleEdit - Final newForm.productLabels:', newForm.productLabels);
-    console.log('🔍 handleEdit - newForm.categoryIds:', newForm.categoryIds);
-    console.log('🔍 handleEdit - newForm.categoryId:', newForm.categoryId);
-    
+  
     setForm(newForm);
     setEditProduct(originalProduct);
     setDrawerMode('edit');
