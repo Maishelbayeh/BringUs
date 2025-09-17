@@ -16,7 +16,7 @@ interface CategoriesFormProps {
 
 // تم نقل جميع دوال الفالديشين إلى نظام الفالديشين العام في src/validation/categoryValidation.ts
 
-const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onImageChange, isSubcategory, isRTL, categories, validationErrors = {} }) => {
+const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onImageChange, isRTL, categories, validationErrors = {} }) => {
 
   const parentCategory = form.parentId !== null && categories ? categories.find(cat => String(cat.id) === String(form.parentId)) : null;
   

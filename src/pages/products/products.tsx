@@ -99,6 +99,7 @@ const initialForm: {
   isOnSale: 'false',
   salePercentage: '',
 };
+
 //-------------------------------------------- ProductsPage -------------------------------------------
 const ProductsPage: React.FC = () => {
   const [subcategories] = useState(initialSubcategories);
@@ -1347,9 +1348,10 @@ const ProductsPage: React.FC = () => {
       // رفع الصور إلى Cloudflare
       const uploadedUrls = await uploadProductImages(fileArray);
       
-      // تحديث النموذج بالروابط الجديدة
-      const newForm = { ...form, images: uploadedUrls };
-      //CONSOLE.log('🔍 handleImageChange - newForm.barcodes:', newForm.barcodes);
+      // تحديث النموذج بالروابط الجديدة عبر الإضافة لا الاستبدال (مع إزالة التكرار)
+      const combined = Array.isArray(form.images) ? [...form.images, ...uploadedUrls] : [...uploadedUrls];
+      const deduped = Array.from(new Set(combined));
+      const newForm = { ...form, images: deduped };
       setForm(newForm);
       
       //CONSOLE.log('✅ Images uploaded to Cloudflare:', uploadedUrls);
@@ -1358,8 +1360,9 @@ const ProductsPage: React.FC = () => {
       // في حالة الخطأ، نستخدم الروابط المحلية كـ fallback
       const fileArray = Array.isArray(files) ? files : [files];
       const imageUrls = fileArray.map(file => URL.createObjectURL(file));
-      const newForm = { ...form, images: imageUrls };
-      //CONSOLE.log('🔍 handleImageChange (fallback) - newForm.barcodes:', newForm.barcodes);
+      const combined = Array.isArray(form.images) ? [...form.images, ...imageUrls] : [...imageUrls];
+      const deduped = Array.from(new Set(combined));
+      const newForm = { ...form, images: deduped };
       setForm(newForm);
     }
   };
@@ -1415,6 +1418,19 @@ const ProductsPage: React.FC = () => {
     }
 
     try {
+      // Block submit if image validation errors exist (localized)
+      if (productsFormRef.current && typeof productsFormRef.current.getImageErrors === 'function') {
+        const imageErrors = productsFormRef.current.getImageErrors();
+        const imagesError = imageErrors?.images;
+        const mainImageError = imageErrors?.mainImage;
+        if ((imagesError && imagesError.trim()) || (mainImageError && mainImageError.trim())) {
+          showError(
+            isRTL ? (imagesError || mainImageError) : (imagesError || mainImageError),
+            isRTL ? 'خطأ في الصور' : 'Image Error'
+          );
+          return;
+        }
+      }
      
       // تحويل البيانات إلى الشكل المطلوب للـ API
       const productData = {
@@ -1519,6 +1535,21 @@ const ProductsPage: React.FC = () => {
           isRTL ? 'خطأ في التحقق' : 'Validation Error'
         );
         return;
+      }
+
+      // التحقق من أخطاء الصور
+      if (productsFormRef.current && typeof productsFormRef.current.getImageErrors === 'function') {
+        const imageErrors = productsFormRef.current.getImageErrors();
+        if (imageErrors && Object.keys(imageErrors).length > 0) {
+          const errorMessages = Object.values(imageErrors).filter(msg => msg).join(' | ');
+          if (errorMessages) {
+            showError(
+              errorMessages,
+              isRTL ? 'خطأ في الصور' : 'Image Error'
+            );
+            return;
+          }
+        }
       }
 
       // حفظ المنتج

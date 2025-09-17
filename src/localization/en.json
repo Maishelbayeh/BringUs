@@ -182,6 +182,29 @@
     "lahzaToken": "Lahza Token",
     "lahzaTokenPlaceholder": "Enter Lahza Token"
   },
+  "auth":{
+    "since_2024":"Since 2024",
+    "login":"Login",
+    "signUp":"Sign Up",
+    "username": "Username",
+    "password":  "Password",
+    "rememberMe":"Remember me",
+    "invalidCredentials":"Invalid username or password",
+    "otp": {
+      "title": "Email Verification",
+      "subtitle": "Verification code sent to",
+      "verification_code": "Verification Code",
+      "enter_code": "Enter the 5-digit code",
+      "verify": "Verify Code",
+      "verifying": "Verifying...",
+      "didnt_receive": "Didn't receive the code?",
+      "resend_code": "Resend Code",
+      "sending": "Sending...",
+      "resend_in": "Resend in {{seconds}} seconds",
+      "wrong_email": "Wrong email?",
+      "change_email": "Change Email"
+    }
+  },
   "login": {
     "welcomeTitle": "Welcome to BringUs",
     "welcomeSubtitle": "Your comprehensive e-commerce management platform. Manage orders, customers, products, and analytics all in one place.",
@@ -222,7 +245,12 @@
     "completeStoreInfo": "Please complete all required store information",
     "completeMerchantInfo": "Please complete all required merchant information",
     "merchantInfoComplete": "✅ Merchant information complete and valid",
-    "storeInfoComplete": "✅ Store information complete and valid"
+    "storeInfoComplete": "✅ Store information complete and valid",
+    "successTitle": "🎉 Congratulations!",
+    "successMessage": "Your store has been created successfully and your email has been verified!",
+    "welcomeMessage": "Welcome to our family!",
+    "successInfo": "You can now start managing your products and orders. We wish you a great experience with us!",
+    "redirecting": "Redirecting to the main page..."
   },
  
   "dashboard": {
@@ -439,7 +467,7 @@
     "inactive": "Inactive",
     "qrPicture": "Logo/Image",
     "qrPictureDescription": "Payment method logo or image",
-    "qrPictureDescription2": " max 300 KB.",
+    "qrPictureDescription2": " max 15 MB.",
     "paymentMethod": "Payment Method",
     "chooseFile": "Choose File",
     "save": "Save",
@@ -1182,7 +1210,9 @@
     "mustBeLess": "Value must be less than the other value",
     "mustBeGreaterOrEqual": "Value must be greater than or equal to the other value",
     "phoneMaxLength": "Phone number cannot exceed 15 digits",
-    "whatsAppMaxLength": "WhatsApp number cannot exceed 15 digits"
+    "whatsAppMaxLength": "WhatsApp number cannot exceed 15 digits",
+    "imageTooLargeLimit": "Image size {{size}} MB exceeds the allowed ({{limit}} MB)",
+    "imagesTooLargeList": "The following image exceed the allowed size ({{limit}} MB): {{names}}"
   },
   "units": {
     "title": "Units",

@@ -16,6 +16,34 @@ import { createCategorySelectOptions, type CategoryNode } from '@/utils/category
 import { useValidation } from '@/hooks/useValidation';
 import { productValidationSchema, validateBarcode } from '@/validation/productValidation';
 
+//-------------------------------------------- Image Size Validation -------------------------------------------
+const MAX_IMAGE_SIZE = 3 * 1024 * 1024 ; // 3 ميجابايت بالبايت
+
+const validateImageSize = (file: File): { isValid: boolean; sizeInMB?: string } => {
+  if (file.size > MAX_IMAGE_SIZE) {
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    return { isValid: false, sizeInMB };
+  }
+  return { isValid: true };
+};
+
+const validateImagesSize = (files: File[]): { isValid: boolean; invalidFiles?: string[] } => {
+  const invalidFiles: string[] = [];
+  
+  for (const file of files) {
+    const validation = validateImageSize(file);
+    if (!validation.isValid) {
+      invalidFiles.push(file.name);
+    }
+  }
+  
+  if (invalidFiles.length > 0) {
+    return { isValid: false, invalidFiles };
+  }
+  
+  return { isValid: true };
+};
+
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
   id: string;
@@ -87,8 +115,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     validateOnBlur: true
   });
 
+  // state لأخطاء الصور
+  const [imageErrors, setImageErrors] = useState<{ [key: string]: string }>({});
+  
   // دمج الأخطاء الداخلية مع الأخطاء الخارجية
-  const allErrors = { ...internalErrors, ...validationErrors };
+  const allErrors = { ...internalErrors, ...validationErrors, ...imageErrors };
   
   // استخدام hook لجلب مواصفات المنتجات من API
   const { specifications: apiSpecifications, fetchSpecifications } = useProductSpecifications();
@@ -123,6 +154,55 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     console.log('🔍 ProductsForm - No categories found, returning empty array');
     return [];
   });
+
+  // دوال للتعامل مع الصور مع validation
+  const handleImageChangeWithValidation = (files: File | File[] | null) => {
+    if (!files) {
+      setImageErrors(prev => ({ ...prev, images: '' }));
+      onImageChange(files);
+      return;
+    }
+
+    const fileArray = Array.isArray(files) ? files : [files];
+    const validation = validateImagesSize(fileArray);
+    
+    if (!validation.isValid) {
+      const names = validation.invalidFiles && validation.invalidFiles.length > 0 ? validation.invalidFiles.join(', ') : '';
+      const msg = t('validation.imagesTooLargeList', { limit: 3, names });
+      console.log('❌ Additional images validation failed:', msg);
+      setImageErrors(prev => ({ ...prev, images: msg }));
+      return; // لا نستدعي onImageChange إذا كان هناك خطأ
+    }
+
+    // مسح رسالة الخطأ إذا كانت الصور صالحة
+    setImageErrors(prev => ({ ...prev, images: '' }));
+    onImageChange(files);
+  };
+
+  const handleMainImageChangeWithValidation = (file: File | null) => {
+    if (!file) {
+      setImageErrors(prev => ({ ...prev, mainImage: '' }));
+      onMainImageChange(file);
+      return;
+    }
+
+    const validation = validateImageSize(file);
+    
+    if (!validation.isValid) {
+      const msg = t('validation.imageTooLargeLimit', { size: validation.sizeInMB, limit: 3 });
+      setImageErrors(prev => ({ ...prev, mainImage: msg }));
+      return; // لا نستدعي onMainImageChange إذا كان هناك خطأ
+    }
+
+    // مسح رسالة الخطأ إذا كانت الصورة صالحة
+    setImageErrors(prev => ({ ...prev, mainImage: '' }));
+    onMainImageChange(file);
+  };
+
+  // دالة لإرجاع أخطاء الصور
+  const getImageErrors = () => {
+    return imageErrors;
+  };
 
   // دالة لحساب مجموع الكميات من الصفات
   const calculateTotalQuantity = (specifications: any[]): number => {
@@ -757,6 +837,18 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
       return;
     }
 
+    // التحقق من حجم الصورة أولاً
+    const validation = validateImageSize(file);
+    if (!validation.isValid) {
+      const msg = t('validation.imageTooLargeLimit', { size: validation.sizeInMB, limit: 3 });
+      console.log('❌ Main image validation failed:', msg);
+      setImageErrors(prev => ({ ...prev, mainImage: msg }));
+      return; // إيقاف التحميل إذا كان هناك خطأ
+    }
+
+    // مسح رسالة الخطأ إذا كانت الصورة صالحة
+    setImageErrors(prev => ({ ...prev, mainImage: '' }));
+
     try {
       setMainImageUploading(true);
       setShowMainImageSuccess(false);
@@ -771,7 +863,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
       } else {
         // Fallback: just call onMainImageChange
         console.log('🔍 uploadMainImage not available, using onMainImageChange');
-        onMainImageChange(file);
+        handleMainImageChangeWithValidation(file);
         setShowMainImageSuccess(true);
       }
       
@@ -785,9 +877,10 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     }
   };
 
-  // expose getCurrentBarcode to parent
+  // expose getCurrentBarcode and getImageErrors to parent
   useImperativeHandle(ref, () => ({
-    getCurrentBarcode: () => localNewBarcode
+    getCurrentBarcode: () => localNewBarcode,
+    getImageErrors: () => imageErrors
   }));
 
   //-------------------------------------------- return -------------------------------------------
@@ -1440,6 +1533,13 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
               multiple={false}
             />
             
+            {/* عرض رسالة خطأ الصورة الرئيسية */}
+            {allErrors.mainImage && (
+              <div className="mt-2 text-sm text-red-600">
+                {allErrors.mainImage}
+              </div>
+            )}
+            
             {/* مؤشر التحميل */}
             {mainImageUploading && (
               <div className="mt-3 flex items-center justify-center p-3 bg-blue-50 rounded-lg">
@@ -1508,7 +1608,26 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
               label={isRTL ? 'اختر الصور الإضافية' : 'Select Additional Images'}
               id="images"
               value={form.images || []}
-              onChange={files => onImageChange(files)}
+              onChange={files => handleImageChangeWithValidation(files)}
+              beforeChangeValidate={(files) => {
+                const validation = validateImagesSize(files);
+                if (!validation.isValid) {
+                  const names = validation.invalidFiles && validation.invalidFiles.length > 0 ? validation.invalidFiles.join(', ') : '';
+                  const message = t('validation.imagesTooLargeList', { limit: 3, names });
+                  return { isValid: false, errorMessage: message };
+                }
+                return { isValid: true };
+              }}
+              onRemoveExisting={(previewUrl, index) => {
+                // Remove only the clicked existing image from form.images
+                if (Array.isArray(form.images)) {
+                  const updated = form.images.filter((img: any, i: number) => i !== index && img !== previewUrl);
+                  handleInputChange('images', updated);
+                  setImageErrors(prev => ({ ...prev, images: '' }));
+                }
+              }}
+              onValidationErrorChange={(err) => setImageErrors(prev => ({ ...prev, images: err || '' }))}
+              appendOnly={true}
               multiple={true}
             />
             

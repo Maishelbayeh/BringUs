@@ -4,20 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Visibility, 
   VisibilityOff, 
-  CheckCircle,
-  Language,
   Check,
-  PersonAdd,
-  ArrowBack,
-  PhotoCamera
+  PersonAdd
 } from '@mui/icons-material';
 import CustomInput from '@/components/common/CustomInput';
 import CustomButton from '@/components/common/CustomButton';
 import CustomFileInput from '@/components/common/CustomFileInput';
+import OTPVerification from '@/components/Auth/OTPVerification';
 import useLanguage from '@/hooks/useLanguage';
 import { getUserData, getStoreId } from '@/hooks/useLocalStorage';
 import { useUser } from '@/hooks/useUser';
 import { useToastContext } from '@/contexts/ToastContext';
+import useOTP from '@/hooks/useOTP';
 
 interface NewUserRegistrationProps {
   onUserCreated?: () => void;
@@ -25,7 +23,7 @@ interface NewUserRegistrationProps {
 
 const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated }) => {
   const { t } = useTranslation();
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -59,11 +57,63 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
     terms?: string; 
   }>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [userData, setUserData] = useState<any>(null);
-  const [isOwner, setIsOwner] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
   
   const { createUser, loading: createUserLoading, error: createUserError, checkEmailExists } = useUser();
   const { showSuccess, showError } = useToastContext();
+  const { sendOTP } = useOTP();
+
+  // دالة إعادة تعيين الفورم
+  const resetForm = () => {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      phone: ''
+    });
+    setAddressData({
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: ''
+    });
+    setAvatarFile(null);
+    setAgreeTerms(false);
+  };
+
+ 
+  const handleOTPSuccess = () => {
+    console.log('✅ تم التحقق من الإيميل بنجاح');
+    showSuccess(t('newUser.success'), t('general.success'));
+    
+    // إعادة تعيين الفورم
+    resetForm();
+    
+   
+    if (onUserCreated) {
+      onUserCreated();
+    } else {
+      // إعادة توجيه للصفحة الرئيسية بعد النجاح
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+    }
+  };
+
+  // معالجة إعادة إرسال OTP
+  const handleOTPResend = () => {
+    console.log('📧 تم إعادة إرسال OTP');
+    showSuccess('Verification code resent successfully', t('general.success'));
+  };
+
+  // معالجة العودة من صفحة OTP
+  const handleOTPBack = () => {
+    setShowOTP(false);
+    // setRegistrationData(null);
+  };
 
   // فحص حالة التحميل والأخطاء
   console.log('🔄 حالة التحميل:', createUserLoading);
@@ -252,28 +302,40 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
       
       console.log('📥 استجابة API:', createdUser);
       
-              if (createdUser) {
-          console.log('✅ تم إنشاء المستخدم بنجاح');
-          showSuccess(t('newUser.success'), t('general.success'));
+      if (createdUser) {
+        console.log('✅ تم إنشاء المستخدم بنجاح');
+        
+        
+        try {
+          const storeSlug = window.location.pathname.split('/')[1] || 'default';
+          const otpResult = await sendOTP(formData.email, storeSlug);
           
-          // إعادة تعيين الفورم
-          setFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-            phone: ''
-          });
-          setAddressData({
-            street: '',
-            city: '',
-            state: '',
-            zipCode: '',
-            country: ''
-          });
-          setAvatarFile(null);
-          setAgreeTerms(false);
+          if (otpResult.success) {
+            console.log('📧 تم إرسال OTP بنجاح');
+            setShowOTP(true);
+          } else {
+            console.log('❌ فشل في إرسال OTP:', otpResult.error);
+            showError(otpResult.error || 'Failed to send verification code', t('general.error'));
+            
+            // إعادة تعيين الفورم في حالة فشل إرسال OTP
+            resetForm();
+            
+            // استدعاء callback إذا كان موجوداً
+            if (onUserCreated) {
+              onUserCreated();
+            } else {
+              // إعادة توجيه للصفحة الرئيسية بعد النجاح
+              setTimeout(() => {
+                navigate('/');
+              }, 2000);
+            }
+          }
+        } catch (otpError) {
+          console.error('💥 خطأ في إرسال OTP:', otpError);
+          showError('Failed to send verification code', t('general.error'));
+          
+          // إعادة تعيين الفورم في حالة فشل إرسال OTP
+          resetForm();
           
           // استدعاء callback إذا كان موجوداً
           if (onUserCreated) {
@@ -284,7 +346,8 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
               navigate('/');
             }, 2000);
           }
-        } else {
+        }
+      } else {
         console.log('❌ فشل في إنشاء المستخدم:', createUserError);
         showError(createUserError || t('newUser.error'), t('general.error'));
       }
@@ -296,6 +359,17 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
     }
   };
 
+
+  if (showOTP) {
+    return (
+      <OTPVerification
+        email={formData.email}
+        onVerificationSuccess={handleOTPSuccess}
+        onResendCode={handleOTPResend}
+        onBack={handleOTPBack}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen  flex items-center justify-center p-6 relative">
@@ -377,7 +451,11 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
              <div className="space-y-2">
                <CustomFileInput
                  label={t('newUser.avatar')}
-                 onChange={(file) => setAvatarFile(Array.isArray(file) ? file[0] || null : file)}
+                 onChange={(file) => {
+                   const selectedFile = Array.isArray(file) ? file[0] || null : file;
+                   setAvatarFile(selectedFile);
+                   console.log('Selected avatar file:', selectedFile);
+                 }}
                  placeholder={t('newUser.avatarPlaceholder')}
                  id="avatar"
                  isRTL={language === 'ARABIC'}
