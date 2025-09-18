@@ -216,6 +216,50 @@
     "passwordPlaceholder": "Enter your password",
     "rememberMe": "Remember me",
     "forgotPassword": "Forgot password?",
+    "signInButton": "Sign In",
+    "signInSubmitting": "Signing in...",
+    "createAccount": "Create Account",
+    "auth": {
+    "forgot_password": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email address and we'll send you a link to reset your password",
+      "email": "Email Address",
+      "email_placeholder": "Enter your email address",
+      "send": "Send Reset Link",
+      "sending": "Sending...",
+      "back_to_login": "Back to Login",
+      "remember_password": "Remember your password?",
+      "success_message": "Password reset link has been sent to your email address",
+      "validation": {
+        "email_required": "Email is required",
+        "email_invalid": "Please enter a valid email address"
+      },
+      "error_generic": "An error occurred. Please try again",
+      "error_network": "Network error. Please check your connection"
+    },
+    "reset_password": {
+      "title": "Reset Password",
+      "subtitle": "Enter your new password",
+      "new_password": "New Password",
+      "new_password_placeholder": "Enter your new password",
+      "confirm_password": "Confirm Password",
+      "confirm_password_placeholder": "Confirm your new password",
+      "reset": "Reset Password",
+      "resetting": "Resetting...",
+      "back_to_login": "Back to Login",
+      "remember_password": "Remember your password?",
+      "success_message": "Your password has been reset successfully",
+      "validation": {
+        "password_required": "Password is required",
+        "password_min_length": "Password must be at least 6 characters",
+        "confirm_password_required": "Please confirm your password",
+        "passwords_not_match": "Passwords do not match"
+      },
+      "error_no_token": "Invalid or expired reset token",
+      "error_generic": "An error occurred. Please try again",
+      "error_network": "Network error. Please check your connection"
+    }
+   },
     "signingIn": "Signing in...",
     "noAccount": "Don't have an account?",
     "signUp": "Sign up",

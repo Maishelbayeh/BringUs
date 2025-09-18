@@ -1,10 +1,10 @@
-import  { useState } from 'react';
+import React from 'react';
 import { BrowserRouter, useLocation } from 'react-router-dom';
 
 import Routers from './routers';
 import useLanguage from './hooks/useLanguage';
 import useSidebar from './hooks/useSidebar';
-import { getMenuAsText, MenuModel, getFilteredMenuItems } from './constants/sideBarData';
+import { getFilteredMenuItems } from './constants/sideBarData';
 import { MenuItem } from './Types';
 import Sidebar from './components/common/navigation/sidebar';
 import TopNavbar from './components/common/navigation/topNav';
@@ -16,10 +16,11 @@ import PaymentVerificationHandler from './components/common/PaymentVerificationH
 // Component to check if we're on login page
 const AppContent: React.FC = () => {
   const location = useLocation();
-  const isLoginPage = location.pathname === '/login';
-  const isSignupPage = location.pathname === '/signup';
-  const isForgotPasswordPage = location.pathname === '/forgot-password';
-  const isAuthPage = isLoginPage || isSignupPage || isForgotPasswordPage;
+  const isLoginPage = location.pathname === '/login' || location.pathname.match(/^\/[^\/]+\/login$/);
+  const isSignupPage = location.pathname === '/signup' || location.pathname.match(/^\/[^\/]+\/signup$/);
+  const isForgotPasswordPage = location.pathname === '/forgot-password' || location.pathname.match(/^\/[^\/]+\/forgot-password$/);
+  const isResetPasswordPage = location.pathname === '/reset-password' || location.pathname.match(/^\/[^\/]+\/reset-password$/);
+  const isAuthPage = isLoginPage || isSignupPage || isForgotPasswordPage || isResetPasswordPage;
   
   const { language, toggleLanguage } = useLanguage();
   const { isSidebarOpen, toggleSidebar } = useSidebar();
@@ -53,8 +54,8 @@ const AppContent: React.FC = () => {
     return filteredMenu;
   };
   
-  const handleItemClick = (path: string) => {
-    //CONSOLE.log('path', path);
+  const handleItemClick = () => {
+    // Handle menu item click
   };
 
   // If on auth pages, render only the router without navigation
@@ -100,8 +101,6 @@ const AppContent: React.FC = () => {
       )}
       <div className="flex-1 min-w-0 flex flex-col">
         <TopNavbar
-          // userName="Mai Shalabi"
-          userPosition="Last sign in on {date}"
           language={language}
           onLanguageToggle={toggleLanguage}
           onMenuToggle={toggleSidebar}

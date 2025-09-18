@@ -16,6 +16,7 @@ import CustomInput from '@/components/common/CustomInput';
 import CustomButton from '@/components/common/CustomButton';
 import useLanguage from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
+import { useStoreUrls } from '@/hooks/useStoreUrls';
 
 
 const Login: React.FC = () => {
@@ -23,7 +24,7 @@ const Login: React.FC = () => {
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const { login, isLoading: authLoading, error: authError } = useAuth();
-  // const { storeSlug } = useStoreUrls();
+  const { storeSlug } = useStoreUrls();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -255,7 +256,7 @@ const Login: React.FC = () => {
                 </label>
                 <button
                   type="button"
-                  onClick={() => navigate('/forgot-password')}
+                  onClick={() => navigate(`/forgot-password`)}
                   className="text-sm text-purple-600 hover:text-purple-800 transition-colors"
                 >
                   {t('login.forgotPassword')}
