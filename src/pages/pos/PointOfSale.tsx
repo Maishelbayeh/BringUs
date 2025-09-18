@@ -31,7 +31,7 @@ const PointOfSale: React.FC = () => {
   const { specifications, fetchSpecifications } = useProductSpecifications();
   
   // Get store ID
-  const storeId = getStoreId();
+  const storeId = getStoreId() || ''; // Provide empty string as fallback
   const { createPOSOrder, isCreatingOrder, error: createOrderError } = useOrder(storeId);
 
   // State

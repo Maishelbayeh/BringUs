@@ -301,7 +301,7 @@ const POSTabsManager: React.FC = () => {
       <div className="flex-1">
         {activeTabId ? (
           <POSManager 
-            cartId={activeTabId}
+            cartId={activeTabId!}
             onNewOrder={(cartId) => {
               // This will be called when a new order is created
               console.log('New order created:', cartId);

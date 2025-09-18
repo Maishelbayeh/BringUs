@@ -102,7 +102,7 @@ const initialForm: {
 
 //-------------------------------------------- ProductsPage -------------------------------------------
 const ProductsPage: React.FC = () => {
-  const [subcategories] = useState(initialSubcategories);
+
   const [showDrawer, setShowDrawer] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [editProduct, setEditProduct] = useState<any | null>(null);
@@ -116,7 +116,7 @@ const ProductsPage: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<'table' | 'tree'>('table');
+  const [viewMode] = useState<'table' | 'tree'>('table');
   const [showVariantsPopup, setShowVariantsPopup] = useState(false);
   const [selectedProductVariants, setSelectedProductVariants] = useState<any[]>([]);
   const [selectedProductInfo, setSelectedProductInfo] = useState<any | null>(null);
@@ -206,22 +206,9 @@ const ProductsPage: React.FC = () => {
     fetchUnits();
     fetchSpecifications();
   }, []);
-  // دالة لتحديث البيانات
-  const refreshData = useCallback(() => {
-    fetchProducts(true); // force refresh
-    fetchProductLabels();
-    fetchCategories();
-    fetchUnits();
-    fetchSpecifications(true); // force refresh
-  }, [fetchProducts, fetchProductLabels, fetchCategories, fetchUnits, fetchSpecifications]);
-
+ 
   //-------------------------------------------- sortOptions -------------------------------------------
-  const sortOptions = [
-    { value: 'default', label: t('products.sort.default') || 'Default' },
-    { value: 'alpha', label: t('products.sort.alpha') || 'A-Z' },
-    { value: 'newest', label: t('products.sort.newest') || 'Newest' },
-    { value: 'oldest', label: t('products.sort.oldest') || 'Oldest' },
-  ];
+ 
   //-------------------------------------------- useEffect -------------------------------------------
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);
@@ -260,7 +247,7 @@ const ProductsPage: React.FC = () => {
         // تحقق إضافي: إذا كان المنتج لديه isParent: false، فهو متغير
         // لكن المنتجات العادية (بدون متغيرات) لديها أيضاً isParent: false
         // لذا نتحقق من أن المنتج ليس متغير لأي منتج آخر
-        const isVariantByParentFlag = product.isParent === false && isVariantOfAnotherProduct;
+       
         
         // تحقق إضافي: المنتج يعتبر متغير إذا كان موجود في قائمة variants لأي منتج آخر
         // أو إذا كان isParent: false وليس منتج عادي (hasVariants: false)
@@ -292,23 +279,11 @@ const ProductsPage: React.FC = () => {
     filteredProducts = [...filteredProducts].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }
   //-------------------------------------------- getCategoryName -------------------------------------------    
-  const getCategoryName = (catId: number) => {
-    const cat = categories.find((c: any) => c.id === catId || c._id === catId);
-    return isRTL ? (cat?.nameAr || '') : (cat?.nameEn || '');
-  };
-  //-------------------------------------------- getSubcategoryName -------------------------------------------
-  const getSubcategoryName = (subId: number) => {
-    const sub = subcategories.find(s => s.id === subId);
-    return isRTL ? (sub?.nameAr || '') : (sub?.nameEn || '');
-  };
-
+ 
   //-------------------------------------------- getUnitName -------------------------------------------
-  const getUnitName = (unitId: number) => {
-    const unit = units?.find((u: any) => u.id === unitId || u._id === unitId);
-    return isRTL ? (unit?.nameAr || '') : (unit?.nameEn || '');
-  };
+ 
   //-------------------------------------------- tableData -------------------------------------------
-  const tableData = Array.isArray(filteredProducts) ? filteredProducts.map((product, index) => {
+  const tableData = Array.isArray(filteredProducts) ? filteredProducts.map((product) => {
     // Log barcodes for debugging
     //CONSOLE.log(`🔍 tableData - Product ${index + 1} barcodes:`, product.barcodes);
     //CONSOLE.log(`🔍 tableData - Product ${index + 1} barcodes type:`, typeof product.barcodes);
@@ -387,7 +362,7 @@ const ProductsPage: React.FC = () => {
     };
   }) : [];
   //-------------------------------------------- renderMainImage -------------------------------------------
-  const renderMainImage = (value: any, item: any) => {
+  const renderMainImage = ( item: any) => {
     const mainImage = item.mainImage || (item.images && item.images.length > 0 ? item.images[0] : DEFAULT_PRODUCT_IMAGE);
     return (
       <div className="flex justify-center">
@@ -401,7 +376,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderImages -------------------------------------------
-  const renderImages = (value: any, item: any) => {
+  const renderImages = ( item: any) => {
     const images = item.images || [];
     const mainImage = item.mainImage;
     
@@ -458,7 +433,7 @@ const ProductsPage: React.FC = () => {
     );
   };
   //-------------------------------------------- renderStock -------------------------------------------
-  const renderStock = (value: any, item: any) => {
+  const renderStock = (value: any) => {
     const quantity = Number(value);
     let colorClass = 'bg-green-100 text-green-700';
     let text = value;
@@ -485,7 +460,7 @@ const ProductsPage: React.FC = () => {
     );
   };
   //-------------------------------------------- renderProductLabels -------------------------------------------
-  const renderProductLabels = (value: any, item: any) => {
+  const renderProductLabels = (value: any) => {
     if (!value || value === (isRTL ? 'لا يوجد علامات' : 'No Labels')) {
       return (
         <span className="text-gray-500 text-sm">
@@ -595,7 +570,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderCategories -------------------------------------------
-  const renderCategories = (value: any, item: any) => {
+  const renderCategories = ( item: any) => {
     const categories = item.categories || [];
     
     if (!categories || categories.length === 0) {
@@ -618,7 +593,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderBarcode -------------------------------------------
-  const renderBarcode = (value: any, item: any) => {
+  const renderBarcode = (value: any) => {
     //CONSOLE.log('🔍 renderBarcode - value:', value);
     //CONSOLE.log('🔍 renderBarcode - value type:', typeof value);
     //CONSOLE.log('🔍 renderBarcode - value is array:', Array.isArray(value));
@@ -683,7 +658,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderSpecifications -------------------------------------------
-  const renderSpecifications = (value: any, item: any) => {
+  const renderSpecifications = (value: any) => {
     if (!value || value === (isRTL ? 'لا توجد مواصفات' : 'No Specifications')) {
       return (
         <span className="text-gray-500 text-sm">
@@ -839,7 +814,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderActions -------------------------------------------
-  const renderActions = (value: any, item: any) => (
+  const renderActions = ( item: any) => (
     <div className="flex justify-center space-x-2">
       <button
         onClick={() => handleEdit(item)}
@@ -871,7 +846,7 @@ const ProductsPage: React.FC = () => {
     </div>
   );
   //-------------------------------------------- renderVariantStatus -------------------------------------------
-  const renderVariantStatus = (value: any, item: any) => {
+  const renderVariantStatus = ( item: any) => {
     const hasVariants = item.hasVariants;
     
     if (hasVariants) {
@@ -938,7 +913,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderProductId -------------------------------------------
-  const renderProductId = (value: any, item: any) => (
+  const renderProductId = ( item: any) => (
     <button
       className="text-blue-600 underline hover:text-blue-800 cursor-pointer"
       onClick={() => handleShowVariants(item)}
