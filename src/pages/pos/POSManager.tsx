@@ -1,43 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import useCategories from '@/hooks/useCategories';
-import useProductSpecifications from '@/hooks/useProductSpecifications';
-import useLanguage from '@/hooks/useLanguage';
-import useProducts from '@/hooks/useProducts';
-import { getStoreId } from '@/hooks/useLocalStorage';
-import { useOrder } from '@/hooks/useOrder';
-import { AlertCircle, ArrowLeftIcon, Calculator, CheckCircle, Info, Search, ShoppingCart, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Calculator, ShoppingCart, Search, X, CheckCircle, AlertCircle, Info, ArrowLeftIcon, Trash2 } from 'lucide-react';
+import useProducts from '../../hooks/useProducts';
+import useCategories from '../../hooks/useCategories';
+import useProductSpecifications from '../../hooks/useProductSpecifications';
+import { usePOS } from '../../hooks/usePOS';
+import { getStoreId } from '../../utils/storeUtils';
+import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 import ProductSpecificationModal from './ProductSpecificationModal';
-import { DEFAULT_PRODUCT_IMAGE } from '@/constants/config';
+import useLanguage from '../../hooks/useLanguage';
 
-interface CartItem {
-  id: string;
-  product: any;
-  quantity: number;
-  specifications: { [key: string]: string }; // specId -> valueId
-  selectedColor: string;
-  unitPrice: number;
-  totalPrice: number;
+interface POSManagerProps {
+  cartId?: string;
+  onNewOrder?: (cartId: string) => void;
 }
 
-// Customer info is now taken from localStorage, no need for interface
-
-const PointOfSale: React.FC = () => {
+const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
   const { isRTL } = useLanguage();
 
   // Hooks
   const { products, fetchProducts } = useProducts();
   const { categories, fetchCategories } = useCategories();
   const { specifications, fetchSpecifications } = useProductSpecifications();
+  const pos = usePOS();
   
   // Get store ID
   const storeId = getStoreId();
-  const { createPOSOrder, isCreatingOrder, error: createOrderError } = useOrder(storeId);
 
   // State
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [showSpecModal, setShowSpecModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [toast, setToast] = useState<{
@@ -58,7 +50,18 @@ const PointOfSale: React.FC = () => {
     fetchProducts();
     fetchCategories();
     fetchSpecifications();
-  }, [fetchProducts, fetchCategories, fetchSpecifications]);
+    if (storeId) {
+      pos.getAllCarts(storeId);
+    }
+  }, [fetchProducts, fetchCategories, fetchSpecifications, storeId]);
+
+  // Load cart when cartId changes
+  useEffect(() => {
+    if (cartId) {
+      console.log('Loading cart for cartId:', cartId);
+      pos.getCart(cartId);
+    }
+  }, [cartId]);
 
   // Show toast notification
   const showToast = (type: 'success' | 'error' | 'info', title: string, message: string, orderNumber?: string) => {
@@ -69,19 +72,6 @@ const PointOfSale: React.FC = () => {
       message,
       orderNumber
     });
-    
-    // Play notification sound
-    if (type === 'success') {
-      // Success sound - gentle chime
-      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBz2O0fPTgjMGHm7A7+OZURE=');
-      audio.volume = 0.3;
-      audio.play().catch(() => {}); // Ignore errors if audio fails
-    } else if (type === 'error') {
-      // Error sound - gentle beep
-      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBz2O0fPTgjMGHm7A7+OZURE=');
-      audio.volume = 0.2;
-      audio.play().catch(() => {}); // Ignore errors if audio fails
-    }
     
     // Auto hide after 5 seconds
     setTimeout(() => {
@@ -94,7 +84,39 @@ const PointOfSale: React.FC = () => {
     setToast(prev => ({ ...prev, show: false }));
   };
 
-  // Smart search function that handles all types of search
+  // Create new cart
+  const handleCreateNewCart = async () => {
+    if (!storeId) return;
+    
+    try {
+      const result = await pos.createCart(storeId);
+      if (result.success && result.data) {
+        await pos.getCart(result.data.cartId);
+        showToast('success', 
+          isRTL ? 'تم إنشاء سلة جديدة' : 'New Cart Created',
+          isRTL ? 'تم إنشاء سلة جديدة بنجاح' : 'New cart created successfully'
+        );
+        
+        // Open new tab if callback provided
+        if (onNewOrder && result.data.cartId) {
+          onNewOrder(result.data.cartId);
+        }
+      } else {
+        showToast('error',
+          isRTL ? 'خطأ في إنشاء السلة' : 'Error Creating Cart',
+          result.message || (isRTL ? 'حدث خطأ في إنشاء السلة' : 'Error creating cart')
+        );
+      }
+    } catch (error) {
+      console.error('Error creating cart:', error);
+      showToast('error',
+        isRTL ? 'خطأ في إنشاء السلة' : 'Error Creating Cart',
+        isRTL ? 'حدث خطأ في إنشاء السلة' : 'Error creating cart'
+      );
+    }
+  };
+
+  // Smart search function
   const smartSearch = (searchValue: string) => {
     if (!searchValue.trim()) return;
     
@@ -113,7 +135,7 @@ const PointOfSale: React.FC = () => {
       }
     }
     
-    // Check if it's a price search (starts with $ or ₪ or contains numbers with currency)
+    // Check if it's a price search
     const priceMatch = trimmedValue.match(/^[₪$]?(\d+(?:\.\d{2})?)$/);
     if (priceMatch) {
       const price = parseFloat(priceMatch[1]);
@@ -126,7 +148,6 @@ const PointOfSale: React.FC = () => {
         handleProductFound(productsAtPrice[0]);
         return;
       } else if (productsAtPrice.length > 1) {
-        // Show multiple products found
         const productNames = productsAtPrice.map(p => isRTL ? p.nameAr : p.nameEn).join(', ');
         showToast('info',
           isRTL ? 'تم العثور على عدة منتجات' : 'Multiple Products Found',
@@ -146,15 +167,18 @@ const PointOfSale: React.FC = () => {
     
     if (exactMatch) {
       handleProductFound(exactMatch);
-    } else {
-      // No exact match found, just filter the products list
-      console.log('No exact match found, filtering products...');
     }
   };
 
-  // Handle product found (add to cart or open specifications)
+  // Handle product found
   const handleProductFound = (product: any) => {
-    console.log('Found product:', product);
+    if (!pos.currentCart) {
+      showToast('error',
+        isRTL ? 'لا توجد سلة نشطة' : 'No Active Cart',
+        isRTL ? 'يرجى إنشاء سلة جديدة أولاً' : 'Please create a new cart first'
+      );
+      return;
+    }
     
     // If product has specifications, open modal
     if (product.specificationValues && product.specificationValues.length > 0) {
@@ -163,14 +187,170 @@ const PointOfSale: React.FC = () => {
     } else {
       // Add directly to cart if no specifications
       addToCart(product, 1, {}, '');
-      // Show success message
-      const productName = isRTL ? product.nameAr : product.nameEn;
-      showToast('success', 
-        isRTL ? 'تم الإضافة بنجاح' : 'Added Successfully',
-        isRTL ? `تم إضافة ${productName} للسلة` : `${productName} added to cart`
+    }
+    setSearchTerm('');
+  };
+
+  // Add item to cart
+  const addToCart = async (product: any, quantity: number, selectedSpecs: { [key: string]: string }, selectedColor: string = '') => {
+    if (!pos.currentCart) return;
+    
+    try {
+      const result = await pos.addToCart(
+        pos.currentCart._id,
+        product,
+        quantity,
+        null,
+        Object.entries(selectedSpecs).map(([specId, valueId]) => ({
+          specificationId: specId,
+          valueId: valueId,
+          title: specId,
+          value: valueId
+        })),
+        selectedColor ? [{
+          colorId: selectedColor,
+          name: selectedColor,
+          value: selectedColor
+        }] : []
+      );
+      
+      if (result.success) {
+        const productName = isRTL ? product.nameAr : product.nameEn;
+        showToast('success', 
+          isRTL ? 'تم الإضافة بنجاح' : 'Added Successfully',
+          isRTL ? `تم إضافة ${productName} للسلة` : `${productName} added to cart`
+        );
+        // Close the specification modal after successful addition
+        setShowSpecModal(false);
+        setSelectedProduct(null);
+      } else {
+        showToast('error',
+          isRTL ? 'خطأ في الإضافة' : 'Error Adding Item',
+          result.message || (isRTL ? 'حدث خطأ في إضافة المنتج' : 'Error adding product')
+        );
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showToast('error',
+        isRTL ? 'خطأ في الإضافة' : 'Error Adding Item',
+        isRTL ? 'حدث خطأ في إضافة المنتج' : 'Error adding product'
       );
     }
-    setSearchTerm(''); // Clear search
+  };
+
+  // Update item quantity
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
+    if (!pos.currentCart) return;
+    
+    if (newQuantity <= 0) {
+      await pos.removeFromCart(pos.currentCart._id, itemId);
+      return;
+    }
+
+    try {
+      const result = await pos.updateCartItem(pos.currentCart._id, itemId, newQuantity);
+      if (!result.success) {
+        showToast('error',
+          isRTL ? 'خطأ في تحديث الكمية' : 'Error Updating Quantity',
+          result.message || (isRTL ? 'حدث خطأ في تحديث الكمية' : 'Error updating quantity')
+        );
+      }
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      showToast('error',
+        isRTL ? 'خطأ في تحديث الكمية' : 'Error Updating Quantity',
+        isRTL ? 'حدث خطأ في تحديث الكمية' : 'Error updating quantity'
+      );
+    }
+  };
+
+  // Remove item from cart
+  const removeFromCart = async (itemId: string) => {
+    if (!pos.currentCart) return;
+    
+    try {
+      const result = await pos.removeFromCart(pos.currentCart._id, itemId);
+      if (result.success) {
+        showToast('success',
+          isRTL ? 'تم الحذف بنجاح' : 'Removed Successfully',
+          isRTL ? 'تم حذف المنتج من السلة' : 'Product removed from cart'
+        );
+      } else {
+        showToast('error',
+          isRTL ? 'خطأ في الحذف' : 'Error Removing Item',
+          result.message || (isRTL ? 'حدث خطأ في حذف المنتج' : 'Error removing product')
+        );
+      }
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      showToast('error',
+        isRTL ? 'خطأ في الحذف' : 'Error Removing Item',
+        isRTL ? 'حدث خطأ في حذف المنتج' : 'Error removing product'
+      );
+    }
+  };
+
+  // Complete order
+  const handleCompleteOrder = async () => {
+    if (!pos.currentCart || !pos.currentCart.items || pos.currentCart.items.length === 0) {
+      showToast('error',
+        isRTL ? 'خطأ' : 'Error',
+        isRTL ? 'السلة فارغة' : 'Cart is empty'
+      );
+      return;
+    }
+
+    try {
+      const result = await pos.completeCart(pos.currentCart._id, `POS Order - ${new Date().toLocaleString()}`);
+      
+      if (result.success) {
+        showToast('success',
+          isRTL ? 'تم إكمال الطلب بنجاح!' : 'Order Completed Successfully!',
+          isRTL ? 'تم إنشاء الطلب بنجاح' : 'Order has been created successfully',
+          result.data?.orderNumber || 'N/A'
+        );
+        
+        // Create new cart after completion
+        await handleCreateNewCart();
+      } else {
+        showToast('error',
+          isRTL ? 'فشل في إنشاء الطلب' : 'Failed to Create Order',
+          result.message || (isRTL ? 'حدث خطأ غير متوقع' : 'An unexpected error occurred')
+        );
+      }
+    } catch (error) {
+      console.error('Error completing order:', error);
+      showToast('error',
+        isRTL ? 'خطأ في إكمال الطلب' : 'Error Completing Order',
+        isRTL ? 'حدث خطأ في إكمال الطلب' : 'Error completing order'
+      );
+    }
+  };
+
+  // Clear cart
+  const handleClearCart = async () => {
+    if (!pos.currentCart) return;
+    
+    try {
+      const result = await pos.clearCart(pos.currentCart._id);
+      if (result.success) {
+        showToast('success',
+          isRTL ? 'تم مسح السلة بنجاح' : 'Cart Cleared Successfully',
+          isRTL ? 'تم مسح جميع المنتجات من السلة' : 'All products removed from cart'
+        );
+      } else {
+        showToast('error',
+          isRTL ? 'خطأ في مسح السلة' : 'Error Clearing Cart',
+          result.message || (isRTL ? 'حدث خطأ في مسح السلة' : 'Error clearing cart')
+        );
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      showToast('error',
+        isRTL ? 'خطأ في مسح السلة' : 'Error Clearing Cart',
+        isRTL ? 'حدث خطأ في مسح السلة' : 'Error clearing cart'
+      );
+    }
   };
 
   // Handle search on Enter key
@@ -185,7 +365,7 @@ const PointOfSale: React.FC = () => {
     if (searchTerm.length >= 8 && /^\d+$/.test(searchTerm)) {
       const timer = setTimeout(() => {
         smartSearch(searchTerm);
-      }, 500); // Wait 500ms after user stops typing
+      }, 500);
       
       return () => clearTimeout(timer);
     }
@@ -193,29 +373,24 @@ const PointOfSale: React.FC = () => {
 
   // Filter products based on search and category
   const filteredProducts = products.filter(product => {
-    // First check category filter
     const matchesCategory = selectedCategory === 'all' || 
       product.categoryId === selectedCategory ||
       product.categories?.some((cat: any) => cat._id === selectedCategory || cat.id === selectedCategory);
     
-    // If no search term, only filter by category
     if (searchTerm === '') {
       return matchesCategory;
     }
     
     const searchLower = searchTerm.toLowerCase();
     
-    // Search by name
     const matchesName = 
       product.nameAr?.toLowerCase().includes(searchLower) ||
       product.nameEn?.toLowerCase().includes(searchLower);
     
-    // Search by barcode
     const matchesBarcode = 
       product.barcodes && Array.isArray(product.barcodes) && 
       product.barcodes.some((barcode: string) => barcode.includes(searchTerm));
     
-    // Search by price
     const priceMatch = searchTerm.match(/^[₪$]?(\d+(?:\.\d{2})?)$/);
     let matchesPrice = false;
     if (priceMatch) {
@@ -225,7 +400,6 @@ const PointOfSale: React.FC = () => {
         Math.abs((product.finalPrice || 0) - searchPrice) < 0.01;
     }
     
-    // Search by partial price (without currency symbol)
     const partialPriceMatch = /^\d+(?:\.\d{2})?$/.test(searchTerm);
     let matchesPartialPrice = false;
     if (partialPriceMatch) {
@@ -240,120 +414,18 @@ const PointOfSale: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
-
   // Handle product click
   const handleProductClick = (product: any) => {
+    if (!pos.currentCart) {
+      showToast('error',
+        isRTL ? 'لا توجد سلة نشطة' : 'No Active Cart',
+        isRTL ? 'يرجى إنشاء سلة جديدة أولاً' : 'Please create a new cart first'
+      );
+      return;
+    }
+    
     setSelectedProduct(product);
     setShowSpecModal(true);
-  };
-
-  // Add item to cart
-  // selectedSpecs contains {specId: valueId} mapping
-  const addToCart = (product: any, quantity: number, selectedSpecs: { [key: string]: string }, selectedColor: string = '') => {
-    
-    const unitPrice = product.isOnSale && product.salePercentage && product.salePercentage > 0 
-      ? (product.finalPrice || product.price || 0)
-      : (product.price || 0);
-    const totalPrice = unitPrice * quantity;
-    
-    const cartItem: CartItem = {
-      id: `${product._id || product.id}-${Date.now()}`,
-      product,
-      quantity,
-      specifications: selectedSpecs,
-      selectedColor,
-      unitPrice,
-      totalPrice
-    };
-
-    setCart(prev => [...prev, cartItem]);
-    setShowSpecModal(false);
-    setSelectedProduct(null);
-  };
-
-  // Remove item from cart
-  const removeFromCart = (itemId: string) => {
-    setCart(prev => prev.filter(item => item.id !== itemId));
-  };
-
-  // Update item quantity
-  const updateQuantity = (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeFromCart(itemId);
-      return;
-    }
-
-    setCart(prev => prev.map(item => 
-      item.id === itemId 
-        ? { ...item, quantity: newQuantity, totalPrice: item.unitPrice * newQuantity }
-        : item
-    ));
-  };
-
-  // Calculate total
-  const cartTotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
-
-  // Complete order
-  const handleCompleteOrder = async () => {
-    if (cart.length === 0) {
-      showToast('error',
-        isRTL ? 'خطأ' : 'Error',
-        isRTL ? 'السلة فارغة' : 'Cart is empty'
-      );
-      return;
-    }
-
-    try {
-      // Get store info from localStorage
-      const storeInfo = JSON.parse(localStorage.getItem('storeInfo') || '{}');
-      
-      // Prepare cart items for the order
-      const cartItems = cart.map(item => ({
-        productId: item.product._id || item.product.id,
-        product: item.product,
-        quantity: item.quantity,
-        selectedSpecifications: Object.entries(item.specifications || {}).map(([specId, valueId]) => ({
-          specificationId: specId,
-          valueId: valueId,
-          title: specId, // This will be replaced with actual spec name if needed
-          value: valueId  // This will be replaced with actual value name if needed
-        })),
-        selectedColors: item.selectedColor ? [{
-          colorId: item.selectedColor,
-          name: item.selectedColor,
-          value: item.selectedColor
-        }] : [],
-        unitPrice: item.unitPrice,
-        totalPrice: item.totalPrice
-      }));
-
-      console.log('Creating POS order with cart items:', cartItems);
-      console.log('Store info:', storeInfo);
-      console.log('Selected specifications details:', cartItems[0]?.selectedSpecifications);
-
-      const result = await createPOSOrder(cartItems, storeInfo, `POS Order - ${new Date().toLocaleString()}`);
-
-      if (result.success) {
-        // Clear cart after successful order
-        setCart([]);
-        showToast('success',
-          isRTL ? 'تم إكمال الطلب بنجاح!' : 'Order Completed Successfully!',
-          isRTL ? 'تم إنشاء الطلب بنجاح' : 'Order has been created successfully',
-          result.data?.orderNumber || 'N/A'
-        );
-      } else {
-        showToast('error',
-          isRTL ? 'فشل في إنشاء الطلب' : 'Failed to Create Order',
-          result.message || (isRTL ? 'حدث خطأ غير متوقع' : 'An unexpected error occurred')
-        );
-      }
-    } catch (error) {
-      console.error('Error completing order:', error);
-      showToast('error',
-        isRTL ? 'خطأ في إكمال الطلب' : 'Error Completing Order',
-        isRTL ? 'حدث خطأ في إكمال الطلب' : 'Error completing order'
-      );
-    }
   };
 
   // Get all categories including subcategories
@@ -391,9 +463,30 @@ const PointOfSale: React.FC = () => {
               <div className="flex items-center space-x-1 lg:space-x-2 rtl:space-x-reverse">
                 <Calculator className="w-5 h-5 lg:w-6 lg:h-6 text-blue-600" />
                 <h1 className="text-lg lg:text-2xl font-bold text-gray-900">
-                  {isRTL ? 'نقطة البيع' : 'POS'}
+                  {isRTL ? 'نقطة البيع' : 'POS Manager'}
                 </h1>
               </div>
+            </div>
+            
+            {/* Cart Actions */}
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              {/* <button
+                onClick={handleCreateNewCart}
+                className="flex items-center space-x-1 rtl:space-x-reverse bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm">{isRTL ? 'سلة جديدة' : 'New Cart'}</span>
+              </button> */}
+              
+              {pos.currentCart && (
+                <button
+                  onClick={handleClearCart}
+                  className="flex items-center space-x-1 rtl:space-x-reverse bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="text-sm">{isRTL ? 'مسح السلة' : 'Clear Cart'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -426,24 +519,6 @@ const PointOfSale: React.FC = () => {
                 <Search className="w-3 h-3 lg:w-4 lg:h-4" />
                 <span className="text-xs lg:text-sm hidden sm:inline">{isRTL ? 'بحث' : 'Search'}</span>
               </button>
-            </div>
-            
-            {/* Search Help Text - Hidden on mobile */}
-            <div className="mt-2 text-xs text-gray-500 hidden lg:block">
-              <div className="flex flex-wrap gap-4 rtl:gap-4">
-                <span className="flex items-center">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-1 rtl:mr-0 rtl:ml-1"></span>
-                  {isRTL ? 'الاسم' : 'Name'}
-                </span>
-                <span className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-1 rtl:mr-0 rtl:ml-1"></span>
-                  {isRTL ? 'الباركود' : 'Barcode'}
-                </span>
-                <span className="flex items-center">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full mr-1 rtl:mr-0 rtl:ml-1"></span>
-                  {isRTL ? 'السعر' : 'Price'}
-                </span>
-              </div>
             </div>
           </div>
 
@@ -495,71 +570,6 @@ const PointOfSale: React.FC = () => {
                   {isRTL ? product.nameAr : product.nameEn}
                 </h3>
                 
-                {/* Search Match Indicators */}
-                {searchTerm && (
-                  <div className="mb-2 flex flex-wrap gap-1">
-                    {/* Name match indicator */}
-                    {((isRTL ? product.nameAr : product.nameEn)?.toLowerCase().includes(searchTerm.toLowerCase())) && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1 rtl:mr-0 rtl:ml-1"></span>
-                        {isRTL ? 'الاسم' : 'Name'}
-                      </span>
-                    )}
-                    
-                    {/* Barcode match indicator */}
-                    {product.barcodes && Array.isArray(product.barcodes) && 
-                     product.barcodes.some((barcode: string) => barcode.includes(searchTerm)) && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1 rtl:mr-0 rtl:ml-1"></span>
-                        {isRTL ? 'الباركود' : 'Barcode'}
-                      </span>
-                    )}
-                    
-                    {/* Price match indicator */}
-                    {(() => {
-                      const priceMatch = searchTerm.match(/^[₪$]?(\d+(?:\.\d{2})?)$/);
-                      const partialPriceMatch = /^\d+(?:\.\d{2})?$/.test(searchTerm);
-                      const searchPrice = priceMatch ? parseFloat(priceMatch[1]) : (partialPriceMatch ? parseFloat(searchTerm) : null);
-                      
-                      if (searchPrice && (
-                        Math.abs((product.price || 0) - searchPrice) < 0.01 ||
-                        Math.abs((product.finalPrice || 0) - searchPrice) < 0.01
-                      )) {
-                        return (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
-                            <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1 rtl:mr-0 rtl:ml-1"></span>
-                            {isRTL ? 'السعر' : 'Price'}
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
-                )}
-                
-                {/* Barcode display */}
-                {product.barcodes && product.barcodes.length > 0 && (
-                  <div className="mb-2">
-                    <div className="flex items-center text-xs text-gray-500">
-                      <svg className="w-3 h-3 mr-1 rtl:mr-0 rtl:ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <path d="M9 9h6v6H9z"/>
-                        <path d="M9 1v6"/>
-                        <path d="M15 1v6"/>
-                        <path d="M9 17v6"/>
-                        <path d="M15 17v6"/>
-                        <path d="M1 9h6"/>
-                        <path d="M17 9h6"/>
-                        <path d="M1 15h6"/>
-                        <path d="M17 15h6"/>
-                      </svg>
-                      <span className="truncate">
-                        {product.barcodes[0]}
-                        {product.barcodes.length > 1 && ` +${product.barcodes.length - 1}`}
-                      </span>
-                    </div>
-                  </div>
-                )}
                 <div className="mb-2">
                   {product.isOnSale && product.salePercentage && product.salePercentage > 0 ? (
                     <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -569,9 +579,6 @@ const PointOfSale: React.FC = () => {
                       <p className="text-sm text-gray-500 line-through">
                         ₪{product.price?.toFixed(2) || '0.00'}
                       </p>
-                      <span className="absolute top-6 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
-                        -{product.salePercentage}%
-                      </span>
                     </div>
                   ) : (
                     <p className="text-lg font-bold text-green-600">
@@ -617,43 +624,10 @@ const PointOfSale: React.FC = () => {
                           <span className={`font-bold ml-1 rtl:mr-1 ${textColorBold}`}>
                             {stock}
                           </span>
-                          {isOutOfStock && (
-                            <span className="ml-1 rtl:mr-1 text-xs font-semibold">
-                              {isRTL ? '(نفد)' : '(Out)'}
-                            </span>
-                          )}
-                          {isLowStock && !isOutOfStock && (
-                            <span className="ml-1 rtl:mr-1 text-xs font-semibold">
-                              {isRTL ? '(منخفض)' : '(Low)'}
-                            </span>
-                          )}
                         </span>
                       </div>
                     );
                   })()}
-                </div>
-                
-                <div className="flex items-center justify-between" dir={isRTL ? 'rtl' : 'ltr'}>
-                  <span className="truncate max-w-[120px] inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                    {isRTL ? product.category?.nameAr : product.category?.nameEn}
-                  </span>
-                  {product.colors && product.colors.length > 0 && (
-                    <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                      {product.colors.slice(0, 3).map((colorGroup: string[], index: number) => 
-                        colorGroup.slice(0, 1).map((color: string, colorIndex: number) => (
-                          <div
-                            key={`${index}-${colorIndex}`}
-                            className="w-4 h-4 rounded-full border border-gray-300"
-                            style={{ backgroundColor: color }}
-                            title={color}
-                          />
-                        ))
-                      )}
-                      {product.colors.length > 3 && (
-                        <span className="text-xs text-gray-500">+{product.colors.length - 3}</span>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
@@ -666,73 +640,65 @@ const PointOfSale: React.FC = () => {
             {isRTL ? 'الطلب الحالي' : 'Current Order'}
           </h2>
 
-          {/* Customer Information - Now taken from localStorage - Hidden on mobile */}
-          <div className="mb-4 lg:mb-6 space-y-4 hidden lg:block">
-            <div className="p-3 lg:p-4 bg-blue-50 rounded-lg">
-              <h3 className="text-xs lg:text-sm font-medium text-blue-900 mb-2">
-                {isRTL ? 'معلومات العميل' : 'Customer Information'}
-              </h3>
-              <p className="text-xs lg:text-sm text-blue-800">
-                {isRTL ? 'سيتم استخدام معلومات المستخدم المسجل حالياً' : 'Will use current logged-in user information'}
-              </p>
-              <p className="text-xs text-blue-600 mt-1">
-                {isRTL ? 'الاسم والهاتف سيتم أخذهما من بيانات تسجيل الدخول' : 'Name and phone will be taken from login data'}
-              </p>
-            </div>
-          </div>
-
-         
-
           {/* Cart Items */}
           <div className="flex-1 overflow-y-auto mb-4 lg:mb-6">
-            {cart.length === 0 ? (
+            {!pos.currentCart || !pos.currentCart.items || pos.currentCart.items.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-gray-500">
                 <ShoppingCart className="w-8 h-8 mb-2" />
                 <p>{isRTL ? 'لا توجد عناصر في السلة' : 'No items in cart'}</p>
+                {!pos.currentCart && (
+                  <button
+                    onClick={handleCreateNewCart}
+                    className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {isRTL ? 'إنشاء سلة جديدة' : 'Create New Cart'}
+                  </button>
+                )}
               </div>
             ) : (
               <div className="space-y-2 lg:space-y-3">
-                {cart.map((item) => (
-                  <div key={item.id} className="bg-gray-50 rounded-lg p-2 lg:p-3">
+                {pos.currentCart.items.map((item) => {
+                  console.log('Item data:', item);
+                  return (
+                  <div key={item._id} className="bg-gray-50 rounded-lg p-2 lg:p-3">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-900 text-xs lg:text-sm line-clamp-2">
-                          {isRTL ? item.product.nameAr : item.product.nameEn}
+                          {isRTL ? (item.product?.nameAr || item.product?.nameEn || 'Unknown Product') : (item.product?.nameEn || item.product?.nameAr || 'Unknown Product')}
                         </h4>
-                        {item.selectedColor && (
-                          <div className="flex items-center mt-1">
-                            <span className="text-xs text-gray-600 mr-2 rtl:mr-0 rtl:ml-2">
-                              {isRTL ? 'اللون:' : 'Color:'}
-                            </span>
-                            <div 
-                              className="w-4 h-4 rounded-full border border-gray-300"
-                              style={{ backgroundColor: item.selectedColor }}
-                              title={item.selectedColor}
-                            />
+                        <div className="text-xs text-gray-600 mt-1">
+                          {isRTL ? 'السعر:' : 'Price:'} ₪{(item.priceAtAdd || 0).toFixed(2)}
+                        </div>
+                        {/* Display selected specifications */}
+                        {item.selectedSpecifications && item.selectedSpecifications.length > 0 && (
+                          <div className="text-xs text-blue-600 mt-1">
+                            {isRTL ? 'المواصفات:' : 'Specifications:'} {item.selectedSpecifications.map(spec => {
+                              console.log('Spec:', spec, 'All specs:', specifications);
+                              const specData = specifications.find(s => s._id === spec.specificationId);
+                              const valueData = specData?.values?.find((v: any) => v._id === spec.valueId);
+                              return valueData ? (isRTL ? valueData.valueAr : valueData.valueEn) : spec.specificationId;
+                            }).join(', ')}
                           </div>
                         )}
-                        {Object.keys(item.specifications).length > 0 && (
-                          <div className="mt-1">
-                            <span className="text-xs text-gray-600">
-                              {isRTL ? 'المواصفات: ' : 'Specs: '}
-                            </span>
-                            <span className="text-xs text-gray-800">
-                              {Object.entries(item.specifications).map(([specId, valueId]) => {
-                                // Find the specification and its value
-                                const spec = specifications.find(s => s._id === specId || s.id === specId);
-                                if (!spec) return valueId;
-                                
-                                const specValue = spec.values?.find((v: any) => v._id === valueId);
-                                if (!specValue) return valueId;
-                                
-                                return isRTL ? specValue.valueAr : specValue.valueEn;
-                              }).join(', ')}
-                            </span>
+                        {/* Display selected colors */}
+                        {item.selectedColors && item.selectedColors.length > 0 && (
+                          <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <span>{isRTL ? 'الألوان:' : 'Colors:'}</span>
+                            {item.selectedColors.map((color, index) => (
+                              <div key={index} className="flex items-center gap-1">
+                                <div 
+                                  className="w-3 h-3 rounded-full border border-gray-300" 
+                                  style={{ backgroundColor: color.colorId }}
+                                ></div>
+                                <span>{color.name}</span>
+                                {index < item.selectedColors.length - 1 && <span>,</span>}
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
                       <button
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item._id)}
                         className="text-red-500 hover:text-red-700 ml-2 rtl:ml-0 rtl:mr-2"
                       >
                         <X className="w-4 h-4" />
@@ -741,64 +707,81 @@ const PointOfSale: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-1 lg:space-x-2 rtl:space-x-reverse">
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item._id, item.quantity - 1)}
                           className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 text-xs lg:text-sm"
                         >
                           -
                         </button>
                         <span className="w-6 lg:w-8 text-center text-xs lg:text-sm">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item._id, item.quantity + 1)}
                           className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 text-xs lg:text-sm"
                         >
                           +
                         </button>
                       </div>
                       <span className="font-medium text-gray-900 text-xs lg:text-sm">
-                        ₪{item.totalPrice.toFixed(2)}
+                        ₪{((item.priceAtAdd || 0) * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
           {/* Total and Complete Order */}
-          <div className="border-t border-gray-200 pt-3 lg:pt-4">
-            {createOrderError && (
-              <div className="mb-3 lg:mb-4 p-2 lg:p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-xs lg:text-sm">
-                {createOrderError}
-              </div>
-            )}
-            <div className="flex justify-between items-center mb-3 lg:mb-4">
-              <span className="text-base lg:text-lg font-bold text-gray-900">
-                {isRTL ? 'المجموع:' : 'Total:'}
-              </span>
-              <span className="text-lg lg:text-xl font-bold text-green-600">
-                ₪{cartTotal.toFixed(2)}
-              </span>
-            </div>
-            <button
-              onClick={handleCompleteOrder}
-              disabled={cart.length === 0 || isCreatingOrder}
-              className="w-full bg-green-600 text-white py-2 lg:py-3 px-3 lg:px-4 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm lg:text-base"
-            >
-              {isCreatingOrder ? (
-                <>
-                  <div className="animate-spin rounded-full h-3 w-3 lg:h-4 lg:w-4 border-b-2 border-white mr-2 rtl:mr-0 rtl:ml-2"></div>
-                  <span className="text-xs lg:text-sm">{isRTL ? 'جاري إنشاء الطلب...' : 'Creating Order...'}</span>
-                </>
-              ) : (
-                <span className="text-xs lg:text-sm">{isRTL ? 'إكمال الطلب' : 'Complete Order'}</span>
+          {pos.currentCart && pos.currentCart.items && pos.currentCart.items.length > 0 && (
+            <div className="border-t border-gray-200 pt-3 lg:pt-4">
+              {pos.error && (
+                <div className="mb-3 lg:mb-4 p-2 lg:p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-xs lg:text-sm">
+                  {pos.error}
+                </div>
               )}
-            </button>
-          </div>
+              <div className="flex justify-between items-center mb-3 lg:mb-4">
+                <span className="text-base lg:text-lg font-bold text-gray-900">
+                  {isRTL ? 'المجموع:' : 'Total:'}
+                </span>
+                <span className="text-lg lg:text-xl font-bold text-green-600">
+                  ₪{(() => {
+                    // Calculate total locally if API total is 0 or missing
+                    const apiTotal = pos.currentCart.total || 0;
+                    if (apiTotal > 0) {
+                      return apiTotal.toFixed(2);
+                    }
+                    
+                    // Calculate total from items
+                    const calculatedTotal = pos.currentCart.items?.reduce((sum, item) => {
+                      return sum + ((item.priceAtAdd || 0) * item.quantity);
+                    }, 0) || 0;
+                    
+                    console.log('Calculated total:', calculatedTotal, 'API total:', apiTotal);
+                    return calculatedTotal.toFixed(2);
+                  })()}
+                </span>
+              </div>
+              <button
+                onClick={handleCompleteOrder}
+                disabled={pos.isLoading}
+                className="w-full bg-green-600 text-white py-2 lg:py-3 px-3 lg:px-4 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm lg:text-base"
+              >
+                {pos.isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-3 w-3 lg:h-4 lg:w-4 border-b-2 border-white mr-2 rtl:mr-0 rtl:ml-2"></div>
+                    <span className="text-xs lg:text-sm">{isRTL ? 'جاري إنشاء الطلب...' : 'Creating Order...'}</span>
+                  </>
+                ) : (
+                  <span className="text-xs lg:text-sm">{isRTL ? 'إكمال الطلب' : 'Complete Order'}</span>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Product Specification Modal */}
-      {showSpecModal && selectedProduct && (
+      {showSpecModal && selectedProduct && pos.currentCart && (
         <ProductSpecificationModal
           product={selectedProduct}
           specifications={specifications}
@@ -827,7 +810,7 @@ const PointOfSale: React.FC = () => {
               <div className="flex-shrink-0">
                 {toast.type === 'success' && (
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-green-600" />          
+                    <CheckCircle className="w-5 h-5 text-green-600" />
                   </div>
                 )}
                 {toast.type === 'error' && (
@@ -888,23 +871,6 @@ const PointOfSale: React.FC = () => {
                 </button>
               </div>
             </div>
-            
-            {/* Progress bar */}
-            <div className={`mt-3 h-1 rounded-full overflow-hidden ${
-              toast.type === 'success' 
-                ? 'bg-green-200' 
-                : toast.type === 'error' 
-                ? 'bg-red-200' 
-                : 'bg-blue-200'
-            }`}>
-              <div className={`h-full rounded-full transition-all duration-5000 ease-linear ${
-                toast.type === 'success' 
-                  ? 'bg-green-500' 
-                  : toast.type === 'error' 
-                  ? 'bg-red-500' 
-                  : 'bg-blue-500'
-              }`} style={{ width: '100%', animation: 'toast-progress 5s linear forwards' }}></div>
-            </div>
           </div>
         </div>
       )}
@@ -912,4 +878,4 @@ const PointOfSale: React.FC = () => {
   );
 };
 
-export default PointOfSale;
+export default POSManager;

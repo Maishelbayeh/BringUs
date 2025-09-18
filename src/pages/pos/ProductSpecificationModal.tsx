@@ -20,6 +20,7 @@ const ProductSpecificationModal: React.FC<ProductSpecificationModalProps> = ({
   const [quantity, setQuantity] = useState(1);
   const [specificationDetails, setSpecificationDetails] = useState<any[]>([]);
   const [selectedColor, setSelectedColor] = useState<string>('');
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   // Get unique specifications from product specificationValues
   const productSpecifications = React.useMemo(() => {
@@ -142,18 +143,23 @@ const ProductSpecificationModal: React.FC<ProductSpecificationModalProps> = ({
     setSelectedColor(color);
   };
 
-  const handleAddToCart = () => {
-    // Create a map of specId to valueId for the order
-    const specIdToValueId: { [key: string]: string } = {};
-    specificationDetails.forEach(spec => {
-      if (spec.selectedValueId) {
-        specIdToValueId[spec.specId] = spec.selectedValueId;
-      }
-    });
-    
-    console.log('🔍 تم اختيار مواصفات المنتج:', specIdToValueId);
-    
-    onAddToCart(product, quantity, specIdToValueId, selectedColor);
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true);
+    try {
+      // Create a map of specId to valueId for the order
+      const specIdToValueId: { [key: string]: string } = {};
+      specificationDetails.forEach(spec => {
+        if (spec.selectedValueId) {
+          specIdToValueId[spec.specId] = spec.selectedValueId;
+        }
+      });
+      
+      console.log('🔍 تم اختيار مواصفات المنتج:', specIdToValueId);
+      
+      await onAddToCart(product, quantity, specIdToValueId, selectedColor);
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   // Check if all required specifications are selected
@@ -549,18 +555,23 @@ const ProductSpecificationModal: React.FC<ProductSpecificationModalProps> = ({
           </button>
           <button
             onClick={handleAddToCart}
-            disabled={isAddToCartDisabled}
-            className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            disabled={isAddToCartDisabled || isAddingToCart}
+            className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
           >
-            {isAddToCartDisabled 
-              ? (!allSpecsSelected 
-                  ? (isRTL ? 'يرجى اختيار جميع المواصفات المطلوبة' : 'Please select all required specifications')
-                  : !isColorSelected 
-                    ? (isRTL ? 'يرجى اختيار لون للمنتج' : 'Please select a color for the product')
-                    : (isRTL ? 'غير متاح' : 'Not available')
-                )
-              : (isRTL ? 'إضافة للسلة' : 'Add to Cart')
-            }
+            {isAddingToCart ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 rtl:mr-0 rtl:ml-2"></div>
+                {isRTL ? 'جاري الإضافة...' : 'Adding...'}
+              </>
+            ) : isAddToCartDisabled ? (
+              !allSpecsSelected 
+                ? (isRTL ? 'يرجى اختيار جميع المواصفات المطلوبة' : 'Please select all required specifications')
+                : !isColorSelected 
+                  ? (isRTL ? 'يرجى اختيار لون للمنتج' : 'Please select a color for the product')
+                  : (isRTL ? 'غير متاح' : 'Not available')
+            ) : (
+              isRTL ? 'إضافة للسلة' : 'Add to Cart'
+            )}
           </button>
         </div>
       </div>

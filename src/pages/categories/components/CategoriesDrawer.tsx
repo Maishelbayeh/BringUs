@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import useCategories from '@/hooks/useCategories';
 import { useToastContext } from '../../../contexts/ToastContext';
 import { useValidation } from '../../../hooks/useValidation';
-import { categoryValidationSchema, CategoryFormData, validateCategoryWithDuplicates } from '../../../validation/categoryValidation';
+import { categoryValidationSchema,  validateCategoryWithDuplicates } from '../../../validation/categoryValidation';
 import { getStoreId } from '../../../utils/storeUtils';
 
 interface CategoriesDrawerProps {
@@ -25,13 +25,13 @@ interface CategoriesDrawerProps {
 const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onImageChange, onSubmit, isSubcategory, categories, allCategories }) => {
   const { t } = useTranslation();
   const { uploadCategoryImage } = useCategories();
-  const { showError } = useToastContext();
+ 
   
   // استخدام النظام العام للفالديشين
   const {
     errors,
     validateForm: validateFormData,
-    validateUnique,
+ 
     clearAllErrors,
     setErrors,
   } = useValidation({

@@ -216,13 +216,10 @@
     "passwordPlaceholder": "أدخل كلمة المرور",
     "rememberMe": "تذكرني",
     "forgotPassword": "نسيت كلمة المرور؟",
-    "emailRequired": "البريد الإلكتروني مطلوب",
-    "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح",
-    "passwordRequired": "كلمة المرور مطلوبة",
-    "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+  
     "signInButton": "تسجيل الدخول",
     "signInSubmitting": "جاري تسجيل الدخول...",
-    "noAccount": "ليس لديك حساب؟",
+   
     "createAccount": "إنشاء حساب",
     "auth": {
     "forgot_password": {
@@ -472,7 +469,7 @@
       "arabicWithNumbersOnly": "يرجى إدخال نص عربي وأرقام فقط",
       "englishOnly": "يرجى إدخال نص إنجليزي فقط",
       "invalidUrl": "يرجى إدخال رابط صحيح",
-      "invalidFileType": "يرجى رفع ملف صورة صحيح (JPG, PNG, GIF, SVG, WebP)",
+      
       "fileTooLarge": "حجم الملف يجب أن يكون أقل من 5 ميجابايت",
       "invalidWhatsApp": "يرجى إدخال رقم واتساب صحيح يبدأ بـ + ورمز الدولة",
       "whatsAppMaxLength": "رقم الواتساب لا يمكن أن يتجاوز 15 رقم",

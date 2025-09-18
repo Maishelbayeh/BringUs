@@ -1,0 +1,538 @@
+import { useState, useCallback } from 'react';
+import { POS_API_ENDPOINTS, getPOSApiHeaders } from '../constants/posApi';
+
+export interface POSCart {
+  _id: string;
+  sessionId: string;
+  cartName: string;
+  admin: string;
+  store: string;
+  customer: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+  };
+  items: POSCartItem[];
+  subtotal: number;
+  tax?: {
+    amount: number;
+    rate: number;
+  };
+  discount?: {
+    type: 'percentage' | 'fixed';
+    value: number;
+    reason?: string;
+  };
+  total: number;
+  payment?: {
+    method: string;
+    amount: number;
+    change: number;
+    notes?: string;
+  };
+  notes?: {
+    admin?: string;
+    customer?: string;
+  };
+  status: 'active' | 'completed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface POSCartItem {
+  _id: string;
+  product: {
+    _id: string;
+    nameEn: string;
+    nameAr: string;
+    price: number;
+    images: string[];
+    mainImage: string;
+    stock: number;
+    availableQuantity: number;
+  };
+  quantity: number;
+  variant?: any;
+  priceAtAdd: number;
+  selectedSpecifications: any[];
+  selectedColors: any[];
+}
+
+export interface UsePOSResult {
+  // Cart management
+  carts: POSCart[];
+  currentCart: POSCart | null;
+  isLoading: boolean;
+  error: string | null;
+  
+  // Cart operations
+  createCart: (storeId: string) => Promise<{ success: boolean; data?: any; message?: string }>;
+  getCart: (cartId: string) => Promise<{ success: boolean; data?: POSCart; message?: string }>;
+  getAllCarts: (storeId: string, status?: string) => Promise<{ success: boolean; data?: POSCart[]; message?: string }>;
+  
+  // Item operations
+  addToCart: (cartId: string, product: any, quantity: number, variant?: any, selectedSpecifications?: any[], selectedColors?: any[]) => Promise<{ success: boolean; data?: POSCart; message?: string }>;
+  updateCartItem: (cartId: string, itemId: string, quantity: number) => Promise<{ success: boolean; data?: POSCart; message?: string }>;
+  removeFromCart: (cartId: string, itemId: string) => Promise<{ success: boolean; data?: POSCart; message?: string }>;
+  
+  // Cart management
+  updateCustomer: (cartId: string, customer: any) => Promise<{ success: boolean; data?: POSCart; message?: string }>;
+  applyDiscount: (cartId: string, type: 'percentage' | 'fixed', value: number, reason?: string) => Promise<{ success: boolean; data?: POSCart; message?: string }>;
+  clearCart: (cartId: string) => Promise<{ success: boolean; data?: POSCart; message?: string }>;
+  deleteCart: (cartId: string) => Promise<{ success: boolean; message?: string }>;
+  
+  // Order completion
+  completeCart: (cartId: string, notes?: string) => Promise<{ success: boolean; data?: any; message?: string }>;
+  
+  // State management
+  setCurrentCart: (cart: POSCart | null) => void;
+  setCarts: (carts: POSCart[]) => void;
+}
+
+export function usePOS(): UsePOSResult {
+  const [carts, setCarts] = useState<POSCart[]>([]);
+  const [currentCart, setCurrentCart] = useState<POSCart | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Use the centralized headers function
+  const getAuthHeaders = getPOSApiHeaders;
+
+  // Helper function to handle API responses
+  const handleResponse = async (response: Response) => {
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.message || `HTTP error! status: ${response.status}`);
+    }
+    
+    if (!result.success) {
+      throw new Error(result.message || 'API request failed');
+    }
+    
+    return result;
+  };
+
+  // Create new POS cart
+  const createCart = useCallback(async (storeId: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.CREATE_CART(storeId), {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      
+      const result = await handleResponse(response);
+      
+      // Refresh carts list
+      await getAllCarts(storeId);
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to create cart';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Get specific POS cart
+  const getCart = useCallback(async (cartId: string) => {
+    // Avoid duplicate calls for the same cart
+    if (currentCart && currentCart._id === cartId) {
+      console.log('Cart already loaded, skipping duplicate call');
+      return { success: true, data: currentCart };
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.GET_CART(cartId), {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      
+      const result = await handleResponse(response);
+      
+      if (result.data) {
+        // Ensure all required fields exist
+        const cartData = {
+          ...result.data,
+          items: result.data.items || [],
+          total: result.data.total || 0,
+          subtotal: result.data.subtotal || 0,
+          status: result.data.status || 'active'
+        };
+        console.log('Setting current cart:', cartData);
+        setCurrentCart(cartData);
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to get cart';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentCart]);
+
+  // Get all POS carts
+  const getAllCarts = useCallback(async (storeId: string, status: string = 'active') => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.GET_ALL_CARTS(storeId, status), {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      
+      const result = await handleResponse(response);
+      
+      if (result.data) {
+        // Ensure items array exists for each cart
+        const cartsData = result.data.map((cart: any) => ({
+          ...cart,
+          items: cart.items || []
+        }));
+        setCarts(cartsData);
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to get carts';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Add item to POS cart
+  const addToCart = useCallback(async (cartId: string, product: any, quantity: number, variant?: any, selectedSpecifications?: any[], selectedColors?: any[]) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.ADD_ITEM(cartId), {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          product: product._id || product.id,
+          quantity,
+          variant: variant || null,
+          selectedSpecifications: selectedSpecifications || [],
+          selectedColors: selectedColors || []
+        })
+      });
+      
+      const result = await handleResponse(response);
+      
+      if (result.data) {
+        // Ensure all required fields exist
+        const cartData = {
+          ...result.data,
+          items: result.data.items || [],
+          total: result.data.total || 0,
+          subtotal: result.data.subtotal || 0,
+          status: result.data.status || 'active'
+        };
+        console.log('Adding to cart, setting current cart:', cartData);
+        setCurrentCart(cartData);
+        // Update carts list
+        setCarts(prev => prev.map(cart => cart._id === cartId ? cartData : cart));
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to add item to cart';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Update item in POS cart
+  const updateCartItem = useCallback(async (cartId: string, itemId: string, quantity: number) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.UPDATE_ITEM(cartId, itemId), {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ quantity })
+      });
+      
+      const result = await handleResponse(response);
+      
+      if (result.data) {
+        // Ensure all required fields exist
+        const cartData = {
+          ...result.data,
+          items: result.data.items || [],
+          total: result.data.total || 0,
+          subtotal: result.data.subtotal || 0,
+          status: result.data.status || 'active'
+        };
+        console.log('Adding to cart, setting current cart:', cartData);
+        setCurrentCart(cartData);
+        // Update carts list
+        setCarts(prev => prev.map(cart => cart._id === cartId ? cartData : cart));
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to update cart item';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Remove item from POS cart
+  const removeFromCart = useCallback(async (cartId: string, itemId: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.REMOVE_ITEM(cartId, itemId), {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      
+      const result = await handleResponse(response);
+      
+      if (result.data) {
+        // Ensure all required fields exist
+        const cartData = {
+          ...result.data,
+          items: result.data.items || [],
+          total: result.data.total || 0,
+          subtotal: result.data.subtotal || 0,
+          status: result.data.status || 'active'
+        };
+        console.log('Adding to cart, setting current cart:', cartData);
+        setCurrentCart(cartData);
+        // Update carts list
+        setCarts(prev => prev.map(cart => cart._id === cartId ? cartData : cart));
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to remove item from cart';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Update POS cart customer info
+  const updateCustomer = useCallback(async (cartId: string, customer: any) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.UPDATE_CUSTOMER(cartId), {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ customer })
+      });
+      
+      const result = await handleResponse(response);
+      
+      if (result.data) {
+        // Ensure all required fields exist
+        const cartData = {
+          ...result.data,
+          items: result.data.items || [],
+          total: result.data.total || 0,
+          subtotal: result.data.subtotal || 0,
+          status: result.data.status || 'active'
+        };
+        console.log('Adding to cart, setting current cart:', cartData);
+        setCurrentCart(cartData);
+        // Update carts list
+        setCarts(prev => prev.map(cart => cart._id === cartId ? cartData : cart));
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to update customer info';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Apply discount to POS cart
+  const applyDiscount = useCallback(async (cartId: string, type: 'percentage' | 'fixed', value: number, reason?: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.APPLY_DISCOUNT(cartId), {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ type, value, reason })
+      });
+      
+      const result = await handleResponse(response);
+      
+      if (result.data) {
+        // Ensure all required fields exist
+        const cartData = {
+          ...result.data,
+          items: result.data.items || [],
+          total: result.data.total || 0,
+          subtotal: result.data.subtotal || 0,
+          status: result.data.status || 'active'
+        };
+        console.log('Adding to cart, setting current cart:', cartData);
+        setCurrentCart(cartData);
+        // Update carts list
+        setCarts(prev => prev.map(cart => cart._id === cartId ? cartData : cart));
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to apply discount';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Clear POS cart
+  const clearCart = useCallback(async (cartId: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.CLEAR_CART(cartId), {
+        method: 'PUT',
+        headers: getAuthHeaders()
+      });
+      
+      const result = await handleResponse(response);
+      
+      if (result.data) {
+        // Ensure all required fields exist
+        const cartData = {
+          ...result.data,
+          items: result.data.items || [],
+          total: result.data.total || 0,
+          subtotal: result.data.subtotal || 0,
+          status: result.data.status || 'active'
+        };
+        console.log('Adding to cart, setting current cart:', cartData);
+        setCurrentCart(cartData);
+        // Update carts list
+        setCarts(prev => prev.map(cart => cart._id === cartId ? cartData : cart));
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to clear cart';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Delete POS cart
+  const deleteCart = useCallback(async (cartId: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.DELETE_CART(cartId), {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      
+      const result = await handleResponse(response);
+      
+      // Remove from local state
+      setCarts(prev => prev.filter(cart => cart._id !== cartId));
+      if (currentCart?._id === cartId) {
+        setCurrentCart(null);
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to delete cart';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentCart]);
+
+  // Complete POS cart (convert to order)
+  const completeCart = useCallback(async (cartId: string, notes?: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(POS_API_ENDPOINTS.COMPLETE_CART(cartId), {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ notes })
+      });
+      
+      const result = await handleResponse(response);
+      
+      // Update cart status to completed
+      setCarts(prev => prev.map(cart => 
+        cart._id === cartId 
+          ? { ...cart, status: 'completed' as const }
+          : cart
+      ));
+      
+      if (currentCart?._id === cartId) {
+        setCurrentCart(prev => prev ? { ...prev, status: 'completed' as const } : null);
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to complete cart';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentCart]);
+
+  return {
+    carts,
+    currentCart,
+    isLoading,
+    error,
+    createCart,
+    getCart,
+    getAllCarts,
+    addToCart,
+    updateCartItem,
+    removeFromCart,
+    updateCustomer,
+    applyDiscount,
+    clearCart,
+    deleteCart,
+    completeCart,
+    setCurrentCart,
+    setCarts
+  };
+}

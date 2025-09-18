@@ -32,7 +32,7 @@ import StoreInfo from "@/pages/store/StoreInfo";
 import StoresManagement from "@/pages/superadmin/StoresManagement";
 import SubscriptionPlans from "@/pages/superadmin/SubscriptionPlans";
 import SubscriptionHistory from "@/pages/subscription/SubscriptionHistory";
-import PointOfSale from "@/pages/pos/PointOfSale";
+import PointOfSale from "@/pages/pos/PointOfSaleNew";
 import AdminRoute from "@/hoc/AdminRoute";
 
 // Wrapper component to handle store slug parameter

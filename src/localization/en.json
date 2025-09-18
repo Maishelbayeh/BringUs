@@ -1239,7 +1239,7 @@
     "maxCurrencies": "Maximum {{max}} currencies allowed",
     "invalidImageUrl": "Please enter a valid image URL",
     "maxGreaterThanMin": "Maximum amount must be greater than minimum amount",
-    "invalidFileType": "Please upload a valid image file (JPG, PNG, GIF, SVG, WebP)",
+    
     "fileTooLarge": "File size must be less than 5MB",
     "invalidFormat": "Invalid format",
     "invalidValue": "Invalid value",
