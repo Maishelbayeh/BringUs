@@ -8,6 +8,7 @@ import CustomInput from '../../../components/common/CustomInput';
 import CustomTextArea from '../../../components/common/CustomTextArea';
 import CustomSwitch from '../../../components/common/CustomSwitch';
 import { validatePaymentForm } from './paymentValidation';
+import { createImageValidationFunction } from '../../../validation/imageValidation';
 
 interface Props {
   method: PaymentMethod | null;
@@ -45,6 +46,9 @@ export interface PaymentFormRef {
 const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, language, onValidationChange, isEditMode }, ref) => {
   const { t } = useTranslation();
   const isRTL = language === 'ARABIC';
+  
+  // Create image validation function
+  const imageValidator = createImageValidationFunction(t);
 
   // Form state
   const [formData, setFormData] = useState<Partial<PaymentMethod>>({
@@ -406,6 +410,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
                 onChange={handleQrCodeFileChange}
                 placeholder={t('paymentMethods.chooseFile')}
                 style={{ textAlign: isRTL ? 'right' : 'left' }}
+                beforeChangeValidate={imageValidator}
               />
             </div>
           )}
@@ -422,6 +427,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
             onChange={handleLogoFileChange}
             placeholder={t('paymentMethods.chooseFile')}
             style={{ textAlign: isRTL ? 'right' : 'left' }}
+            beforeChangeValidate={imageValidator}
           />
 
           {/* File validation error */}
@@ -479,6 +485,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
                   value={imageFile.file.name || ''}
                   onChange={(files) => handlePaymentImageFileChange(files, index)}
                   placeholder={t('paymentMethods.chooseFile')}
+                  beforeChangeValidate={imageValidator}
                 />
 
                 <CustomSelect

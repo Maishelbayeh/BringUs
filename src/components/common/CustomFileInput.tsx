@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { createImageValidationFunction, ImageValidationOptions } from '../../validation/imageValidation';
 
 interface CustomFileInputProps {
   label: string;
@@ -35,6 +36,8 @@ interface CustomFileInputProps {
   onValidationErrorChange?: (error?: string) => void;
   /** Max allowed image size in MB (default 3 MB) */
   maxImageSizeMB?: number;
+  /** Additional validation options for images */
+  imageValidationOptions?: ImageValidationOptions;
 }
 
 const CustomFileInput: React.FC<CustomFileInputProps> = ({ 
@@ -52,7 +55,8 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   onRemoveExisting,
   appendOnly = false,
   onValidationErrorChange,
-  maxImageSizeMB = 3
+  maxImageSizeMB = 10,
+  imageValidationOptions = {}
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -65,26 +69,18 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
 
+  // Create validation function with options
+  const imageValidationOptionsWithSize: ImageValidationOptions = {
+    maxSizeMB: maxImageSizeMB,
+    ...imageValidationOptions
+  };
+  
+  const defaultImageValidator = createImageValidationFunction(t, imageValidationOptionsWithSize);
+
   // Unified validator for selection and removal
   const validateFiles = (filesToValidate: File[]): { isValid: boolean; errorMessage?: string } => {
     if (beforeChangeValidate) return beforeChangeValidate(filesToValidate);
-    const limitBytes = maxImageSizeMB * 1024 * 1024;
-    const invalidNames: string[] = [];
-    let firstOversizedSizeMB: string | undefined = undefined;
-    for (const f of filesToValidate) {
-      if (f.size > limitBytes) {
-        invalidNames.push(f.name);
-        if (!firstOversizedSizeMB) {
-          firstOversizedSizeMB = (f.size / (1024 * 1024)).toFixed(2);
-        }
-      }
-    }
-    if (invalidNames.length === 0) return { isValid: true };
-    const names = invalidNames.join(', ');
-    const message = invalidNames.length > 1
-      ? t('validation.imagesTooLargeList', { limit: maxImageSizeMB, names })
-      : t('validation.imageTooLargeLimit', { size: firstOversizedSizeMB, limit: maxImageSizeMB });
-    return { isValid: false, errorMessage: message };
+    return defaultImageValidator(filesToValidate);
   };
 
   // تحميل الصور الموجودة مسبقاً

@@ -477,7 +477,12 @@
       "invalidWhatsApp": "يرجى إدخال رقم واتساب صحيح يبدأ بـ + ورمز الدولة",
       "whatsAppMaxLength": "رقم الواتساب لا يمكن أن يتجاوز 15 رقم",
       "imageTooLargeLimit": "حجم الصورة {{size}} ميجابايت يتجاوز الحد المسموح ({{limit}} ميجابايت)",
-      "imagesTooLargeList": "الصور التالية تتجاوز الحد المسموح ({{limit}} ميجابايت): {{names}}"
+      "imagesTooLargeList": "الصور التالية تتجاوز الحد المسموح ({{limit}} ميجابايت): {{names}}",
+      "tooManyFiles": "عدد الملفات كبير جداً. الحد الأقصى المسموح: {{limit}}",
+      "invalidFileType": "نوع الملف غير صحيح. الأنواع المسموحة: {{types}}",
+      "imageUrlRequired": "رابط الصورة مطلوب لجميع صور الدفع",
+      "invalidQrCodeUrl": "يرجى إدخال رابط صورة QR code صحيح",
+      "altTextTooLong": "النص البديل لا يمكن أن يتجاوز 200 حرف"
     },
    "sideBar":{
        "xstore": "إكس ستور",
@@ -641,7 +646,7 @@
     "cashOnDeliveryLogoDescription": "الدفع عند الإستلام",
     "qrPicture": "الشعار/الصورة",
     "qrPictureDescription": "شعار أو صورة طريقة الدفع",
-    "qrPictureDescription2": " أقصى 15 ميجابايت.",
+    "qrPictureDescription2": " أقصى 10 ميجابايت.",
     "paymentMethod": "طريقة الدفع",
     "chooseFile": "اختر ملف",
     "save": "حفظ",

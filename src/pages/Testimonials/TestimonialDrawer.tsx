@@ -7,6 +7,7 @@ import CustomButton from '../../components/common/CustomButton';
 import CustomSwitch from '../../components/common/CustomSwitch';
 import { socialIcons, platformOptions } from './Testimonial';
 import { type Testimonial } from '@/hooks/useTestimonials';
+import { createImageValidationFunction } from '../../validation/imageValidation';
 
 interface TestimonialDrawerProps {
   open: boolean;
@@ -19,6 +20,9 @@ interface TestimonialDrawerProps {
 }
 
 const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, onSave, onDelete, testimonial, isRtl, t }) => {
+  // Create image validation function
+  const imageValidator = createImageValidationFunction(t);
+  
   const [formData, setFormData] = useState({
     platform: 'FACEBOOK',
     image: '',
@@ -129,6 +133,7 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
                 onChange={handleImageChange}
                 value={formData.image}
                 isRTL={isRtl}
+                beforeChangeValidate={imageValidator}
               />
             </div>
           </div>

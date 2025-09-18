@@ -17,32 +17,7 @@ import { useValidation } from '@/hooks/useValidation';
 import { productValidationSchema, validateBarcode } from '@/validation/productValidation';
 
 //-------------------------------------------- Image Size Validation -------------------------------------------
-const MAX_IMAGE_SIZE = 3 * 1024 * 1024 ; // 3 ميجابايت بالبايت
-
-const validateImageSize = (file: File): { isValid: boolean; sizeInMB?: string } => {
-  if (file.size > MAX_IMAGE_SIZE) {
-    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
-    return { isValid: false, sizeInMB };
-  }
-  return { isValid: true };
-};
-
-const validateImagesSize = (files: File[]): { isValid: boolean; invalidFiles?: string[] } => {
-  const invalidFiles: string[] = [];
-  
-  for (const file of files) {
-    const validation = validateImageSize(file);
-    if (!validation.isValid) {
-      invalidFiles.push(file.name);
-    }
-  }
-  
-  if (invalidFiles.length > 0) {
-    return { isValid: false, invalidFiles };
-  }
-  
-  return { isValid: true };
-};
+import { validateImageFileI18n, validateImageFilesI18n } from '../../validation/imageValidation';
 
 //-------------------------------------------- ColorVariant -------------------------------------------
 interface ColorVariant {
@@ -164,13 +139,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     }
 
     const fileArray = Array.isArray(files) ? files : [files];
-    const validation = validateImagesSize(fileArray);
+    const validation = validateImageFilesI18n(fileArray, t);
     
     if (!validation.isValid) {
-      const names = validation.invalidFiles && validation.invalidFiles.length > 0 ? validation.invalidFiles.join(', ') : '';
-      const msg = t('validation.imagesTooLargeList', { limit: 3, names });
-      console.log('❌ Additional images validation failed:', msg);
-      setImageErrors(prev => ({ ...prev, images: msg }));
+      console.log('❌ Additional images validation failed:', validation.errorMessage);
+      setImageErrors(prev => ({ ...prev, images: validation.errorMessage || '' }));
       return; // لا نستدعي onImageChange إذا كان هناك خطأ
     }
 
@@ -186,11 +159,10 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
       return;
     }
 
-    const validation = validateImageSize(file);
+    const validation = validateImageFileI18n(file, t);
     
     if (!validation.isValid) {
-      const msg = t('validation.imageTooLargeLimit', { size: validation.sizeInMB, limit: 3 });
-      setImageErrors(prev => ({ ...prev, mainImage: msg }));
+      setImageErrors(prev => ({ ...prev, mainImage: validation.errorMessage || '' }));
       return; // لا نستدعي onMainImageChange إذا كان هناك خطأ
     }
 
@@ -838,11 +810,10 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     }
 
     // التحقق من حجم الصورة أولاً
-    const validation = validateImageSize(file);
+    const validation = validateImageFileI18n(file, t);
     if (!validation.isValid) {
-      const msg = t('validation.imageTooLargeLimit', { size: validation.sizeInMB, limit: 3 });
-      console.log('❌ Main image validation failed:', msg);
-      setImageErrors(prev => ({ ...prev, mainImage: msg }));
+      console.log('❌ Main image validation failed:', validation.errorMessage);
+      setImageErrors(prev => ({ ...prev, mainImage: validation.errorMessage || '' }));
       return; // إيقاف التحميل إذا كان هناك خطأ
     }
 
@@ -1610,13 +1581,8 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
               value={form.images || []}
               onChange={files => handleImageChangeWithValidation(files)}
               beforeChangeValidate={(files) => {
-                const validation = validateImagesSize(files);
-                if (!validation.isValid) {
-                  const names = validation.invalidFiles && validation.invalidFiles.length > 0 ? validation.invalidFiles.join(', ') : '';
-                  const message = t('validation.imagesTooLargeList', { limit: 3, names });
-                  return { isValid: false, errorMessage: message };
-                }
-                return { isValid: true };
+                const validation = validateImageFilesI18n(files, t);
+                return { isValid: validation.isValid, errorMessage: validation.errorMessage };
               }}
               onRemoveExisting={(previewUrl, index) => {
                 // Remove only the clicked existing image from form.images

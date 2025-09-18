@@ -511,7 +511,7 @@
     "inactive": "Inactive",
     "qrPicture": "Logo/Image",
     "qrPictureDescription": "Payment method logo or image",
-    "qrPictureDescription2": " max 15 MB.",
+    "qrPictureDescription2": " max 10 MB.",
     "paymentMethod": "Payment Method",
     "chooseFile": "Choose File",
     "save": "Save",
@@ -1256,7 +1256,12 @@
     "phoneMaxLength": "Phone number cannot exceed 15 digits",
     "whatsAppMaxLength": "WhatsApp number cannot exceed 15 digits",
     "imageTooLargeLimit": "Image size {{size}} MB exceeds the allowed ({{limit}} MB)",
-    "imagesTooLargeList": "The following image exceed the allowed size ({{limit}} MB): {{names}}"
+    "imagesTooLargeList": "The following image exceed the allowed size ({{limit}} MB): {{names}}",
+    "tooManyFiles": "Too many files. Maximum allowed: {{limit}}",
+    "invalidFileType": "Invalid file type. Allowed types: {{types}}",
+    "imageUrlRequired": "Image URL is required for all payment images",
+    "invalidQrCodeUrl": "Please enter a valid QR code image URL",
+    "altTextTooLong": "Alt text cannot exceed 200 characters"
   },
   "units": {
     "title": "Units",

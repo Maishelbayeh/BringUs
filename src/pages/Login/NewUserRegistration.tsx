@@ -16,6 +16,7 @@ import { getUserData, getStoreId } from '@/hooks/useLocalStorage';
 import { useUser } from '@/hooks/useUser';
 import { useToastContext } from '@/contexts/ToastContext';
 import useOTP from '@/hooks/useOTP';
+import { createImageValidationFunction } from '@/validation/imageValidation';
 
 interface NewUserRegistrationProps {
   onUserCreated?: () => void;
@@ -25,6 +26,9 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
   const { t } = useTranslation();
   const { language } = useLanguage();
   const navigate = useNavigate();
+  
+  // Create image validation function
+  const imageValidator = createImageValidationFunction(t);
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -459,6 +463,7 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
                  placeholder={t('newUser.avatarPlaceholder')}
                  id="avatar"
                  isRTL={language === 'ARABIC'}
+                 beforeChangeValidate={imageValidator}
                />
              </div>
 
