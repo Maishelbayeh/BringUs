@@ -18,7 +18,7 @@ export interface ImageValidationOptions {
 
 // Default validation options
 const DEFAULT_OPTIONS: Required<ImageValidationOptions> = {
-  maxSizeMB: 3,
+  maxSizeMB: 10,
   allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
   maxFiles: 10
 };

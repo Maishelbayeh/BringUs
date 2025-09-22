@@ -99,10 +99,9 @@ const initialForm: {
   isOnSale: 'false',
   salePercentage: '',
 };
-
 //-------------------------------------------- ProductsPage -------------------------------------------
 const ProductsPage: React.FC = () => {
-
+  const [subcategories] = useState(initialSubcategories);
   const [showDrawer, setShowDrawer] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [editProduct, setEditProduct] = useState<any | null>(null);
@@ -116,7 +115,7 @@ const ProductsPage: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
-  const [viewMode] = useState<'table' | 'tree'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'tree'>('table');
   const [showVariantsPopup, setShowVariantsPopup] = useState(false);
   const [selectedProductVariants, setSelectedProductVariants] = useState<any[]>([]);
   const [selectedProductInfo, setSelectedProductInfo] = useState<any | null>(null);
@@ -206,9 +205,22 @@ const ProductsPage: React.FC = () => {
     fetchUnits();
     fetchSpecifications();
   }, []);
- 
+  // دالة لتحديث البيانات
+  const refreshData = useCallback(() => {
+    fetchProducts(true); // force refresh
+    fetchProductLabels();
+    fetchCategories();
+    fetchUnits();
+    fetchSpecifications(true); // force refresh
+  }, [fetchProducts, fetchProductLabels, fetchCategories, fetchUnits, fetchSpecifications]);
+
   //-------------------------------------------- sortOptions -------------------------------------------
- 
+  const sortOptions = [
+    { value: 'default', label: t('products.sort.default') || 'Default' },
+    { value: 'alpha', label: t('products.sort.alpha') || 'A-Z' },
+    { value: 'newest', label: t('products.sort.newest') || 'Newest' },
+    { value: 'oldest', label: t('products.sort.oldest') || 'Oldest' },
+  ];
   //-------------------------------------------- useEffect -------------------------------------------
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);
@@ -247,7 +259,7 @@ const ProductsPage: React.FC = () => {
         // تحقق إضافي: إذا كان المنتج لديه isParent: false، فهو متغير
         // لكن المنتجات العادية (بدون متغيرات) لديها أيضاً isParent: false
         // لذا نتحقق من أن المنتج ليس متغير لأي منتج آخر
-       
+        const isVariantByParentFlag = product.isParent === false && isVariantOfAnotherProduct;
         
         // تحقق إضافي: المنتج يعتبر متغير إذا كان موجود في قائمة variants لأي منتج آخر
         // أو إذا كان isParent: false وليس منتج عادي (hasVariants: false)
@@ -279,11 +291,23 @@ const ProductsPage: React.FC = () => {
     filteredProducts = [...filteredProducts].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }
   //-------------------------------------------- getCategoryName -------------------------------------------    
- 
+  const getCategoryName = (catId: number) => {
+    const cat = categories.find((c: any) => c.id === catId || c._id === catId);
+    return isRTL ? (cat?.nameAr || '') : (cat?.nameEn || '');
+  };
+  //-------------------------------------------- getSubcategoryName -------------------------------------------
+  const getSubcategoryName = (subId: number) => {
+    const sub = subcategories.find(s => s.id === subId);
+    return isRTL ? (sub?.nameAr || '') : (sub?.nameEn || '');
+  };
+
   //-------------------------------------------- getUnitName -------------------------------------------
- 
+  const getUnitName = (unitId: number) => {
+    const unit = units?.find((u: any) => u.id === unitId || u._id === unitId);
+    return isRTL ? (unit?.nameAr || '') : (unit?.nameEn || '');
+  };
   //-------------------------------------------- tableData -------------------------------------------
-  const tableData = Array.isArray(filteredProducts) ? filteredProducts.map((product) => {
+  const tableData = Array.isArray(filteredProducts) ? filteredProducts.map((product, index) => {
     // Log barcodes for debugging
     //CONSOLE.log(`🔍 tableData - Product ${index + 1} barcodes:`, product.barcodes);
     //CONSOLE.log(`🔍 tableData - Product ${index + 1} barcodes type:`, typeof product.barcodes);
@@ -362,7 +386,7 @@ const ProductsPage: React.FC = () => {
     };
   }) : [];
   //-------------------------------------------- renderMainImage -------------------------------------------
-  const renderMainImage = ( item: any) => {
+  const renderMainImage = (value: any, item: any) => {
     const mainImage = item.mainImage || (item.images && item.images.length > 0 ? item.images[0] : DEFAULT_PRODUCT_IMAGE);
     return (
       <div className="flex justify-center">
@@ -376,7 +400,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderImages -------------------------------------------
-  const renderImages = ( item: any) => {
+  const renderImages = (value: any, item: any) => {
     const images = item.images || [];
     const mainImage = item.mainImage;
     
@@ -433,7 +457,7 @@ const ProductsPage: React.FC = () => {
     );
   };
   //-------------------------------------------- renderStock -------------------------------------------
-  const renderStock = (value: any) => {
+  const renderStock = (value: any, item: any) => {
     const quantity = Number(value);
     let colorClass = 'bg-green-100 text-green-700';
     let text = value;
@@ -460,7 +484,7 @@ const ProductsPage: React.FC = () => {
     );
   };
   //-------------------------------------------- renderProductLabels -------------------------------------------
-  const renderProductLabels = (value: any) => {
+  const renderProductLabels = (value: any, item: any) => {
     if (!value || value === (isRTL ? 'لا يوجد علامات' : 'No Labels')) {
       return (
         <span className="text-gray-500 text-sm">
@@ -570,7 +594,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderCategories -------------------------------------------
-  const renderCategories = ( item: any) => {
+  const renderCategories = (value: any, item: any) => {
     const categories = item.categories || [];
     
     if (!categories || categories.length === 0) {
@@ -593,7 +617,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderBarcode -------------------------------------------
-  const renderBarcode = (value: any) => {
+  const renderBarcode = (value: any, item: any) => {
     //CONSOLE.log('🔍 renderBarcode - value:', value);
     //CONSOLE.log('🔍 renderBarcode - value type:', typeof value);
     //CONSOLE.log('🔍 renderBarcode - value is array:', Array.isArray(value));
@@ -658,7 +682,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderSpecifications -------------------------------------------
-  const renderSpecifications = (value: any) => {
+  const renderSpecifications = (value: any, item: any) => {
     if (!value || value === (isRTL ? 'لا توجد مواصفات' : 'No Specifications')) {
       return (
         <span className="text-gray-500 text-sm">
@@ -814,7 +838,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderActions -------------------------------------------
-  const renderActions = ( item: any) => (
+  const renderActions = (value: any, item: any) => (
     <div className="flex justify-center space-x-2">
       <button
         onClick={() => handleEdit(item)}
@@ -846,7 +870,7 @@ const ProductsPage: React.FC = () => {
     </div>
   );
   //-------------------------------------------- renderVariantStatus -------------------------------------------
-  const renderVariantStatus = ( item: any) => {
+  const renderVariantStatus = (value: any, item: any) => {
     const hasVariants = item.hasVariants;
     
     if (hasVariants) {
@@ -913,7 +937,7 @@ const ProductsPage: React.FC = () => {
   };
 
   //-------------------------------------------- renderProductId -------------------------------------------
-  const renderProductId = ( item: any) => (
+  const renderProductId = (value: any, item: any) => (
     <button
       className="text-blue-600 underline hover:text-blue-800 cursor-pointer"
       onClick={() => handleShowVariants(item)}
@@ -926,21 +950,32 @@ const ProductsPage: React.FC = () => {
   //-------------------------------------------- handleEdit -------------------------------------------
   const handleEdit = (product: any) => {
     const originalProduct = product.originalProduct || product;
-  
+    
+    console.log('🔍 handleEdit - originalProduct:', originalProduct);
+    console.log('🔍 handleEdit - originalProduct.categoryIds:', originalProduct.categoryIds);
+    console.log('🔍 handleEdit - originalProduct.categories:', originalProduct.categories);
+    console.log('🔍 handleEdit - originalProduct.category:', originalProduct.category);
+    
+    // Handle colors from original product data - pass raw colors data to let ProductsForm handle conversion
     const productColors = originalProduct.colors || [];
-
+    console.log('🔍 handleEdit - originalProduct.colors:', originalProduct.colors);
+    console.log('🔍 handleEdit - productColors type:', typeof productColors);
+    console.log('🔍 handleEdit - productColors is array:', Array.isArray(productColors));
+    
     const maintainStock = (originalProduct.availableQuantity || originalProduct.stock || 0) > 0 ? 'Y' : 'N';
     const unitId = originalProduct.unit?._id || originalProduct.unitId || (typeof originalProduct.unit === 'string' ? originalProduct.unit : '');
     const categoryId = originalProduct.category?._id || originalProduct.categoryId || (typeof originalProduct.category === 'string' ? originalProduct.category : '');
     const subcategoryId = originalProduct.subcategory?._id || originalProduct.subcategoryId || (typeof originalProduct.subcategory === 'string' ? originalProduct.subcategory : '');
     const storeId = originalProduct.store?._id || originalProduct.storeId || (typeof originalProduct.store === 'string' ? originalProduct.store : '');
     const tags = (originalProduct.productLabels || []).map((l: any) => typeof l === 'object' ? String(l._id || l.id) : String(l));
-  
+    console.log('🔍 handleEdit - originalProduct.productLabels:', originalProduct.productLabels);
+    console.log('🔍 handleEdit - processed tags:', tags);
 
     // Extract specifications and convert to the format expected by the form
     const specifications = originalProduct.specifications || [];
     const specificationValues = originalProduct.specificationValues || [];
-
+    
+    // استخدام قيم المواصفات المختارة إذا كانت موجودة
     const selectedSpecifications = Array.isArray(specificationValues) && specificationValues.length > 0
       ? specificationValues.map((spec: any) => {
           const foundSpec = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec.specificationId) : null;
@@ -1012,11 +1047,13 @@ const ProductsPage: React.FC = () => {
       barcodes: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [],
       newBarcode: '',
       videoUrl: originalProduct.videoUrl || '',
-      isOnSale: originalProduct.isOnSale === true || originalProduct.isOnSale === 'true' ? 'true' : 'false',
-      salePercentage: originalProduct.salePercentage ? String(originalProduct.salePercentage) : '',
     };
     
-  
+    console.log('🔍 handleEdit - Final newForm:', newForm);
+    console.log('🔍 handleEdit - Final newForm.productLabels:', newForm.productLabels);
+    console.log('🔍 handleEdit - newForm.categoryIds:', newForm.categoryIds);
+    console.log('🔍 handleEdit - newForm.categoryId:', newForm.categoryId);
+    
     setForm(newForm);
     setEditProduct(originalProduct);
     setDrawerMode('edit');
@@ -1323,10 +1360,9 @@ const ProductsPage: React.FC = () => {
       // رفع الصور إلى Cloudflare
       const uploadedUrls = await uploadProductImages(fileArray);
       
-      // تحديث النموذج بالروابط الجديدة عبر الإضافة لا الاستبدال (مع إزالة التكرار)
-      const combined = Array.isArray(form.images) ? [...form.images, ...uploadedUrls] : [...uploadedUrls];
-      const deduped = Array.from(new Set(combined));
-      const newForm = { ...form, images: deduped };
+      // تحديث النموذج بالروابط الجديدة
+      const newForm = { ...form, images: uploadedUrls };
+      //CONSOLE.log('🔍 handleImageChange - newForm.barcodes:', newForm.barcodes);
       setForm(newForm);
       
       //CONSOLE.log('✅ Images uploaded to Cloudflare:', uploadedUrls);
@@ -1335,9 +1371,8 @@ const ProductsPage: React.FC = () => {
       // في حالة الخطأ، نستخدم الروابط المحلية كـ fallback
       const fileArray = Array.isArray(files) ? files : [files];
       const imageUrls = fileArray.map(file => URL.createObjectURL(file));
-      const combined = Array.isArray(form.images) ? [...form.images, ...imageUrls] : [...imageUrls];
-      const deduped = Array.from(new Set(combined));
-      const newForm = { ...form, images: deduped };
+      const newForm = { ...form, images: imageUrls };
+      //CONSOLE.log('🔍 handleImageChange (fallback) - newForm.barcodes:', newForm.barcodes);
       setForm(newForm);
     }
   };
@@ -1393,19 +1428,6 @@ const ProductsPage: React.FC = () => {
     }
 
     try {
-      // Block submit if image validation errors exist (localized)
-      if (productsFormRef.current && typeof productsFormRef.current.getImageErrors === 'function') {
-        const imageErrors = productsFormRef.current.getImageErrors();
-        const imagesError = imageErrors?.images;
-        const mainImageError = imageErrors?.mainImage;
-        if ((imagesError && imagesError.trim()) || (mainImageError && mainImageError.trim())) {
-          showError(
-            isRTL ? (imagesError || mainImageError) : (imagesError || mainImageError),
-            isRTL ? 'خطأ في الصور' : 'Image Error'
-          );
-          return;
-        }
-      }
      
       // تحويل البيانات إلى الشكل المطلوب للـ API
       const productData = {
@@ -1512,21 +1534,6 @@ const ProductsPage: React.FC = () => {
         return;
       }
 
-      // التحقق من أخطاء الصور
-      if (productsFormRef.current && typeof productsFormRef.current.getImageErrors === 'function') {
-        const imageErrors = productsFormRef.current.getImageErrors();
-        if (imageErrors && Object.keys(imageErrors).length > 0) {
-          const errorMessages = Object.values(imageErrors).filter(msg => msg).join(' | ');
-          if (errorMessages) {
-            showError(
-              errorMessages,
-              isRTL ? 'خطأ في الصور' : 'Image Error'
-            );
-            return;
-          }
-        }
-      }
-
       // حفظ المنتج
       const editId = editProduct?._id || editProduct?.id;
       //CONSOLE.log('🔍 handleSubmit - editId:', editId);
@@ -1571,34 +1578,12 @@ const ProductsPage: React.FC = () => {
       //CONSOLE.error('Error saving product:', error);
     }
   };
-  //-------------------------------------------- renderDescription -------------------------------------------
-  const renderDescription = (value: string) => {
-    if (!value) return '';
-    
-    return (
-      <div 
-        className="max-w-xs overflow-hidden"
-        style={{
-          display: '-webkit-box',
-          WebkitLineClamp: 3,
-          WebkitBoxOrient: 'vertical',
-          lineHeight: '1.4',
-          maxHeight: '4.2em', // 3 lines * 1.4 line height
-          wordBreak: 'break-word'
-        }}
-        title={value} // Show full description on hover
-      >
-        {value}
-      </div>
-    );
-  };
-
   //-------------------------------------------- columns -------------------------------------------
   const columns = [
     { key: 'mainImage', label: { ar: 'الصورة الرئيسية', en: 'Main Image' }, type: 'image' as const, render: renderMainImage },
     { key: 'images', label: { ar: 'الصور الإضافية', en: 'Additional Images' }, type: 'text' as const, render: renderImages },
     { key: isRTL ? 'nameAr' : 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
-    { key: isRTL ? 'descriptionAr' : 'descriptionEn', label: { ar: 'الوصف', en: 'Description' }, type: 'text' as const, render: renderDescription },
+    { key: isRTL ? 'descriptionAr' : 'descriptionEn', label: { ar: 'الوصف', en: 'Description' }, type: 'text' as const },
     { key: 'categories', label: { ar: 'الفئات', en: 'Categories' }, type: 'text' as const, render: renderCategories },
     { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number' as const, render: renderPrice },
     { key: 'costPrice', label: { ar: 'سعر التكلفة', en: 'Cost Price' }, type: 'number' as const },

@@ -154,10 +154,7 @@ const TableCell: React.FC<TableCellProps> = ({
   const renderContent = () => {
     const value = item[column.key];
 
-    console.log('🔍 TableCell - column.key:', column.key);
-    console.log('🔍 TableCell - value:', value);
-    console.log('🔍 TableCell - item:', item);
-
+    
     // إذا كان هناك render function مخصص
     if (column.render) {
       return column.render(value, item);
