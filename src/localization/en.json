@@ -327,7 +327,19 @@
     "vsLastMonth": "vs last month",
     "products": "products",
     "revenue": "revenue",
-    "orders": "orders"
+    "orders": "orders",
+    "topUsers": "Top Users",
+    "refresh": "Refresh",
+    "noTopUsers": "No top users data available",
+    "productsSold": "Products Sold",
+    "topProducts": "Top Products",
+    "noTopProducts": "No top products data available",
+    "sold": "Sold",
+    "orderPercentage": "Order Percentage",
+    "guestUsers": "Guest Users",
+    "loggedUsers": "Logged Users",
+    "percentage": "Percentage",
+    "noOrderData": "No order data available"
   },
   "sideBar":{
 

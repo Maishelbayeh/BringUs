@@ -84,7 +84,7 @@ export const getMenuAsText = (): MenuItem[] => {
           id: 32,
           title: 'sideBar.productSpecifications',
           icon: DocumentTextIcon,
-          path: '/products/specifications',
+          path: '/specifications',
           roles: ['admin'],
           requireActiveStore: true
         },

@@ -5,6 +5,9 @@ import useLanguage from '../../hooks/useLanguage';
 import useDashboardStats from '../../hooks/useDashboardStats';
 import DashboardStatCard from './components/DashboardStatCard';
 import RevenueChart from './components/RevenueChart';
+import TopUsersAnalytics from './components/TopUsersAnalytics';
+import TopProductsAnalytics from './components/TopProductsAnalytics';
+import OrderPercentageChart from './components/OrderPercentageChart';
 import { 
   ShoppingCartIcon, 
   CurrencyDollarIcon, 
@@ -71,7 +74,7 @@ const Homepage: React.FC = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-7xl mx-auto"
+        className=" mx-auto"
       >
         {/* Header */}
         <motion.div variants={itemVariants} className="mb-8">
@@ -225,22 +228,32 @@ const Homepage: React.FC = () => {
         </motion.div>
 
         {/* Charts and Lists Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Revenue Chart */}
-          <motion.div variants={itemVariants} className="xl:col-span-2">
+          <motion.div variants={itemVariants} className="xl:col-span-1">
             <RevenueChart 
               data={stats?.revenueChart || []} 
               isLoading={loading} 
             />
           </motion.div>
 
-          {/* Top Categories */}
-          {/* <motion.div variants={itemVariants}>
-            <TopCategories 
-              categories={stats?.topCategories || []} 
-              isLoading={loading} 
-            />
-          </motion.div> */}
+          {/* Top Users Analytics */}
+          <motion.div variants={itemVariants} className="xl:col-span-1">
+            <TopUsersAnalytics isLoading={loading} />
+          </motion.div>
+        </div>
+
+        {/* Analytics Charts Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+          {/* Order Percentage Chart */}
+          <motion.div variants={itemVariants}>
+            <OrderPercentageChart isLoading={loading} />
+          </motion.div>
+
+          {/* Top Products Analytics */}
+          <motion.div variants={itemVariants}>
+            <TopProductsAnalytics isLoading={loading} />
+          </motion.div>
         </div>
       </motion.div>
     </div>

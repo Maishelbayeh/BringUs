@@ -403,7 +403,19 @@
     "vsLastMonth": "من الشهر الماضي",
     "products": "منتج",
     "revenue": "إيرادات",
-    "orders": "طلبات"
+    "orders": "طلبات",
+    "topUsers": "المستخدمون الأكثر مبيعاً",
+    "refresh": "تحديث",
+    "noTopUsers": "لا توجد بيانات للمستخدمين الأكثر مبيعاً",
+    "productsSold": "مباعة",
+    "topProducts": "المنتجات الأكثر مبيعاً",
+    "noTopProducts": "لا توجد بيانات للمنتجات الأكثر مبيعاً",
+    "sold": "مباع",
+    "orderPercentage": "نسبة الطلبات",
+    "guestUsers": "المستخدمون الضيوف",
+    "loggedUsers": "المستخدمون المسجلون",
+    "percentage": "النسبة المئوية",
+    "noOrderData": "لا توجد بيانات للطلبات"
   },
   "validation": {
       "usernameRequired": "يرجى إدخال اسم المستخدم",
