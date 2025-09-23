@@ -6,6 +6,7 @@ interface UserStoreData {
   storeName: string;
   userName: string;
     email:string;
+    phone:string;
 }
 
 export const useUserStore = (): UserStoreData => {
@@ -14,7 +15,8 @@ export const useUserStore = (): UserStoreData => {
     userId: '',
     storeName: '',
     userName: '',
-    email:''
+    email:'',
+    phone:''
   });
 
   useEffect(() => {
@@ -27,13 +29,14 @@ export const useUserStore = (): UserStoreData => {
         const storeName = localStorage.getItem('userName') || 'Default Store';
         const userName = localStorage.getItem('userLastName') || 'Default User';
         const email=localStorage.getItem('email')||'';
-
+        const phone=localStorage.getItem('phone')||'';
         setUserStoreData({
           storeId,
           userId,
           storeName,
           userName,
-          email
+          email,
+          phone
         });
       } catch (error) {
         console.error('Error loading user store data:', error);

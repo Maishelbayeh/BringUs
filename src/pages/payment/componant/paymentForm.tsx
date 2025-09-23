@@ -8,6 +8,7 @@ import CustomInput from '../../../components/common/CustomInput';
 import CustomTextArea from '../../../components/common/CustomTextArea';
 import CustomSwitch from '../../../components/common/CustomSwitch';
 import { validatePaymentForm } from './paymentValidation';
+import { createImageValidationFunction } from '../../../validation/imageValidation';
 
 interface Props {
   method: PaymentMethod | null;
@@ -45,6 +46,9 @@ export interface PaymentFormRef {
 const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, language, onValidationChange, isEditMode }, ref) => {
   const { t } = useTranslation();
   const isRTL = language === 'ARABIC';
+  
+  // Create image validation function
+  const imageValidator = createImageValidationFunction(t);
 
   // Form state
   const [formData, setFormData] = useState<Partial<PaymentMethod>>({
@@ -411,6 +415,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
                 onChange={handleQrCodeFileChange}
                 placeholder={t('paymentMethods.chooseFile')}
                 style={{ textAlign: isRTL ? 'right' : 'left' }}
+                beforeChangeValidate={imageValidator}
               />
             </div>
           )}
@@ -427,6 +432,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
             onChange={handleLogoFileChange}
             placeholder={t('paymentMethods.chooseFile')}
             style={{ textAlign: isRTL ? 'right' : 'left' }}
+            beforeChangeValidate={imageValidator}
           />
 
           {/* File validation error */}
@@ -452,6 +458,77 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
         </div>
 
         {/* Payment Images Section */}
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium">{t('paymentMethods.paymentImages')}</h3>
+            <button
+              type="button"
+              onClick={addPaymentImage}
+              className="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary-dark"
+            >
+              {t('paymentMethods.addImage')}
+            </button>
+          </div>
+
+          {paymentImageFiles.map((imageFile, index) => (
+            <div key={index} className="border rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium">{t('paymentMethods.image')} {index + 1}</h4>
+                <button
+                  type="button"
+                  onClick={() => removePaymentImage(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  {t('common.remove')}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <CustomFileInput
+                  label={t('paymentMethods.imageFile')}
+                  id={`payment_image_${index}`}
+                  value={imageFile.file.name || ''}
+                  onChange={(files) => handlePaymentImageFileChange(files, index)}
+                  placeholder={t('paymentMethods.chooseFile')}
+                  beforeChangeValidate={imageValidator}
+                />
+
+                <CustomSelect
+                  label={t('paymentMethods.imageType')}
+                  value={imageFile.imageType}
+                  onChange={(e) => updatePaymentImage(index, 'imageType', e.target.value)}
+                  options={IMAGE_TYPES}
+                />
+
+                <CustomInput
+                  label={t('paymentMethods.altText')}
+                  value={imageFile.altText}
+                  onChange={(e) => updatePaymentImage(index, 'altText', e.target.value)}
+                  placeholder={t('paymentMethods.altTextPlaceholder')}
+                />
+              </div>
+            </div>
+          ))}
+
+          {/* Show existing payment images */}
+          {method?.paymentImages && method.paymentImages.length > 0 && (
+            <div className="mt-4">
+              <h4 className="font-medium mb-2">{t('paymentMethods.existingImages')}</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {method.paymentImages.map((image, index) => (
+                  <div key={index} className="text-center">
+                    <img 
+                      src={image.imageUrl} 
+                      alt={image.altText || 'Payment image'} 
+                      className="w-20 h-20 rounded-lg object-cover border mx-auto"
+                    />
+                    <p className="text-xs text-gray-600 mt-1">{image.imageType}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
    
       </div>
     </div>

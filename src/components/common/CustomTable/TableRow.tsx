@@ -22,8 +22,6 @@ const TableRow: React.FC<TableRowProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  console.log('🔍 TableRow - item:', item);
-  console.log('🔍 TableRow - columns:', columns);
 
   return (
     <tr className="custom-table-row mb-4 bg-white rounded-lg shadow border-0">

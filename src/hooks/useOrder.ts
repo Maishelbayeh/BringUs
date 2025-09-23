@@ -46,6 +46,73 @@ export interface Order {
   items: OrderItem[];
 }
 
+export interface CreateOrderData {
+  store?: {
+    _id: string;
+    nameAr: string;
+    nameEn: string;
+    logo: string;
+    contact: any;
+  };
+  user?: string | null;
+  items: Array<{
+    product: string;
+    quantity: number;
+  }>;
+  cartItems: Array<{
+    product: string;
+    quantity: number;
+    selectedSpecifications?: any[];
+    selectedColors?: any[];
+  }>;
+  shippingAddress: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    street: string;
+    city: string;
+    district: string;
+    country: string;
+    zipCode: string;
+  };
+  billingAddress: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    street: string;
+    city: string;
+    district: string;
+    country: string;
+    zipCode: string;
+  };
+  paymentInfo: {
+    method: 'credit_card' | 'debit_card' | 'paypal' | 'stripe' | 'cash_on_delivery'|'store';
+    paymentMethodId?: string | null;
+    status: string;
+  };
+  shippingInfo: {
+    method: string;
+    cost: number;
+    deliveryMethodId?: string | null;
+  };
+  notes: {
+    customer: string;
+  };
+  isGift?: boolean;
+  giftMessage?: string;
+  deliveryArea?: string;
+  currency?: string;
+}
+
+export interface CreateOrderResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+  error?: string;
+}
+
 export interface UseOrderResult {
   data: Order[];
   isLoading: boolean;
@@ -54,6 +121,10 @@ export interface UseOrderResult {
   updateOrderPaymentStatus: (orderId: string, paid: boolean) => Promise<void>;
   updateOrderStatus: (orderId: string, status: string) => Promise<void>;
   deleteOrder: (orderId: string) => Promise<void>;
+  createOrder: (orderData: CreateOrderData) => Promise<CreateOrderResponse>;
+  createGuestOrder: (orderData: CreateOrderData & { guestId: string }) => Promise<CreateOrderResponse>;
+  createPOSOrder: (cartItems: any[], store: any, notes?: string) => Promise<CreateOrderResponse>;
+  isCreatingOrder: boolean;
 }
 
 export function useOrder(storeId: string): UseOrderResult {
@@ -61,6 +132,7 @@ export function useOrder(storeId: string): UseOrderResult {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadFlag, setReloadFlag] = useState(0);
+  const [isCreatingOrder, setIsCreatingOrder] = useState<boolean>(false);
 
   // Helper function to get auth token
   const getAuthHeaders = () => {
@@ -219,6 +291,234 @@ export function useOrder(storeId: string): UseOrderResult {
 
   const refetch = () => setReloadFlag(f => f + 1);
 
+  // Helper function to create order data for POS
+  const createPOSOrderData = (cartItems: any[], store: any, notes?: string): CreateOrderData => {
+    // Get user info from localStorage
+    const userName = localStorage.getItem('userName') || '';
+    const userLastName = localStorage.getItem('userLastName') || '';
+    const userPhone = localStorage.getItem('UserPhone') || '';
+    const userEmail = localStorage.getItem('userEmail') || '';
+    const userId = localStorage.getItem('userId') || null;
+    
+    // Get store address
+    const storeAddress = store?.contact?.address?.street || 'Store Pickup';
+    
+    return {
+      store: {
+        _id: store?._id || store?.id,
+        nameAr: store?.nameAr || '',
+        nameEn: store?.nameEn || '',
+        logo: store?.logo || '',
+        contact: store?.contact || {}
+      },
+      user: userId,
+      items: cartItems.map(item => {
+        let productId = null;
+        
+        if (item.productId) {
+          productId = item.productId;
+        } else if (item.product && typeof item.product === 'string') {
+          productId = item.product;
+        } else if (item.product && typeof item.product === 'object') {
+          productId = item.product._id || item.product.id;
+        } else if (item._id) {
+          productId = item._id;
+        }
+        
+        return {
+          product: productId,
+          quantity: item.quantity
+        };
+      }),
+      cartItems: cartItems.map(item => ({
+        product: item.productId || (item.product && typeof item.product === 'string' ? item.product : item.product?._id || item.product?.id || item._id),
+        quantity: item.quantity,
+        selectedSpecifications: Array.isArray(item.selectedSpecifications || item.specifications) 
+          ? (item.selectedSpecifications || item.specifications || []).map((spec: any) => ({
+              specificationId: spec.specificationId || spec.id || spec._id,
+              valueId: spec.valueId || spec.id || spec._id,
+              title: spec.title || spec.name || '',
+              value: spec.value || spec.name || ''
+            }))
+          : [],
+        selectedColors: Array.isArray(item.selectedColors) 
+          ? (item.selectedColors || []).map((color: any) => ({
+              colorId: color.colorId || color.id || color._id,
+              name: color.name || color.title || '',
+              value: color.value || color.hex || color.name || ''
+            }))
+          : []
+      })),
+      shippingAddress: {
+        firstName:  userName,
+        lastName: userLastName,
+        email: userEmail || `${userName.replace(/\s+/g, '').toLowerCase()}@example.com`,
+        phone: userPhone,
+        street: storeAddress,
+        city: store?.contact?.address?.city || '',
+        district: store?.contact?.address?.state || '',
+        country: store?.contact?.address?.country || '',
+        zipCode: store?.contact?.address?.zipCode || ''
+      },
+      billingAddress: {
+        firstName: userName.split(' ')[0] || userName,
+        lastName: userName.split(' ').slice(1).join(' ') || '',
+        email: userEmail || `${userName.replace(/\s+/g, '').toLowerCase()}@example.com`,
+        phone: userPhone,
+        street: storeAddress,
+        city: store?.contact?.address?.city || '',
+        district: store?.contact?.address?.state || '',
+        country: store?.contact?.address?.country || '',
+        zipCode: store?.contact?.address?.zipCode || ''
+      },
+      paymentInfo: {
+        method: 'store',
+        paymentMethodId: null,
+        status: 'delivered'
+      },
+      shippingInfo: {
+        method: 'pickup',
+        cost: 0,
+        deliveryMethodId: null
+      },
+      notes: {
+        customer: notes || ''
+      },
+      isGift: false,
+      giftMessage: '',
+      deliveryArea: undefined,
+      currency: store?.settings?.currency || 'ILS'
+    };
+  };
+
+  const createOrder = async (orderData: CreateOrderData): Promise<CreateOrderResponse> => {
+    setIsCreatingOrder(true);
+    setError(null);
+
+    try {
+      if (!storeId) {
+        throw new Error('Store ID is required');
+      }
+
+      // Get auth token
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in again.');
+      }
+
+      // Prepare the order data for the API
+      const apiOrderData = {
+        ...orderData,
+        // Ensure billing address is same as shipping if not provided
+        billingAddress: orderData.billingAddress || orderData.shippingAddress,
+      };
+
+      console.log('Creating order with data:', apiOrderData);
+      console.log('Cart items details:', apiOrderData.cartItems);
+      console.log('Selected specifications:', apiOrderData.cartItems[0]?.selectedSpecifications);
+
+      const response = await fetch(`http://localhost:5001/api/orders/store/${storeId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(apiOrderData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+      }
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to create order');
+      }
+
+      console.log('Order created successfully:', result);
+      
+      // Refresh orders list after successful creation
+      refetch();
+      
+      return result;
+
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to create order';
+      setError(errorMessage);
+      console.error('Error creating order:', err);
+      return {
+        success: false,
+        message: errorMessage,
+        error: errorMessage
+      };
+    } finally {
+      setIsCreatingOrder(false);
+    }
+  };
+
+  const createGuestOrder = async (orderData: CreateOrderData & { guestId: string }): Promise<CreateOrderResponse> => {
+    setIsCreatingOrder(true);
+    setError(null);
+
+    try {
+      if (!storeId) {
+        throw new Error('Store ID is required');
+      }
+
+      // Prepare the order data for the API
+      const apiOrderData = {
+        ...orderData,
+        // Ensure billing address is same as shipping if not provided
+        billingAddress: orderData.billingAddress || orderData.shippingAddress,
+      };
+
+      console.log('Creating guest order with data:', apiOrderData);
+
+      const response = await fetch(`http://localhost:5001/api/orders/store/${storeId}/guest`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(apiOrderData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+      }
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to create guest order');
+      }
+
+      console.log('Guest order created successfully:', result);
+      
+      // Refresh orders list after successful creation
+      refetch();
+      
+      return result;
+
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to create guest order';
+      setError(errorMessage);
+      console.error('Error creating guest order:', err);
+      return {
+        success: false,
+        message: errorMessage,
+        error: errorMessage
+      };
+    } finally {
+      setIsCreatingOrder(false);
+    }
+  };
+
+  const createPOSOrder = async (cartItems: any[], store: any, notes?: string): Promise<CreateOrderResponse> => {
+    const orderData = createPOSOrderData(cartItems, store, notes);
+    return await createOrder(orderData);
+  };
+
   const deleteOrder = async (orderId: string) => {
     try {
       console.log(`🗑️ Deleting order ${orderId}`);
@@ -248,5 +548,17 @@ export function useOrder(storeId: string): UseOrderResult {
     }
   };
 
-  return { data, isLoading, error, refetch, updateOrderPaymentStatus, updateOrderStatus, deleteOrder };
+  return { 
+    data, 
+    isLoading, 
+    error, 
+    refetch, 
+    updateOrderPaymentStatus, 
+    updateOrderStatus, 
+    deleteOrder, 
+    createOrder, 
+    createGuestOrder, 
+    createPOSOrder,
+    isCreatingOrder 
+  };
 } 

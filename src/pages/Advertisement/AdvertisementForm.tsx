@@ -4,6 +4,7 @@ import CustomRadioGroup from '../../components/common/CustomRadioGroup';
 import CustomInput from '../../components/common/CustomInput';
 import FormImageGallery from '../../components/common/FormImageGallery';
 import CustomFileInput from '../../components/common/CustomFileInput';
+import { createImageValidationFunction } from '../../validation/imageValidation';
 
 interface AdvertisementFormProps {
   formHtml: string;
@@ -47,6 +48,8 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
     }
   });
 
+  // Create image validation function
+  const imageValidator = createImageValidationFunction(t);
   const [imageUploading, setImageUploading] = useState(false);
 
   // رفع صورة مباشرة عند الاختيار
@@ -195,6 +198,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 setImage(null);
               }
             }}
+            beforeChangeValidate={imageValidator}
             multiple={false}
             isRTL={isRTL}
           />

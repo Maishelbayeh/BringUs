@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { createImageValidationFunction, ImageValidationOptions } from '../../validation/imageValidation';
 
 interface CustomFileInputProps {
   label: string;
@@ -12,6 +13,31 @@ interface CustomFileInputProps {
   style?: React.CSSProperties;
   multiple?: boolean;
   isRTL?: boolean;
+  disabled?: boolean;
+  /**
+   * Optional validator invoked BEFORE committing selection.
+   * If returns isValid:false, the component will:
+   *  - show the selected files with an error
+   *  - block further selections until offending files are removed
+   *  - NOT call onChange until remaining files become valid
+   */
+  beforeChangeValidate?: (files: File[]) => { isValid: boolean; errorMessage?: string };
+  /**
+   * Called when user removes an existing (server-sourced) image from previews
+   * identified by its index in the current previews list.
+   */
+  onRemoveExisting?: (previewUrl: string, index: number) => void;
+  /**
+   * If true, onChange will receive only newly selected files (append mode).
+   * If false, onChange receives the full aggregated selection (replace mode).
+   */
+  appendOnly?: boolean;
+  /** Notify parent when internal validation error changes (for form-level blocking) */
+  onValidationErrorChange?: (error?: string) => void;
+  /** Max allowed image size in MB (default 3 MB) */
+  maxImageSizeMB?: number;
+  /** Additional validation options for images */
+  imageValidationOptions?: ImageValidationOptions;
 }
 
 const CustomFileInput: React.FC<CustomFileInputProps> = ({ 
@@ -23,16 +49,39 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   id, 
   style, 
   multiple = false,
-  isRTL = false
+  isRTL = false,
+  disabled = false,
+  beforeChangeValidate,
+  onRemoveExisting,
+  appendOnly = false,
+  onValidationErrorChange,
+  maxImageSizeMB = 10,
+  imageValidationOptions = {}
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<string[]>([]);
   const [fileCount, setFileCount] = useState(0);
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [internalError, setInternalError] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
+
+  // Create validation function with options
+  const imageValidationOptionsWithSize: ImageValidationOptions = {
+    maxSizeMB: maxImageSizeMB,
+    ...imageValidationOptions
+  };
+  
+  const defaultImageValidator = createImageValidationFunction(t, imageValidationOptionsWithSize);
+
+  // Unified validator for selection and removal
+  const validateFiles = (filesToValidate: File[]): { isValid: boolean; errorMessage?: string } => {
+    if (beforeChangeValidate) return beforeChangeValidate(filesToValidate);
+    return defaultImageValidator(filesToValidate);
+  };
 
   // تحميل الصور الموجودة مسبقاً
   useEffect(() => {
@@ -47,23 +96,31 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
       //CONSOLE.log('🔍 CustomFileInput useEffect - imageUrls:', imageUrls);
       //CONSOLE.log('🔍 CustomFileInput useEffect - validUrls:', validUrls);
       
-      if (validUrls.length > 0) {
-        setPreviews(validUrls);
-        setFileCount(validUrls.length);
-        setFileNames(validUrls.map(url => url.split('/').pop() || 'image'));
-      } else {
+      // Only mirror external value if there are no locally selected files
+      if (selectedFiles.length === 0) {
+        if (validUrls.length > 0) {
+          setPreviews(validUrls);
+          setFileCount(validUrls.length);
+          setFileNames(validUrls.map(url => url.split('/').pop() || 'image'));
+        } else {
+          setPreviews([]);
+          setFileCount(0);
+          setFileNames([]);
+        }
+      }
+    } else {
+      //CONSOLE.log('🔍 CustomFileInput useEffect - Setting empty state');
+      if (selectedFiles.length === 0) {
         setPreviews([]);
         setFileCount(0);
         setFileNames([]);
       }
-    } else {
-      //CONSOLE.log('🔍 CustomFileInput useEffect - Setting empty state');
-      setPreviews([]);
-      setFileCount(0);
-      setFileNames([]);
     }
-  }, [value]);
+  }, [value, selectedFiles.length]);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled || isBlocked) {
+      return;
+    }
     const files = event.target.files;
     console.log('🔍 CustomFileInput handleFileChange - files:', files);
     console.log('🔍 CustomFileInput handleFileChange - files length:', files?.length);
@@ -79,10 +136,52 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
     console.log('🔍 CustomFileInput handleFileChange - multiple:', multiple);
     console.log('🔍 CustomFileInput handleFileChange - calling onChange with:', multiple ? updatedFiles : updatedFiles[0]);
     
+    // Pre-validation (custom or built-in)
+    const validation = validateFiles(updatedFiles);
+      if (!validation.isValid) {
+        // Show the offending selection, block further uploads, don't propagate change
+        setSelectedFiles(updatedFiles);
+        setFileNames(updatedFiles.map(file => file.name));
+        setIsBlocked(true);
+        setInternalError(validation.errorMessage || 'Invalid files selected');
+        onValidationErrorChange && onValidationErrorChange(validation.errorMessage || 'Invalid files selected');
+
+        const newPreviews: string[] = [];
+        newFiles.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            if (e.target?.result) {
+              newPreviews.push(e.target.result as string);
+              if (multiple) {
+                setPreviews(prev => {
+                  const merged = [...prev, ...newPreviews];
+                  setFileCount(merged.length);
+                  return merged;
+                });
+              } else {
+                setPreviews([...newPreviews]);
+                setFileCount(newPreviews.length);
+              }
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+        return;
+      } else {
+        // Clear any internal error/block if previously set
+        setIsBlocked(false);
+        setInternalError(undefined);
+        onValidationErrorChange && onValidationErrorChange(undefined);
+      }
+
     setSelectedFiles(updatedFiles);
-    setFileCount(updatedFiles.length);
     setFileNames(updatedFiles.map(file => file.name));
-    onChange(multiple ? updatedFiles : updatedFiles[0]);
+    // In appendOnly mode send only new files, otherwise send all
+    if (appendOnly) {
+      onChange(multiple ? newFiles : newFiles[0]);
+    } else {
+      onChange(multiple ? updatedFiles : updatedFiles[0]);
+    }
 
     // استبدال الصور الموجودة بالصور الجديدة
     const newPreviews: string[] = [];
@@ -91,7 +190,16 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
       reader.onload = e => {
         if (e.target?.result) {
           newPreviews.push(e.target.result as string);
-          setPreviews([...newPreviews]);
+          if (multiple) {
+            setPreviews(prev => {
+              const merged = [...prev, ...newPreviews];
+              setFileCount(merged.length);
+              return merged;
+            });
+          } else {
+            setPreviews([...newPreviews]);
+            setFileCount(newPreviews.length);
+          }
         }
       };
       reader.readAsDataURL(file);
@@ -100,7 +208,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
 
   const handleClick = () => {
     //CONSOLE.log('🔍 CustomFileInput handleClick - Opening file dialog');
-    if (fileRef.current) {
+    if (fileRef.current && !disabled && !isBlocked) {
       fileRef.current.value = ''; // Reset input value to allow selecting the same file again
       fileRef.current.click();
     }
@@ -110,27 +218,46 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
     //CONSOLE.log('🔍 CustomFileInput removeFile - index:', index);
     //CONSOLE.log('🔍 CustomFileInput removeFile - selectedFiles before:', selectedFiles);
     
-    const newFiles = selectedFiles.filter((_, i) => i !== index);
-    const newPreviews = previews.filter((_, i) => i !== index);
-    const newFileNames = fileNames.filter((_, i) => i !== index);
-    
-    //CONSOLE.log('🔍 CustomFileInput removeFile - newFiles:', newFiles);
-    //CONSOLE.log('🔍 CustomFileInput removeFile - calling onChange with:', multiple ? newFiles : null);
-    
-    setSelectedFiles(newFiles);
-    setPreviews(newPreviews);
-    setFileCount(newPreviews.length);
-    
-    // إذا كانت الصورة من الملفات المحددة حديثاً
-    if (index < selectedFiles.length) {
-      const newFiles = selectedFiles.filter((_, i) => i !== index);
-      const newFileNames = fileNames.filter((_, i) => i !== index);
-      setSelectedFiles(newFiles);
-      setFileNames(newFileNames);
-      onChange(multiple ? newFiles : null);
+    const existingCount = Math.max(previews.length - selectedFiles.length, 0);
+    const isExisting = index < existingCount;
+
+    if (isExisting) {
+      // Remove from previews only and delegate to parent for external list
+      setPreviews(prev => {
+        const copy = prev.filter((_, i) => i !== index);
+        setFileCount(copy.length);
+        return copy;
+      });
+      if (onRemoveExisting) {
+        const previewUrl = previews[index];
+        onRemoveExisting(previewUrl, index);
+      }
+      return;
+    }
+
+    const localIndex = index - existingCount;
+    const remainingLocalFiles = selectedFiles.filter((_, i) => i !== localIndex);
+    const remainingFileNames = fileNames.filter((_, i) => i !== localIndex);
+
+    setSelectedFiles(remainingLocalFiles);
+    setFileNames(remainingFileNames);
+    setPreviews(prev => {
+      const copy = prev.filter((_, i) => i !== index);
+      setFileCount(copy.length);
+      return copy;
+    });
+
+    // Re-validate remaining files using unified validator
+    const validation = validateFiles(remainingLocalFiles);
+    if (validation.isValid) {
+      setIsBlocked(false);
+      setInternalError(undefined);
+      onValidationErrorChange && onValidationErrorChange(undefined);
+      onChange(multiple ? remainingLocalFiles : null);
     } else {
-      // إذا كانت الصورة موجودة مسبقاً
-      onChange(null);
+      setIsBlocked(true);
+      setInternalError(validation.errorMessage || internalError);
+      onValidationErrorChange && onValidationErrorChange(validation.errorMessage || internalError);
     }
   };
 
@@ -140,7 +267,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
         {label}
       </label>
       <div
-        className={`flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary w-full p-2.5 cursor-pointer transition-all duration-200 hover:bg-primary/10 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${error ? 'border-red-500' : ''}`}
+        className={`flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary w-full p-2.5 ${disabled || isBlocked ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:bg-primary/10'} transition-all duration-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${(error || internalError) ? 'border-red-500' : ''}`}
         onClick={handleClick}
       >
         <input
@@ -197,7 +324,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
       <Typography variant="caption" color="text.secondary" style={style}>
         {t('paymentMethods.qrPictureDescription2')}
       </Typography>
-      {error && <span className={`mt-1 text-xs text-red-600 block ${currentLanguage === 'ARABIC' ? 'text-right' : 'text-left'}`} style={style}>{error}</span>}
+      {(error || internalError) && <span className={`mt-1 text-xs text-red-600 block ${currentLanguage === 'ARABIC' ? 'text-right' : 'text-left'}`} style={style}>{error || internalError}</span>}
     </div>
   );
 };

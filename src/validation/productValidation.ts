@@ -3,6 +3,7 @@
 
 import { ValidationSchema, COMMON_SCHEMAS, PATTERNS, validateUnique } from '../utils/validation';
 import { TFunction } from 'i18next';
+import { validateImageFilesI18n, validateImageFileI18n } from './imageValidation';
 
 // Interface لبيانات فورم المنتج
 export interface ProductFormData {
@@ -414,4 +415,30 @@ export const validateProductWithDuplicates = (
   console.log('validateProductWithDuplicates result:', result);
   
   return result;
+};
+
+// دالة للتحقق من صحة الصور
+export const validateProductImages = (images: File[], t: TFunction): { isValid: boolean; errorMessage?: string } => {
+  if (!images || images.length === 0) {
+    return { isValid: true };
+  }
+  
+  const validation = validateImageFilesI18n(images, t);
+  return {
+    isValid: validation.isValid,
+    errorMessage: validation.errorMessage
+  };
+};
+
+// دالة للتحقق من صحة الصورة الرئيسية
+export const validateProductMainImage = (file: File, t: TFunction): { isValid: boolean; errorMessage?: string } => {
+  if (!file) {
+    return { isValid: true };
+  }
+  
+  const validation = validateImageFileI18n(file, t);
+  return {
+    isValid: validation.isValid,
+    errorMessage: validation.errorMessage
+  };
 }; 

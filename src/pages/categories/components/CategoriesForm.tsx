@@ -2,6 +2,8 @@ import React from 'react';
 import CustomInput from '../../../components/common/CustomInput';
 import CustomFileInput from '../../../components/common/CustomFileInput';
 import CustomTextArea from '../../../components/common/CustomTextArea';
+import { createImageValidationFunction } from '../../../validation/imageValidation';
+import { useTranslation } from 'react-i18next';
 
 
 interface CategoriesFormProps {
@@ -16,7 +18,11 @@ interface CategoriesFormProps {
 
 // تم نقل جميع دوال الفالديشين إلى نظام الفالديشين العام في src/validation/categoryValidation.ts
 
-const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onImageChange, isSubcategory, isRTL, categories, validationErrors = {} }) => {
+const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onImageChange, isRTL, categories, validationErrors = {} }) => {
+  const { t } = useTranslation();
+  
+  // Create image validation function
+  const imageValidator = createImageValidationFunction(t);
 
   const parentCategory = form.parentId !== null && categories ? categories.find(cat => String(cat.id) === String(form.parentId)) : null;
   
@@ -103,6 +109,7 @@ const CategoriesForm: React.FC<CategoriesFormProps> = ({ form, onFormChange, onI
           id="image"
           value={form.image}
           onChange={file => onImageChange({ target: { files: file ? [file] : [] } } as any)}
+          beforeChangeValidate={imageValidator}
         />
         {showError('image')}
         {form.image && (

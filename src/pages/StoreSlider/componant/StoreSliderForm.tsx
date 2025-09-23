@@ -4,6 +4,8 @@ import CustomInput from '@/components/common/CustomInput';
 import CustomNumberInput from '@/components/common/CustomNumberInput';
 import CustomSwitch from '@/components/common/CustomSwitch';
 import React from 'react';
+import { createImageValidationFunction } from '@/validation/imageValidation';
+import { useTranslation } from 'react-i18next';
 
 interface StoreSliderFormProps {
   form: any;
@@ -16,6 +18,11 @@ interface StoreSliderFormProps {
 }
 
 const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, onFileChange, errors, isRTL}) => {
+  const { t } = useTranslation();
+  
+  // Create image validation function
+  const imageValidator = createImageValidationFunction(t);
+  
   console.log('StoreSliderForm render - form.type:', form.type);
   console.log('StoreSliderForm render - form:', form);
   
@@ -70,7 +77,8 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
             } else {
               onFileChange(files);
             }
-          }} 
+          }}
+          beforeChangeValidate={imageValidator} 
           style={{ textAlign: isRTL ? 'right' : 'left' }}
           error={errors.imageUrl}
         />

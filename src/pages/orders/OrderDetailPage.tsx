@@ -6,6 +6,7 @@ import { CheckCircleIcon, XCircleIcon, BuildingStorefrontIcon, UserIcon, Documen
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import { CustomTable } from '../../components/common/CustomTable';
 import InvoicePrint from '../../components/common/InvoicePrint';
+import { useStoreUrls } from '../../hooks/useStoreUrls';
 
 
 interface Order {
@@ -84,6 +85,7 @@ const OrderDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
+  const { urls } = useStoreUrls();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -197,7 +199,7 @@ const OrderDetailPage: React.FC = () => {
   return (
     <div className="sm:p-4 w-full">
       <div dir={isArabic ? 'rtl' : 'ltr'}>
-        <button onClick={() => navigate(-1)} className="mb-4 text-primary underline flex items-center gap-2">
+        <button onClick={() => navigate(urls.orders)} className="mb-4 text-primary underline flex items-center gap-2">
           <ArrowLeftIcon className={`h-4 w-4 text-primary ${isArabic ? 'rotate-180' : ''}`} />
           {isArabic ? 'رجوع' : 'Back'}
         </button>

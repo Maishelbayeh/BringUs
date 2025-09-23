@@ -95,8 +95,8 @@ export const useUser = () => {
       console.log('📥 استجابة API:', response.data);
 
       if (response.data.success) {
-        console.log('✅ تم إنشاء المستخدم بنجاح:', response.data.data);
-        return response.data.data || null;
+        console.log('✅ تم إنشاء المستخدم بنجاح:', response.data.user);
+        return response.data.user || response.data.data || null;
       } else {
         console.log('❌ فشل في إنشاء المستخدم:', response.data.message);
         throw new Error(response.data.message || 'فشل في إنشاء المستخدم');

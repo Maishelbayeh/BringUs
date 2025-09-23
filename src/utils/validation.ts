@@ -43,7 +43,7 @@ export const PATTERNS = {
 // File validation constants
 export const FILE_VALIDATION = {
   allowedImageTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp'],
-  maxImageSize: 5 * 1024 * 1024, // 5MB
+  maxImageSize:10 * 1024 * 1024, // 10MB
   allowedDocumentTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   maxDocumentSize: 10 * 1024 * 1024, // 10MB
 };
@@ -264,7 +264,7 @@ export const validateFile = (
     }
 
     if (file.size > FILE_VALIDATION.maxImageSize) {
-      return t('validation.fileTooLarge', 'File size must be less than 5MB');
+      return t('validation.fileTooLarge', 'File size must be less than 10MB');
     }
   }
 

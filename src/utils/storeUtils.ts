@@ -9,7 +9,7 @@ export const getStoreId = (): string => {
   // أولاً: البحث في localStorage
   const storedStoreId = localStorage.getItem('storeId');
   if (storedStoreId && storedStoreId.trim()) {
-    console.log('Store ID found in localStorage:', storedStoreId);
+   
     return storedStoreId;
   }
   

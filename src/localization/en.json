@@ -184,6 +184,29 @@
     "lahzaSecretKey": "Lahza Secret Key",
     "lahzaSecretKeyPlaceholder": "Enter Lahza Secret Key"
   },
+  "auth":{
+    "since_2024":"Since 2024",
+    "login":"Login",
+    "signUp":"Sign Up",
+    "username": "Username",
+    "password":  "Password",
+    "rememberMe":"Remember me",
+    "invalidCredentials":"Invalid username or password",
+    "otp": {
+      "title": "Email Verification",
+      "subtitle": "Verification code sent to",
+      "verification_code": "Verification Code",
+      "enter_code": "Enter the 5-digit code",
+      "verify": "Verify Code",
+      "verifying": "Verifying...",
+      "didnt_receive": "Didn't receive the code?",
+      "resend_code": "Resend Code",
+      "sending": "Sending...",
+      "resend_in": "Resend in {{seconds}} seconds",
+      "wrong_email": "Wrong email?",
+      "change_email": "Change Email"
+    }
+  },
   "login": {
     "welcomeTitle": "Welcome to BringUs",
     "welcomeSubtitle": "Your comprehensive e-commerce management platform. Manage orders, customers, products, and analytics all in one place.",
@@ -195,6 +218,50 @@
     "passwordPlaceholder": "Enter your password",
     "rememberMe": "Remember me",
     "forgotPassword": "Forgot password?",
+    "signInButton": "Sign In",
+    "signInSubmitting": "Signing in...",
+    "createAccount": "Create Account",
+    "auth": {
+    "forgot_password": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email address and we'll send you a link to reset your password",
+      "email": "Email Address",
+      "email_placeholder": "Enter your email address",
+      "send": "Send Reset Link",
+      "sending": "Sending...",
+      "back_to_login": "Back to Login",
+      "remember_password": "Remember your password?",
+      "success_message": "Password reset link has been sent to your email address",
+      "validation": {
+        "email_required": "Email is required",
+        "email_invalid": "Please enter a valid email address"
+      },
+      "error_generic": "An error occurred. Please try again",
+      "error_network": "Network error. Please check your connection"
+    },
+    "reset_password": {
+      "title": "Reset Password",
+      "subtitle": "Enter your new password",
+      "new_password": "New Password",
+      "new_password_placeholder": "Enter your new password",
+      "confirm_password": "Confirm Password",
+      "confirm_password_placeholder": "Confirm your new password",
+      "reset": "Reset Password",
+      "resetting": "Resetting...",
+      "back_to_login": "Back to Login",
+      "remember_password": "Remember your password?",
+      "success_message": "Your password has been reset successfully",
+      "validation": {
+        "password_required": "Password is required",
+        "password_min_length": "Password must be at least 6 characters",
+        "confirm_password_required": "Please confirm your password",
+        "passwords_not_match": "Passwords do not match"
+      },
+      "error_no_token": "Invalid or expired reset token",
+      "error_generic": "An error occurred. Please try again",
+      "error_network": "Network error. Please check your connection"
+    }
+   },
     "signingIn": "Signing in...",
     "noAccount": "Don't have an account?",
     "signUp": "Sign up",
@@ -224,7 +291,12 @@
     "completeStoreInfo": "Please complete all required store information",
     "completeMerchantInfo": "Please complete all required merchant information",
     "merchantInfoComplete": "✅ Merchant information complete and valid",
-    "storeInfoComplete": "✅ Store information complete and valid"
+    "storeInfoComplete": "✅ Store information complete and valid",
+    "successTitle": "🎉 Congratulations!",
+    "successMessage": "Your store has been created successfully and your email has been verified!",
+    "welcomeMessage": "Welcome to our family!",
+    "successInfo": "You can now start managing your products and orders. We wish you a great experience with us!",
+    "redirecting": "Redirecting to the main page..."
   },
  
   "dashboard": {
@@ -257,7 +329,19 @@
     "vsLastMonth": "vs last month",
     "products": "products",
     "revenue": "revenue",
-    "orders": "orders"
+    "orders": "orders",
+    "topUsers": "Top Users",
+    "refresh": "Refresh",
+    "noTopUsers": "No top users data available",
+    "productsSold": "Products Sold",
+    "topProducts": "Top Products",
+    "noTopProducts": "No top products data available",
+    "sold": "Sold",
+    "orderPercentage": "Order Percentage",
+    "guestUsers": "Guest Users",
+    "loggedUsers": "Logged Users",
+    "percentage": "Percentage",
+    "noOrderData": "No order data available"
   },
   "sideBar":{
 
@@ -266,6 +350,7 @@
       "products": "Products",
       "customers": "Customers",
       "orders": "Orders",
+      "pointOfSale": "Point of Sale",
       "storeSlider": "Store Slider",
       "storePreview": "Store Preview",
       "storeVideos": "Store Videos",
@@ -440,7 +525,7 @@
     "inactive": "Inactive",
     "qrPicture": "Logo/Image",
     "qrPictureDescription": "Payment method logo or image",
-    "qrPictureDescription2": " max 300 KB.",
+    "qrPictureDescription2": " max 10 MB.",
     "paymentMethod": "Payment Method",
     "chooseFile": "Choose File",
     "save": "Save",
@@ -1169,7 +1254,7 @@
     "maxCurrencies": "Maximum {{max}} currencies allowed",
     "invalidImageUrl": "Please enter a valid image URL",
     "maxGreaterThanMin": "Maximum amount must be greater than minimum amount",
-    "invalidFileType": "Please upload a valid image file (JPG, PNG, GIF, SVG, WebP)",
+    
     "fileTooLarge": "File size must be less than 5MB",
     "invalidFormat": "Invalid format",
     "invalidValue": "Invalid value",
@@ -1184,7 +1269,14 @@
     "mustBeLess": "Value must be less than the other value",
     "mustBeGreaterOrEqual": "Value must be greater than or equal to the other value",
     "phoneMaxLength": "Phone number cannot exceed 15 digits",
-    "whatsAppMaxLength": "WhatsApp number cannot exceed 15 digits"
+    "whatsAppMaxLength": "WhatsApp number cannot exceed 15 digits",
+    "imageTooLargeLimit": "Image size {{size}} MB exceeds the allowed ({{limit}} MB)",
+    "imagesTooLargeList": "The following image exceed the allowed size ({{limit}} MB): {{names}}",
+    "tooManyFiles": "Too many files. Maximum allowed: {{limit}}",
+    "invalidFileType": "Invalid file type. Allowed types: {{types}}",
+    "imageUrlRequired": "Image URL is required for all payment images",
+    "invalidQrCodeUrl": "Please enter a valid QR code image URL",
+    "altTextTooLong": "Alt text cannot exceed 200 characters"
   },
   "units": {
     "title": "Units",

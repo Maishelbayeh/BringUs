@@ -3,10 +3,9 @@ import CustomButton from '../../../components/common/CustomButton';
 import CategoriesForm from './CategoriesForm';
 import { useTranslation } from 'react-i18next';
 import useCategories from '@/hooks/useCategories';
-import { useToastContext } from '../../../contexts/ToastContext';
 import { useValidation } from '../../../hooks/useValidation';
-import { categoryValidationSchema, CategoryFormData, validateCategoryWithDuplicates } from '../../../validation/categoryValidation';
-import { getStoreId } from '../../../utils/storeUtils';
+import { categoryValidationSchema,  validateCategoryWithDuplicates } from '../../../validation/categoryValidation';
+
 
 interface CategoriesDrawerProps {
   open: boolean;
@@ -22,27 +21,26 @@ interface CategoriesDrawerProps {
   allCategories?: any[]; // قائمة التصنيفات الكاملة للـ validation
 }
 
-const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onImageChange, onSubmit, isSubcategory, categories, allCategories }) => {
+const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onSubmit, isSubcategory, categories, allCategories }) => {
   const { t } = useTranslation();
   const { uploadCategoryImage } = useCategories();
-  const { showError } = useToastContext();
+ 
   
   // استخدام النظام العام للفالديشين
   const {
     errors,
     validateForm: validateFormData,
-    validateUnique,
+ 
     clearAllErrors,
     setErrors,
   } = useValidation({
     schema: categoryValidationSchema,
-    onValidationChange: (isValid) => {
+    onValidationChange: () => {
       // يمكن إضافة منطق إضافي هنا
     },
   });
 
-  // جلب storeId باستخدام الدالة المساعدة
-  const storeId = getStoreId();
+
 
   // دالة رفع الصورة: ترفع دائماً إلى Cloudflare وتخزن الرابط الناتج
   const onImageChangeLocal = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,23 +53,9 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
     }
   };
 
-  // دالة توليد slug من الاسم الإنجليزي
-  function generateSlug(text: string) {
-    return text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9\-]/g, '')
-      .replace(/\-+/g, '-');
-  }
 
-  // عند عرض الصورة في الفورم
-  const getImageUrl = (imageUrl: string | undefined) => {
-    if (!imageUrl) return '';
-    return imageUrl; // إرجاع الرابط مباشرة
-  };
 
+ 
   // دالة لتسطيح شجرة التصنيفات للـ validation
   const flattenCategoriesForValidation = (categories: any[]): any[] => {
     if (!Array.isArray(categories)) return [];

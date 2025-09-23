@@ -3,6 +3,7 @@
 
 import { ValidationSchema, COMMON_SCHEMAS, PATTERNS } from '../utils/validation';
 import { TFunction } from 'i18next';
+import { validateImageFileI18n } from './imageValidation';
 
 // Interface لبيانات فورم الكاتيجوري
 export interface CategoryFormData {
@@ -196,4 +197,17 @@ export const validateCategoryWithDuplicates = (
   console.log('validateCategoryWithDuplicates result:', result);
   
   return result;
+};
+
+// دالة للتحقق من صحة صورة الكاتيجوري
+export const validateCategoryImage = (file: File, t: TFunction): { isValid: boolean; errorMessage?: string } => {
+  if (!file) {
+    return { isValid: true };
+  }
+  
+  const validation = validateImageFileI18n(file, t);
+  return {
+    isValid: validation.isValid,
+    errorMessage: validation.errorMessage
+  };
 }; 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+
 import { 
   Close, 
   ArrowBack, 
@@ -14,9 +16,11 @@ import CustomButton from '../../components/common/CustomButton';
 import useLanguage from '@/hooks/useLanguage';
 import StoreGeneralInfo from './StoreGeneralInfo';
 import CustomPhoneInput from '../../components/common/CustomPhoneInput';
+import OTPVerification from '../../components/Auth/OTPVerification';
 import { useUser } from '@/hooks/useUser';
 import { useStore } from '../../hooks/useStore';
 import { useOwner } from '../../hooks/useOwner';
+import useOTP from '../../hooks/useOTP';
 
 interface StoreRegistrationWizardProps {
   isOpen: boolean;
@@ -53,7 +57,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   const { createUser, checkEmailExists } = useUser();
   const { createStore, uploadStoreLogo, updateStore } = useStore();
   const { createOwner } = useOwner();
-  
+  const { sendOTP } = useOTP();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [merchantData, setMerchantData] = useState<MerchantData>({
     firstName: '',
@@ -89,6 +94,67 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   const [storeData, setStoreData] = useState<any>(null);
   const [isStoreValid, setIsStoreValid] = useState(false);
   const [isMerchantValid, setIsMerchantValid] = useState(false);
+  
+  // إضافة state للتحكم في OTP
+  const [showOTP, setShowOTP] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [registrationData, setRegistrationData] = useState<any>(null);
+
+  // معالجة نجاح التحقق من OTP
+  const handleOTPSuccess = () => {
+    console.log('✅ تم التحقق من الإيميل بنجاح');
+    setShowOTP(false);
+    setShowSuccess(true);
+    
+    // الانتقال للصفحة الرئيسية بعد 3 ثوان
+    setTimeout(() => {
+      onClose();
+      resetWizardData();
+      navigate('/login');
+    }, 10000);
+  };
+
+  // معالجة إعادة إرسال OTP
+  const handleOTPResend = () => {
+    console.log('📧 تم إعادة إرسال OTP');
+   
+  };
+
+  // معالجة العودة من صفحة OTP
+  const handleOTPBack = () => {
+    setShowOTP(false);
+    if (registrationData) {
+      console.log('العودة من OTP - بيانات التسجيل:', registrationData);
+    }
+    setRegistrationData(null);
+  };
+
+  // دالة إعادة تعيين بيانات الويزرد
+  const resetWizardData = () => {
+    setCurrentStep(1);
+    setMerchantData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
+      addresses: [{
+        type: 'home',
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+        isDefault: true
+      }]
+    });
+    setMerchantErrors({});
+    setStoreData(null);
+    setShowOTP(false);
+    setShowSuccess(false);
+    setRegistrationData(null);
+  };
 
   const validateField = (name: string, value: string) => {
     let error = '';
@@ -295,17 +361,14 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   };
 
   const handleStoreSubmit = async () => {
-    // التحقق من صحة نموذج المتجر
+    
     if (!storeData || !isStoreValid) {
-      //CONSOLE.log('❌ نموذج المتجر يحتوي على أخطاء، لا يمكن الانتقال للخطوة التالية');
+      
       return;
     }
     
     try {
-      // حفظ بيانات المتجر محلياً فقط (بدون إنشاء في الباك إند)
-      console.log('✅ تم حفظ بيانات المتجر محلياً، جاري الانتقال للخطوة التالية...');
       
-      // الانتقال للخطوة الثانية
       setCurrentStep(2);
       
     } catch (error) {
@@ -461,26 +524,22 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       //CONSOLE.log('Merchant Data with Store ID:', merchantDataForBackend);
 
       // 3. تسجيل المستخدم مع store ID
-      //CONSOLE.log('🔄 جاري تسجيل المستخدم مع store ID...');
+    
       const user = await createUser(merchantDataForBackend);
+    
       
       if (!user) {
-        //CONSOLE.error('❌ فشل في تسجيل المستخدم');
+       
         return;
       }
 
-      // 4. ربط المستخدم بالمتجر كمالك
-      //CONSOLE.log('🔄 جاري ربط المستخدم بالمتجر...');
       
-      // التأكد من استخدام الـ ID الصحيح
       const userId = user.id;
       
-      //CONSOLE.log('🔍 User ID:', { id: user.id, finalId: userId });
-      //CONSOLE.log('🔍 Store ID:', { id: store.id, finalId: storeId });
+     
       
       if (!userId) {
-        //CONSOLE.error('❌ خطأ: لم يتم العثور على ID للمستخدم');
-        //CONSOLE.error('User:', user);
+        
         alert('خطأ في بيانات المستخدم. يرجى المحاولة مرة أخرى.');
         return;
       }
@@ -510,42 +569,41 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         return;
       }
       
-      //CONSOLE.log('✅ تم ربط المستخدم بالمتجر بنجاح:', owner);
-
-      // نجاح العملية
-      //CONSOLE.log('🎉 تم التسجيل الكامل بنجاح!');
-      //CONSOLE.log('User:', user);
-      //CONSOLE.log('Store:', store);
-      //CONSOLE.log('Owner:', owner);
+     
+      console.log('🎉 تم التسجيل الكامل بنجاح!');
+      console.log('User:', user);
+      console.log('Store:', store);
+      console.log('Owner:', owner);
       
-      alert('تم التسجيل بنجاح!');
+      // حفظ بيانات التسجيل
+      setRegistrationData({ user, store, owner });
       
-      // إغلاق الويزرد
-      onClose();
-      
-      // إعادة تعيين البيانات
-      setCurrentStep(1);
-      setMerchantData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: '',
-        addresses: [{
-          type: 'home',
-          street: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          country: '',
-          isDefault: true
-        }]
-      });
-      setMerchantErrors({});
-      setStoreData(null);
+      // إرسال OTP للتحقق من الإيميل
+      try {
+        const storeSlug = store.slug || (store as any).name?.toLowerCase().replace(/\s+/g, '-') || 'default';
+        
+        
+        const otpResult = await sendOTP(merchantData.email, storeSlug);
+        
+        
+        if (otpResult.success) {
+        
+          setShowOTP(true);
+        } else {
+         
+          setShowOTP(true);
+          
+         
+        }
+      } catch (otpError) {
+        console.error('💥 خطأ في إرسال OTP:', otpError);
+       
+        console.log('🧪 للاختبار: سيتم عرض صفحة OTP حتى لو حدث خطأ');
+        setShowOTP(true);
+        
+      }
     } catch (error) {
-      //CONSOLE.error('❌ خطأ في التسجيل:', error);
+      
       alert('حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.');
     }
   };
@@ -648,7 +706,67 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {currentStep === 1 ? (
+          {showSuccess ? (
+           
+            <div className="min-h-[400px] flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
+              <div className="text-center max-w-md mx-auto p-8">
+                {/* Success Icon with Animation */}
+                <div className="relative mb-8">
+                  <div className="w-32 h-32 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce">
+                    <CheckCircle className="text-white text-5xl" />
+                  </div>
+                  {/* Ripple Effect */}
+                  <div className="absolute inset-0 w-32 h-32 bg-green-400 rounded-full mx-auto animate-ping opacity-20"></div>
+                </div>
+                
+                {/* Success Title */}
+                <h2 className={`text-4xl font-bold text-gray-800 mb-4 animate-pulse ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('storeRegistration.successTitle')}
+                </h2>
+                
+                {/* Success Message */}
+                <p className={`text-xl text-gray-600 mb-6 animate-pulse ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('storeRegistration.successMessage')}
+                </p>
+                
+                {/* Additional Info */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 mb-8 shadow-lg transform transition-all duration-1000 hover:scale-105">
+                  <div className="flex items-center justify-center mb-3">
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3 animate-pulse">
+                      <span className="text-white text-sm font-bold">✨</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-green-800">
+                      {t('storeRegistration.welcomeMessage')}
+                    </h3>
+                  </div>
+                  <p className={`text-sm text-green-700 leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('storeRegistration.successInfo')}
+                  </p>
+                </div>
+                
+                {/* Loading Animation */}
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-green-500 border-t-transparent"></div>
+                  <span className={`text-lg text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('storeRegistration.redirecting')}
+                  </span>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="mt-6 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          ) : showOTP ? (
+            // OTP Verification Step
+            <OTPVerification
+              email={merchantData.email}
+              onVerificationSuccess={handleOTPSuccess}
+              onResendCode={handleOTPResend}
+              onBack={handleOTPBack}
+            />
+          ) : currentStep === 1 ? (
             // Step 1: Store Registration
             <div className="max-w-2xl mx-auto">
              

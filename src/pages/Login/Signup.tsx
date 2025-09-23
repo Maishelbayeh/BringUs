@@ -29,8 +29,7 @@ const Signup: React.FC = () => {
     confirmPassword: '',
     phone: ''
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [errors, setErrors] = useState<{ 
     firstName?: string; 
@@ -44,33 +43,7 @@ const Signup: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showStoreWizard, setShowStoreWizard] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear error when user starts typing
-    if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
-    }
-    
-    // Real-time password confirmation validation
-    if (name === 'confirmPassword') {
-      if (value && value !== formData.password) {
-        setErrors(prev => ({ ...prev, confirmPassword: t('signup.passwordsNotMatch') }));
-      } else if (value && value === formData.password) {
-        setErrors(prev => ({ ...prev, confirmPassword: undefined }));
-      }
-    }
-    
-    // Real-time password validation for confirm password field
-    if (name === 'password') {
-      if (formData.confirmPassword && value !== formData.confirmPassword) {
-        setErrors(prev => ({ ...prev, confirmPassword: t('signup.passwordsNotMatch') }));
-      } else if (formData.confirmPassword && value === formData.confirmPassword) {
-        setErrors(prev => ({ ...prev, confirmPassword: undefined }));
-      }
-    }
-  };
+  
 
   const validateForm = () => {
     const newErrors: typeof errors = {};

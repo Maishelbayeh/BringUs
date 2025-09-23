@@ -18,6 +18,7 @@ import useLanguage from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreUrls } from '@/hooks/useStoreUrls';
 
+
 const Login: React.FC = () => {
   const { t } = useTranslation();
   const { language, toggleLanguage } = useLanguage();
@@ -77,6 +78,7 @@ const Login: React.FC = () => {
       localStorage.setItem('storeNameEn', result?.user?.store?.nameEn || '');
       localStorage.setItem('userLastName', result?.user.lastName || '');
       localStorage.setItem('status', result?.user?.store?.status || '');
+      localStorage.setItem('UserPhone', result?.user.phone || '');
 
       const storeslug=result?.user?.store?.slug;
       if (result) {
@@ -254,7 +256,7 @@ const Login: React.FC = () => {
                 </label>
                 <button
                   type="button"
-                  onClick={() => navigate('/forgot-password')}
+                  onClick={() => navigate(`/forgot-password`)}
                   className="text-sm text-purple-600 hover:text-purple-800 transition-colors"
                 >
                   {t('login.forgotPassword')}

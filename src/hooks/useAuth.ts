@@ -14,7 +14,7 @@ interface LoginResponse {
     lastName: string;
     email: string;
     role: string;
-    
+    phone: string;
     avatar: {
       public_id: string | null;
       url: string;

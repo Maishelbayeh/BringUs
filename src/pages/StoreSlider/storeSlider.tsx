@@ -237,6 +237,9 @@ const StoreSliderPage: React.FC = () => {
     // التحقق من الصورة (النوع ثابت على slider)
     if (!form.selectedFile && !form.imageUrl) {
       errors.imageUrl = isRTL ? 'الصورة مطلوبة' : 'Image is required';
+    } else if (form.selectedFile && form.selectedFile.size > 10 * 1024 * 1024) {
+      // التحقق من حجم الصورة (3 ميجابايت) - فقط إذا كانت الصورة موجودة
+      errors.imageUrl = isRTL ? 'حجم الصورة يجب أن يكون أقل من 10 ميجابايت' : 'Image size must be less than 10 MB';
     }
     
     // التحقق من الترتيب
