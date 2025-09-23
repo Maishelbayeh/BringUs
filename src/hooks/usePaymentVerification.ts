@@ -51,6 +51,7 @@ export const usePaymentVerification = () => {
       }
 
       setVerificationResult(result);
+      console.log('Payment verification result:', result);
       return result;
 
     } catch (error: any) {

@@ -190,7 +190,7 @@ const TableCell: React.FC<TableCellProps> = ({
   };
 
   return (
-    <td className={`px-6 py-3 text-sm text-gray-900 table-cell ${
+    <td className={`px-6 py-3 text-sm text-gray-900 table-cell truncate max-w-[150px] sm:max-w-[250px] ${
       column.align === 'left' ? 'text-left' : 
       column.align === 'right' ? 'text-right' : 'text-center'
     }`}>

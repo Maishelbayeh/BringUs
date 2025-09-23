@@ -590,7 +590,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         setIsEditMode(true);
           try {
           //CONSOLE.log('🔄 جلب بيانات المتجر مرة واحدة فقط...');
-          const store = await getStore(storeId,storeSlug);
+          const store = await getStore(storeSlug);
           if (store) {
             setStoreData(store);
             
