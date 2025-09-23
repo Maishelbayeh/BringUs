@@ -175,7 +175,7 @@ const StoresManagement: React.FC = () => {
   // تنسيق التاريخ
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(
-      isRTL ? 'ar-SA' : 'en-US',
+      isRTL ? 'ar-EG' : 'en-US',
       {
         year: 'numeric',
         month: 'short',

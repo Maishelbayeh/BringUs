@@ -17,7 +17,7 @@ interface Props {
     qrCodeFile?: File | null;
     paymentImageFiles?: Array<{
       file: File;
-      imageType: 'logo' | 'banner' | 'qr_code' | 'payment_screenshot' | 'other';
+      imageType: 'logo' | 'banner' | 'qr_code' | 'payment_screenshot' | 'other' | 'lahza';
       altText: string;
     }>;
   }) => void;
@@ -72,7 +72,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
   const [qrCodeFile, setQrCodeFile] = useState<File | null>(null);
   const [paymentImageFiles, setPaymentImageFiles] = useState<Array<{
     file: File;
-    imageType: 'logo' | 'banner' | 'qr_code' | 'payment_screenshot' | 'other';
+    imageType: 'logo' | 'banner' | 'qr_code' | 'payment_screenshot' | 'other' | 'lahza';
     altText: string;
   }>>([]);
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -86,7 +86,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
           qrCodeFile?: File | null;
           paymentImageFiles?: Array<{
             file: File;
-            imageType: 'logo' | 'banner' | 'qr_code' | 'payment_screenshot' | 'other';
+            imageType: 'logo' | 'banner' | 'qr_code' | 'payment_screenshot' | 'other' | 'lahza';
             altText: string;
           }>;
         } = {
@@ -118,6 +118,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
 
   // Available payment method types
   const METHOD_TYPES = [
+    { value: 'lahza', label: t('paymentMethods.methodTypes.lahza') },
     { value: 'cash', label: t('paymentMethods.methodTypes.cash') },
     { value: 'card', label: t('paymentMethods.methodTypes.card') },
     { value: 'digital_wallet', label: t('paymentMethods.methodTypes.digital_wallet') },
@@ -128,6 +129,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
 
   // Image type options
   const IMAGE_TYPES = [
+    { value: 'lahza', label: t('paymentMethods.methodTypes.lahza') },
     { value: 'logo', label: t('paymentMethods.imageTypes.logo') },
     { value: 'banner', label: t('paymentMethods.imageTypes.banner') },
     { value: 'qr_code', label: t('paymentMethods.imageTypes.qr_code') },
@@ -360,11 +362,13 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
         </div>
 
         {/* Active Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <CustomSwitch
           label={t('paymentMethods.isActive')}
           name="isActive"
           checked={formData.isActive !== undefined ? formData.isActive : true}
           onChange={(e) => handleInputChange('isActive', e.target.checked)}
+         
         />
 
         {/* Default Status */}
@@ -373,8 +377,9 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
           name="isDefault"
           checked={formData.isDefault !== undefined ? formData.isDefault : false}
           onChange={(e) => handleInputChange('isDefault', e.target.checked)}
+         
         />
-
+</div>
         {/* QR Code Section */}
         <div className="border rounded-lg p-4">
           <h3 className="text-lg font-medium mb-4">{t('paymentMethods.qrCode')}</h3>
@@ -524,6 +529,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
             </div>
           )}
         </div>
+   
       </div>
     </div>
   );

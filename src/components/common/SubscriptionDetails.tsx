@@ -113,7 +113,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return isRTL ? 'غير محدد' : 'Not set';
-    return new Date(dateString).toLocaleDateString(isRTL ? 'ar-SA' : 'en-US');
+    return new Date(dateString).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US');
   };
 
   // الحصول على رمز العملة

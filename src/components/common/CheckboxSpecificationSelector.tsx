@@ -32,7 +32,7 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
   const [expandedTitles, setExpandedTitles] = useState<Set<string>>(new Set());
   const [selectedValues, setSelectedValues] = useState<Set<string>>(new Set());
   const { i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
   // Initialize selected values from props
   useEffect(() => {
     console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);

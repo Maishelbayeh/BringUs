@@ -87,7 +87,7 @@ export const validatePaymentForm = (
   // Validate Method Type - Required
   if (!data.methodType || data.methodType === '') {
     errors.methodType = t('validation.required', 'This field is required');
-  } else if (!['cash', 'card', 'digital_wallet', 'bank_transfer', 'qr_code', 'other'].includes(data.methodType)) {
+  } else if (!['cash', 'card', 'digital_wallet', 'bank_transfer', 'qr_code', 'other', 'lahza'].includes(data.methodType)) {
     errors.methodType = t('validation.invalidMethodType', 'Please select a valid payment method type');
   }
 
@@ -225,7 +225,7 @@ export const validateMethodType = (value: string, t: any): string | undefined =>
   if (!value) {
     return t('validation.required', 'This field is required');
   }
-  if (!['cash', 'card', 'digital_wallet', 'bank_transfer', 'qr_code', 'other'].includes(value)) {
+  if (!['cash', 'card', 'digital_wallet', 'bank_transfer', 'qr_code', 'other', 'lahza'].includes(value)) {
     return t('validation.invalidMethodType', 'Please select a valid payment method type');
   }
   return undefined;

@@ -180,7 +180,9 @@
       "updatedAt": "Updated At"
     },
     "lahzaToken": "Lahza Token",
-    "lahzaTokenPlaceholder": "Enter Lahza Token"
+    "lahzaTokenPlaceholder": "Enter Lahza Token",
+    "lahzaSecretKey": "Lahza Secret Key",
+    "lahzaSecretKeyPlaceholder": "Enter Lahza Secret Key"
   },
   "auth":{
     "since_2024":"Since 2024",
@@ -564,7 +566,8 @@
       "digital_wallet": "Digital Wallet",
       "bank_transfer": "Bank Transfer",
       "qr_code": "QR Code",
-      "other": "Other"
+      "other": "Other",
+      "lahza": "Lahza"
     },
     "imageTypes": {
       "logo": "Logo",

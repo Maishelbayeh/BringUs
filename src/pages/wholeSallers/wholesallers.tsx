@@ -21,7 +21,7 @@ const initialForm: Partial<Wholesaler> = {
 //-------------------------------------------- WholesallersPage -------------------------------------------
 const WholesallersPage = () => {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [form, setForm] = useState<Partial<Wholesaler>>(initialForm);
   const [editId, setEditId] = useState<string | null>(null);

@@ -73,7 +73,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
     { 
       key: 'paymentDate', 
       label: { ar: 'تاريخ الدفع', en: 'Payment Date' },
-      render: (value: string) => new Date(value).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US')
+      render: (value: string) => new Date(value).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')
     },
     { 
       key: 'description', 
@@ -409,7 +409,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-sm text-gray-600">{t('affiliation.registrationDate') || 'تاريخ التسجيل'}</span>
                       <span className="font-medium text-sm">
-                        {affiliate?.registrationDate ? new Date(affiliate.registrationDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US') : '-'}
+                        {affiliate?.registrationDate ? new Date(affiliate.registrationDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US') : '-'}
                       </span>
                     </div>
                   </div>

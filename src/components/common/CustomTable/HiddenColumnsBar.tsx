@@ -14,7 +14,7 @@ const HiddenColumnsBar: React.FC<HiddenColumnsBarProps> = ({
   onColumnToggle
 }) => {
   const { i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
   // الأعمدة المخفية فقط
   const hiddenColumns = columns.filter(col => 
     col.hideable !== false && !columnVisibility[col.key]

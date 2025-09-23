@@ -37,14 +37,28 @@ const PaymentCard: React.FC<Props> = ({
     }
   };
 
-  const getMethodTypeIcon = (type: string) => {
+  const getMethodTypeEnIcon = (type: string) => {
     switch (type) {
-      case 'cash': return '💵';
-      case 'card': return '💳';
-      case 'digital_wallet': return '📱';
-      case 'bank_transfer': return '🏦';
-      case 'qr_code': return '📱';
+      case 'cash' : return '💵';
+      case 'card' : return '💳';
+      case 'digital_wallet' : return '💰';
+      case 'bank_transfer' : return '💰';
+      case 'qr_code' : return '💰';
+      case 'lahza' : return '💰';
       default: return '💰';
+    }
+  };
+
+  const getMethodTypeArIcon = (type: string) => {
+
+    switch (type) {
+      case 'cash' : return 'كاش';
+      case 'card' : return 'بطاقة';
+      case 'digital_wallet' : return 'محفظة رقمية';
+      case 'bank_transfer' : return 'تحويل بنكي';
+      case 'qr_code' : return 'كود كود';
+      case 'lahza' : return 'لحظة';
+      default: return 'لحظنة';
     }
   };
 
@@ -70,7 +84,7 @@ const PaymentCard: React.FC<Props> = ({
             />
           ) : (
             <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-primary text-white text-xl font-bold border border-primary">
-              {getMethodTypeIcon(method.methodType)}
+              {isRTL ? getMethodTypeArIcon(method.methodType) : getMethodTypeEnIcon(method.methodType)}
             </div>
           )}
           <div>
@@ -127,37 +141,11 @@ const PaymentCard: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Payment Images indicator */}
-      {method.paymentImages && method.paymentImages.length > 0 && (
-        <div className="mb-4">
-          <div className="flex items-center gap-2 text-sm text-purple-600 mb-2">
-            <PhotoIcon className="w-4 h-4" />
-            <span>{t('paymentMethods.paymentImages')} ({method.paymentImages.length})</span>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {method.paymentImages.slice(0, 3).map((image, index) => (
-              <div key={index} className="relative">
-                <img 
-                  src={image.imageUrl} 
-                  alt={image.altText || 'Payment image'} 
-                  className="w-12 h-12 rounded-lg object-cover border"
-                />
-                <span className="absolute -top-1 -right-1 bg-gray-800 text-white text-xs px-1 rounded-full">
-                  {image.imageType}
-                </span>
-              </div>
-            ))}
-            {method.paymentImages.length > 3 && (
-              <div className="w-12 h-12 rounded-lg border border-dashed border-gray-300 flex items-center justify-center text-xs text-gray-500">
-                +{method.paymentImages.length - 3}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+   
 
       {/* Action buttons */}
       <div className={`flex items-center justify-end gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} onClick={e => e.stopPropagation()}>
+      {!method.isDefault && (
         <button
           onClick={() => onToggleActive(methodId)}
           className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 transition"
@@ -166,9 +154,8 @@ const PaymentCard: React.FC<Props> = ({
         >
           {method.isActive ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
         </button>
-        
-        {!method.isDefault && (
-          <>
+      )}
+       
             <button
               onClick={() => onEdit(method)}
               className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition"
@@ -177,6 +164,8 @@ const PaymentCard: React.FC<Props> = ({
             >
               <PencilSquareIcon className="w-4 h-4" />
             </button>
+            {!method.isDefault && (
+          <>
             <button
               onClick={() => onDelete(methodId)}
               className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 transition"

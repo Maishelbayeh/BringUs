@@ -11,7 +11,7 @@ import { useStoreUrls } from '@/hooks/useStoreUrls';
 
 const AdvertisementPage = () => {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
   const { storeSlug } = useStoreUrls();
   // TODO: Replace with actual storeId from context/auth if needed
   const storeId = localStorage.getItem('storeId') || '';
