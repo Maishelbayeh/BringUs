@@ -109,6 +109,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     // إعدادات المتجر
     settings: {
       lahzaToken: '',
+      lahzaSecretKey: '', //ضيفه لحظة
       mainColor: '#1976d2',
       language: 'ar',
       currency: 'ILS',
@@ -618,7 +619,8 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
               logo: logoData,
               settings: {
                 lahzaToken: store.settings?.lahzaToken || '',
-                mainColor: store.settings?.mainColor || '#1976d2',
+                lahzaSecretKey: store.settings?.lahzaSecretKey || '',
+                  mainColor: store.settings?.mainColor || '#1976d2',
                 language: store.settings?.language || 'ar',
                 currency: store.settings?.currency || 'ILS',
                 storeDiscount: store.settings?.storeDiscount || 0,
@@ -670,6 +672,14 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
       settings: { ...prev.settings, lahzaToken: value }
     }));
   };  
+
+  const handleLahzaSecretKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setForm(prev => ({
+      ...prev,
+      settings: { ...prev.settings, lahzaSecretKey: value }
+    }));
+  };
 
   /**
    * إرسال حالة الفالديشن للويزرد
@@ -927,6 +937,15 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
               value={form.settings.lahzaToken}
               onChange={handleLahzaTokenChange}
               placeholder={t('stores.lahzaTokenPlaceholder')}
+            />
+            </div>
+            <div className="mb-4">
+            <CustomInput
+              label={t('stores.lahzaSecretKey')}
+              name="lahzaSecretKey"
+              value={form.settings.lahzaSecretKey}
+              onChange={handleLahzaSecretKeyChange}
+              placeholder={t('stores.lahzaSecretKeyPlaceholder')}
             />
             </div>
         </div>

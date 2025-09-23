@@ -15,7 +15,7 @@ const AffiliationPage = () => {
   const { t, i18n } = useTranslation();
   const { affiliateCode } = useParams<{ affiliateCode?: string }>();
   console.log('Current affiliateCode:', affiliateCode);
-  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingAffiliate, setEditingAffiliate] = useState<any>(null);
   const [isEdit, setIsEdit] = useState(false);

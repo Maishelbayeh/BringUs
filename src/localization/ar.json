@@ -180,7 +180,9 @@
       "updatedAt": "آخر تحديث"
     },
     "lahzaToken": "رمز لحظة",
-    "lahzaTokenPlaceholder": "أدخل رمز لحظة"
+    "lahzaTokenPlaceholder": "أدخل رمز لحظة",
+    "lahzaSecretKey": "رمز لحظة السري",
+    "lahzaSecretKeyPlaceholder": "أدخل رمز لحظة السري"
   },   
   "auth":{
     "since_2024":"منذ 2024",

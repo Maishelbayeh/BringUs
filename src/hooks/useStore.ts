@@ -26,6 +26,7 @@ interface StoreSettings {
   shippingEnabled: boolean; // تفعيل الشحن
   storeSocials: StoreSocials; // روابط السوشال ميديا
   lahzaToken: string;
+  lahzaSecretKey: string;
 }
 
 
@@ -82,6 +83,8 @@ interface StoreResponse {
   contact: StoreContact;
   createdAt: string;
   updatedAt?: string;
+  lahzaToken: string;
+  lahzaSecretKey: string;
 }
 
 

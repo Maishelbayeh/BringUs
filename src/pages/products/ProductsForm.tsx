@@ -73,7 +73,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     showValidation = true
   } = props;
   const { i18n, t } = useTranslation();
-  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
 
   // نظام التحقق من صحة البيانات
   const {

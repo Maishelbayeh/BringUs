@@ -19,6 +19,11 @@ export const updateStoreData = (storeData: any) => {
         localStorage.setItem('storeLogo', logoUrl);
       }
     }
+
+    // Store Lahza secret key if available
+    if (storeData.settings?.lahzaSecretKey) {
+      localStorage.setItem('lahzaSecretKey', storeData.settings.lahzaSecretKey);
+    }
     
     // Dispatch custom event for store context update
     window.dispatchEvent(new CustomEvent('storeDataUpdated', { 
@@ -113,4 +118,8 @@ export const getUserData = () => {
     avatar: userAvatar,
     isOwner: isOwner,
   };
+};
+
+export const getLahzaSecretKey = () => {
+  return localStorage.getItem('lahzaSecretKey');
 }; 

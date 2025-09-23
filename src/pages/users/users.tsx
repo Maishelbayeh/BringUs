@@ -207,10 +207,10 @@ const UsersPage: React.FC = () => {
     return (
       <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
         <span className="text-sm text-gray-900">
-          {date.toLocaleDateString(isRTL ? 'ar-SA' : 'en-US')}
+          {date.toLocaleDateString(isRTL ? 'ar-EG' : 'en-US')}
         </span>
         <span className="text-xs text-gray-500">
-          {date.toLocaleTimeString(isRTL ? 'ar-SA' : 'en-US', { 
+          {date.toLocaleTimeString(isRTL ? 'ar-EG' : 'en-US', { 
             hour: '2-digit', 
             minute: '2-digit' 
           })}

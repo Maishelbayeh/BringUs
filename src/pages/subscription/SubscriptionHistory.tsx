@@ -290,13 +290,14 @@ const getDaysUntilExpiry = () => {
   // تنسيق التاريخ
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(
-      isRTL ? 'ar-SA' : 'en-US',
+      isRTL ? 'ar-EG' : 'en-US',
       {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        calendar: 'gregory'
       }
     );
   };

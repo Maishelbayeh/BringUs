@@ -25,7 +25,7 @@ const CustomSwitch: React.FC<CustomSwitchProps> = ({ label, name, checked, onCha
     onChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
   };
 const { i18n } = useTranslation();
-const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
   return (
     <div className="w-full mb-4">
       <label className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{label}</label>

@@ -12,7 +12,7 @@ const initialHtml = `<h2>Terms & Conditions</h2><ul><li>All users must be 18+ ye
 
 const TermsConditionsPage = () => {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-SA' || i18n.language === 'ARABIC';
+  const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
   
   // Get store ID dynamically inside component
   const storeId = getStoreId();
