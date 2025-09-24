@@ -136,7 +136,7 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`bg-white rounded-lg shadow-xl max-w-md w-full h-[80vh] overflow-y-auto ${isRTL ? 'text-right' : 'text-left'}`}>
+      <div className={`bg-white rounded-lg shadow-xl max-w-md w-full h-[80vh] flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
         {/* Header */}
         <div className={`flex items-center justify-between p-6 border-b border-gray-200 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <h2 className={`text-xl font-semibold text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -153,7 +153,8 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Selected Plan Info */}
           {selectedPlan && (
             <div className="bg-gray-50 rounded-lg p-4">
@@ -162,19 +163,19 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
               </h3>
               <div className={`space-y-1 text-sm text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span>{isRTL ? 'الاسم' : 'Name'}:</span>
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'الاسم' : 'Name'}:</span>
                   <span className="font-medium">{isRTL ? selectedPlan.nameAr : selectedPlan.name}</span>
                 </div>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span>{isRTL ? 'النوع' : 'Type'}:</span>
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'النوع' : 'Type'}:</span>
                   <span>{selectedPlan.type}</span>
                 </div>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span>{isRTL ? 'السعر' : 'Price'}:</span>
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'السعر' : 'Price'}:</span>
                   <span>{getCurrencySymbol(selectedPlan.currency)}{selectedPlan.price}</span>
                 </div>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <span>{isRTL ? 'المدة' : 'Duration'}:</span>
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'المدة' : 'Duration'}:</span>
                   <span>{selectedPlan.duration} {isRTL ? 'يوم' : 'days'}</span>
                 </div>
               </div>
@@ -182,7 +183,7 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
           )}
 
           {/* Auto Renewal Toggle */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between" >
             <label className={`text-sm font-medium text-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
               {isRTL ? 'التجديد التلقائي' : 'Auto Renewal'}
             </label>
@@ -201,7 +202,7 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
             </button>
           </div>
 
-          {/* Reference ID Field (only shown when auto-renewal is enabled) */}
+          {/* Reference ID Field (only shown when auto-renewal is enabled) 
           {autoRenew && (
             <div>
               <label className={`block text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -221,7 +222,7 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
               </p>
             </div>
           )}
-
+*/}
           {/* Start Date */}
           <div>
             <label className={`block text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -267,10 +268,11 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
               }
             </p>
           </div>
-        </form>
+          </form>
+        </div>
 
-        {/* Footer */}
-        <div className={`flex gap-3 p-6 border-t border-gray-200 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        {/* Footer - Fixed at bottom */}
+        <div className={`flex gap-3 p-6 border-t border-gray-200 mt-auto ${isRTL ? 'flex-row-reverse' : ''}`}>
           <button
             type="button"
             onClick={onClose}
