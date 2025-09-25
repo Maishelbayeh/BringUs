@@ -457,7 +457,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
           )}
         </div>
 
-        {/* Payment Images Section */}
+        {/* Payment Images Section 
         <div className="border rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium">{t('paymentMethods.paymentImages')}</h3>
@@ -510,7 +510,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
             </div>
           ))}
 
-          {/* Show existing payment images */}
+          
           {method?.paymentImages && method.paymentImages.length > 0 && (
             <div className="mt-4">
               <h4 className="font-medium mb-2">{t('paymentMethods.existingImages')}</h4>
@@ -529,7 +529,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
             </div>
           )}
         </div>
-   
+   */}
       </div>
     </div>
   );

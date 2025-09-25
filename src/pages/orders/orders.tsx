@@ -307,18 +307,23 @@ const OrdersPage: React.FC = () => {
       deliveryArea: order.deliveryArea?.locationEn || '-',
       affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
       currency: order.currency,
-        price: (() => {
-          if (order.items && Array.isArray(order.items) && order.items.length > 0) {
-            const total = order.items.reduce((sum: number, item: any) => {
-              return sum + (item.total || item.totalPrice || item.price || 0);
-            }, 0);
-            console.log('Order ID:', order.id, 'Items:', order.items, 'Total calculated:', total);
-            return total;
-          } else {
-            console.log('Order ID:', order.id, 'No items, using 0');
-            return 0; // إذا لم تكن هناك items، استخدم 0
-          }
-        })(),
+      //   price: (() => {
+
+
+      //     if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+      //       const total = order.items.reduce((sum: number, item: any) => {
+      //         return sum + (item.total || item.totalPrice || item.price || 0);
+      //       }, 0);
+      //       console.log('Order ID:', order.id, 'Items:', order.items, 'Total calculated:', total);
+      //       return total;
+      //     } else {
+      //       console.log('Order ID:', order.id, 'No items, using 0');
+      //       return 0; // إذا لم تكن هناك items، استخدم 0
+      //     }
+      //   }
+      
+      // )(),
+      price: order.price,
       date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
       status: order.status,
       paymentStatus: order.paymentStatus || 'unpaid', // Default to 'unpaid' if not present
