@@ -995,6 +995,7 @@
     "tax": "الضريبة",
     "discount": "الخصم",
     "discountPercentage": "نسبة الخصم",
+    "priceAfterDiscount": "السعر بعد الخصم",
     "itemsCount": "عدد المنتجات",
     "notes": "ملاحظات",
     "notFound": "الطلب غير موجود",

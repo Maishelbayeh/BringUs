@@ -220,12 +220,20 @@ export function usePOS(): UsePOSResult {
     setError(null);
     
     try {
+      // Calculate the correct price at the time of adding to cart
+      // This ensures that if a product is on sale, the discounted price (finalPrice) is used
+      // instead of the original price, fixing the issue where original price was being added
+      const priceAtAdd = product.isOnSale && product.salePercentage && product.salePercentage > 0 
+        ? (product.finalPrice || product.price || 0)
+        : (product.price || 0);
+      
       const response = await fetch(POS_API_ENDPOINTS.ADD_ITEM(cartId), {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
           product: product._id || product.id,
           quantity,
+          priceAtAdd,
           variant: variant || null,
           selectedSpecifications: selectedSpecifications || [],
           selectedColors: selectedColors || []

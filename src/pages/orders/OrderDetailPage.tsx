@@ -24,6 +24,7 @@ interface Order {
     lastName: string;
     email: string;
     phone: string;
+    role?: string;
   };
   affiliate?: string;
   deliveryArea?: {
@@ -134,9 +135,9 @@ const OrderDetailPage: React.FC = () => {
             _id: result.data.id,
             id: result.data.id,
             orderNumber: result.data.orderNumber,
-            storeName: result.data.storeName || '',
+            storeName: i18n.language === 'ARABIC' ? result.data.store.nameAr : result.data.store.nameEn || '',
             storePhone: result.data.store?.phone || '',
-            storeUrl: result.data.storeUrl || '',
+            storeUrl: result.data.store.url || '',
             customer: result.data.user ? `${result.data.user.firstName} ${result.data.user.lastName}` : '',
             customerPhone: result.data.user?.phone || '',
             customerEmail: result.data.user?.email || '',
@@ -144,10 +145,11 @@ const OrderDetailPage: React.FC = () => {
               firstName: result.data.user.firstName,
               lastName: result.data.user.lastName,
               email: result.data.user.email,
-              phone: result.data.user.phone
+              phone: result.data.user.phone,
+              role: result.data.user.role
             } : undefined,
             affiliate: result.data.affiliate ? 
-              `${result.data.affiliate.snapshot?.firstName || ''} ${result.data.affiliate.snapshot?.lastName || ''}`.trim() || 'لا يوجد' : 'لا يوجد',
+              `${result.data.affiliate.firstName || ''} ${result.data.affiliate.lastName || ''}`.trim() || 'لا يوجد' : 'لا يوجد',
             deliveryArea: result.data.deliveryArea ? {
               locationAr: result.data.deliveryArea.locationAr,
               locationEn: result.data.deliveryArea.locationEn,
@@ -468,6 +470,21 @@ const OrderDetailPage: React.FC = () => {
                   })()}
                 </span>
               </div>
+              {/* إظهار السعر بعد الخصم للعملاء من نوع تاجر جملة */}
+              {order.user?.role === 'wholesaler' && order.pricing?.discount && order.pricing?.discount > 0 && (
+                <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''} bg-green-50 rounded-lg px-3`}> 
+                  <span className="font-semibold text-green-700">{t('orders.priceAfterDiscount')}</span>
+                  <span className="text-green-700 font-bold">
+                    {(() => {
+                      const discountPercentage = order.pricing.discount;
+                      const subtotal = order.pricing.subtotal || 0;
+                      const discountAmount = (subtotal * discountPercentage) / 100;
+                      const priceAfterDiscount = subtotal - discountAmount;
+                      return `${priceAfterDiscount.toFixed(2)} ${order.currency}`;
+                    })()}
+                  </span>
+                </div>
+              )}
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''} font-bold text-lg border-t-2 pt-2`}> 
                 <span>{t('orders.total') || 'Total'}</span>
                 <span>{(order.price || order.pricing?.total || (order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0) + (order.deliveryArea?.price || 0))).toFixed(2)} {order.currency || ''}</span>

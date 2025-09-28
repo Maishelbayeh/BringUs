@@ -16,6 +16,22 @@ interface AffiliatePaymentDrawerProps{
 const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, onClose, isRTL, affiliate, onPaymentSuccess }) => {
   const { t, i18n } = useTranslation();
   
+  // الحصول على عملة المتجر من localStorage
+  const getStoreCurrency = () => {
+    try {
+      const storeInfo = localStorage.getItem('storeInfo');
+      if (storeInfo) {
+        const parsedStoreInfo = JSON.parse(storeInfo);
+        return parsedStoreInfo.settings.currency || '';
+      }
+    } catch (error) {
+      console.error('Error parsing storeInfo from localStorage:', error);
+    }
+    return ''; // قيمة افتراضية
+  };
+  
+  const storeCurrency = getStoreCurrency();
+  
   // تحديث النموذج بالبيانات الحقيقية من المسوق
   const [form, setForm] = React.useState(() => ({
     totalSale: affiliate?.totalSales || 0,
@@ -54,7 +70,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
     { 
       key: 'amount', 
       label: { ar: 'المبلغ', en: 'Amount' },
-      render: (value: number) => `$${value.toLocaleString()}`
+      render: (value: number) => `${value.toLocaleString()} ${storeCurrency}`
     },
     { 
       key: 'paymentMethod', 
@@ -101,12 +117,12 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
     { 
       key: 'previousBalance', 
       label: { ar: 'الرصيد السابق', en: 'Previous Balance' },
-      render: (value: number) => `$${value.toLocaleString()}`
+      render: (value: number) => `${value.toLocaleString()} ${storeCurrency}`
     },
     { 
       key: 'newBalance', 
       label: { ar: 'الرصيد الجديد', en: 'New Balance' },
-      render: (value: number) => `$${value.toLocaleString()}`
+      render: (value: number) => `${value.toLocaleString()} ${storeCurrency}`
     },
   ];
 
@@ -209,7 +225,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600">{t('affiliation.totalSales') || 'إجمالي المبيعات'}</p>
-                      <p className="text-xl font-bold text-gray-800">${affiliate?.totalSales?.toLocaleString() || 0}</p>
+                      <p className="text-xl font-bold text-gray-800">{affiliate?.totalSales?.toLocaleString() || 0} {storeCurrency}</p>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
                       <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +239,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600">{t('affiliation.totalCommission') || 'إجمالي العمولة'}</p>
-                      <p className="text-xl font-bold text-blue-600">${affiliate?.totalCommission?.toLocaleString() || 0}</p>
+                      <p className="text-xl font-bold text-blue-600">{affiliate?.totalCommission?.toLocaleString() || 0} {storeCurrency}</p>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                       <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,7 +253,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600">{t('affiliation.totalPaid') || 'إجمالي المدفوع'}</p>
-                      <p className="text-xl font-bold text-green-600">${affiliate?.totalPaid?.toLocaleString() || 0}</p>
+                      <p className="text-xl font-bold text-green-600">{affiliate?.totalPaid?.toLocaleString() || 0} {storeCurrency}</p>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
                       <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -251,7 +267,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600">{t('affiliation.balance') || 'الرصيد'}</p>
-                      <p className="text-xl font-bold text-orange-600">${affiliate?.balance?.toLocaleString() || 0}</p>
+                      <p className="text-xl font-bold text-orange-600">{affiliate?.balance?.toLocaleString() || 0} {storeCurrency}</p>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
                       <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -397,13 +413,13 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         affiliate?.settings?.autoPayment ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {affiliate?.settings?.autoPayment ? t('common.yes') : t('common.no')}
+                        {affiliate?.settings?.autoPayment ? t('general.yes') : t('general.no')}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-sm text-gray-600">{t('affiliation.paymentThreshold') || 'حد الدفع'}</span>
-                      <span className="font-medium">${affiliate?.settings?.paymentThreshold || 0}</span>
+                      <span className="font-medium">{affiliate?.settings?.paymentThreshold || 0} {storeCurrency}</span>
                     </div>
                     
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

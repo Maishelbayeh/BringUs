@@ -856,6 +856,7 @@
     "tax": "Tax",
     "discount": "Discount",
     "discountPercentage": "Discount Percentage",
+    "priceAfterDiscount": "Price After Discount",
     "itemsCount": "Items Count",
     "notes": "Notes",
     "notFound": "Order not found",

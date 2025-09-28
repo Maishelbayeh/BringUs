@@ -8,8 +8,12 @@ interface InvoicePrintProps {
 }
 
 const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }) => {
+  console.log('order', order);
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ARABIC' || i18n.language === 'ar';
+  const isArabic = i18n.language === 'ARABIC' || i18n.language === 'ar' || i18n.language === 'arabic';
+  
+  console.log('Current language:', i18n.language);
+  console.log('Is Arabic:', isArabic);
 
   if (!isVisible || !order) return null;
 
@@ -54,19 +58,20 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
 
     const printContent = `
       <!DOCTYPE html>
-      <html dir="${isArabic ? 'rtl' : 'ltr'}">
+      <html dir="${isArabic ? 'rtl' : 'ltr'}" lang="${isArabic ? 'ar' : 'en'}">
       <head>
         <meta charset="UTF-8">
         <title>${t('orders.invoiceTitle')}</title>
                  <style>
            body {
-             font-family: Arial, sans-serif;
+             font-family: ${isArabic ? 'Arial, Tahoma, sans-serif' : 'Arial, sans-serif'};
              margin: 0;
              padding: 15px;
              background: white;
              color: black;
              direction: ${isArabic ? 'rtl' : 'ltr'};
              font-size: 12px;
+             text-align: ${isArabic ? 'right' : 'left'};
            }
            .header {
              text-align: center;
@@ -79,9 +84,20 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
              margin: 0 0 8px 0;
              color: black;
            }
+           .store-name {
+             font-size: 14px;
+             font-weight: normal;
+             color: #666;
+             margin: 5px 0;
+             padding: 4px 8px;
+             background: #f5f5f5;
+             border: 1px solid #ddd;
+             border-radius: 4px;
+             display: inline-block;
+           }
            .info-grid {
              display: grid;
-             grid-template-columns: 1fr 1fr;
+             grid-template-columns: 1fr;
              gap: 15px;
              margin-bottom: 20px;
            }
@@ -118,7 +134,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
            .items-table td {
              border: 1px solid black;
              padding: 5px;
-             text-align: center;
+             text-align: ${isArabic ? 'right' : 'center'};
            }
            .items-table th {
              background: #f9fafb;
@@ -134,7 +150,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
              margin: 0 auto;
            }
            .product-name {
-             text-align: left;
+             text-align: ${isArabic ? 'right' : 'left'};
              font-size: 10px;
            }
            .summary-box {
@@ -189,16 +205,12 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
       <body>
         <div class="header">
           <h1>${t('orders.invoiceTitle')}</h1>
+          <div class="store-name">${order.storeName || '-'}</div>
           <div>${t('orders.orderNumber')}: <strong>#${order.id}</strong></div>
           <div>${t('orders.date')}: <strong>${formatDate(order.date)}</strong></div>
         </div>
 
-        <div class="info-grid">
-          <div class="info-box">
-            <h3>${t('orders.storeInfo')}</h3>
-            <div><strong>${t('orders.storeName')}:</strong> ${order.storeName || '-'}</div>
-            <div><strong>${t('orders.storePhone')}:</strong> ${order.storePhone || '-'}</div>
-          </div>
+        <div class="info-grid" dir=${isArabic ? 'rtl' : 'ltr'}>
           <div class="info-box">
             <h3>${t('orders.customerInfo')}</h3>
             <div><strong>${t('orders.customer')}:</strong> ${order.customer || '-'}</div>
@@ -322,41 +334,28 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
             <h1 className="text-3xl font-bold text-primary mb-2">
               {t('orders.invoiceTitle')}
             </h1>
+            <div className="inline-block px-3 py-1 bg-gray-100 border border-gray-300 rounded text-gray-600 text-sm mb-2">
+              {order.storeName || '-'}
+            </div>
             <div className="text-gray-600">
               {t('orders.orderNumber')}: <span className="font-bold">#{order.id}</span>
             </div>
-                         <div className="text-gray-600">
-               {t('orders.date')}: <span className="font-bold">
-                 {new Date(order.date).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', {
-                   year: 'numeric',
-                   month: 'long',
-                   day: 'numeric',
-                   hour: '2-digit',
-                   minute: '2-digit',
-                   calendar: 'gregory'
-                 })}
-               </span>
-             </div>
+            <div className="text-gray-600">
+              {t('orders.date')}: <span className="font-bold">
+                {new Date(order.date).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  calendar: 'gregory'
+                })}
+              </span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="border border-gray-300 rounded-lg p-4">
-              <h3 className="font-bold text-lg mb-3 text-primary">
-                {t('orders.storeInfo')}
-              </h3>
-              <div className="space-y-2">
-                <div>
-                  <span className="font-semibold">{t('orders.storeName')}:</span>
-                  <span className="ml-2">{order.storeName || '-'}</span>
-                </div>
-                <div>
-                  <span className="font-semibold">{t('orders.storePhone')}:</span>
-                  <span className="ml-2">{order.storePhone || '-'}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="border border-gray-300 rounded-lg p-4">
+          <div className="mb-6">
+            <div className="border border-gray-300 rounded-lg p-4" dir={isArabic ? 'rtl' : 'ltr'}>
               <h3 className="font-bold text-lg mb-3 text-primary">
                 {t('orders.customerInfo')}
               </h3>
@@ -378,7 +377,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
           </div>
 
           <div className="mb-6">
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4" dir={isArabic ? 'rtl' : 'ltr'}>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">{t('orders.orderStatus')}:</span>
                 <span className={`px-3 py-1 rounded-full text-sm font-bold ${
@@ -407,10 +406,10 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
           </div>
 
           <div className="mb-6">
-            <h3 className="font-bold text-lg mb-4 text-primary">
+            <h3 className="font-bold text-lg mb-4 text-primary" dir={isArabic ? 'rtl' : 'ltr'}>
               {t('orders.orderItems')}
             </h3>
-                         <div className="border border-gray-300 rounded-lg overflow-hidden">
+                         <div className="border border-gray-300 rounded-lg overflow-hidden" dir={isArabic ? 'rtl' : 'ltr'}>
                <table className="w-full">
                  <thead className="bg-gray-50">
                    <tr>
@@ -445,7 +444,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
                            }}
                          />
                        </td>
-                       <td className="px-4 py-3 text-left">
+                       <td className={`px-4 py-3 ${isArabic ? 'text-right' : 'text-left'}`}>
                          <span className="font-medium">{item.name || item.productSnapshot?.nameEn || 'غير محدد'}</span>
                        </td>
                        <td className="px-4 py-3 text-center">{item.quantity || 0}</td>
@@ -462,7 +461,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
              </div>
           </div>
 
-          <div className="border border-gray-300 rounded-lg p-6">
+          <div className="border border-gray-300 rounded-lg p-6" dir={isArabic ? 'rtl' : 'ltr'}>
             <h3 className="font-bold text-lg mb-4 text-primary">
               {t('orders.orderSummary')}
             </h3>
@@ -492,16 +491,16 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ order, isVisible, onClose }
 
           {order.notes && (
             <div className="mt-6">
-              <h3 className="font-bold text-lg mb-2 text-primary">
+              <h3 className="font-bold text-lg mb-2 text-primary" dir={isArabic ? 'rtl' : 'ltr'}>
                 {t('orders.notes')}:
               </h3>
-              <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+              <div className="border border-gray-300 rounded-lg p-4 bg-gray-50" dir={isArabic ? 'rtl' : 'ltr'}>
                 <p className="text-gray-700">{order.notes}</p>
               </div>
             </div>
           )}
 
-          <div className="mt-8 text-center text-gray-600 text-sm">
+          <div className="mt-8 text-center text-gray-600 text-sm" dir={isArabic ? 'rtl' : 'ltr'}>
             <p>{t('orders.thankYouMessage')}</p>
             <p>{t('orders.enjoyShoppingMessage')}</p>
           </div>
