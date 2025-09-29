@@ -14,6 +14,7 @@ import { useStoreUrls } from '../../../hooks/useStoreUrls';
 import SubscriptionRenewalPopup from '../SubscriptionRenewalPopup';
 import { useUserStore } from '../../../hooks/useUserStore';
 import { useSubscription } from '../../../hooks/useSubscription';
+import { isStoreActive } from '../../../constants/sideBarData';
 type TopNavbarProps = {
   // userName: string;
   language: string;
@@ -38,6 +39,7 @@ console.log(role);
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
   const { storeId, userId } = useUserStore();
   const { isExpired, isExpiringSoon, getDaysUntilExpiry } = useSubscription();
+  const storeActive = isStoreActive();
 
   // الاستماع لتحديث بيانات المتجر
   useEffect(() => {
@@ -84,7 +86,7 @@ console.log(role);
   
 
         <div className={`flex items-center gap-4 justify-center flex-row ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`}>
-        {role==='admin' && ( <>
+        {role==='admin' && storeActive && ( <>
           <button
             onClick={() => navigate(`/${storeSlug}/payment-methods`)}
             className="p-2 rounded-full hover:bg-primary/10 transition"
@@ -116,6 +118,7 @@ console.log(role);
           {role==='admin' && ( <>
           <button
             onClick={() => setShowSubscriptionPopup(true)}
+            data-renewal-button
             className={`px-3 py-2 rounded-lg transition relative cursor-pointer hover:opacity-80 ${
               isExpired() ? 'bg-red-100 text-red-700' : 
               isExpiringSoon() ? 'bg-yellow-100 text-yellow-700' : 
@@ -144,6 +147,20 @@ console.log(role);
             )}
           </button>
           </>
+        )}
+        
+        {/* Show renewal button when store is inactive */}
+        {!storeActive && role==='admin' && (
+          <button
+            onClick={() => setShowSubscriptionPopup(true)}
+            data-renewal-button
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center gap-2"
+          >
+            <CreditCardIcon className="h-4 w-4" />
+            <span className="text-sm font-semibold">
+              {t('general.renewSubscription')}
+            </span>
+          </button>
         )}
         </div>
 
