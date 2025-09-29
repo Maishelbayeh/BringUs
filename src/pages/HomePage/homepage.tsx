@@ -8,6 +8,7 @@ import RevenueChart from './components/RevenueChart';
 import TopUsersAnalytics from './components/TopUsersAnalytics';
 import TopProductsAnalytics from './components/TopProductsAnalytics';
 import OrderPercentageChart from './components/OrderPercentageChart';
+import { isStoreActive } from '../../constants/sideBarData';
 import { 
   ShoppingCartIcon, 
   CurrencyDollarIcon, 
@@ -17,7 +18,8 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
-  TruckIcon
+  TruckIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline';
 import { WarningAmber } from '@mui/icons-material';
 
@@ -26,6 +28,7 @@ const Homepage: React.FC = () => {
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
   const { stats, loading, error, refreshStats } = useDashboardStats();
+  const storeActive = isStoreActive();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -41,6 +44,39 @@ const Homepage: React.FC = () => {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
   };
+
+  // Show subscription expired message if store is inactive
+  if (!storeActive) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-[45%] text-center "
+        >
+          <div className="text-red-500 text-6xl mb-4">
+            <CreditCardIcon className="h-16 w-16 mx-auto text-red-500" />
+          </div>
+          
+          <p className="text-gray-600 mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+            {t('general.subscriptionExpired')}
+          </p>
+          <button
+            onClick={() => {
+              // This will be handled by the navbar renewal button
+              const renewalButton = document.querySelector('[data-renewal-button]');
+              if (renewalButton) {
+                (renewalButton as HTMLElement).click();
+              }
+            }}
+            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
+          >
+            {t('general.renewSubscription')}
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (error) {
     return (

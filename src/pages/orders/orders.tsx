@@ -307,18 +307,23 @@ const OrdersPage: React.FC = () => {
       deliveryArea: order.deliveryArea?.locationEn || '-',
       affiliate: order.affiliate && typeof order.affiliate === 'string' && order.affiliate.trim() !== '' ? order.affiliate : 'لا يوجد',
       currency: order.currency,
-        price: (() => {
-          if (order.items && Array.isArray(order.items) && order.items.length > 0) {
-            const total = order.items.reduce((sum: number, item: any) => {
-              return sum + (item.total || item.totalPrice || item.price || 0);
-            }, 0);
-            console.log('Order ID:', order.id, 'Items:', order.items, 'Total calculated:', total);
-            return total;
-          } else {
-            console.log('Order ID:', order.id, 'No items, using 0');
-            return 0; // إذا لم تكن هناك items، استخدم 0
-          }
-        })(),
+      //   price: (() => {
+
+
+      //     if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+      //       const total = order.items.reduce((sum: number, item: any) => {
+      //         return sum + (item.total || item.totalPrice || item.price || 0);
+      //       }, 0);
+      //       console.log('Order ID:', order.id, 'Items:', order.items, 'Total calculated:', total);
+      //       return total;
+      //     } else {
+      //       console.log('Order ID:', order.id, 'No items, using 0');
+      //       return 0; // إذا لم تكن هناك items، استخدم 0
+      //     }
+      //   }
+      
+      // )(),
+      price: order.price,
       date: order.date ? new Date(order.date).toISOString().slice(0, 10) : '-',
       status: order.status,
       paymentStatus: order.paymentStatus || 'unpaid', // Default to 'unpaid' if not present
@@ -525,7 +530,82 @@ const OrdersPage: React.FC = () => {
     { 
       key: 'price', 
       label: { ar: 'السعر الكلي', en: 'Total Price' }, 
-      type: 'number'
+      type: 'number',
+      render: (value: any, item: any) => {
+        const order = item.originalOrder;
+        
+        // إذا كان order.price يحتوي على السعر الإجمالي (بما في ذلك التوصيل)
+        if (order.price && order.price > 0) {
+          const shipping = order.deliveryArea?.price || order.pricing?.shipping || 0;
+          const subtotal = order.price - shipping;
+          const isWholesaler = order.user?.role === 'wholesaler';
+          const hasDiscount = order.pricing?.discount && order.pricing.discount > 0;
+          
+          return (
+            <div className="text-sm">
+              <div className="font-semibold text-gray-900">
+                {order.price.toFixed(2)} {order.currency}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                <div>{i18n.language === 'ARABIC' ? 'المجموع الفرعي' : 'Subtotal'}: {subtotal.toFixed(2)} {order.currency}</div>
+                <div>{i18n.language === 'ARABIC' ? 'التوصيل' : 'Shipping'}: {shipping.toFixed(2)} {order.currency}</div>
+                {/* إظهار السعر بعد الخصم للعملاء من نوع تاجر جملة */}
+                {isWholesaler && hasDiscount && (
+                  <div className="text-green-600 font-medium">
+                    {t('orders.priceAfterDiscount')}: {(() => {
+                      const discountPercentage = order.pricing.discount;
+                      const discountAmount = (subtotal * discountPercentage) / 100;
+                      const priceAfterDiscount = subtotal - discountAmount;
+                      return `${priceAfterDiscount.toFixed(2)} ${order.currency}`;
+                    })()}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }
+        
+        // إذا كان order.pricing موجود
+        if (order.pricing) {
+          const subtotal = order.pricing.subtotal || 0;
+          const shipping = order.pricing.shipping || order.deliveryArea?.price || 0;
+          const total = order.pricing.total || (subtotal + shipping);
+          const isWholesaler = order.user?.role === 'wholesaler';
+          const hasDiscount = order.pricing.discount && order.pricing.discount > 0;
+          
+          return (
+            <div className="text-sm">
+              <div className="font-semibold text-gray-900">
+                {total.toFixed(2)} {order.currency}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                <div>{i18n.language === 'ARABIC' ? 'المجموع الفرعي' : 'Subtotal'}: {subtotal.toFixed(2)} {order.currency}</div>
+                <div>{i18n.language === 'ARABIC' ? 'التوصيل' : 'Shipping'}: {shipping.toFixed(2)} {order.currency}</div>
+                {/* إظهار السعر بعد الخصم للعملاء من نوع تاجر جملة */}
+                {isWholesaler && hasDiscount && (
+                  <div className="text-green-600 font-medium">
+                    {t('orders.priceAfterDiscount')}: {(() => {
+                      const discountPercentage = order.pricing.discount;
+                      const discountAmount = (subtotal * discountPercentage) / 100;
+                      const priceAfterDiscount = subtotal - discountAmount;
+                      return `${priceAfterDiscount.toFixed(2)} ${order.currency}`;
+                    })()}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }
+        
+        // إذا لم تكن هناك بيانات، استخدم القيمة الافتراضية
+        return (
+          <div className="text-sm">
+            <div className="font-semibold text-gray-900">
+              {value || 0} {order.currency}
+            </div>
+          </div>
+        );
+      }
     },
     { key: 'date', label: { ar: 'تاريخ الطلب', en: 'Order Date' }, type: 'date'},
     { key: 'status', label: { ar: 'حالة الطلب', en: 'Order Status' }, type: 'status', render: renderStatus},

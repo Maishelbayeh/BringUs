@@ -164,7 +164,7 @@ const PaymentMethods: React.FC = () => {
           <CreditCardIcon className="w-12 h-12 mx-auto" />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">
-          {t('common.error')}
+          {t('general.error')}
         </h3>
         <p className="text-gray-600 mb-6">
           {error}
@@ -173,7 +173,7 @@ const PaymentMethods: React.FC = () => {
           onClick={() => window.location.reload()}
           className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
-          {t('common.retry')}
+          {t('general.retry')}
         </button>
       </div>
     );

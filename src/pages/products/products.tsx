@@ -1049,11 +1049,7 @@ const ProductsPage: React.FC = () => {
       videoUrl: originalProduct.videoUrl || '',
     };
     
-    console.log('🔍 handleEdit - Final newForm:', newForm);
-    console.log('🔍 handleEdit - Final newForm.productLabels:', newForm.productLabels);
-    console.log('🔍 handleEdit - newForm.categoryIds:', newForm.categoryIds);
-    console.log('🔍 handleEdit - newForm.categoryId:', newForm.categoryId);
-    
+   
     setForm(newForm);
     setEditProduct(originalProduct);
     setDrawerMode('edit');
@@ -1209,14 +1205,11 @@ const ProductsPage: React.FC = () => {
       const colorsArray = Array.isArray(colorsValue) ? colorsValue : [];
       
       const newForm = { ...form, colors: colorsArray };
-      console.log('🔍 handleFormChange - Updated colors:', newForm.colors);
+ 
       setForm(newForm);
     } else if (e.target.name === 'productLabels') {
       // التعامل مع productLabels كمصفوفة
-      console.log('🔍 handleFormChange - productLabels received:', e.target.value);
-      console.log('🔍 handleFormChange - productLabels type:', typeof e.target.value);
-      console.log('🔍 handleFormChange - productLabels is array:', Array.isArray(e.target.value));
-      
+     
       let productLabelsValue: any = e.target.value;
       
       // إذا كانت القيمة مصفوفة، استخدمها كما هي
@@ -1236,14 +1229,10 @@ const ProductsPage: React.FC = () => {
       const productLabelsArray = Array.isArray(productLabelsValue) ? productLabelsValue : [];
       
       const newForm = { ...form, productLabels: productLabelsArray };
-      console.log('🔍 handleFormChange - Updated productLabels:', newForm.productLabels);
+ 
       setForm(newForm);
     } else if (e.target.name === 'specifications') {
-      // التعامل مع specifications كمصفوفة
-      console.log('🔍 handleFormChange - specifications received:', e.target.value);
-      console.log('🔍 handleFormChange - specifications type:', typeof e.target.value);
-      console.log('🔍 handleFormChange - specifications is array:', Array.isArray(e.target.value));
-      
+     
       let specificationsValue: any = e.target.value;
       
       // إذا كانت القيمة مصفوفة، استخدمها كما هي
@@ -1263,14 +1252,11 @@ const ProductsPage: React.FC = () => {
       const specificationsArray = Array.isArray(specificationsValue) ? specificationsValue : [];
       
       const newForm = { ...form, specifications: specificationsArray };
-      console.log('🔍 handleFormChange - Updated specifications:', newForm.specifications);
+    
       setForm(newForm);
     } else if (e.target.name === 'specificationValues') {
       // التعامل مع specificationValues كمصفوفة
-      console.log('🔍 handleFormChange - specificationValues received:', e.target.value);
-      console.log('🔍 handleFormChange - specificationValues type:', typeof e.target.value);
-      console.log('🔍 handleFormChange - specificationValues is array:', Array.isArray(e.target.value));
-      
+    
       let specificationValuesValue: any = e.target.value;
       
       // إذا كانت القيمة مصفوفة، استخدمها كما هي
@@ -1290,14 +1276,10 @@ const ProductsPage: React.FC = () => {
       const specificationValuesArray = Array.isArray(specificationValuesValue) ? specificationValuesValue : [];
       
       const newForm = { ...form, specificationValues: specificationValuesArray };
-      console.log('🔍 handleFormChange - Updated specificationValues:', newForm.specificationValues);
+
       setForm(newForm);
     } else if (e.target.name === 'categoryIds') {
-      // التعامل مع categoryIds كمصفوفة
-      console.log('🔍 handleFormChange - categoryIds received:', e.target.value);
-      console.log('🔍 handleFormChange - categoryIds type:', typeof e.target.value);
-      console.log('🔍 handleFormChange - categoryIds is array:', Array.isArray(e.target.value));
-      
+   
       let categoryIdsValue: any = e.target.value;
       
       // إذا كانت القيمة مصفوفة، استخدمها كما هي
@@ -1317,31 +1299,21 @@ const ProductsPage: React.FC = () => {
       const categoryIdsArray = Array.isArray(categoryIdsValue) ? categoryIdsValue : [];
       
       const newForm = { ...form, categoryIds: categoryIdsArray };
-      console.log('🔍 handleFormChange - Updated categoryIds:', newForm.categoryIds);
+
       setForm(newForm);
     } else {
-      // التعامل مع الحقول الأخرى
-      console.log('🔍 handleFormChange - generic case for:', e.target.name);
-      console.log('🔍 handleFormChange - generic case value:', e.target.value);
-      console.log('🔍 handleFormChange - generic case value type:', typeof e.target.value);
-      console.log('🔍 handleFormChange - generic case value is array:', Array.isArray(e.target.value));
-      
+     
       const newForm = { ...form, [e.target.name]: e.target.value };
-      console.log('🔍 handleFormChange - newForm after update:', newForm);
-      console.log('🔍 handleFormChange - newForm[e.target.name]:', newForm[e.target.name as keyof typeof newForm]);
+
       setForm(newForm);
     }
   };
 
   //-------------------------------------------- handleProductLabelsChange -------------------------------------------
   const handleTagsChange = (values: string[]) => {
-    console.log('🔍 handleTagsChange called with values:', values);
-    console.log('🔍 handleTagsChange - values type:', typeof values);
-    console.log('🔍 handleTagsChange - values is array:', Array.isArray(values));
+
     const newForm = { ...form, productLabels : values };
-    console.log('🔍 handleTagsChange - newForm.productLabels:', newForm.productLabels);
-    console.log('🔍 handleTagsChange - newForm.productLabels type:', typeof newForm.productLabels);
-    console.log('🔍 handleTagsChange - newForm.productLabels is array:', Array.isArray(newForm.productLabels));
+
     setForm(newForm);
   };
   //-------------------------------------------- handleImageChange -------------------------------------------
@@ -1379,45 +1351,40 @@ const ProductsPage: React.FC = () => {
 
   //-------------------------------------------- handleMainImageChange -------------------------------------------
   const handleMainImageChange = async (file: File | null) => {
-    console.log('🔍 handleMainImageChange called with file:', file);
+
     if (!file) {
       console.log("no files");
       const newForm = { ...form, mainImage: null };
-      console.log('🔍 handleMainImageChange (no file) - newForm:', newForm);
+   
       setForm(newForm);
       return;
     }
 
     try {
-      console.log('🔍 Starting main image upload...');
+   
       // رفع الصورة الرئيسية إلى Cloudflare
       const uploadedUrl = await uploadMainImage(file);
-      console.log('🔍 Upload successful, URL:', uploadedUrl);
+    
       
       // تحديث النموذج بالرابط الجديد
       const newForm = { ...form, mainImage: uploadedUrl };
-      console.log('🔍 handleMainImageChange - Updated form:', newForm);
+     
       setForm(newForm);
       
-      console.log('✅ Main image uploaded to Cloudflare:', uploadedUrl);
+      
     } catch (error) {
-      console.error('❌ Error uploading main image:', error);
+   
       // في حالة الخطأ، نستخدم الرابط المحلي كـ fallback
       const imageUrl = URL.createObjectURL(file);
       const newForm = { ...form, mainImage: imageUrl };
-      console.log('🔍 handleMainImageChange (fallback) - newForm:', newForm);
+    
       setForm(newForm);
     }
   };
   //-------------------------------------------- handleSubmit -------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🔍 handleSubmit called. drawerMode:', drawerMode, 'editProduct:', editProduct);
-    console.log('🔍 handleSubmit - Complete form state:', form);
-    console.log('🔍 handleSubmit - form.tags:', form.tags);
-    console.log('🔍 handleSubmit - form.productLabels:', form.productLabels);
-    console.log('🔍 handleSubmit - form keys:', Object.keys(form));
-
+   
     // جلب الباركود من ProductsForm مباشرة (حتى لو لم يضغط +)
     if (productsFormRef.current && typeof productsFormRef.current.getCurrentBarcode === 'function') {
       const currentBarcode = productsFormRef.current.getCurrentBarcode();
@@ -1454,7 +1421,7 @@ const ProductsPage: React.FC = () => {
         
           // Use tags if available, otherwise use productLabels
             const labels =  form.productLabels || [];
-          console.log('🔍 handleSubmit - Final productLabels to send:', labels);
+        
           return labels;
         })(),
         barcodes: Array.isArray(form.barcodes) ? form.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [], // إضافة الباركود مع فلترة القيم الفارغة
@@ -1462,24 +1429,18 @@ const ProductsPage: React.FC = () => {
         specifications: Array.isArray(form.specifications) ? form.specifications : [], // إرسال IDs المواصفات
         specificationValues: Array.isArray(form.specificationValues) ? form.specificationValues : [], // إرسال قيم المواصفات مع الكمية والسعر
         colors: (() => {
-          console.log('🔍 handleSubmit - form.colors:', form.colors);
-          console.log('🔍 handleSubmit - form.colors type:', typeof form.colors);
-          console.log('🔍 handleSubmit - form.colors is array:', Array.isArray(form.colors));
           
           if (Array.isArray(form.colors)) {
             const processedColors = form.colors.map((variant: any) => {
-              console.log('🔍 handleSubmit - Processing variant:', variant);
-              console.log('🔍 handleSubmit - Variant type:', typeof variant);
-              console.log('🔍 handleSubmit - Variant is array:', Array.isArray(variant));
-              
+             
               // إذا كان variant مصفوفة ألوان مباشرة (من convertedColors)
               if (Array.isArray(variant)) {
-                console.log('🔍 handleSubmit - Returning variant as array:', variant);
+              
                 return variant;
               }
               // إذا كان variant يحتوي على colors property (من CustomColorPicker)
               else if (variant && typeof variant === 'object' && Array.isArray(variant.colors)) {
-                console.log('🔍 handleSubmit - Returning variant.colors:', variant.colors);
+                
                 return variant.colors;
               }
               // إذا كان لون واحد
@@ -1509,20 +1470,7 @@ const ProductsPage: React.FC = () => {
         videoUrl: form.videoUrl || '',
       };
 
-      //CONSOLE.log('🔍 handleSubmit - productData:', productData);
-      //CONSOLE.log('🔍 handleSubmit - productData.mainImage:', productData.mainImage);
-      //CONSOLE.log('🔍 handleSubmit - productData.mainImage type:', typeof productData.mainImage);
-      //CONSOLE.log('🔍 handleSubmit - productData.barcodes:', productData.barcodes);
-      //CONSOLE.log('🔍 handleSubmit - productData.barcodes type:', typeof productData.barcodes);
-      //CONSOLE.log('🔍 handleSubmit - productData.barcodes is array:', Array.isArray(productData.barcodes));
-      //CONSOLE.log('🔍 handleSubmit - productData.barcodes length:', Array.isArray(productData.barcodes) ? productData.barcodes.length : 'N/A');
-
-      // Debug: طباعة معلومات editProduct
-      //CONSOLE.log('🔍 handleSubmit - editProduct:', editProduct);
-      //CONSOLE.log('🔍 handleSubmit - editProduct._id:', editProduct?._id);
-      //CONSOLE.log('🔍 handleSubmit - editProduct.id:', editProduct?.id);
-      //CONSOLE.log('🔍 handleSubmit - editId for validation:', editProduct?._id || editProduct?.id);
-      
+     
       // التحقق من صحة البيانات باستخدام النظام الجديد
       const validationResult = validateProductForm(productData);
       if (!validationResult.isValid) {
@@ -1536,9 +1484,7 @@ const ProductsPage: React.FC = () => {
 
       // حفظ المنتج
       const editId = editProduct?._id || editProduct?.id;
-      //CONSOLE.log('🔍 handleSubmit - editId:', editId);
-      //CONSOLE.log('🔍 handleSubmit - drawerMode:', drawerMode);
-      
+    
       if (drawerMode === 'variant') {
         // If the form has no _id, it's a new variant
         const formWithId = form as any;
@@ -1557,14 +1503,7 @@ const ProductsPage: React.FC = () => {
         }
       } else {
         // تعديل أو إنشاء منتج عادي
-        console.log('🔍 handleSubmit - About to call saveProduct with productData:', productData);
-        console.log('🔍 handleSubmit - productData.productLabels:', productData.productLabels);
-        console.log('🔍 handleSubmit - productData.productLabels type:', typeof productData.productLabels);
-        console.log('🔍 handleSubmit - productData.productLabels is array:', Array.isArray(productData.productLabels));
-        console.log('🔍 handleSubmit - productData.specifications:', productData.specifications);
-        console.log('🔍 handleSubmit - productData.specificationValues:', productData.specificationValues);
-        console.log('🔍 handleSubmit - productData.videoUrl:', productData.videoUrl);
-        console.log('🔍 handleSubmit - form.videoUrl:', form.videoUrl);
+       
         await saveProduct(productData, editId);
       }
       
@@ -1580,6 +1519,7 @@ const ProductsPage: React.FC = () => {
   };
   //-------------------------------------------- columns -------------------------------------------
   const columns = [
+    { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text' as const, render: renderActions, showControls: false },
     { key: 'mainImage', label: { ar: 'الصورة الرئيسية', en: 'Main Image' }, type: 'image' as const, render: renderMainImage },
     { key: 'images', label: { ar: 'الصور الإضافية', en: 'Additional Images' }, type: 'text' as const, render: renderImages },
     { key: isRTL ? 'nameAr' : 'nameEn', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' as const },
@@ -1599,7 +1539,6 @@ const ProductsPage: React.FC = () => {
     { key: 'colors', label: { ar: 'الألوان', en: 'Colors' }, type: 'text' as const, render: renderColors },
     { key: 'id', label: { ar: 'الرقم', en: 'ID' }, type: 'number' as const, render: renderProductId },
 
-    { key: 'actions', label: { ar: 'العمليات', en: 'Actions' }, type: 'text' as const, render: renderActions, showControls: false },
   ];
   //-------------------------------------------- return -------------------------------------------   
   return (

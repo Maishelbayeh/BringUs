@@ -24,6 +24,7 @@ interface Order {
     lastName: string;
     email: string;
     phone: string;
+    role?: string;
   };
   affiliate?: string;
   deliveryArea?: {
@@ -134,9 +135,9 @@ const OrderDetailPage: React.FC = () => {
             _id: result.data.id,
             id: result.data.id,
             orderNumber: result.data.orderNumber,
-            storeName: result.data.storeName || '',
+            storeName: i18n.language === 'ARABIC' ? result.data.store.nameAr : result.data.store.nameEn || '',
             storePhone: result.data.store?.phone || '',
-            storeUrl: result.data.storeUrl || '',
+            storeUrl: result.data.store.url || '',
             customer: result.data.user ? `${result.data.user.firstName} ${result.data.user.lastName}` : '',
             customerPhone: result.data.user?.phone || '',
             customerEmail: result.data.user?.email || '',
@@ -144,10 +145,11 @@ const OrderDetailPage: React.FC = () => {
               firstName: result.data.user.firstName,
               lastName: result.data.user.lastName,
               email: result.data.user.email,
-              phone: result.data.user.phone
+              phone: result.data.user.phone,
+              role: result.data.user.role
             } : undefined,
             affiliate: result.data.affiliate ? 
-              `${result.data.affiliate.snapshot?.firstName || ''} ${result.data.affiliate.snapshot?.lastName || ''}`.trim() || 'لا يوجد' : 'لا يوجد',
+              `${result.data.affiliate.firstName || ''} ${result.data.affiliate.lastName || ''}`.trim() || 'لا يوجد' : 'لا يوجد',
             deliveryArea: result.data.deliveryArea ? {
               locationAr: result.data.deliveryArea.locationAr,
               locationEn: result.data.deliveryArea.locationEn,
@@ -256,7 +258,7 @@ const OrderDetailPage: React.FC = () => {
                     minute: '2-digit',
                     calendar: 'gregory'
                   }) : '-'}</div>
-                  <div className="mb-1"><span className="font-semibold">{t('orders.orderPrice')}:</span> {order.price || order.pricing?.total || order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0)} {order.currency || ''}</div>
+                  <div className="mb-1"><span className="font-semibold">{t('orders.orderPrice')}:</span> {(order.price || order.pricing?.total || order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0)).toFixed(2)} {order.currency || ''}</div>
                   <div className="mb-1"><span className="font-semibold">{t('orders.discountPercentage')}:</span> <span className="text-green-600 font-medium">
                     {(() => {
                       if (order.pricing?.discount) {
@@ -321,6 +323,98 @@ const OrderDetailPage: React.FC = () => {
                       )
                     },
                     { key: 'name', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' },
+                    { 
+                      key: 'specifications', 
+                      label: { ar: 'المواصفات', en: 'Specifications' }, 
+                      type: 'text',
+                      render: (value: any, item: any) => (
+                        <div className="text-sm">
+                          {item.selectedSpecifications && item.selectedSpecifications.length > 0 ? (
+                            <div className="space-y-1">
+                              {item.selectedSpecifications.map((spec: any, index: number) => (
+                                <div key={index} className="flex items-center gap-2">
+                                  <span className="font-medium text-gray-600">
+                                    {isArabic ? spec.titleAr : spec.titleEn}:
+                                  </span>
+                                  <span className="text-gray-800">
+                                    {isArabic ? spec.valueAr : spec.valueEn}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">{isArabic ? 'لا توجد مواصفات' : 'No specifications'}</span>
+                          )}
+                        </div>
+                      )
+                    },
+                    { 
+                      key: 'colors', 
+                      label: { ar: 'الألوان', en: 'Colors' }, 
+                      type: 'text',
+                      render: (value: any, item: any) => (
+                        <div className="flex items-center gap-2">
+                          {item.selectedColors && item.selectedColors.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {item.selectedColors.map((color: any, colorIndex: number) => {
+                                // تحديد لون الدائرة
+                                const getColorValue = (color: any) => {
+                                  if (typeof color === 'string') {
+                                    // إذا كان اللون نص، نحاول تحويله إلى hex
+                                    const colorMap: { [key: string]: string } = {
+                                      'أحمر': '#FF0000',
+                                      'أزرق': '#0000FF',
+                                      'أخضر': '#00FF00',
+                                      'أصفر': '#FFFF00',
+                                      'أسود': '#000000',
+                                      'أبيض': '#FFFFFF',
+                                      'رمادي': '#808080',
+                                      'بني': '#A52A2A',
+                                      'برتقالي': '#FFA500',
+                                      'بنفسجي': '#800080',
+                                      'وردي': '#FFC0CB',
+                                      'red': '#FF0000',
+                                      'blue': '#0000FF',
+                                      'green': '#00FF00',
+                                      'yellow': '#FFFF00',
+                                      'black': '#000000',
+                                      'white': '#FFFFFF',
+                                      'gray': '#808080',
+                                      'brown': '#A52A2A',
+                                      'orange': '#FFA500',
+                                      'purple': '#800080',
+                                      'pink': '#FFC0CB'
+                                    };
+                                    return colorMap[color.toLowerCase()] || color;
+                                  } else if (color.hex) {
+                                    return color.hex;
+                                  } else if (color.color) {
+                                    return color.color;
+                                  }
+                                  return '#808080'; // لون افتراضي
+                                };
+
+                                const colorValue = getColorValue(color);
+                                const colorName = typeof color === 'string' ? color : (isArabic ? color.nameAr : color.nameEn);
+
+                                return (
+                                  <div key={colorIndex} className="flex items-center gap-1">
+                                    <div 
+                                      className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
+                                      style={{ backgroundColor: colorValue }}
+                                      title={colorName}
+                                    />
+                                   
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-sm">{isArabic ? 'لا توجد ألوان' : 'No colors'}</span>
+                          )}
+                        </div>
+                      )
+                    },
                     { key: 'quantity', label: { ar: 'الكمية', en: 'Quantity' }, type: 'number' },
                     { key: 'price', label: { ar: 'سعر الوحدة', en: 'Unit Price' }, type: 'number' },
                     { key: 'totalPrice', label: { ar: 'الإجمالي', en: 'Total' }, type: 'number' },
@@ -328,10 +422,14 @@ const OrderDetailPage: React.FC = () => {
                   data={order.items.map(item => ({
                     image: item.image || item.productSnapshot?.images?.[0] || '',
                     name: item.name || item.productSnapshot?.nameEn || 'غير محدد',
+                    specifications: item.selectedSpecifications || [],
+                    colors: item.selectedColors || [],
                     quantity: item.quantity || 0,
                     price: item.price || item.pricePerUnit || 0,
                     totalPrice: item.totalPrice || item.total || 0,
-                    currency: order.currency
+                    currency: order.currency,
+                    selectedSpecifications: item.selectedSpecifications || [],
+                    selectedColors: item.selectedColors || []
                   }))}
                 />
               </div>
@@ -348,7 +446,7 @@ const OrderDetailPage: React.FC = () => {
               </div>
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
                 <span className="font-semibold">{t('orders.subtotal') || 'Subtotal'}</span>
-                <span>{order.pricing?.subtotal || order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0)} {order.currency || ''}</span>
+                <span>{(order.pricing?.subtotal || order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0)).toFixed(2)} {order.currency || ''}</span>
               </div>
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
                 <span className="font-semibold">{t('orders.shipping') || 'Shipping'}</span>
@@ -372,9 +470,24 @@ const OrderDetailPage: React.FC = () => {
                   })()}
                 </span>
               </div>
+              {/* إظهار السعر بعد الخصم للعملاء من نوع تاجر جملة */}
+              {order.user?.role === 'wholesaler' && order.pricing?.discount && order.pricing?.discount > 0 && (
+                <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''} bg-green-50 rounded-lg px-3`}> 
+                  <span className="font-semibold text-green-700">{t('orders.priceAfterDiscount')}</span>
+                  <span className="text-green-700 font-bold">
+                    {(() => {
+                      const discountPercentage = order.pricing.discount;
+                      const subtotal = order.pricing.subtotal || 0;
+                      const discountAmount = (subtotal * discountPercentage) / 100;
+                      const priceAfterDiscount = subtotal - discountAmount;
+                      return `${priceAfterDiscount.toFixed(2)} ${order.currency}`;
+                    })()}
+                  </span>
+                </div>
+              )}
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''} font-bold text-lg border-t-2 pt-2`}> 
                 <span>{t('orders.total') || 'Total'}</span>
-                <span>{order.price || order.pricing?.total || (order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0) + (order.deliveryArea?.price || 0))} {order.currency || ''}</span>
+                <span>{(order.price || order.pricing?.total || (order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0) + (order.deliveryArea?.price || 0))).toFixed(2)} {order.currency || ''}</span>
               </div>
               <div className={`py-2 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}> 
                 <span className="font-semibold">{t('orders.notes') || 'Notes'}</span>

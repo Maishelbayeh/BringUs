@@ -29,7 +29,8 @@ const StockTable: React.FC = () => {
       key: 'stockInfo', 
       label: { ar: 'المخزون والحالة', en: 'Stock & Status' }, 
       type: 'custom',
-      render: ( row: any) => {
+      render: (_value: any, row: any) => {
+        console.log('row', row);
         const currentQuantity = row.availableQuantity;
         let quantityColorClass = 'bg-green-100 text-green-800';
         let statusColorClass = 'bg-green-100 text-green-800';
@@ -82,7 +83,7 @@ const StockTable: React.FC = () => {
       key: 'specifications',
       label: { ar: 'المواصفات', en: 'Specifications' },
       type: 'custom',
-      render: ( row: any) => {
+      render: (_value: any, row: any) => {
         const hasSpecifications = row.specificationValues && row.specificationValues.length > 0;
         
         if (!hasSpecifications) {

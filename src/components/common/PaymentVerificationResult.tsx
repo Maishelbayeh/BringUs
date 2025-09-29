@@ -156,19 +156,19 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
                   {t('payment.details')}
                 </h4>
                 <div className={`space-y-1 text-sm text-gray-600 flex flex-col ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className={`flex justify-between  ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  {/* <div className={`flex justify-between  ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <span>{t('payment.reference')}:</span>
                     <span className="font-mono">{result.data.data.reference || result.data.data.id}</span>
-                  </div>
+                  </div> */}
                   {result.data.data.amount && (
                     <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <span>{t('payment.amount')}:</span>
-                      <span>{result.data.data.amount} {result.data.data.currency}</span>
+                      <span dir={isRTL ? 'rtl' : 'ltr'}>{t('payment.amount')}:</span>
+                      <span dir={isRTL ? 'rtl' : 'ltr'}>{(result.data.data.amount / 100).toFixed(2)} {result.data.data.currency}</span>
                     </div>
                   )}
                   {result.data.data.status && (
                     <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <span>{t('payment.status')}:</span>
+                      <span dir={isRTL ? 'rtl' : 'ltr'}>{t('payment.status')}:</span>
                       <span className="capitalize">{result.data.data.status.toLowerCase()}</span>
                     </div>
                   )}
@@ -184,7 +184,7 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
             onClick={onClose}
             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
-            {t('general.close')}
+            {t('general.cancel')}
           </button>
           {result?.data?.data?.status?.toLowerCase() === 'success' && (
             <button
@@ -204,7 +204,9 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
       {showAutoRenewalSetup && (
         <AutoRenewalSetup
           isOpen={showAutoRenewalSetup}
-          onClose={() => setShowAutoRenewalSetup(false)}
+          onClose={() => {setShowAutoRenewalSetup(false)
+            onClose();
+          }}
           isRTL={isRTL}
           referenceId={result?.data?.data?.authorization.authorization_code  || ''}
         />

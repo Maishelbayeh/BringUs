@@ -20,6 +20,7 @@ export interface OrderItem {
 }
 
 export interface Order {
+  price: any;
   _id?: string;
   id: string; // This is orderNumber from the API
   orderNumber?: string; // Alternative field name

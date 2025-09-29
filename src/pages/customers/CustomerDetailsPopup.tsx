@@ -98,7 +98,7 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <style>{scrollbarHideStyles}</style>
-      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl relative shadow-xl border border-primary/20">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-4xl relative shadow-xl border border-primary/20">
         <button
           className="absolute top-2 left-2 text-gray-400 hover:text-primary text-2xl"
           onClick={onClose}
@@ -179,8 +179,26 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
                       <td className="py-3 px-4 border-b">{new Date(order.date || order.createdAt).toLocaleDateString()}</td>
                       <td className="py-3 px-4 border-b font-medium">
                         {(() => {
-                          const price = order.pricing?.total || order.price || order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0);
-                          return `${Math.round(price * 100) / 100} ${order.currency}`;
+                          // حساب السعر الإجمالي
+                          const totalPrice = order.pricing?.total || order.price || order.items.reduce((sum, item) => sum + (item.totalPrice || item.total || 0), 0);
+                          
+                          // حساب سعر التوصيل
+                          const shippingPrice = order.deliveryArea?.price || order.pricing?.shipping || 0;
+                          
+                          // حساب السعر الفرعي (السعر الإجمالي - التوصيل)
+                          const subtotal = totalPrice - shippingPrice;
+                          
+                          return (
+                            <div className="text-sm">
+                              <div className="font-semibold text-gray-900">
+                                {totalPrice.toFixed(2)} {order.currency}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                <div>{isRTL ? 'المجموع الفرعي' : 'Subtotal'}: {subtotal.toFixed(2)} {order.currency}</div>
+                                <div>{isRTL ? 'التوصيل' : 'Shipping'}: {shippingPrice.toFixed(2)} {order.currency}</div>
+                              </div>
+                            </div>
+                          );
                         })()}
                       </td>
                       <td className="py-3 px-4 border-b">

@@ -572,7 +572,7 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
                 
                 <div className="mb-2">
                   {product.isOnSale && product.salePercentage && product.salePercentage > 0 ? (
-                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse flex-wrap">
                       <p className="text-lg font-bold text-green-600">
                         ₪{product.finalPrice?.toFixed(2) || product.price?.toFixed(2) || '0.00'}
                       </p>
@@ -581,7 +581,7 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
                       </p>
                     </div>
                   ) : (
-                    <p className="text-lg font-bold text-green-600">
+                    <p className="text-lg font-bold text-green-600 flex-wrap">
                       ₪{product.price?.toFixed(2) || '0.00'}
                     </p>
                   )}

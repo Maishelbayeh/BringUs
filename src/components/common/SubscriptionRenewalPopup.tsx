@@ -162,8 +162,8 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
          onClose();
        }, 1000);
        console.log(response.data.data.authorization_url);
-       // Redirect to external payment URL
-       window.location.href = response.data.data.authorization_url;
+       // Redirect to external payment URL in the same tab
+       window.location.assign(response.data.data.authorization_url);
 
        
 

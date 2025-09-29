@@ -6,6 +6,7 @@ export const updateStoreData = (storeData: any) => {
       nameEn: storeData.nameEn,
       slug: storeData.slug,
       status: storeData.status,
+      settings: storeData.settings,
     }));
 
     if (storeData.logo) {

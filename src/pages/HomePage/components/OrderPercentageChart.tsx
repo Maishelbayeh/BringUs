@@ -180,25 +180,34 @@ const OrderPercentageChart: React.FC<OrderPercentageChartProps> = ({ isLoading =
           {/* Legend and Stats */}
           <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {chartData.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-3 gap-2">
-                  <div 
-                    className="w-4 h-4 rounded-full" 
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <div>
-                    <div className="font-medium text-gray-900 truncate mx-2 whitespace-nowrap md:max-w-full max-w-[100px]">{item.label}</div>
-                    <div className="text-sm text-gray-500">
-                      {item.count} {t('dashboard.orders')}
-                    </div>
+              <div 
+              key={item.id} 
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-gray-50 rounded-lg gap-2"
+            >
+              {/* Left side */}
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div 
+                  className="w-4 h-4 rounded-full flex-shrink-0" 
+                  style={{ backgroundColor: item.color }}
+                />
+                <div className="min-w-0">
+                  <div className="font-medium text-gray-900 truncate max-w-[150px] sm:max-w-[250px]">
+                    {item.label}
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg font-semibold text-gray-900">
-                    {item.value.toFixed(1)}%
+                  <div className="text-sm text-gray-500">
+                    {item.count} {t('dashboard.orders')}
                   </div>
                 </div>
               </div>
+            
+              {/* Right side */}
+              <div className="text-right">
+                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                  {item.value.toFixed(1)}%
+                </div>
+              </div>
+            </div>
+            
             ))}
           </motion.div>
 

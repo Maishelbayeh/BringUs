@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { PAYMENT_API_CONFIG } from '../constants/payment';
+import useLanguage from './useLanguage';
 
 interface PaymentVerificationResult {
   success: boolean;
@@ -12,6 +13,7 @@ interface PaymentVerificationResult {
 export const usePaymentVerification = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<PaymentVerificationResult | null>(null);
+  const { language } = useLanguage();
 
   const verifyPayment = async (reference: string): Promise<PaymentVerificationResult> => {
     setIsVerifying(true);
@@ -36,7 +38,7 @@ export const usePaymentVerification = () => {
       const result: PaymentVerificationResult = {
         success: true,
         status: 'unknown',
-        message: 'Payment verification completed',
+        message: language === 'ARABIC' ? 'تم إكمال التحقق من الدفع' : 'Payment verification completed',
         data: response.data
       };
 
@@ -46,17 +48,18 @@ export const usePaymentVerification = () => {
         
         if (paymentData.status === 'CAPTURED' || paymentData.status === 'SUCCESS') {
           result.status = 'success';
-          result.message = 'Payment completed successfully';
+          result.message = language === 'ARABIC' ? 'تم إكمال الدفع بنجاح' : 'Payment completed successfully';
         } else if (paymentData.status === 'PENDING' || paymentData.status === 'INITIATED') {
           result.status = 'pending';
-          result.message = 'Payment is still pending';
+          result.message = language === 'ARABIC' ? 'الدفع لا يزال معلقاً' : 'Payment is still pending';
         } else if (paymentData.status === 'FAILED' || paymentData.status === 'CANCELLED' || paymentData.status === 'DECLINED') {
           result.status = 'failed';
-          result.message = 'Payment failed or was cancelled';
+          result.message = language === 'ARABIC' ? 'فشل الدفع أو تم إلغاؤه' : 'Payment failed or was cancelled';
         }
       }
 
       setVerificationResult(result);
+      console.log('Payment verification result:', result);
       return result;
 
     } catch (error: any) {
@@ -65,7 +68,9 @@ export const usePaymentVerification = () => {
       const result: PaymentVerificationResult = {
         success: false,
         status: 'unknown',
-        message: `Verification failed: ${error.response?.data?.message || error.message}`
+        message: language === 'ARABIC' 
+          ? `فشل التحقق: ${error.response?.data?.message || error.message}`
+          : `Verification failed: ${error.response?.data?.message || error.message}`
       };
 
       setVerificationResult(result);

@@ -75,7 +75,7 @@ const StoreView: React.FC = () => {
   useEffect(() => {
     const fetchStoreData = async () => {
       if (STORE_ID) {
-        const store = await getStore(STORE_ID,getStoreInfo().slug);
+        const store = await getStore(getStoreInfo().slug);
         if (store) {
           setStoreData(store);
         }
