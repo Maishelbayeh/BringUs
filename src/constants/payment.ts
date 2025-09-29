@@ -3,17 +3,12 @@ import { getLahzaSecretKey } from '../hooks/useLocalStorage';
 // Get the secret key and log it for debugging
 const secretKey = getLahzaSecretKey() || '';
 console.log('🔐 Lahza Secret Key from localStorage:', secretKey || 'No key found - using empty string');
-console.log('📊 Payment Config Loaded:', {
-  baseUrl: 'https://api.lahza.io/transaction',
-  secretKey: secretKey ? `${secretKey.substring(0, 10)}...` : 'EMPTY',
-  callbackUrl: 'http://localhost:5173/'
-});
 
 // Payment API Constants
 export const PAYMENT_API_CONFIG = {
   BASE_URL: 'https://api.lahza.io/transaction',
   SECRET_KEY: secretKey, // Using stored secret key or empty string
-  CALLBACK_URL: 'http://localhost:5173/',
+  CALLBACK_URL: '',
   ENDPOINTS: {
     CHARGES: '/initialize',
     VERIFY: '/verify'

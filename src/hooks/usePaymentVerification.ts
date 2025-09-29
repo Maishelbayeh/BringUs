@@ -23,10 +23,6 @@ export const usePaymentVerification = () => {
       console.log('📋 Reference:', reference);
       console.log('🔑 Using Secret Key:', PAYMENT_API_CONFIG.SECRET_KEY);
       console.log('🌐 Request URL:', `${PAYMENT_API_CONFIG.BASE_URL}${PAYMENT_API_CONFIG.ENDPOINTS.VERIFY}/${reference}`);
-      console.log('📋 Verification Headers:', {
-        'Authorization': `Bearer ${PAYMENT_API_CONFIG.SECRET_KEY}`,
-        'Content-Type': 'application/json'
-      });
 
       const response = await axios.get(`${PAYMENT_API_CONFIG.BASE_URL}${PAYMENT_API_CONFIG.ENDPOINTS.VERIFY}/${reference}`, {
         headers: {
@@ -35,13 +31,7 @@ export const usePaymentVerification = () => {
         }
       });
 
-      console.log('✅ Payment verification response:', response.data);
-      console.log('🎯 Verification Success - Response Data:', {
-        success: response.data.success,
-        status: response.data.data?.status,
-        reference: response.data.data?.reference,
-        amount: response.data.data?.amount
-      });
+      console.log('Payment verification response:', response.data);
 
       const result: PaymentVerificationResult = {
         success: true,

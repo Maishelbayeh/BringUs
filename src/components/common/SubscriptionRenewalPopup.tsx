@@ -131,10 +131,6 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
       console.log('🚀 Payment Initialize Request Body:', JSON.stringify(paymentData, null, 2));
       console.log('🔑 Using Secret Key:', PAYMENT_API_CONFIG.SECRET_KEY);
       console.log('🌐 Request URL:', `${PAYMENT_API_CONFIG.BASE_URL}${PAYMENT_API_CONFIG.ENDPOINTS.CHARGES}`);
-      console.log('📋 Payment Headers:', {
-        'Authorization': `Bearer ${PAYMENT_API_CONFIG.SECRET_KEY}`,
-        'Content-Type': 'application/json'
-      });
 
       const response = await axios.post(`${PAYMENT_API_CONFIG.BASE_URL}${PAYMENT_API_CONFIG.ENDPOINTS.CHARGES}`, paymentData, {
         headers: {
@@ -143,13 +139,7 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
         }
       });
 
-      console.log('✅ Payment response:', response.data);
-      console.log('🎯 Payment Success - Response Data:', {
-        success: response.data.success,
-        reference: response.data.data?.reference,
-        authorization_url: response.data.data?.authorization_url,
-        access_code: response.data.data?.access_code
-      });
+      console.log('Payment response:', response.data);
       setSuccess(t('subscription.paymentSuccess'));
       localStorage.setItem('authorization_url',response.data.data.authorization_url);
       localStorage.setItem('access_code',response.data.data.access_code);

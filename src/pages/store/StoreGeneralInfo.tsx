@@ -590,12 +590,12 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         hasFetchedData.current = true; // منع استدعاء متكرر
         setIsEditMode(true);
           try {
-          //CONSOLE.log('🔄 جلب بيانات المتجر مرة واحدة فقط...');
-          const store = await getStore(storeId,storeSlug);
-          if (store) {
-            setStoreData(store);
-            
-            // تحويل logo من array إلى الشكل المتوقع
+            //CONSOLE.log('🔄 جلب بيانات المتجر مرة واحدة فقط...');
+            const store = await getStore(storeId);
+            if (store) {
+              setStoreData(store);
+
+              // تحويل logo من array إلى الشكل المتوقع
             let logoData = { public_id: null as string | null, url: null as string | null };
             
             if (Array.isArray(store.logo) && store.logo.length > 0) {
