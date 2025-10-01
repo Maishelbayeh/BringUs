@@ -6,7 +6,6 @@ import CustomNumberInput from '../../components/common/CustomNumberInput';
 import CustomButton from '../../components/common/CustomButton';
 import { validateProductVariantForm } from './productVariantValidation';
 
-
 interface PaymentVariant {
   id: number;
   productId: number;
@@ -84,7 +83,6 @@ const PaymentVariantsDrawer = forwardRef<PaymentVariantsDrawerRef, PaymentVarian
 
   // Validate form whenever formData changes
   useEffect(() => {
-   
     //CONSOLE.log('PaymentVariantsDrawer useEffect - validation result:', isValid);
   }, [formData]);
 
@@ -114,7 +112,7 @@ const PaymentVariantsDrawer = forwardRef<PaymentVariantsDrawerRef, PaymentVarian
       price: formData.price
     };
 
-    const validationErrors = validateProductVariantForm(validationData, t);
+    const validationErrors = validateProductVariantForm(validationData, t, !!initialData);
     setErrors(validationErrors);
     
     const isValid = Object.keys(validationErrors).length === 0;

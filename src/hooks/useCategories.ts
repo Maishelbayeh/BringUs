@@ -46,7 +46,7 @@ const STORE_ID = getStoreId() || '';
 
     
     try {
-      const url = `https://bringus-backend.onrender.com/api/categories/store/${STORE_ID}`;
+      const url = `http://localhost:5001/api/categories/store/${STORE_ID}`;
       const res = await axios.get(url, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -66,7 +66,7 @@ const STORE_ID = getStoreId() || '';
   }, [hasLoaded, categories.length, showError]);
 
   // إضافة أو تعديل تصنيف
-  const saveCategory = async (form: any, editId?: string | number | null) => {
+  const saveCategory = async (form: any, editId?: string | number | null, _isRTL: boolean = false) => {
     //CONSOLE.log('Saving category with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
     // صورة افتراضية للكاتيجوري
@@ -101,11 +101,15 @@ const STORE_ID = getStoreId() || '';
     //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
-        
+         await axios.put(`http://localhost:5001/api/categories/${editId}`, payload, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
         //CONSOLE.log('Category updated successfully:', response.data);
         showSuccess('تم تعديل التصنيف بنجاح', 'نجح التحديث');
       } else {
-        
+         await axios.post('http://localhost:5001/api/categories', payload, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
         //CONSOLE.log('Category created successfully:', response.data);
         showSuccess('تم إضافة التصنيف بنجاح', 'نجح الإضافة');
       }
@@ -129,9 +133,14 @@ const STORE_ID = getStoreId() || '';
   };
 
   // حذف تصنيف
-  const deleteCategory = async () => {
+  const deleteCategory = async (categoryId: string | number) => {
+    //CONSOLE.log('Deleting category with id:', categoryId);
     try {
-     
+      await axios.delete(`http://localhost:5001/api/categories/${categoryId}?storeId=${STORE_ID}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      }); 
+        
+      //CONSOLE.log('Category deleted successfully:', response.data);
       showSuccess('تم حذف التصنيف بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
       await fetchCategories(true);
@@ -158,7 +167,7 @@ const STORE_ID = getStoreId() || '';
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
-      const res = await axios.post('https://bringus-backend.onrender.com/api/categories/upload-image', formData, {
+      const res = await axios.post('http://localhost:5001/api/categories/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       //CONSOLE.log('Image uploaded successfully:', res.data);

@@ -44,6 +44,7 @@ export interface UseValidationReturn {
  */
 export const useValidation = ({
   schema,
+
   onValidationChange
 }: UseValidationOptions): UseValidationReturn => {
   const { t } = useTranslation();
@@ -75,7 +76,7 @@ export const useValidation = ({
     const rule = extraRule || schema[fieldName];
     if (!rule) return undefined;
 
-    const error = validateField(value, rule, t);
+    const error = validateField(value, rule, t, fieldName);
     
     // تحديث الأخطاء
     setErrors(prev => {
@@ -193,7 +194,7 @@ export const useSimpleValidation = () => {
   const { t } = useTranslation();
   
   return {
-    validateRequired: (value: any): string | undefined => {
+    validateRequired: (value: any, _fieldName?: string): string | undefined => {
       if (value === undefined || value === null || value === '') {
         return t('validation.required', 'This field is required');
       }

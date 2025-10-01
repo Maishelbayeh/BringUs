@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowBack
+  ArrowBack,
 } from '@mui/icons-material';
 import CustomInput from '@/components/common/CustomInput';
 import CustomButton from '@/components/common/CustomButton';
@@ -10,7 +10,7 @@ import useLanguage from '@/hooks/useLanguage';
 
 const ForgotPassword: React.FC = () => {
   const { t } = useTranslation();
-  const { language} = useLanguage();
+  const { language: _language, toggleLanguage: _toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,9 +20,9 @@ const ForgotPassword: React.FC = () => {
 
   // Set document direction when language changes
   useEffect(() => {
-    document.dir = language === 'ARABIC' ? 'rtl' : 'ltr';
-    document.documentElement.lang = language === 'ARABIC' ? 'ar' : 'en';
-  }, [language]);
+    document.dir = _language === 'ARABIC' ? 'rtl' : 'ltr';
+    document.documentElement.lang = _language === 'ARABIC' ? 'ar' : 'en';
+  }, [_language]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +42,7 @@ const ForgotPassword: React.FC = () => {
     setMessage('');
 
     try {
-      const API_BASE_URL = 'https://bringus-backend.onrender.com/api';
+      const API_BASE_URL = 'http://localhost:5001/api';
       
       // Get base URL from current window location
       let baseUrl = `${window.location.protocol}//${window.location.host}`;
@@ -101,7 +101,7 @@ const ForgotPassword: React.FC = () => {
           className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
         >
           <Language className="w-5 h-5" />
-          {language === 'ARABIC' ? 'English' : 'العربية'}
+          {_language === 'ARABIC' ? 'English' : 'العربية'}
         </button> */}
 
         <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
@@ -144,7 +144,7 @@ const ForgotPassword: React.FC = () => {
         className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
       >
         <Language className="w-5 h-5" />
-        {language === 'ARABIC' ? 'English' : 'العربية'}
+        {_language === 'ARABIC' ? 'English' : 'العربية'}
       </button> */}
 
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
@@ -153,7 +153,7 @@ const ForgotPassword: React.FC = () => {
           onClick={handleBackToLogin}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6 transition-colors duration-200"
         >
-          <ArrowBack className={`w-5 h-5 ${language === 'ARABIC' ? 'rotate-180' : ''}`} />
+          <ArrowBack className={`w-5 h-5 ${_language === 'ARABIC' ? 'rotate-180' : ''}`} />
           {t('general.back')}
         </button>
 

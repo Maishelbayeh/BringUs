@@ -73,6 +73,13 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
     storageLimit: -1
   });
 
+  const [_newFeature, _setNewFeature] = useState<Feature>({
+    name: '',
+    nameAr: '',
+    description: '',
+    descriptionAr: '',
+    included: true
+  });
 
   // Populate form when editing
   useEffect(() => {
@@ -143,9 +150,28 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
     }));
   };
 
- 
+  // const addFeature = () => {
+  //   if (newFeature.name && newFeature.nameAr) {
+  //     setFormData(prev => ({
+  //       ...prev,
+  //       features: [...prev.features, { ...newFeature }]
+  //     }));
+  //     setNewFeature({
+  //       name: '',
+  //       nameAr: '',
+  //       description: '',
+  //       descriptionAr: '',
+  //       included: true
+  //     });
+  //   }
+  // };
 
-
+  // const removeFeature = (index: number) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     features: prev.features.filter((_, i) => i !== index)
+  //   }));
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,7 +181,7 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
       let response;
       if (isEdit && plan) {
         // Update existing plan
-        response = await axios.put(`https://bringus-backend.onrender.com/api/subscription-plans/${plan._id}`, formData, {
+        response = await axios.put(`http://localhost:5001/api/subscription-plans/${plan._id}`, formData, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -164,7 +190,7 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
         showSuccess(t('subscriptionPlans.planUpdated'));
       } else {
         // Create new plan
-        response = await axios.post('https://bringus-backend.onrender.com/api/subscription-plans', formData, {
+        response = await axios.post('http://localhost:5001/api/subscription-plans', formData, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }

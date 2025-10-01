@@ -134,7 +134,7 @@ export const validateAffiliateWithDuplicates = (
   }
 
   // Percent validation
-  if (form.percent === undefined || form.percent === null) {
+  if (form.percent === undefined || form.percent === null || String(form.percent) === '' || String(form.percent) === '') {
     errors.percent = t('validation.required');
   } else if (form.percent < 0 || form.percent > 100) {
     errors.percent = t('validation.numberRange', { min: 0, max: 100 });

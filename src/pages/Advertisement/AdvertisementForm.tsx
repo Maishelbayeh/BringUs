@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomRadioGroup from '../../components/common/CustomRadioGroup';
 import CustomInput from '../../components/common/CustomInput';
+// import FormImageGallery from '../../components/common/FormImageGallery';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import { createImageValidationFunction } from '../../validation/imageValidation';
 
@@ -64,7 +65,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
         const res = await fetch(base64);
         const blob = await res.blob();
         formData.append('file', blob, file.name || 'advertisement-image.png');
-        const uploadRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://bringus-backend.onrender.com/api/'}advertisements/upload-image`, {
+        const uploadRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api/'}advertisements/upload-image`, {
           method: 'POST',
           body: formData,
           headers: {

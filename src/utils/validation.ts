@@ -55,6 +55,7 @@ export const validateField = (
   value: any,
   rule: ValidationRule,
   t: TFunction,
+  _fieldName?: string
 ): string | undefined => {
   // Required validation
   if (rule.required) {
@@ -306,7 +307,7 @@ export const validateForm = (
 
   for (const [fieldName, rule] of Object.entries(schema)) {
     const value = data[fieldName];
-    const error = validateField(value, rule, t);
+    const error = validateField(value, rule, t, fieldName);
     if (error) {
       errors[fieldName] = error;
     }

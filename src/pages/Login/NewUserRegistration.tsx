@@ -40,7 +40,7 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
   });
 
   // إضافة state للأفاتار والعنوان
-  const [, setAvatarFile] = useState<File | null>(null);
+  const [_avatarFile, setAvatarFile] = useState<File | null>(null);
   const [addressData, setAddressData] = useState({
     street: '',
     city: '',

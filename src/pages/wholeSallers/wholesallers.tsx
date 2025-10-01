@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import SallersDrawer from './componnent/sallersDrawer';
@@ -33,10 +33,10 @@ const WholesallersPage = () => {
   const token = localStorage.getItem('token') || '';
 
   const {
-   
     error,
     wholesalers,
     getWholesalers,
+
     deleteWholesaler,
   } = useWholesalers(storeId, token);
 
@@ -59,7 +59,11 @@ const WholesallersPage = () => {
     { key: 'address', label: { en: 'Address', ar: 'العنوان' } }
   ];
 
-  
+  //-------------------------------------------- handleFormChange -------------------------------------------
+  // const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  //   const { name, value } = e.target;
+  //   setForm(prev => ({ ...prev, [name]: value }));
+  // };
 
   //-------------------------------------------- handleDrawerOpen -------------------------------------------
   const handleDrawerOpen = () => {

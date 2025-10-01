@@ -9,7 +9,7 @@ interface ToastContainerProps {
 }
 
 const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => {
-  const {  isRTL } = useLanguage();
+  const { isRTL } = useLanguage();
   
   // //CONSOLE.log('ToastContainer rendered with toasts:', toasts.length, toasts);
   // //CONSOLE.log('Current language:', language, 'isRTL:', isRTL);

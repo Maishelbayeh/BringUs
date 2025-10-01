@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useValidation } from '../../../hooks/useValidation';
 import { deliveryValidationSchema, DeliveryFormData } from '../../../validation/deliveryValidation';
 import { useStore } from '../../../hooks/useStore';
-import {  getStoreInfo } from '../../../utils/storeUtils';
+import { getStoreId, getStoreInfo } from '../../../utils/storeUtils';
 
 interface Props {
   area: DeliveryArea | null;
@@ -48,7 +48,7 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, language,
       try {
         const storeSlug = getStoreInfo().slug;
         if (storeSlug) {
-          const storeData = await getStore(storeSlug);
+          const storeData = await getStore(getStoreId());
           if (storeData?.whatsappNumber) {
             setStoreWhatsappNumber(storeData.whatsappNumber);
             // إذا لم يكن هناك رقم واتساب محدد، استخدم رقم المتجر كافتراضي

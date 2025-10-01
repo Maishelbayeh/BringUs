@@ -207,7 +207,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         </div>
 
         {/* Bank Transfer Details */}
-        {form.paymentMethod === 'bank_transfer' && (
+        {/* {form.paymentMethod === 'bank_transfer' && (
           <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
             <h3 className="text-lg font-semibold text-blue-800 mb-4">
               {t('affiliation.bankTransferDetails') || 'تفاصيل التحويل البنكي'}
@@ -245,10 +245,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
               />
             </div>
           </div>
-        )}
+        )} */}
 
         {/* PayPal Details */}
-        {form.paymentMethod === 'paypal' && (
+        {/* {form.paymentMethod === 'paypal' && (
           <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
             <h3 className="text-lg font-semibold text-blue-800 mb-4">
               {t('affiliation.paypalDetails') || 'تفاصيل PayPal'}
@@ -272,7 +272,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
               />
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Footer */}

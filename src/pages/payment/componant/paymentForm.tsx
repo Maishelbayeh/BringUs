@@ -127,7 +127,15 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
     { value: 'other', label: t('paymentMethods.methodTypes.other') },
   ];
 
-  
+  // Image type options
+  // const IMAGE_TYPES = [
+  //   { value: 'lahza', label: t('paymentMethods.methodTypes.lahza') },
+  //   { value: 'logo', label: t('paymentMethods.imageTypes.logo') },
+  //   { value: 'banner', label: t('paymentMethods.imageTypes.banner') },
+  //   { value: 'qr_code', label: t('paymentMethods.imageTypes.qr_code') },
+  //   { value: 'payment_screenshot', label: t('paymentMethods.imageTypes.payment_screenshot') },
+  //   { value: 'other', label: t('paymentMethods.imageTypes.other') },
+  // ];
 
   useEffect(() => {
     if (method) {
@@ -205,7 +213,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
       paymentImages: formData.paymentImages || []
     };
 
-    const validationErrors = validatePaymentForm(validationData, t);
+    const validationErrors = validatePaymentForm(validationData, t, isEditMode);
     setErrors(validationErrors);
     
     const isValid = Object.keys(validationErrors).length === 0;
@@ -245,7 +253,42 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
     clearError('qrCode');
   };
 
- 
+  // const handlePaymentImageFileChange = (files: File | File[] | null, index: number) => {
+  //   if (files instanceof File) {
+  //     setPaymentImageFiles(prev => {
+  //       const newFiles = [...prev];
+  //       newFiles[index] = { ...newFiles[index], file: files };
+  //       return newFiles;
+  //     });
+  //   } else if (Array.isArray(files) && files.length > 0) {
+  //     setPaymentImageFiles(prev => {
+  //       const newFiles = [...prev];
+  //       newFiles[index] = { ...newFiles[index], file: files[0] };
+  //       return newFiles;
+  //     });
+  //   }
+  //   clearError('paymentImages');
+  // };
+
+  // const addPaymentImage = () => {
+  //   setPaymentImageFiles(prev => [...prev, {
+  //     file: new File([], ''),
+  //     imageType: 'other',
+  //     altText: ''
+  //   }]);
+  // };
+
+  // const removePaymentImage = (index: number) => {
+  //   setPaymentImageFiles(prev => prev.filter((_, i) => i !== index));
+  // };
+
+  // const updatePaymentImage = (index: number, field: 'imageType' | 'altText', value: string) => {
+  //   setPaymentImageFiles(prev => {
+  //     const newFiles = [...prev];
+  //     newFiles[index] = { ...newFiles[index], [field]: value };
+  //     return newFiles;
+  //   });
+  // };
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));

@@ -455,7 +455,7 @@ const OrdersPage: React.FC = () => {
   };
 
 //-------------------------------------------- renderActions -------------------------------------------
-  const renderActions = ( item: any) => {
+  const renderActions = (_value: any, item: any) => {
     const [isDeleting, setIsDeleting] = useState(false);
     
     const handleDelete = async () => {

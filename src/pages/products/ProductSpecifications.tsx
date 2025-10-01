@@ -5,22 +5,25 @@ import ProductSpecificationsDrawer from './ProductSpecificationsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
-import PermissionModal from '../../components/common/PermissionModal';
+  import PermissionModal from '../../components/common/PermissionModal';
 import { useStoreUrls } from '@/hooks/useStoreUrls';
+// import { validateSpecificationWithDuplicates } from '../../validation/specificationsValidation'; // No longer needed here
 
 const ProductSpecifications: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ARABIC' || i18n.language === 'ar';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingSpec, setEditingSpec] = useState<any>(null);
+  // const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({}); // No longer needed here
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [specToDelete, setSpecToDelete] = useState<any>(null);
+  const [specToDelete,  ] = useState<any>(null);
   const [search, setSearch] = useState('');
   const { storeSlug } = useStoreUrls();
   const {
     specifications,
     loading,
     fetchSpecifications,
+    // saveSpecification, // Will be called from the Drawer
     deleteSpecification,
   } = useProductSpecifications();
 
@@ -43,10 +46,9 @@ const ProductSpecifications: React.FC = () => {
 
   const handleDelete = async (item: any) => {
     try {
-      setSpecToDelete(item);
-      setShowDeleteModal(true);
+      await deleteSpecification(item._id || item.id);
     } catch (error) {
-      console.error('Error deleting specification:', error);
+      //CONSOLE.error('Error deleting specification:', error);
     }
   };
 
@@ -249,12 +251,14 @@ const ProductSpecifications: React.FC = () => {
       {/* Empty State */}
       {!loading && filteredSpecifications.length === 0 && (
         <div className="bg-white rounded-2xl p-8 text-center">
+         
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             {isRTL ? 'لا توجد مواصفات منتجات' : 'No Product Specifications'}
           </h3>
           <p className="text-gray-600 mb-6">
             {isRTL ? 'ابدأ بإضافة مواصفات المنتجات لتنظيم منتجاتك بشكل أفضل' : 'Start by adding product specifications to better organize your products'}
           </p>
+         
         </div>
       )}
       
@@ -268,17 +272,7 @@ const ProductSpecifications: React.FC = () => {
       <PermissionModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={async () => {
-          if (specToDelete) {
-            try {
-              await deleteSpecification();
-              setShowDeleteModal(false);
-              setSpecToDelete(null);
-            } catch (error) {
-              console.error('Error deleting specification:', error);
-            }
-          }
-        }}
+        onConfirm={() => handleDelete(specToDelete)}
         title={t('products.deleteSpecConfirmTitle') || 'Confirm Delete Specification'}
         message={t('products.deleteSpecConfirmMessage') || 'Are you sure you want to delete this specification?'}
         itemName={specToDelete ? (isRTL ? specToDelete.titleAr : specToDelete.titleEn) : ''}

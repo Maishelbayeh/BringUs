@@ -374,7 +374,14 @@ export const validateProductWithDuplicates = (
     }
   }
 
-  
+  // فالديشين مقارنة الأسعار
+  if (form.price && form.costPrice) {
+    // const _price = typeof form.price === 'string' ? parseFloat(form.price) : form.price;
+    // const _costPrice = typeof form.costPrice === 'string' ? parseFloat(form.costPrice) : form.costPrice;
+    // const _compareAtPrice = form.compareAtPrice ? 
+    //   (typeof form.compareAtPrice === 'string' ? parseFloat(form.compareAtPrice) : form.compareAtPrice) : undefined;
+    
+  }
 
   // فالديشين الباركود (إذا كان موجود)
   if (form.barcodes && Array.isArray(form.barcodes)) {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
-import { getStoreId, getStoreInfo } from '../utils/storeUtils';
+import { getStoreId } from '../utils/storeUtils';
 import { getAuthHeaders } from '../utils/apiUtils';
 import { useStore } from './useStore';
 
@@ -63,7 +63,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
     
     try {
       const storeId = getStoreId();
-      const storeSlug = getStoreInfo().slug;
+      // const _storeSlug = getStoreInfo().slug;
       // جلب البيانات من endpoints المتاحة
       const [
         productsRes,
@@ -86,7 +86,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
       console.log('Sample product:', products[0]);
       
       // جلب معلومات المتجر باستخدام useStore (سيتم تخزينها في localStorage تلقائياً)
-      const store = await getStore(storeSlug);
+      const store = await getStore(storeId);
       console.log('Store data:', store);
       console.log('Store currency:', store?.settings?.currency);
 
