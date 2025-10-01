@@ -45,7 +45,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
   const fetchPlans = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('https://https://bringus-backend.onrender.com/api/subscription-plans/active', {
+      const response = await axios.get('https://bringus-backend.onrender.com/api/subscription-plans/active', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

@@ -64,7 +64,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
         const res = await fetch(base64);
         const blob = await res.blob();
         formData.append('file', blob, file.name || 'advertisement-image.png');
-        const uploadRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://https://bringus-backend.onrender.com/api/'}advertisements/upload-image`, {
+        const uploadRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://bringus-backend.onrender.com/api/'}advertisements/upload-image`, {
           method: 'POST',
           body: formData,
           headers: {
