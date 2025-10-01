@@ -87,7 +87,7 @@ const StoresManagement: React.FC = () => {
   const fetchPlans = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:5001/api/subscription-plans', {
+      const response = await axios.get('https://https://bringus-backend.onrender.com/api/subscription-plans', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -116,7 +116,7 @@ const StoresManagement: React.FC = () => {
       });
 
       const response = await axios.get<{ success: boolean; data: StoreSubscription[]; pagination: any }>(
-        `http://localhost:5001/api/subscription/stores?${params}`,
+        `https://https://bringus-backend.onrender.com/api/subscription/stores?${params}`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -220,7 +220,7 @@ const StoresManagement: React.FC = () => {
     setIsExtending(true);
     try {
       const response = await axios.patch(
-        `http://localhost:5001/api/subscription/stores/${selectedStore._id}/end-date`,
+        `https://https://bringus-backend.onrender.com/api/subscription/stores/${selectedStore._id}/end-date`,
         {
           endDate: extendForm.endDate.toISOString(),
           reason: extendForm.reason || 'Admin extension'
@@ -276,7 +276,7 @@ const StoresManagement: React.FC = () => {
     setIsExtendingTrial(true);
     try {
       const response = await axios.post(
-        `http://localhost:5001/api/subscription/stores/${selectedStore._id}/trial`,
+        `https://https://bringus-backend.onrender.com/api/subscription/stores/${selectedStore._id}/trial`,
         {
           days: trialForm.days
         },

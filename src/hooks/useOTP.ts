@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = 'https://https://bringus-backend.onrender.com/api';
 
 const useOTP = () => {
   const [loading, setLoading] = useState(false);

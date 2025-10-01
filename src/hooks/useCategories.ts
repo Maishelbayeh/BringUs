@@ -46,7 +46,7 @@ const STORE_ID = getStoreId() || '';
 
     
     try {
-      const url = `http://localhost:5001/api/categories/store/${STORE_ID}`;
+      const url = `https://https://bringus-backend.onrender.com/api/categories/store/${STORE_ID}`;
       const res = await axios.get(url, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -158,7 +158,7 @@ const STORE_ID = getStoreId() || '';
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
-      const res = await axios.post('http://localhost:5001/api/categories/upload-image', formData, {
+      const res = await axios.post('https://https://bringus-backend.onrender.com/api/categories/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       //CONSOLE.log('Image uploaded successfully:', res.data);
