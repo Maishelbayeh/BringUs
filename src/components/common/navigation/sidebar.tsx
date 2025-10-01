@@ -48,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
-  const { urls, generateUrl } = useStoreUrls();
+  const {  generateUrl } = useStoreUrls();
 
   const [expandedRegion, setExpandedRegion] = useState<number | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -68,7 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   // الاستماع لتحديث بيانات المتجر
   useEffect(() => {
     const handleStoreDataUpdate = (event: CustomEvent) => {
-      const { nameAr, nameEn, logo } = event.detail;
+      const {  logo } = event.detail;
       const newStoreName = language === 'ARABIC' ? localStorage.getItem('storeNameAr') : localStorage.getItem('storeNameEn');
       setStoreName(newStoreName || 'BringUs');
       if (logo?.url) {

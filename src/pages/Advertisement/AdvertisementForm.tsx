@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomRadioGroup from '../../components/common/CustomRadioGroup';
 import CustomInput from '../../components/common/CustomInput';
-import FormImageGallery from '../../components/common/FormImageGallery';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import { createImageValidationFunction } from '../../validation/imageValidation';
 

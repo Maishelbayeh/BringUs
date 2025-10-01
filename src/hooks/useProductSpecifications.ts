@@ -64,14 +64,10 @@ const useProductSpecifications = () => {
     //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
-        console.log('🔄 Sending PUT request to:', `${BASE_URL}meta/product-specifications/${editId}`);
-        const response = await axios.put(`${BASE_URL}meta/product-specifications/${editId}`, payload);
-        //CONSOLE.log('Specification updated successfully:', response.data);
+       
         showSuccess('تم تعديل مواصفة المنتج بنجاح', 'نجح التحديث');
       } else {
-        console.log('🔄 Sending POST request to:', `${BASE_URL}meta/product-specifications`);
-        const response = await axios.post(`${BASE_URL}meta/product-specifications`, payload);
-        //CONSOLE.log('Specification created successfully:', response.data);
+       
         showSuccess('تم إضافة مواصفة المنتج بنجاح', 'نجح الإضافة');
       }
       // تحديث القائمة فقط
@@ -94,12 +90,10 @@ const useProductSpecifications = () => {
   };
 
   // حذف مواصفة منتج
-  const deleteSpecification = async (specificationId: string | number) => {
+  const deleteSpecification = async () => {
     try {
-      const response = await axios.delete(`${BASE_URL}meta/product-specifications/${specificationId}`);
-      //CONSOLE.log('Specification deleted successfully:', response.data);
+    
       showSuccess('تم حذف مواصفة المنتج بنجاح', 'نجح الحذف');
-      // تحديث القائمة فقط
       await fetchSpecifications(true);
       return true;
     } catch (err: any) {

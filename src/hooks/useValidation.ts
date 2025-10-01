@@ -44,8 +44,6 @@ export interface UseValidationReturn {
  */
 export const useValidation = ({
   schema,
-  validateOnChange = true,
-  validateOnBlur = true,
   onValidationChange
 }: UseValidationOptions): UseValidationReturn => {
   const { t } = useTranslation();
@@ -77,7 +75,7 @@ export const useValidation = ({
     const rule = extraRule || schema[fieldName];
     if (!rule) return undefined;
 
-    const error = validateField(value, rule, t, fieldName);
+    const error = validateField(value, rule, t);
     
     // تحديث الأخطاء
     setErrors(prev => {

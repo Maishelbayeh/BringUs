@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomButton from '../../components/common/CustomButton';
 import CustomSelect from '../../components/common/CustomSelect';
 import CustomInput from '../../components/common/CustomInput';
 import CustomSwitch from '../../components/common/CustomSwitch';
 import { useTranslation } from 'react-i18next';
 import useCategories from '../../hooks/useCategories';
-import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
 import { useValidation } from '../../hooks/useValidation';
 import useProductSpecifications from '../../hooks/useProductSpecifications';
 import { specificationValidationSchema, validateSpecificationWithDuplicates } from '../../validation/specificationsValidation';

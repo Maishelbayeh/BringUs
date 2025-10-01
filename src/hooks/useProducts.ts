@@ -52,13 +52,7 @@ const useProducts = () => {
       
       // Log barcodes for debugging
       const productsData = res.data.data || res.data;
-      if (Array.isArray(productsData)) {
-        productsData.forEach((product: any, index: number) => {
-          //CONSOLE.log(`🔍 Product ${index + 1} barcodes:`, product.barcodes);
-          //CONSOLE.log(`🔍 Product ${index + 1} barcodes type:`, typeof product.barcodes);
-          //CONSOLE.log(`🔍 Product ${index + 1} barcodes is array:`, Array.isArray(product.barcodes));
-        });
-      }
+     
       
       setProducts(productsData);
       setHasLoaded(true); // تم تحميل البيانات
@@ -293,15 +287,9 @@ const useProducts = () => {
       //CONSOLE.log('Store field in payload:', payload.store);
     try {
       if (editId) {
-        //CONSOLE.log('🔍 Updating product with ID:', editId);
-        //CONSOLE.log('🔍 Update URL:', `${BASE_URL}meta/products/${editId}`);
-        const response = await axios.put(`${BASE_URL}meta/products/${editId}`, payload);
-        showSuccess('تم تعديل المنتج بنجاح', 'نجح التحديث');
+      
       } else {
-        //CONSOLE.log('🔍 Creating new product');
-        //CONSOLE.log('🔍 Create URL:', `${BASE_URL}products`);
-        const response = await axios.post(`${BASE_URL}products`, payload);
-        //CONSOLE.log('Product created successfully:', response.data);
+        
         showSuccess('تم إضافة المنتج بنجاح', 'نجح الإضافة');
       }
       // تحديث القائمة فقط

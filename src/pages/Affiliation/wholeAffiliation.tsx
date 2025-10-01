@@ -51,7 +51,7 @@ const AffiliationPage = () => {
     {
       key: 'firstName',
       label: { en: t('affiliation.firstName'), ar: t('affiliation.firstName') },
-      render: (value: string, row: any) => (
+      render: ( row: any) => (
         <span
           className="text-primary font-bold cursor-pointer hover:underline"
           onClick={() => { setSelectedAffiliate(row); setPaymentDrawerOpen(true); }}

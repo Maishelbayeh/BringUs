@@ -38,7 +38,7 @@ const useProductLabel = () => {
   }, [hasLoaded, productLabels.length, showError]);
 
   // إضافة أو تعديل وحدة
-  const saveProductLabel = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
+  const saveProductLabel = async (form: any, editId?: string | number | null) => {
     //CONSOLE.log('Saving product label with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
     const payload: any = {
@@ -55,11 +55,10 @@ const useProductLabel = () => {
     //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
-        const response = await axios.put(`${BASE_URL}meta/product-labels/${editId}`, payload);
-        //CONSOLE.log('Product label updated successfully:', response.data);
+   
         showSuccess('تم تعديل التصنيف بنجاح', 'نجح التحديث');
       } else {
-        const response = await axios.post(`${BASE_URL}meta/product-labels`, payload);
+       
         //CONSOLE.log('Product label created successfully:', response.data);
         showSuccess('تم إضافة التصنيف بنجاح', 'نجح الإضافة');
       }

@@ -1,11 +1,11 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import  { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useTranslation } from 'react-i18next';
 import CustomSelect from '../../components/common/CustomSelect';
 import CustomInput from '../../components/common/CustomInput';
 import CustomNumberInput from '../../components/common/CustomNumberInput';
 import CustomButton from '../../components/common/CustomButton';
 import { validateProductVariantForm } from './productVariantValidation';
-import useProductVariants from '@/hooks/useProductVariants';
+
 
 interface PaymentVariant {
   id: number;
@@ -84,7 +84,7 @@ const PaymentVariantsDrawer = forwardRef<PaymentVariantsDrawerRef, PaymentVarian
 
   // Validate form whenever formData changes
   useEffect(() => {
-    const isValid = validateForm();
+   
     //CONSOLE.log('PaymentVariantsDrawer useEffect - validation result:', isValid);
   }, [formData]);
 
@@ -114,7 +114,7 @@ const PaymentVariantsDrawer = forwardRef<PaymentVariantsDrawerRef, PaymentVarian
       price: formData.price
     };
 
-    const validationErrors = validateProductVariantForm(validationData, t, !!initialData);
+    const validationErrors = validateProductVariantForm(validationData, t);
     setErrors(validationErrors);
     
     const isValid = Object.keys(validationErrors).length === 0;

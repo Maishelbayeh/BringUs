@@ -86,7 +86,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
       console.log('Sample product:', products[0]);
       
       // جلب معلومات المتجر باستخدام useStore (سيتم تخزينها في localStorage تلقائياً)
-      const store = await getStore(storeId,storeSlug);
+      const store = await getStore(storeSlug);
       console.log('Store data:', store);
       console.log('Store currency:', store?.settings?.currency);
 

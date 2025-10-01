@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { 
   TrophyIcon, 
-  UserIcon
+
 } from '@heroicons/react/24/outline';
 import useLanguage from '../../../hooks/useLanguage';
 import useTopUsers from '../../../hooks/useTopUsers';

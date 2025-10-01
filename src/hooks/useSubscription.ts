@@ -45,7 +45,7 @@ export const useSubscription = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [error] = useState<string>('');
 
   // جلب حالة الاشتراك من API
   const fetchSubscriptionStatus = async () => {

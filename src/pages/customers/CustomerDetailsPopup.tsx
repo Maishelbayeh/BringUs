@@ -57,9 +57,6 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
   orders,
   isRTL,
   t,
-  getLastOrderDate,
-  getTotalSpent,
-  getAverageOrderValue,
   ordersLoading = false,
 }) => {
   const navigate = useNavigate();

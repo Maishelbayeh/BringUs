@@ -1,32 +1,9 @@
 // src/validation/examples.ts
 // أمثلة على كيفية استخدام نظام الفالديشين الجديد
 
-import { useValidation, useSimpleValidation } from '../hooks/useValidation';
+import { useValidation } from '../hooks/useValidation';
 import { ValidationSchema, COMMON_SCHEMAS } from '../utils/validation';
 
-// مثال 1: فورم بسيط باستخدام useSimpleValidation
-export const SimpleFormExample = () => {
-  const { validateRequired, validateEmail, validateMinLength } = useSimpleValidation();
-  
-  const validateFormField = (name: string, value: string) => {
-    switch (name) {
-      case 'name':
-        return validateRequired(value) || validateMinLength(value, 2);
-      case 'email':
-        return validateRequired(value) || validateEmail(value);
-      default:
-        return undefined;
-    }
-  };
-  
-  // استخدام الدالة في الكومبوننت
-  const handleFieldChange = (name: string, value: string) => {
-    const error = validateFormField(name, value);
-    if (error) {
-      console.log(`خطأ في ${name}: ${error}`);
-    }
-  };
-};
 
 // مثال 2: فورم متقدم باستخدام useValidation
 export const AdvancedFormExample = () => {

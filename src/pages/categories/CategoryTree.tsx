@@ -13,17 +13,12 @@ interface CategoryTreeProps {
   level?: number;
 }
 
-const STORE_ID_KEY = 'storeId';
-const DEFAULT_STORE_ID = '687505893fbf3098648bfe16';
-
 const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, isRTL, onAdd, onEdit, onDelete, level = 0 }) => {
   const [expanded, setExpanded] = useState<{ [key: number]: boolean }>({});
   const { i18n } = useTranslation();
   const lang = i18n.language;
   const navigate = useNavigate();
   const { storeSlug } = useStoreUrls();
-  //CONSOLE.log(categories);
-  const storeId = typeof window !== 'undefined' ? (localStorage.getItem(STORE_ID_KEY) || DEFAULT_STORE_ID) : DEFAULT_STORE_ID;
   const toggleExpand = (id: number) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   };

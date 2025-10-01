@@ -21,7 +21,7 @@ const Signup: React.FC = () => {
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   
-  const [formData, setFormData] = useState({
+  const [formData] = useState({
     firstName: '',
     lastName: '',
     email: '',
@@ -30,7 +30,7 @@ const Signup: React.FC = () => {
     phone: ''
   });
 
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeTerms] = useState(false);
   const [errors, setErrors] = useState<{ 
     firstName?: string; 
     lastName?: string; 
@@ -40,7 +40,7 @@ const Signup: React.FC = () => {
     phone?: string; 
     terms?: string; 
   }>({});
-  const [isLoading, setIsLoading] = useState(false);
+ 
   const [showStoreWizard, setShowStoreWizard] = useState(false);
 
   
@@ -93,7 +93,7 @@ const Signup: React.FC = () => {
     
     if (!validateForm()) return;
     
-    setIsLoading(true);
+   
     
     try {
       // Simulate API call
@@ -104,7 +104,7 @@ const Signup: React.FC = () => {
     } catch (error) {
       //CONSOLE.error('Signup error:', error);
     } finally {
-      setIsLoading(false);
+      
     }
   };
 

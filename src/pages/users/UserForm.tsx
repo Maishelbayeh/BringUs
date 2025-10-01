@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   Visibility, 
   VisibilityOff, 
-  PhotoCamera
+ 
 } from '@mui/icons-material';
 import CustomInput from '@/components/common/CustomInput';
 
@@ -53,9 +53,9 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
 
   // Allow dynamic keys like 'address.street'
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-  const [isLoading, setIsLoading] = useState(false);
+ 
   
-  const { createUser, updateUser, loading: apiLoading, error: apiError, checkEmailExists, checkPhoneExists, getAllUsers } = useUser();
+  const { createUser, updateUser, checkEmailExists, checkPhoneExists, getAllUsers } = useUser();
   const { showSuccess, showError } = useToastContext();
 
   const isEditMode = !!user;
@@ -249,7 +249,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
     }
     
     console.log('✅ Validation passed, proceeding with submission...');
-    setIsLoading(true);
+    
 
     try {
       const storeId = getStoreId();
@@ -351,7 +351,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
         t('general.error')
       );
     } finally {
-      setIsLoading(false);
+      
     }
   };
 

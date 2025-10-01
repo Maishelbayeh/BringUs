@@ -5,7 +5,7 @@ import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomButton from '../../components/common/CustomButton';
 import CustomSwitch from '../../components/common/CustomSwitch';
-import { socialIcons, platformOptions } from './Testimonial';
+import { platformOptions } from './Testimonial';
 import { type Testimonial } from '@/hooks/useTestimonials';
 import { createImageValidationFunction } from '../../validation/imageValidation';
 

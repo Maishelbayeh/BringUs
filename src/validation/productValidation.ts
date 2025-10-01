@@ -1,7 +1,7 @@
 // src/validation/productValidation.ts
 // فالديشين المنتجات باستخدام النظام العام
 
-import { ValidationSchema, COMMON_SCHEMAS, PATTERNS, validateUnique } from '../utils/validation';
+import { ValidationSchema, COMMON_SCHEMAS, PATTERNS } from '../utils/validation';
 import { TFunction } from 'i18next';
 import { validateImageFilesI18n, validateImageFileI18n } from './imageValidation';
 
@@ -374,14 +374,7 @@ export const validateProductWithDuplicates = (
     }
   }
 
-  // فالديشين مقارنة الأسعار
-  if (form.price && form.costPrice) {
-    const price = typeof form.price === 'string' ? parseFloat(form.price) : form.price;
-    const costPrice = typeof form.costPrice === 'string' ? parseFloat(form.costPrice) : form.costPrice;
-    const compareAtPrice = form.compareAtPrice ? 
-      (typeof form.compareAtPrice === 'string' ? parseFloat(form.compareAtPrice) : form.compareAtPrice) : undefined;
-    
-  }
+  
 
   // فالديشين الباركود (إذا كان موجود)
   if (form.barcodes && Array.isArray(form.barcodes)) {

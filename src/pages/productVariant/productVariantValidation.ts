@@ -15,7 +15,7 @@ interface ValidationErrors {
 export const validateProductVariantForm = (
   data: ProductVariantFormData, 
   t: any,
-  isEditMode: boolean = false
+  
 ): ValidationErrors => {
   const errors: ValidationErrors = {};
 
