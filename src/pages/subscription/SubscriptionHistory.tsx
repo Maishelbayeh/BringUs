@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   CreditCardIcon,
   CalendarIcon,
+  CurrencyDollarIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
@@ -78,7 +79,7 @@ const SubscriptionHistory: React.FC = () => {
       key: 'action',
       label: { en: 'Action', ar: 'الإجراء' },
       type: 'status' as const,
-      render: (value: string) => (
+      render: (value: string, item: SubscriptionHistoryItem) => (
         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getActionColor(value)}`}>
           {getActionText(value)}
         </span>
@@ -88,7 +89,7 @@ const SubscriptionHistory: React.FC = () => {
       key: 'planName',
       label: { en: 'Plan Name', ar: 'اسم الخطة' },
       type: 'text' as const,
-      render: ( item: SubscriptionHistoryItem) => (
+      render: (value: string, item: SubscriptionHistoryItem) => (
         <div>
           <div className="text-sm font-medium text-gray-900">
             {isRTL ? item.details.planNameAr : item.details.planName}
@@ -103,7 +104,7 @@ const SubscriptionHistory: React.FC = () => {
       key: 'price',
       label: { en: 'Price', ar: 'السعر' },
       type: 'text' as const,
-      render: ( item: SubscriptionHistoryItem) => (
+      render: (value: string, item: SubscriptionHistoryItem) => (
         <div>
           <div className="text-sm font-medium text-gray-900">
             {getCurrencySymbol(item.details.currency)}{item.details.price}
@@ -118,7 +119,7 @@ const SubscriptionHistory: React.FC = () => {
       key: 'startDate',
       label: { en: 'Start Date', ar: 'تاريخ البداية' },
       type: 'date' as const,
-      render: ( item: SubscriptionHistoryItem) => (
+      render: ( _value: string, item: SubscriptionHistoryItem) => (
         <div className="text-sm text-gray-900">
           {formatDate(item.details.startDate)}
         </div>
@@ -128,7 +129,7 @@ const SubscriptionHistory: React.FC = () => {
       key: 'endDate',
       label: { en: 'End Date', ar: 'تاريخ الانتهاء' },
       type: 'date' as const,
-      render: ( item: SubscriptionHistoryItem) => (
+      render: ( _value: string, item: SubscriptionHistoryItem) => (
         <div className="text-sm text-gray-900">
           {formatDate(item.details.endDate)}
         </div>
@@ -138,7 +139,7 @@ const SubscriptionHistory: React.FC = () => {
       key: 'performedAt',
       label: { en: 'Performed At', ar: 'تاريخ التنفيذ' },
       type: 'date' as const,
-      render: ( item: SubscriptionHistoryItem) => (
+      render: ( _value: string, item: SubscriptionHistoryItem) => (
         <div className="text-sm text-gray-900">
           {formatDate(item.performedAt)}
         </div>
@@ -211,7 +212,7 @@ const getDaysUntilExpiry = () => {
     setIsDisablingAutoRenew(true);
     try {
       const response = await axios.patch(
-        `https://bringus-backend.onrender.com/api/subscription/stores/${storeId}/disable-auto-renewal`,
+        `http://localhost:5001/api/subscription/stores/${storeId}/disable-auto-renewal`,
         {},
         {
           headers: {
@@ -246,7 +247,10 @@ const getDaysUntilExpiry = () => {
     }
   };
 
-
+  // معالجة تغيير الصفحة
+  const handlePageChange = (newPage: number) => {
+    fetchHistory(newPage);
+  };
 
   // تحويل البيانات لتتناسب مع CustomTable
   const tableData = history.map(item => ({

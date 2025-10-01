@@ -327,7 +327,7 @@ const OrderDetailPage: React.FC = () => {
                       key: 'specifications', 
                       label: { ar: 'المواصفات', en: 'Specifications' }, 
                       type: 'text',
-                      render: ( item: any) => (
+                      render: ( _value, item: any) => (
                         <div className="text-sm">
                           {item.selectedSpecifications && item.selectedSpecifications.length > 0 ? (
                             <div className="space-y-1">
@@ -352,7 +352,7 @@ const OrderDetailPage: React.FC = () => {
                       key: 'colors', 
                       label: { ar: 'الألوان', en: 'Colors' }, 
                       type: 'text',
-                      render: (item: any) => (
+                      render: (_value: any, item: any) => (
                         <div className="flex items-center gap-2">
                           {item.selectedColors && item.selectedColors.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
