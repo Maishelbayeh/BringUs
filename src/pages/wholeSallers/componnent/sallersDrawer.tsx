@@ -128,6 +128,18 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
     }
   };
 
+  const handlePhoneChange = (value: string) => {
+    const newForm = { ...form, mobile: value };
+    setForm(newForm);
+    
+    // Clear error for mobile field when user starts typing
+    if (errors.mobile) {
+      const newErrors = { ...errors };
+      delete newErrors.mobile;
+      setErrors(newErrors);
+    }
+  };
+
   const handleSave = async () => {
     // Prepare form data for validation
     const formData = {
@@ -196,6 +208,7 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
           <SallersForm 
             form={form} 
             onFormChange={handleFormChange} 
+            onPhoneChange={handlePhoneChange}
             isRTL={isRTL} 
             isEdit={isEdit} 
             errors={errors} 

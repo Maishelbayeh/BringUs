@@ -2,16 +2,18 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import CustomInput from '../../../components/common/CustomInput';
 import CustomTextArea from '../../../components/common/CustomTextArea';
+import CustomPhoneInput from '../../../components/common/CustomPhoneInput';
 
 interface SallersFormProps {
   form: any;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onPhoneChange?: (value: string) => void;
   isRTL: boolean;
   isEdit: boolean;
   errors: { [key: string]: string };
 }
 
-const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL, isEdit, errors }) => {
+const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, onPhoneChange, isRTL, isEdit, errors }) => {
   const { t } = useTranslation();
 
   return (
@@ -65,15 +67,13 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, isRTL, is
       />
 
       {/* Mobile */}
-      <CustomInput
+      <CustomPhoneInput
         label={t('wholesalers.mobile')}
-        name="mobile"
-        type="tel"
         value={form.mobile || ''}
-        onChange={onFormChange}
+        onChange={onPhoneChange || (() => {})}
         error={errors.mobile}
         required
-        placeholder="+972xxxxxxxxx"
+        placeholder="5xxxxxxxx"
       />
 
       {/* Discount */}

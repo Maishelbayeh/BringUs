@@ -32,6 +32,11 @@ const DeliveryMethods: React.FC = () => {
     deleteDeliveryMethod,
     toggleActiveStatus,
     setAsDefault,
+    createDeliveryMethod,
+    updateDeliveryMethod,
+    deleteDeliveryMethod,
+    toggleActiveStatus,
+    setAsDefault,
     clearError,
     clearRateLimit
   } = useDeliveryMethods({
@@ -96,6 +101,7 @@ const DeliveryMethods: React.FC = () => {
     setCurrent(null);
   };
 
+  const handleSave = async (area: DelieveryMethod) => {
   const handleSave = async (area: DelieveryMethod) => {
     try {
       if (isEditMode && current?._id) {

@@ -3,6 +3,7 @@ import  { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { DeliveryArea } from '../../../Types';
 
 import CustomInput from '../../../components/common/CustomInput';
+import CustomPhoneInput from '../../../components/common/CustomPhoneInput';
 import { useTranslation } from 'react-i18next';
 import { useValidation } from '../../../hooks/useValidation';
 import { deliveryValidationSchema, DeliveryFormData } from '../../../validation/deliveryValidation';
@@ -175,18 +176,15 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, language,
         error={errors.price}
       />
       
-      <CustomInput
+      <CustomPhoneInput
         label={t("deliveryDetails.whatsappNumber")}
-        id="whatsapp"
         value={whatsappNumber}
-        onChange={e => {
-          setWhatsappNumber(e.target.value);
+        onChange={(value) => {
+          setWhatsappNumber(value);
           clearFieldError('whatsappNumber');
         }}
         required
-        placeholder={t("deliveryDetails.whatsappNumberPlaceholder")}
-        type="text"
-        style={{ textAlign: language === 'ARABIC' ? 'right' : 'left' }}
+        placeholder="5xxxxxxxxx"
         error={errors.whatsappNumber}
       />
     </div>
