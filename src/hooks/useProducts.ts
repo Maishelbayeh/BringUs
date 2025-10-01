@@ -213,7 +213,6 @@ const useProducts = () => {
               // تحويل المواصفات إلى التنسيق المطلوب للـ API
               const formattedSpecs = parsed.map((spec: any) => {
                 const specificationId = spec._id.split('_')[0]; // أخذ ID المواصفة الأساسي
-                const valueIndex = spec._id.split('_')[1]; // أخذ index القيمة
                 
                 // Ensure we have a proper title - use the spec title if available, otherwise use a fallback
                 let title = spec.title;
@@ -330,8 +329,8 @@ const useProducts = () => {
   // حذف منتج
   const deleteProduct = async (productId: string | number) => {
     try {
-      const response = await axios.delete(`${BASE_URL}meta/products/${productId}?storeId=${getStoreId()}`);
-      //CONSOLE.log('Product deleted successfully:', response.data);
+      await axios.delete(`${BASE_URL}meta/products/${productId}?storeId=${getStoreId()}`);
+      //CONSOLE.log('Product deleted successfully:');
       showSuccess('تم حذف المنتج بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
       await fetchProducts(true);

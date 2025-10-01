@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Chip, Typography, Grid } from '@mui/material';
+import { Box, Chip, Typography } from '@mui/material';
 import { ColorLens as ColorLensIcon } from '@mui/icons-material';
 
 interface ProductColorsDisplayProps {
@@ -26,9 +26,7 @@ const ProductColorsDisplay: React.FC<ProductColorsDisplayProps> = ({
         </Box>
       )}
       
-      <Grid container spacing={2}>
         {colors.map((colorGroup, groupIndex) => (
-          <Grid item xs={12} sm={6} md={4} key={groupIndex}>
             <Box
               border={1}
               borderColor="divider"
@@ -55,9 +53,7 @@ const ProductColorsDisplay: React.FC<ProductColorsDisplayProps> = ({
                 ))}
               </Box>
             </Box>
-          </Grid>
         ))}
-      </Grid>
     </Box>
   );
 };

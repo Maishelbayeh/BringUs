@@ -56,11 +56,11 @@ const useUnits = () => {
       if (editId) {
         // For PUT, backend might expect storeId in payload or might get it from URL/auth
         const updatePayload = { ...payload, storeId };
-        const response = await axios.put(`${BASE_URL}meta/units/${editId}`, updatePayload);
+        await axios.put(`${BASE_URL}meta/units/${editId}`, updatePayload);
         showSuccess('تم تعديل الوحدة بنجاح', 'نجح التحديث');
       } else {
         // For POST, send storeId in the URL
-        const response = await axios.post(`${BASE_URL}meta/units`, payload);
+        await axios.post(`${BASE_URL}meta/units`, payload);
         showSuccess('تم إضافة الوحدة بنجاح', 'نجح الإضافة');
       }
       await fetchUnits(true);
@@ -83,8 +83,8 @@ const useUnits = () => {
   // حذف وحدة
   const deleteUnit = async (unitId: string | number) => {
     try {
-      const response = await axios.delete(`${BASE_URL}meta/units/${unitId}`);
-      //CONSOLE.log('Unit deleted successfully:', response.data);
+      await axios.delete(`${BASE_URL}meta/units/${unitId}`);
+      //CONSOLE.log('Unit deleted successfully:');
       showSuccess('تم حذف الوحدة بنجاح', 'نجح الحذف');
       await fetchUnits(true);
       return true;

@@ -133,7 +133,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
                     : (columnVisibility[column.key] ? 'Hide column' : 'Show column')
                   }
                 >
-                  {getEyeIcon(column.key, columnVisibility[column.key])}
+                  {getEyeIcon(columnVisibility[column.key])}
                 </span>
               )}
             </div>

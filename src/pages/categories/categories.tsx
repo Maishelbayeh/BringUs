@@ -214,7 +214,7 @@ const CategoriesPage: React.FC = () => {
   // إغلاق المودال الحذف
   const handleDeleteConfirm = async () => {
     if (selectedCategory) {
-      await deleteCategory(selectedCategory.id);
+      await deleteCategory();
       setSelectedCategory(null);
     }
     setShowDeleteModal(false);

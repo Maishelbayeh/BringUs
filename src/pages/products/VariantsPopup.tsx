@@ -9,7 +9,7 @@ interface VariantsPopupProps {
   parentProduct: any;
   onEditVariant: (variant: any) => void;
   onDeleteVariant: (variant: any) => void;
-    
+  onAddVariant: () => void;
   isRTL: boolean;
   isLoading?: boolean;
 }
@@ -21,7 +21,6 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
   parentProduct,
   onEditVariant,
   onDeleteVariant,
- 
   isRTL,
   isLoading = false
 }) => {

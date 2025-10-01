@@ -145,7 +145,6 @@ const ColorManager: React.FC<ColorManagerProps> = ({
       ) : (
         <Grid container spacing={2}>
           {colors.map((colorGroup, groupIndex) => (
-            <Grid item xs={12} sm={6} md={4} key={groupIndex}>
               <Box
                 border={1}
                 borderColor="divider"
@@ -191,7 +190,6 @@ const ColorManager: React.FC<ColorManagerProps> = ({
                   ))}
                 </Box>
               </Box>
-            </Grid>
           ))}
         </Grid>
       )}

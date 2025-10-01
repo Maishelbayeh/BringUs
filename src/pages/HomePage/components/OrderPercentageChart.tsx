@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ResponsivePie } from '@nivo/pie';
 import { 
-  ChartPieIcon,
-  ArrowPathIcon
+  ChartPieIcon
 } from '@heroicons/react/24/outline';
 import useLanguage from '../../../hooks/useLanguage';
 import useOrderPercentage from '../../../hooks/useOrderPercentage';

@@ -193,7 +193,7 @@ export const useSimpleValidation = () => {
   const { t } = useTranslation();
   
   return {
-    validateRequired: (value: any, fieldName?: string): string | undefined => {
+    validateRequired: (value: any): string | undefined => {
       if (value === undefined || value === null || value === '') {
         return t('validation.required', 'This field is required');
       }

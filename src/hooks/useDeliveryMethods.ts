@@ -4,7 +4,6 @@ import { BASE_URL } from '../constants/api';
 import { handleApiError } from '../utils/handleApiError';
 import useLanguage from './useLanguage';
 import { useToastContext } from '../contexts/ToastContext';
-import { get } from 'http';
 import { getStoreId } from '../utils/storeUtils';
 
 interface DeliveryMethodsResponse extends ApiResponse<DelieveryMethod[]> {

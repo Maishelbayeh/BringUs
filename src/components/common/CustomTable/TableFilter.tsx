@@ -23,7 +23,6 @@ interface TableFilterProps {
 const TableFilter: React.FC<TableFilterProps> = ({
   activeFilterColumn,
   columns,
-  filters,
   filterValue,
   dateFrom,
   dateTo,
@@ -51,7 +50,6 @@ const TableFilter: React.FC<TableFilterProps> = ({
     if (!activeFilterColumn) return { top: 0, left: 0, width: 0 };
     const filterIconRef = filterIconRefs.current[activeFilterColumn];
     if (filterIconRef) {
-      const rect = filterIconRef.getBoundingClientRect();
       const parentCell = filterIconRef.closest('th');
       const cellRect = parentCell?.getBoundingClientRect();
       

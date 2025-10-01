@@ -96,7 +96,7 @@ export const useUser = () => {
 
       if (response.data.success) {
       
-        return response.data.user || response.data.data || null;
+        return response.data.data || null;
       } else {
        
         throw new Error(response.data.message || 'فشل في إنشاء المستخدم');

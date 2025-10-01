@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useSubscription } from '../../hooks/useSubscription';
 import axios from 'axios';
 
@@ -35,7 +34,6 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
   onPlanSelect,
   onPriceChange
 }) => {
-  const { t } = useTranslation();
   const { subscriptionStatus, isExpired, isExpiringSoon } = useSubscription();
   
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -90,6 +88,13 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
     localStorage.setItem('selected_plan_duration', plan.duration.toString());
     localStorage.setItem('selected_plan_price', plan.price.toString());
     localStorage.setItem('selected_plan_currency', plan.currency);
+  };
+
+  // معالجة تغيير السعر المخصص
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const price = parseFloat(e.target.value) || 0;
+    setCustomPrice(price);
+    onPriceChange?.(price);
   };
 
 
@@ -218,7 +223,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
 
         {/* Custom Price Input */}
         <div className="border-t pt-4">
-          {/* <label className={`block text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <label className={`block text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
             {isRTL ? 'السعر المخصص' : 'Custom Price'}
           </label>
           <input
@@ -231,7 +236,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
               isRTL ? 'text-right' : 'text-left'
             }`}
             placeholder={isRTL ? 'أدخل السعر' : 'Enter price'}
-          /> */}
+          />
         </div>
 
         {/* Warning Messages */}

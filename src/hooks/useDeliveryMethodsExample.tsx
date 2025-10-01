@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import useDeliveryMethods from './useDeliveryMethods';
-import { DelieveryMethod } from '../Types';
 
 const DeliveryMethodsExample: React.FC = () => {
   const [storeId, setStoreId] = useState<string>('');
@@ -60,7 +59,7 @@ const DeliveryMethodsExample: React.FC = () => {
 
   const handleFetchByStore = () => {
     if (storeId) {
-      fetchDeliveryMethods({ storeId });
+      fetchDeliveryMethods();
     }
   };
 
