@@ -5,17 +5,19 @@ import { useTranslation } from 'react-i18next';
 import CustomTextArea from '../../../components/common/CustomTextArea';
 import CustomSwitch from '../../../components/common/CustomSwitch';
 import CustomSelect from '../../../components/common/CustomSelect';
+import CustomPhoneInput from '../../../components/common/CustomPhoneInput';
 import { generateAffiliateLink } from '../../../utils/storeUtils';
 
 interface AffiliationFormProps {
   form: any;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onPhoneChange?: (value: string) => void;
   isRTL: boolean;
   errors: { [key: string]: string };
   affiliates?: any[];
 }
 
-const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, isRTL, errors, affiliates = [] }) => {
+const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, onPhoneChange, isRTL, errors, affiliates = [] }) => {
   const { t } = useTranslation();
   
   return (
@@ -74,15 +76,13 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, i
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Mobile */}
-        <CustomInput
+        <CustomPhoneInput
           label={t('affiliation.mobile')}
-          name="mobile"
-          type="tel"
           value={form.mobile || ''}
-          onChange={onFormChange}
+          onChange={onPhoneChange || (() => {})}
           error={errors.mobile}
           required
-          placeholder="+972xxxxxxxxx"
+          placeholder="5xxxxxxxxx"
         />
         
         {/* Percent */}

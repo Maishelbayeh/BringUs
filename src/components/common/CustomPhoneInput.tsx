@@ -4,6 +4,7 @@ interface CustomPhoneInputProps {
   label?: string;
   value: string;
   onChange: (value: string) => void;
+  onValidationChange?: (isValid: boolean, errorMessage?: string) => void;
   required?: boolean;
   error?: string;
   placeholder?: string;
@@ -222,6 +223,7 @@ const CustomPhoneInput: React.FC<CustomPhoneInputProps> = ({
   label,
   value,
   onChange,
+  onValidationChange,
   required,
   error,
   placeholder,
@@ -245,6 +247,34 @@ const CustomPhoneInput: React.FC<CustomPhoneInputProps> = ({
     // eslint-disable-next-line
   }, [value]);
 
+  useEffect(() => {
+    // التحقق من صحة الرقم
+    if (onValidationChange) {
+      let isValid = true;
+      let errorMessage = '';
+
+      // التحقق من +970 و +972
+      if (countryCode === '+970' || countryCode === '+972') {
+        if (required && !number) {
+          isValid = false;
+          errorMessage = 'رقم الهاتف مطلوب';
+        } else if (number && number.length !== 9) {
+          isValid = false;
+          errorMessage = 'يجب أن يكون رقم الهاتف 9 أرقام بالضبط';
+        } else if (number && number.startsWith('0')) {
+          isValid = false;
+          errorMessage = 'لا يمكن أن يبدأ رقم الهاتف بالرقم 0';
+        }
+      } else if (required && !number) {
+        isValid = false;
+        errorMessage = 'رقم الهاتف مطلوب';
+      }
+
+      onValidationChange(isValid, errorMessage);
+    }
+    // eslint-disable-next-line
+  }, [countryCode, number, required, onValidationChange]);
+
   return (
     <div>
       {label && (
@@ -252,11 +282,20 @@ const CustomPhoneInput: React.FC<CustomPhoneInputProps> = ({
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
-      <div className="flex gap-2 ">
+      <div className="flex gap-2 " dir="ltr">
         <select
           className="border rounded-lg p-2 bg-gray-50 text-gray-900 focus:ring-primary focus:border-primary max-w-[140px] min-w-[140px]"
           value={countryCode}
-          onChange={e => setCountryCode(e.target.value)}
+          onChange={e => {
+            const newCountryCode = e.target.value;
+            
+            // إذا تم تغيير رمز الدولة إلى +970 أو +972 وكان الرقم يبدأ بـ 0، قم بإزالة الرقم 0
+            if ((newCountryCode === '+970' || newCountryCode === '+972') && number.startsWith('0')) {
+              setNumber(number.slice(1)); // إزالة الرقم 0 الأول
+            }
+            
+            setCountryCode(newCountryCode);
+          }}
         >
           {COUNTRY_CODES.map(c => (
             <option key={`${c.code}-${c.country}`} value={c.code}>
@@ -271,8 +310,25 @@ const CustomPhoneInput: React.FC<CustomPhoneInputProps> = ({
             dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary
             ${error ? 'border-red-500' : ''} ${className}`}
           value={number}
-          onChange={e => setNumber(e.target.value.replace(/[^\d]/g, ''))}
-          placeholder={placeholder || '5xxxxxxxx'}
+          onChange={e => {
+            let inputValue = e.target.value.replace(/[^\d]/g, '');
+            
+            // تحقق من +970 و +972
+            if (countryCode === '+970' || countryCode === '+972') {
+              // منع الرقم 0 كأول رقم
+              if (inputValue.startsWith('0')) {
+                return;
+              }
+              
+              // تحديد الطول الأقصى بـ 9 أرقام
+              if (inputValue.length > 9) {
+                inputValue = inputValue.slice(0, 9);
+              }
+            }
+            
+            setNumber(inputValue);
+          }}
+          placeholder={placeholder || (countryCode === '+970' || countryCode === '+972' ? '5xxxxxxxxx' : 'xxxxxxxxxx')}
           required={required}
         />
       </div>

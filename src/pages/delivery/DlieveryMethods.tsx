@@ -15,16 +15,23 @@ import { getStoreId } from '../../utils/storeUtils';
 const DeliveryMethods: React.FC = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { showError,showWarning } = useToastContext();
+  const { showSuccess, showError, showInfo, showWarning } = useToastContext();
   
   // Use the delivery methods hook with dynamic store ID
   const {
     deliveryMethods: areas,
     loading,
-    error,  
+    error,
+    pagination,
     isRateLimited,
     rateLimitResetTime,
+    retryAfter,
     fetchDeliveryMethods,
+    createDeliveryMethod,
+    updateDeliveryMethod,
+    deleteDeliveryMethod,
+    toggleActiveStatus,
+    setAsDefault,
     clearError,
     clearRateLimit
   } = useDeliveryMethods({
@@ -89,12 +96,16 @@ const DeliveryMethods: React.FC = () => {
     setCurrent(null);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (area: DelieveryMethod) => {
     try {
       if (isEditMode && current?._id) {
-
+        // Update existing delivery method
+        const result = await updateDeliveryMethod(current._id, area);
+        // Success message is already shown by the hook
       } else {
-
+        // Create new delivery method
+        const result = await createDeliveryMethod(area);
+        // Success message is already shown by the hook
       }
       closeDrawer();
     } catch (err) {
@@ -112,7 +123,8 @@ const DeliveryMethods: React.FC = () => {
   const confirmDelete = async () => {
     if (deleteModal.area?._id) {
       try {
-
+        const success = await deleteDeliveryMethod(deleteModal.area._id);
+        // Success message is already shown by the hook
       } catch (err) {
         showError(
           t('deliveryDetails.deleteError') || 'Failed to delete delivery method',
@@ -130,7 +142,8 @@ const DeliveryMethods: React.FC = () => {
   const handleToggleActive = async (area: DelieveryMethod) => {
     if (area._id) {
       try {
-
+        const result = await toggleActiveStatus(area._id);
+        // Success message is already shown by the hook
       } catch (err) {
         showError(
           t('deliveryDetails.toggleError') || 'Failed to toggle delivery method status',
@@ -143,7 +156,8 @@ const DeliveryMethods: React.FC = () => {
   const handleSetDefault = async (area: DelieveryMethod) => {
     if (area._id) {
       try {
-
+        const result = await setAsDefault(area._id);
+        // Success message is already shown by the hook
       } catch (err) {
         showError(
           t('deliveryDetails.setDefaultError') || 'Failed to set default delivery method',
