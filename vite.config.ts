@@ -19,6 +19,12 @@ export default defineConfig({
     host: '0.0.0.0',
     port: parseInt(process.env.PORT || '5174'),
     strictPort: true,
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      'bringus.onrender.com',
+      '.onrender.com' // Allow all render.com subdomains
+    ],
   },
   build: {
     rollupOptions: {
