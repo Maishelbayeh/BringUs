@@ -35,8 +35,7 @@ interface ValidationErrors {
 
 export const validatePaymentForm = (
   data: PaymentFormData, 
-  t: any,
-  isEditMode: boolean = false
+  t: any
 ): ValidationErrors => {
   const errors: ValidationErrors = {};
 

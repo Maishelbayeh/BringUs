@@ -37,7 +37,7 @@ const useUnits = () => {
   }, [hasLoaded, units.length, showError]);
 
   // إضافة أو تعديل وحدة
-  const saveUnit = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
+  const saveUnit = async (form: any, editId?: string | number | null) => {
     const storeId = getStoreId();
     if (!storeId) {
       showError('Store ID is missing. Cannot save unit.');

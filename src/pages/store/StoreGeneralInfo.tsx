@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CustomInput from '../../components/common/CustomInput';
-import CustomNumberInput from '../../components/common/CustomNumberInput';
 import CustomPhoneInput from '../../components/common/CustomPhoneInput';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomButton from '../../components/common/CustomButton';
@@ -82,8 +81,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
   // حالة الوضع (إضافة أم تعديل)
   const [isEditMode, setIsEditMode] = useState(false);
   
-  // بيانات المتجر المحفوظة
-  const [storeData, setStoreData] = useState<any>(null);
+ 
   
   // حالة تحميل البيانات
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -385,76 +383,6 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     });
   };
 
-  /**
-   * معالجة تغيير نسبة الضريبة
-   */
-  const handleTaxRateChange = (value: number) => {
-    setForm(prev => {
-      const newForm = {
-        ...prev,
-        settings: { ...prev.settings, taxRate: value }
-      };
-      
-      // حفظ البيانات محلياً فقط في الخطوة الأولى
-      if (onSubmit && !isEditMode) {
-        setTimeout(() => {
-          const formData = {
-            ...newForm,
-            logo: newForm.logo || { public_id: null, url: null }
-          };
-          onSubmit(formData);
-        }, 100);
-      }
-      
-      return newForm;
-    });
-  };
-
-  /**
-   * معالجة تغيير نسبة الخصم
-   */
-  const handleDiscountChange = (value: number) => {
-    setForm(prev => {
-      const newForm = {
-        ...prev,
-        settings: { ...prev.settings, storeDiscount: value }
-      };
-      
-      // حفظ البيانات محلياً فقط في الخطوة الأولى
-      if (onSubmit && !isEditMode) {
-        setTimeout(() => {
-          const formData = {
-            ...newForm,
-            logo: newForm.logo || { public_id: null, url: null }
-          };
-          onSubmit(formData);
-        }, 100);
-      }
-      
-      return newForm;
-    });
-  };
-
-  /**
-   * معالجة تغيير رقم الهاتف
-   */
-  // const handlePhoneChange = (value: string) => {
-  //   setForm(prev => ({
-  //     ...prev,
-  //     contact: { ...prev.contact, phone: value }
-  //   }));
-    
-  //   // الفالديشن للهاتف
-  //   const error = validateField('phone', value);
-  //   setErrors(prev => ({
-  //     ...prev,
-  //     phone: error
-  //   }));
-  // };
-
-  /**
-   * معالجة تغيير رقم الواتساب
-   */
   const handleWhatsAppChange = (value: string) => {
     setForm(prev => {
       const newForm = {
@@ -517,7 +445,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         if (currentStoreId) {
           const result = await updateStore(currentStoreId, updatedForm);
           if (result) {
-            setStoreData(result);
+           
             console.log('✅ تم تحديث المتجر بنجاح، جاري تحديث البيانات المحلية...');
             
             // تحديث البيانات في localStorage
@@ -593,8 +521,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
           //CONSOLE.log('🔄 جلب بيانات المتجر مرة واحدة فقط...');
           const store = await getStore(storeSlug);
           if (store) {
-            setStoreData(store);
-            
+           
             // تحويل logo من array إلى الشكل المتوقع
             let logoData = { public_id: null as string | null, url: null as string | null };
             

@@ -5,7 +5,6 @@ import { CustomTable } from '../../components/common/CustomTable';
 import PaymentVariantsDrawer, { PaymentVariantsDrawerRef } from './PaymentVariantsDrawer';
 import { useNavigate } from 'react-router-dom';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
-import useProductVariants from '@/hooks/useProductVariants';
 
 interface PaymentVariant {
   id: number;
@@ -31,7 +30,7 @@ const PaymentVariants: React.FC = () => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<PaymentVariant | undefined>();
-  const [isFormValid, setIsFormValid] = useState(false);
+
   const drawerRef = useRef<PaymentVariantsDrawerRef>(null);
   
   const [variants, setVariants] = useState<PaymentVariant[]>([
@@ -137,9 +136,8 @@ const PaymentVariants: React.FC = () => {
     setSelectedVariant(undefined);
   };
 
-  const handleValidationChange = (isValid: boolean) => {
-    //CONSOLE.log('PaymentVariants validation changed:', isValid);
-    setIsFormValid(isValid);
+  const handleValidationChange = () => {
+   
   };
 
   return (

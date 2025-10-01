@@ -4,9 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { 
   TrophyIcon, 
   CubeIcon, 
-  ShoppingBagIcon,
-  CurrencyDollarIcon,
-  TagIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
 import useLanguage from '../../../hooks/useLanguage';

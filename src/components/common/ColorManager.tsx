@@ -30,7 +30,7 @@ const ColorManager: React.FC<ColorManagerProps> = ({
     addColorsToProduct,
     removeColorsFromProduct,
     replaceProductColors,
-    getProductColors
+
   } = useProducts();
 
   useEffect(() => {

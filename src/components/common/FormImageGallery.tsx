@@ -20,11 +20,7 @@ const FormImageGallery: React.FC<FormImageGalleryProps> = ({
   onImageRemove,
   editable = false
 }) => {
-  const handleRemoveImage = (index: number) => {
-    if (onImageRemove) {
-      onImageRemove(index);
-    }
-  };
+ 
 
   if (images.length === 0 && !mainImage) {
     return (

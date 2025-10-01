@@ -1,6 +1,6 @@
 // src/components/CustomBarChart.tsx
 import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Cell } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip,CartesianGrid, Cell } from 'recharts';
 import { useTranslation } from 'react-i18next';
 
 const data = [
@@ -110,7 +110,7 @@ const CustomBarChart: React.FC = () => {
               animationDuration={2000}
               animationEasing="ease-out"
             >
-              {data.map((entry, index) => (
+              {data.map((index) => (
                 <Cell key={`cell-${index}`} fill={`url(#colorGradient${index})`} />
               ))}
             </Bar>

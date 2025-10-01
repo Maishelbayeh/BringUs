@@ -28,7 +28,7 @@ interface UseDeliveryMethodsOptions {
 const storeId = localStorage.getItem('storeId');
 const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
   const { t } = useLanguage();
-  const { showSuccess, showError } = useToastContext();
+  const { showSuccess} = useToastContext();
   const [deliveryMethods, setDeliveryMethods] = useState<DelieveryMethod[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -156,18 +156,12 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
   }, [shouldWaitForRateLimit, retryAfter]);
 
   // Get all delivery methods
-  const fetchDeliveryMethods = useCallback(async (fetchOptions: UseDeliveryMethodsOptions = {}) => {
+  const fetchDeliveryMethods = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const queryParams = buildQueryString({
-        page: fetchOptions.page || options.page || 1,
-        limit: fetchOptions.limit || options.limit || 10,
-        isActive: fetchOptions.isActive ?? options.isActive,
-        isDefault: fetchOptions.isDefault ?? options.isDefault,
-        storeId: fetchOptions.storeId || options.storeId,
-      });
+     
 
       const response = await makeRequest(`${BASE_URL}delivery-methods/store/${storeId}`, {
         method: 'GET',

@@ -28,7 +28,7 @@ interface StoreProviderProps {
 export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
   const [currentStore, setCurrentStore] = useState<any>(null);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
-  const { getStore, loading, error } = useStore();
+  const { loading, error } = useStore();
 
   // Function to update store data from localStorage
   const updateStoreFromStorage = () => {

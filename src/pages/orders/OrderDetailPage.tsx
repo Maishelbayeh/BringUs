@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon, XCircleIcon, BuildingStorefrontIcon, UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, XCircleIcon,UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import { CustomTable } from '../../components/common/CustomTable';
 import InvoicePrint from '../../components/common/InvoicePrint';
@@ -327,7 +327,7 @@ const OrderDetailPage: React.FC = () => {
                       key: 'specifications', 
                       label: { ar: 'المواصفات', en: 'Specifications' }, 
                       type: 'text',
-                      render: (value: any, item: any) => (
+                      render: ( item: any) => (
                         <div className="text-sm">
                           {item.selectedSpecifications && item.selectedSpecifications.length > 0 ? (
                             <div className="space-y-1">
@@ -352,7 +352,7 @@ const OrderDetailPage: React.FC = () => {
                       key: 'colors', 
                       label: { ar: 'الألوان', en: 'Colors' }, 
                       type: 'text',
-                      render: (value: any, item: any) => (
+                      render: (item: any) => (
                         <div className="flex items-center gap-2">
                           {item.selectedColors && item.selectedColors.length > 0 ? (
                             <div className="flex flex-wrap gap-2">

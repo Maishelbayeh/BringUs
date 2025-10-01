@@ -28,8 +28,7 @@ const CustomBarcode: React.FC<CustomBarcodeProps> = ({
   className = '',
   style = {},
   showPrintButton = false,
-  printButtonText,
-  printButtonClassName = '',
+
   isRTL = false
 }) => {
   const barcodeRef = useRef<HTMLDivElement>(null);

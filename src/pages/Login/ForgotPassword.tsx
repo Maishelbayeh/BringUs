@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowBack,
-  Language
+  ArrowBack
 } from '@mui/icons-material';
 import CustomInput from '@/components/common/CustomInput';
 import CustomButton from '@/components/common/CustomButton';
@@ -11,7 +10,7 @@ import useLanguage from '@/hooks/useLanguage';
 
 const ForgotPassword: React.FC = () => {
   const { t } = useTranslation();
-  const { language, toggleLanguage } = useLanguage();
+  const { language} = useLanguage();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

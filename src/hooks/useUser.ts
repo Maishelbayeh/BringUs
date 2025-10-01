@@ -95,19 +95,17 @@ export const useUser = () => {
       console.log('📥 استجابة API:', response.data);
 
       if (response.data.success) {
-        console.log('✅ تم إنشاء المستخدم بنجاح:', response.data.user);
+      
         return response.data.user || response.data.data || null;
       } else {
-        console.log('❌ فشل في إنشاء المستخدم:', response.data.message);
+       
         throw new Error(response.data.message || 'فشل في إنشاء المستخدم');
       }
     } catch (err: any) {
-      console.log('💥 خطأ في API:', err);
-      console.log('📋 تفاصيل الخطأ:', err.response?.data);
       
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء إنشاء المستخدم';
       setError(errorMessage);
-      console.error('❌ خطأ في إنشاء المستخدم:', errorMessage);
+     
       return null;
     } finally {
       setLoading(false);
@@ -221,7 +219,7 @@ export const useUser = () => {
   };
 
   // التحقق من صلاحية حذف المستخدم
-  const checkDeletePermission = async (userId: string): Promise<boolean> => {
+  const checkDeletePermission = async (): Promise<boolean> => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return false;

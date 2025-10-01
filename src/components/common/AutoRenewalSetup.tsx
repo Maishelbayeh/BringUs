@@ -29,7 +29,7 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
 }) => {
   console.log('AutoRenewalSetup - referenceId:', referenceId);
   const { t } = useTranslation();
-  const { storeId, userId } = useUserStore();
+  const { storeId } = useUserStore();
   const { showSuccess, showError } = useToastContext();
   
   const [isLoading, setIsLoading] = useState(false);

@@ -9,7 +9,7 @@ interface VariantsPopupProps {
   parentProduct: any;
   onEditVariant: (variant: any) => void;
   onDeleteVariant: (variant: any) => void;
-  onAddVariant: () => void;
+    
   isRTL: boolean;
   isLoading?: boolean;
 }
@@ -21,7 +21,7 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
   parentProduct,
   onEditVariant,
   onDeleteVariant,
-  onAddVariant,
+ 
   isRTL,
   isLoading = false
 }) => {
@@ -34,25 +34,8 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
     setLocalVariants(variants);
   }, [variants]);
 
-  // دالة لتحديث متغير محدد في البوب أب
-  const updateVariantInPopup = (updatedVariant: any) => {
-    setLocalVariants(prevVariants => 
-      prevVariants.map(variant => 
-        variant._id === updatedVariant._id || variant.id === updatedVariant._id
-          ? { ...variant, ...updatedVariant }
-          : variant
-      )
-    );
-  };
 
-  // دالة لحذف متغير من البوب أب
-  const removeVariantFromPopup = (variantId: string) => {
-    setLocalVariants(prevVariants => 
-      prevVariants.filter(v => 
-        v._id !== variantId && v.id !== variantId
-      )
-    );
-  };
+
 
   const toggleVariant = (variantId: string) => {
     const newExpanded = new Set(expandedVariants);

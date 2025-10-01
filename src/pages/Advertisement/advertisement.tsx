@@ -25,7 +25,6 @@ const AdvertisementPage = () => {
     updateAdvertisement,
     deleteAdvertisement,
     getAdvertisements,
-    toggleActiveStatus,
   } = useAdvertisements(storeId, token);
 
   const [drawerOpen, setDrawerOpen] = useState(false);

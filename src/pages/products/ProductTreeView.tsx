@@ -22,9 +22,6 @@ interface ProductTreeViewProps {
 const ProductTreeView: React.FC<ProductTreeViewProps> = ({
   products,
   isRTL,
-  onEdit,
-  onAddVariant,
-  onDelete,
   renderImage,
   renderPrice,
   renderStock,
@@ -33,7 +30,6 @@ const ProductTreeView: React.FC<ProductTreeViewProps> = ({
   renderBarcode,
   renderSpecifications,
   renderVariantStatus,
-  renderColors,
   renderActions
 }) => {
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());

@@ -5,7 +5,6 @@ import CustomInput from '../../components/common/CustomInput';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomSwitch from '../../components/common/CustomSwitch';
-import MultiSelect from '../../components/common/MultiSelect';
 import { createImageValidationFunction } from '../../validation/imageValidation';
 import { useTranslation } from 'react-i18next';
 

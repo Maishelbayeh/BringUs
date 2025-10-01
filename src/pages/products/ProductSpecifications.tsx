@@ -4,8 +4,7 @@ import useProductSpecifications from '../../hooks/useProductSpecifications';
 import ProductSpecificationsDrawer from './ProductSpecificationsDrawer';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '../../components/common/HeaderWithAction';
-import { PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
-import CustomButton from '../../components/common/CustomButton';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import PermissionModal from '../../components/common/PermissionModal';
 import { useStoreUrls } from '@/hooks/useStoreUrls';
 // import { validateSpecificationWithDuplicates } from '../../validation/specificationsValidation'; // No longer needed here
@@ -17,7 +16,7 @@ const ProductSpecifications: React.FC = () => {
   const [editingSpec, setEditingSpec] = useState<any>(null);
   // const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({}); // No longer needed here
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [specToDelete, setSpecToDelete] = useState<any>(null);
+  const [specToDelete] = useState<any>(null);
   const [search, setSearch] = useState('');
   const { storeSlug } = useStoreUrls();
   const {

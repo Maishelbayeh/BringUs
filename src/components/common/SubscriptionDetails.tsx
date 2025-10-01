@@ -92,12 +92,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
     localStorage.setItem('selected_plan_currency', plan.currency);
   };
 
-  // معالجة تغيير السعر المخصص
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPrice = parseFloat(e.target.value) || 0;
-    setCustomPrice(newPrice);
-    onPriceChange?.(newPrice);
-  };
+
 
   const getStatusColor = () => {
     if (isExpired()) return 'text-red-600 bg-red-50 border-red-200';

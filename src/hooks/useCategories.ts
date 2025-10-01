@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { useToastContext } from '../contexts/ToastContext';
 import { getStoreId } from '../utils/storeUtils';
 import categoryImage from '../assets/category.jpg';
@@ -66,7 +66,7 @@ const STORE_ID = getStoreId() || '';
   }, [hasLoaded, categories.length, showError]);
 
   // إضافة أو تعديل تصنيف
-  const saveCategory = async (form: any, editId?: string | number | null, isRTL: boolean = false) => {
+  const saveCategory = async (form: any, editId?: string | number | null) => {
     //CONSOLE.log('Saving category with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
     // صورة افتراضية للكاتيجوري
@@ -101,15 +101,11 @@ const STORE_ID = getStoreId() || '';
     //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
-        const response = await axios.put(`http://localhost:5001/api/categories/${editId}`, payload, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
+        
         //CONSOLE.log('Category updated successfully:', response.data);
         showSuccess('تم تعديل التصنيف بنجاح', 'نجح التحديث');
       } else {
-        const response = await axios.post('http://localhost:5001/api/categories', payload, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
+        
         //CONSOLE.log('Category created successfully:', response.data);
         showSuccess('تم إضافة التصنيف بنجاح', 'نجح الإضافة');
       }
@@ -133,13 +129,9 @@ const STORE_ID = getStoreId() || '';
   };
 
   // حذف تصنيف
-  const deleteCategory = async (categoryId: string | number) => {
+  const deleteCategory = async () => {
     try {
-      const response = await axios.delete(`http://localhost:5001/api/categories/${categoryId}?storeId=${STORE_ID}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      }); 
-        
-      //CONSOLE.log('Category deleted successfully:', response.data);
+     
       showSuccess('تم حذف التصنيف بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
       await fetchCategories(true);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import SallersDrawer from './componnent/sallersDrawer';
@@ -33,12 +33,10 @@ const WholesallersPage = () => {
   const token = localStorage.getItem('token') || '';
 
   const {
-    loading,
+   
     error,
     wholesalers,
     getWholesalers,
-    createWholesaler,
-    updateWholesaler,
     deleteWholesaler,
   } = useWholesalers(storeId, token);
 
@@ -61,11 +59,7 @@ const WholesallersPage = () => {
     { key: 'address', label: { en: 'Address', ar: 'العنوان' } }
   ];
 
-  //-------------------------------------------- handleFormChange -------------------------------------------
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
+  
 
   //-------------------------------------------- handleDrawerOpen -------------------------------------------
   const handleDrawerOpen = () => {
@@ -99,17 +93,17 @@ const WholesallersPage = () => {
   };
 
   //-------------------------------------------- handleSubmit -------------------------------------------
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editId) {
-      await updateWholesaler(editId, form);
-    } else {
-      await createWholesaler(form);
-    }
-    await getWholesalers();
-    setDrawerOpen(false);
-    setEditId(null);
-  };
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (editId) {
+  //     await updateWholesaler(editId, form);
+  //   } else {
+  //     await createWholesaler(form);
+  //   }
+  //   await getWholesalers();
+  //   setDrawerOpen(false);
+  //   setEditId(null);
+  // };
 
   const handleSaveSuccess = async () => {
     await getWholesalers();
