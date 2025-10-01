@@ -125,19 +125,19 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     }
   };
 
-  const handleNestedChange = (parent: string, field: string, value: any) => {
-    setForm((prev: any) => ({
-      ...prev,
-      [parent]: {
-        ...prev[parent],
-        [field]: value
-      }
-    }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev: any) => ({ ...prev, [field]: '' }));
-    }
-  };
+  // const handleNestedChange = (parent: string, field: string, value: any) => {
+  //   setForm((prev: any) => ({
+  //     ...prev,
+  //     [parent]: {
+  //       ...prev[parent],
+  //       [field]: value
+  //     }
+  //   }));
+  //   // Clear error when user starts typing
+  //   if (errors[field]) {
+  //     setErrors((prev: any) => ({ ...prev, [field]: '' }));
+  //   }
+  // };
 
   return (
     <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
