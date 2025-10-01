@@ -9,5 +9,28 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  server: {
+    host: '0.0.0.0',
+    port: parseInt(process.env.PORT || '5174'), // Use PORT env var or default to 5174
+    strictPort: true,
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: parseInt(process.env.PORT || '5174'),
+    strictPort: true,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@mui/material', '@mui/icons-material', '@heroicons/react'],
+          charts: ['recharts', '@nivo/pie'],
+          utils: ['axios', 'dayjs', 'react-i18next'],
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
   }
 })
