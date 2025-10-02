@@ -256,6 +256,7 @@ const DeliveryMethods: React.FC = () => {
         cancelButtonText={t('deliveryDetails.cancel')}
         isRTL={language === 'ARABIC'}
         severity="danger"
+        
       />
     </div>
   );
