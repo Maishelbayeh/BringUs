@@ -81,6 +81,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   // نظام التحقق من صحة البيانات
   const {
     errors: internalErrors,
+    validateField,
     clearError,
     
   } = useValidation({
@@ -170,7 +171,10 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     onMainImageChange(file);
   };
 
- 
+  // دالة لإرجاع أخطاء الصور
+  // const _getImageErrors = () => {
+  //   return imageErrors;
+  // };
 
   // دالة لحساب مجموع الكميات من الصفات
   const calculateTotalQuantity = (specifications: any[]): number => {
@@ -296,9 +300,9 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     if (!hasFetchedSpecifications.current) {
       //CONSOLE.log('🔍 ProductsForm - Fetching specifications...');
       hasFetchedSpecifications.current = true;
-      fetchSpecifications().then(() => {
+      fetchSpecifications().then((_data) => {
         //CONSOLE.log('🔍 ProductsForm - Fetched specifications:', data);
-      }).catch(() => {
+      }).catch((_error) => {
         //CONSOLE.error('🔍 ProductsForm - Error fetching specifications:', error);
         hasFetchedSpecifications.current = false; // إعادة تعيين في حالة الخطأ
       });
@@ -314,7 +318,9 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
       console.log('🔍 ProductsForm - Using specificationValues from API');
       const cleaned = form.specificationValues.map((spec: any) => {
         // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
-         
+        const specData = Array.isArray(apiSpecifications) ? apiSpecifications.find((s: any) => s._id === spec.specificationId) : null;
+        const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec.specificationId}`);
+        console.log('🔍 ProductsForm - title:', title);
         return {
           specId: spec.specificationId,
           valueId: spec.valueId || spec._id,
@@ -528,7 +534,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     title: isRTL ? spec.titleAr : spec.titleEn,
     titleAr: spec.titleAr,
     titleEn: spec.titleEn,
-    values: spec.values.map((value: any) => ({
+    values: spec.values.map((value, _index) => ({
       valueAr: value.valueAr,
       valueEn: value.valueEn
     }))
@@ -570,6 +576,17 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const getFieldErrorClass = (fieldName: string): string => {
     return hasFieldError(fieldName) ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : '';
   };
+
+  //-------------------------------------------- handleShuttleChange -------------------------------------------
+  // const _handleShuttleChange = (e: React.ChangeEvent<{ name: string; value: string[] }>) => {
+  //   //CONSOLE.log('🔍 ProductsForm - handleShuttleChange:', e.target);
+  //   onFormChange({
+  //     target: {
+  //       name: e.target.name,
+  //       value: e.target.value,
+  //     }
+  //   } as any);
+  // };
   
   //-------------------------------------------- handleColorChange -------------------------------------------
   const handleColorChange = (e: React.ChangeEvent<{ name: string; value: ColorVariant[] }>) => {
@@ -620,7 +637,8 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
       // مسح الخطأ الحالي أولاً
       clearError(name);
       
- 
+      // التحقق من صحة القيمة الجديدة
+      validateField(name, value);
       
       // إذا كان هناك دالة للتحقق الخارجي، استدعاؤها
       if (onFieldValidation) {
@@ -649,7 +667,8 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
       // مسح الخطأ الحالي أولاً
       clearError(name);
       
-   
+      // التحقق من صحة القيمة الجديدة
+       validateField(name, value);
       
       // إذا كان هناك دالة للتحقق الخارجي، استدعاؤها
       if (onFieldValidation) {
@@ -677,7 +696,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
       // التحقق من صحة unitId أيضاً
       if (showValidation) {
         clearError('unitId');
-       
+         validateField('unitId', value);
         if (onFieldValidation) {
           onFieldValidation('unitId', value);
         }

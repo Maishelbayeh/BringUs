@@ -14,18 +14,21 @@ const useProductLabel = () => {
   const fetchProductLabels = useCallback(async (forceRefresh: boolean = false) => {
     // إذا كانت البيانات محملة مسبقاً ولا نحتاج تحديث قسري، لا نضرب الـ API
     if (hasLoaded && !forceRefresh && productLabels.length > 0) {
+      // //CONSOLE.log('Data already loaded, skipping API call');
       return productLabels;
     }
 
     try {
-      setLoading(true);
+        setLoading(true);
       const url = `${BASE_URL}meta/stores/${STORE_ID}/product-labels`;
       const res = await axios.get(url);
+      // //CONSOLE.log('FETCHED PRODUCT LABELS FROM API:', res.data);
       const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
       setProductLabels(data);
       setHasLoaded(true); // تم تحميل البيانات
       return data;
     } catch (err: any) {
+      //CONSOLE.error('Error fetching product labels:', err);
       const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب التصنيفات';
       showError(errorMessage);
       throw err;
@@ -35,17 +38,37 @@ const useProductLabel = () => {
   }, [hasLoaded, productLabels.length, showError]);
 
   // إضافة أو تعديل وحدة
-  const saveProductLabel = async (_form: any, editId?: string | number | null) => {
+  const saveProductLabel = async (form: any, editId?: string | number | null, _isRTL: boolean = false) => {
+    //CONSOLE.log('Saving product label with form:', form, 'editId:', editId, 'isRTL:', isRTL);
+    
+    const payload: any = {
+      nameAr: form.nameAr.trim(),
+      nameEn: form.nameEn.trim(),
+      descriptionAr: form.descriptionAr?.trim() || '',
+      descriptionEn: form.descriptionEn?.trim() || '',
+      isActive: form.isActive !== undefined ? form.isActive : true,
+      
+      store: STORE_ID,
+    };
+    
+
+    //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
+        await axios.put(`${BASE_URL}meta/product-labels/${editId}`, payload);
+        //CONSOLE.log('Product label updated successfully:', response.data);
         showSuccess('تم تعديل التصنيف بنجاح', 'نجح التحديث');
       } else {
+        await axios.post(`${BASE_URL}meta/product-labels`, payload);
+        //CONSOLE.log('Product label created successfully:', response.data);
         showSuccess('تم إضافة التصنيف بنجاح', 'نجح الإضافة');
       }
       // تحديث القائمة فقط
       await fetchProductLabels(true);
       return true;
     } catch (err: any) {
+      //CONSOLE.error('Error saving product label:', err);
+      
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
@@ -63,11 +86,14 @@ const useProductLabel = () => {
   const deleteProductLabel = async (productLabelId: string | number) => {
     try {
       await axios.delete(`${BASE_URL}meta/product-labels/${productLabelId}`);
+      //CONSOLE.log('Product label deleted successfully:', response.data);
       showSuccess('تم حذف التصنيف بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
       await fetchProductLabels(true);
       return true;
     } catch (err: any) {
+      //CONSOLE.error('Error deleting product label:', err);
+      
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');

@@ -25,6 +25,7 @@ const AdvertisementPage = () => {
     updateAdvertisement,
     deleteAdvertisement,
     getAdvertisements,
+    // toggleActiveStatus,
   } = useAdvertisements(storeId, token);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -65,7 +66,7 @@ const AdvertisementPage = () => {
     {
       key: 'preview',
       label: { en: t('advertisement.preview'), ar: t('advertisement.preview') },
-      render: (_: any, row: any) => {
+      render: (_value: any, row: any) => {
         if (row.raw && row.raw.backgroundImageUrl) {
           return (
             <div className="flex justify-center items-center">

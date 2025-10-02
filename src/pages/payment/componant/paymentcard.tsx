@@ -1,6 +1,6 @@
 // src/components/PaymentMethods/componant/PaymentCard.tsx
 import React from 'react';
-import { PencilSquareIcon, TrashIcon, StarIcon, CheckCircleIcon, EyeIcon, EyeSlashIcon, QrCodeIcon} from '@heroicons/react/24/outline';
+import { PencilSquareIcon, TrashIcon, StarIcon, CheckCircleIcon, EyeIcon, EyeSlashIcon, QrCodeIcon } from '@heroicons/react/24/outline';
 import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
 

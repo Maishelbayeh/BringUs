@@ -13,12 +13,15 @@ interface CategoryTreeProps {
   level?: number;
 }
 
+
+
 const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, isRTL, onAdd, onEdit, onDelete, level = 0 }) => {
   const [expanded, setExpanded] = useState<{ [key: number]: boolean }>({});
   const { i18n } = useTranslation();
   const lang = i18n.language;
   const navigate = useNavigate();
   const { storeSlug } = useStoreUrls();
+  //CONSOLE.log(categories);
   const toggleExpand = (id: number) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// import { useTranslation } from 'react-i18next';
 import { useSubscription } from '../../hooks/useSubscription';
 import axios from 'axios';
 
@@ -34,12 +35,13 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
   onPlanSelect,
   onPriceChange
 }) => {
+  // const { t } = useTranslation();
   const { subscriptionStatus, isExpired, isExpiringSoon } = useSubscription();
   
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-  const [customPrice, setCustomPrice] = useState<number>(0);
+  const [_customPrice, setCustomPrice] = useState<number>(0);
 
   // جلب خطط الاشتراك المتاحة
   const fetchPlans = async () => {
@@ -91,13 +93,11 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
   };
 
   // معالجة تغيير السعر المخصص
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const price = parseFloat(e.target.value) || 0;
-    setCustomPrice(price);
-    onPriceChange?.(price);
-  };
-
-
+  // const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const newPrice = parseFloat(e.target.value) || 0;
+  //   setCustomPrice(newPrice);
+  //   onPriceChange?.(newPrice);
+  // };
 
   const getStatusColor = () => {
     if (isExpired()) return 'text-red-600 bg-red-50 border-red-200';
@@ -223,7 +223,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
 
         {/* Custom Price Input */}
         <div className="border-t pt-4">
-          <label className={`block text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          {/* <label className={`block text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
             {isRTL ? 'السعر المخصص' : 'Custom Price'}
           </label>
           <input
@@ -236,7 +236,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
               isRTL ? 'text-right' : 'text-left'
             }`}
             placeholder={isRTL ? 'أدخل السعر' : 'Enter price'}
-          />
+          /> */}
         </div>
 
         {/* Warning Messages */}

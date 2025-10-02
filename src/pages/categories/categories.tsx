@@ -109,7 +109,24 @@ function flattenCategories(categories: any[], isRTL: boolean): { id: any; name: 
   return result;
 }
 
+// function buildCategoryTree(flatCategories: any[]): any[] {
+//   if (!Array.isArray(flatCategories)) return [];
+//   const idMap: { [key: string]: any } = {};
+//   const tree: any[] = [];
+//   flatCategories.forEach(cat => {
+//     idMap[cat.id] = { ...cat, children: [] };
+//   });
+//   flatCategories.forEach(cat => {
+//     if (cat.parent && typeof cat.parent === 'object' && cat.parent.id && idMap[cat.parent.id]) {
+//       idMap[cat.parent.id].children.push(idMap[cat.id]);
+//     } else if (!cat.parent || cat.parent === null) {
+//       tree.push(idMap[cat.id]);
+//     }
+//   });
+//   return tree;
+// }
 
+// const STORE_ID = '687505893fbf3098648bfe16'; // storeId ثابت للاختبار
 
 const CategoriesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -124,7 +141,7 @@ const CategoriesPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
   // استخدم الهوك الجديد
-  const { categories,fetchCategories, saveCategory, deleteCategory, uploadCategoryImage } = useCategories();
+  const { categories, fetchCategories, saveCategory, deleteCategory, uploadCategoryImage } = useCategories();
 
   useEffect(() => {
     fetchCategories();
@@ -214,7 +231,7 @@ const CategoriesPage: React.FC = () => {
   // إغلاق المودال الحذف
   const handleDeleteConfirm = async () => {
     if (selectedCategory) {
-      await deleteCategory();
+      await deleteCategory(selectedCategory.id);
       setSelectedCategory(null);
     }
     setShowDeleteModal(false);

@@ -37,7 +37,7 @@ const useUnits = () => {
   }, [hasLoaded, units.length, showError]);
 
   // إضافة أو تعديل وحدة
-  const saveUnit = async (form: any, editId?: string | number | null) => {
+  const saveUnit = async (form: any, editId?: string | number | null, _isRTL: boolean = false) => {
     const storeId = getStoreId();
     if (!storeId) {
       showError('Store ID is missing. Cannot save unit.');
@@ -84,7 +84,7 @@ const useUnits = () => {
   const deleteUnit = async (unitId: string | number) => {
     try {
       await axios.delete(`${BASE_URL}meta/units/${unitId}`);
-      //CONSOLE.log('Unit deleted successfully:');
+      //CONSOLE.log('Unit deleted successfully:', response.data);
       showSuccess('تم حذف الوحدة بنجاح', 'نجح الحذف');
       await fetchUnits(true);
       return true;

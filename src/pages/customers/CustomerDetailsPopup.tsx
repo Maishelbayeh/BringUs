@@ -57,6 +57,7 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
   orders,
   isRTL,
   t,
+
   ordersLoading = false,
 }) => {
   const navigate = useNavigate();

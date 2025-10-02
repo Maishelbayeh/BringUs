@@ -1,5 +1,5 @@
 // src/components/DeliveryAreas/DeliveryAreaDrawer.tsx
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import DeliveryAreaForm, { FormRef } from './DelieveryForm';
 import { DelieveryMethod } from '../../../Types';
@@ -19,6 +19,8 @@ interface Props {
 const DeliveryAreaModal: React.FC<Props> = ({ open, onClose, area, onSave, language, isEditMode }) => {
   const { t } = useTranslation();
   const formRef = useRef<FormRef>(null);
+  const [_isFormValid, setIsFormValid] = useState(true); // Start as true to allow submission
+
   if (!open) return null;
   
   const isRTL = language === 'ARABIC';
@@ -33,8 +35,9 @@ const DeliveryAreaModal: React.FC<Props> = ({ open, onClose, area, onSave, langu
     }
   };
 
-  const handleValidationChange = () => {
-
+  const handleValidationChange = (isValid: boolean) => {
+    //CONSOLE.log('Validation changed:', isValid);
+    setIsFormValid(isValid);
   };
 
   return (

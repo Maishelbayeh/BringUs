@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon, XCircleIcon,UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, XCircleIcon, UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import { CustomTable } from '../../components/common/CustomTable';
 import InvoicePrint from '../../components/common/InvoicePrint';
@@ -303,15 +303,15 @@ const OrderDetailPage: React.FC = () => {
                       key: 'image', 
                       label: { ar: 'الصورة', en: 'Image' }, 
                       type: 'image',
-                      render: (value: any, item: any) => (
+                      render: (_value: any, item: any) => (
                         <div className="flex justify-center">
                           <img 
-                            src={value || '/placeholder-image.png'} 
+                            src={_value || '/placeholder-image.png'} 
                             alt={item.name || 'Product'} 
                             className="w-12 h-12 object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => {
-                              if (value) {
-                                window.open(value, '_blank');
+                              if (_value) {
+                                window.open(_value, '_blank');
                               }
                             }}
                             onError={(e) => {
@@ -327,7 +327,7 @@ const OrderDetailPage: React.FC = () => {
                       key: 'specifications', 
                       label: { ar: 'المواصفات', en: 'Specifications' }, 
                       type: 'text',
-                      render: ( _value, item: any) => (
+                      render: (_value: any, item: any) => (
                         <div className="text-sm">
                           {item.selectedSpecifications && item.selectedSpecifications.length > 0 ? (
                             <div className="space-y-1">

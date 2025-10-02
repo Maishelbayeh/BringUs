@@ -46,7 +46,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
     );
   };
 
-  const getEyeIcon = ( isVisible: boolean) => {
+  const getEyeIcon = (_columnKey: string, isVisible: boolean) => {
     if (isVisible) {
       return (
         <svg className="w-4 h-4 text-gray-500 hover:text-primary transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -133,7 +133,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
                     : (columnVisibility[column.key] ? 'Hide column' : 'Show column')
                   }
                 >
-                  {getEyeIcon(columnVisibility[column.key])}
+                  {getEyeIcon(column.key, columnVisibility[column.key])}
                 </span>
               )}
             </div>

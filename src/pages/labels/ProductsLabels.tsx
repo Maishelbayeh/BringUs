@@ -79,7 +79,7 @@ import useProductLabel from '../../hooks/useProductLabel';
 
       // حفظ البيانات
       const editId = editingSpec?._id || editingSpec?.id;
-      await saveProductLabel(form, editId);
+      await saveProductLabel(form, editId, isRTL);
       setDrawerOpen(false);
       setEditingSpec(null);
       setValidationErrors({});

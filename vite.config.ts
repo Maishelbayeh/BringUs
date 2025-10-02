@@ -12,7 +12,7 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: parseInt(process.env.PORT || '5174'), // Use PORT env var or default to 5174
+    port: parseInt(process.env.PORT || '5174'),
     strictPort: true,
   },
   preview: {
@@ -23,7 +23,7 @@ export default defineConfig({
       'localhost',
       '127.0.0.1',
       'bringus.onrender.com',
-      '.onrender.com' // Allow all render.com subdomains
+      '.onrender.com'
     ],
   },
   build: {

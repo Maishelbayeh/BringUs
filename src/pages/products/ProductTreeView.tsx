@@ -22,6 +22,7 @@ interface ProductTreeViewProps {
 const ProductTreeView: React.FC<ProductTreeViewProps> = ({
   products,
   isRTL,
+
   renderImage,
   renderPrice,
   renderStock,

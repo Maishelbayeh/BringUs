@@ -313,7 +313,7 @@ const StoresManagement: React.FC = () => {
       key: 'name',
       label: { en: 'Store Name', ar: 'اسم المتجر' },
       type: 'text' as const,
-      render: ( item: any) => {
+      render: (_value: string, item: any) => {
         const originalItem = item.originalData as StoreSubscription;
         return (
           <div className="flex items-center gap-3">
@@ -336,7 +336,7 @@ const StoresManagement: React.FC = () => {
       key: 'status',
       label: { en: 'Status', ar: 'الحالة' },
       type: 'status' as const,
-      render: ( item: any) => {
+      render: (_value: string, item: any) => {
         const originalItem = item.originalData as StoreSubscription;
         const status = originalItem.status || 'unknown';
         return (
@@ -357,7 +357,7 @@ const StoresManagement: React.FC = () => {
       key: 'subscription',
       label: { en: 'Subscription', ar: 'الاشتراك' },
       type: 'text' as const,
-      render: ( item: any) => {
+      render: (_value: string, item: any) => {
         const originalItem = item.originalData as StoreSubscription;
         const subscription = originalItem.subscription;
         if (!subscription) {
@@ -395,7 +395,7 @@ const StoresManagement: React.FC = () => {
       key: 'trialEndDate',
       label: { en: 'Trial End', ar: 'انتهاء التجربة' },
       type: 'date' as const,
-      render: ( item: any) => {
+      render: (_value: string, item: any) => {
         const originalItem = item.originalData as StoreSubscription;
         const trialEndDate = originalItem.subscription?.trialEndDate;
         if (!trialEndDate) {
@@ -437,7 +437,7 @@ const StoresManagement: React.FC = () => {
       key: 'subscriptionEndDate',
       label: { en: 'Subscription End', ar: 'انتهاء الاشتراك' },
       type: 'date' as const,
-      render: ( item: any) => {
+      render: (_value: string, item: any) => {
         const originalItem = item.originalData as StoreSubscription;
         const endDate = originalItem.subscription?.endDate;
         if (!endDate) {
@@ -483,7 +483,7 @@ const StoresManagement: React.FC = () => {
       key: 'createdAt',
       label: { en: 'Created At', ar: 'تاريخ الإنشاء' },
       type: 'date' as const,
-      render: ( item: any) => {
+      render: (_value: string, item: any) => {
         const originalItem = item.originalData as StoreSubscription;
         return (
           <div className="text-sm text-gray-900 flex justify-center ">

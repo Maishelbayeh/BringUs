@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-
+// import { useTranslation } from 'react-i18next';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 
 
@@ -31,11 +31,21 @@ const CheckboxSpecificationSelector: React.FC<CheckboxSpecificationSelectorProps
 }) => {
   const [expandedTitles, setExpandedTitles] = useState<Set<string>>(new Set());
   const [selectedValues, setSelectedValues] = useState<Set<string>>(new Set());
+  // const { i18n } = useTranslation();
+  // const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
+  // Initialize selected values from props
   useEffect(() => {
- 
+    console.log('🔍 CheckboxSpecificationSelector - selectedSpecifications:', selectedSpecifications);
+    console.log('🔍 CheckboxSpecificationSelector - specifications:', specifications);
+    
     if (Array.isArray(selectedSpecifications) && selectedSpecifications.length > 0) {
       const selectedIds = new Set(selectedSpecifications.map(spec => spec._id));
-     
+      console.log('🔍 CheckboxSpecificationSelector - Setting selectedIds:', selectedIds);
+      console.log('🔍 CheckboxSpecificationSelector - Selected specs details:', selectedSpecifications.map(spec => ({
+        id: spec._id,
+        title: spec.title,
+        value: spec.value
+      })));
       
       // تحقق من تطابق الـ IDs
       const availableIds = specifications.flatMap(s => s.values.map(v => v._id));

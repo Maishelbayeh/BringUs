@@ -66,7 +66,7 @@ const STORE_ID = getStoreId() || '';
   }, [hasLoaded, categories.length, showError]);
 
   // إضافة أو تعديل تصنيف
-  const saveCategory = async (form: any, editId?: string | number | null) => {
+  const saveCategory = async (form: any, editId?: string | number | null, _isRTL: boolean = false) => {
     //CONSOLE.log('Saving category with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
     // صورة افتراضية للكاتيجوري
@@ -101,11 +101,15 @@ const STORE_ID = getStoreId() || '';
     //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
-        
+         await axios.put(`https://bringus-backend.onrender.com/api/categories/${editId}`, payload, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
         //CONSOLE.log('Category updated successfully:', response.data);
         showSuccess('تم تعديل التصنيف بنجاح', 'نجح التحديث');
       } else {
-        
+         await axios.post('https://bringus-backend.onrender.com/api/categories', payload, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
         //CONSOLE.log('Category created successfully:', response.data);
         showSuccess('تم إضافة التصنيف بنجاح', 'نجح الإضافة');
       }
@@ -129,9 +133,14 @@ const STORE_ID = getStoreId() || '';
   };
 
   // حذف تصنيف
-  const deleteCategory = async () => {
+  const deleteCategory = async (categoryId: string | number) => {
+    //CONSOLE.log('Deleting category with id:', categoryId);
     try {
-     
+      await axios.delete(`https://bringus-backend.onrender.com/api/categories/${categoryId}?storeId=${STORE_ID}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      }); 
+        
+      //CONSOLE.log('Category deleted successfully:', response.data);
       showSuccess('تم حذف التصنيف بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
       await fetchCategories(true);

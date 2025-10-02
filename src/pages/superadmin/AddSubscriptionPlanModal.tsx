@@ -73,6 +73,13 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
     storageLimit: -1
   });
 
+  const [_newFeature, _setNewFeature] = useState<Feature>({
+    name: '',
+    nameAr: '',
+    description: '',
+    descriptionAr: '',
+    included: true
+  });
 
   // Populate form when editing
   useEffect(() => {
@@ -143,9 +150,28 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
     }));
   };
 
- 
+  // const addFeature = () => {
+  //   if (newFeature.name && newFeature.nameAr) {
+  //     setFormData(prev => ({
+  //       ...prev,
+  //       features: [...prev.features, { ...newFeature }]
+  //     }));
+  //     setNewFeature({
+  //       name: '',
+  //       nameAr: '',
+  //       description: '',
+  //       descriptionAr: '',
+  //       included: true
+  //     });
+  //   }
+  // };
 
-
+  // const removeFeature = (index: number) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     features: prev.features.filter((_, i) => i !== index)
+  //   }));
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

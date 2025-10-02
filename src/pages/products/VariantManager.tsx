@@ -4,6 +4,7 @@ import ProductsDrawer from './ProductsDrawer';
 import useProductSpecifications from '../../hooks/useProductSpecifications';
 import useProducts from '../../hooks/useProducts';
 
+
 interface VariantManagerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -18,6 +19,10 @@ interface VariantManagerProps {
   units: any[];
 }
 
+// const fetchVariantById = async (productId: string, variantId: string, storeId: string) => {
+//   const res = await axios.get(`${BASE_URL}products/${productId}/variants?storeId=${storeId}`);
+//   return res.data.data.find((v: any) => v._id === variantId || v.id === variantId);
+// };
 
 const VariantManager: React.FC<VariantManagerProps> = ({
   isOpen,

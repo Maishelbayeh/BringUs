@@ -44,7 +44,7 @@ console.log(role);
   // الاستماع لتحديث بيانات المتجر
   useEffect(() => {
     const handleStoreDataUpdate = (event: CustomEvent) => {
-      const { logo } = event.detail;
+      const {  logo } = event.detail;
       const newStoreName = language === 'ARABIC' ? localStorage.getItem('storeNameAr') : localStorage.getItem('storeNameEn');
       setStoreName(newStoreName || 'bring us');
       if (logo?.url) {

@@ -5,45 +5,49 @@ import HeaderWithAction from '../../components/common/HeaderWithAction';
 import { SpecificationSelector } from '../../components/common';
 import useProductSpecifications from '../../hooks/useProductSpecifications';
 
-interface SelectedSpecification {
-  specId: string;
-  valueId: string;
-  value: string;
-  quantity: number;
-  price: number;
-}
-
 const SpecificationsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
   
   const { specifications, fetchSpecifications, loading } = useProductSpecifications();
-  const [selectedSpecifications, setSelectedSpecifications] = useState<SelectedSpecification[]>([]);
+  const [selectedSpecifications, setSelectedSpecifications] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     fetchSpecifications();
   }, [fetchSpecifications]);
 
-  const handleSpecificationChange = (specifications: SelectedSpecification[]) => {
-    setSelectedSpecifications(specifications);
+  const handleSpecificationChange = (specId: string, value: string) => {
+    setSelectedSpecifications(prev => {
+      const updated = { ...prev };
+      if (value) {
+        updated[specId] = value;
+      } else {
+        delete updated[specId];
+      }
+      return updated;
+    });
+  };
+
+  const handleSpecificationChangeWrapper = (specifications: any[]) => {
+    // Convert array format to object format
+    const newSpecs: { [key: string]: string } = {};
+    specifications.forEach(spec => {
+      if (spec.specificationId && spec.value) {
+        newSpecs[spec.specificationId] = spec.value;
+      }
+    });
+    setSelectedSpecifications(newSpecs);
   };
 
   const handleClearAll = () => {
-    setSelectedSpecifications([]);
+    setSelectedSpecifications({});
   };
 
   const handleSelectAll = () => {
-    const allSelected: SelectedSpecification[] = [];
+    const allSelected: { [key: string]: string } = {};
     specifications.forEach(spec => {
       if (spec.values.length > 0) {
-        const value = spec.values[0];
-        allSelected.push({
-          specId: spec._id,
-          valueId: `${spec._id}_0`,
-          value: isRTL ? value.valueAr : value.valueEn,
-          quantity: 0,
-          price: 0
-        });
+        allSelected[spec._id] = isRTL ? spec.values[0].valueAr : spec.values[0].valueEn;
       }
     });
     setSelectedSpecifications(allSelected);
@@ -91,41 +95,52 @@ const SpecificationsPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <SpecificationSelector
               specifications={specifications}
-              selectedSpecifications={selectedSpecifications}
-              onSpecificationChange={handleSpecificationChange}
+              selectedSpecifications={Object.entries(selectedSpecifications).map(([specId, value]) => ({
+                specId: specId,
+                specificationId: specId,
+                value: value,
+                valueId: `${specId}_${value}`,
+                quantity: 1,
+                price: 0
+              }))}
+              onSpecificationChange={handleSpecificationChangeWrapper}
               isRTL={isRTL}
             />
           </div>
 
           {/* Selected Specifications Summary */}
-          {selectedSpecifications.length > 0 && (
+          {Object.keys(selectedSpecifications).length > 0 && (
             <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className={`text-lg font-semibold text-gray-800 mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
                 {isRTL ? 'ملخص المواصفات المختارة' : 'Selected Specifications Summary'}
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {selectedSpecifications.map(selected => {
-                  const spec = specifications.find(s => s._id === selected.specId);
-                  if (!spec) return null;
-                  
-                  return (
-                    <div key={`${selected.specId}_${selected.valueId}`} className="bg-gray-50 rounded-lg p-4">
-                      <div className={`text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                        {isRTL ? spec.titleAr : spec.titleEn}
-                      </div>
-                      <div className={`text-lg font-semibold text-blue-600 ${isRTL ? 'text-right' : 'text-left'}`}>
-                        {selected.value}
-                      </div>
-                      {(selected.quantity > 0 || selected.price > 0) && (
-                        <div className={`mt-2 text-sm text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}>
-                          {selected.quantity > 0 && <div>{isRTL ? 'الكمية' : 'Quantity'}: {selected.quantity}</div>}
-                          {selected.price > 0 && <div>{isRTL ? 'السعر' : 'Price'}: {selected.price}</div>}
+                {specifications
+                  .filter(spec => selectedSpecifications[spec._id])
+                  .map(spec => {
+                    const selectedValue = selectedSpecifications[spec._id];
+                                         const value = spec.values.find((v: any) => 
+                       v.valueAr === selectedValue || v.valueEn === selectedValue
+                     );
+                    
+                    return (
+                      <div key={spec._id} className="bg-gray-50 rounded-lg p-4">
+                        <div className={`text-sm font-medium text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          {isRTL ? spec.titleAr : spec.titleEn}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        <div className={`text-lg font-semibold text-blue-600 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          {isRTL ? value?.valueAr : value?.valueEn}
+                        </div>
+                        <button
+                          onClick={() => handleSpecificationChange(spec._id, '')}
+                          className={`mt-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded transition-colors ${isRTL ? 'text-right' : 'text-left'}`}
+                        >
+                          {isRTL ? 'إلغاء الاختيار' : 'Remove'}
+                        </button>
+                      </div>
+                    );
+                  })}
               </div>
 
               {/* Export/Use Buttons */}

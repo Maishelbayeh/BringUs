@@ -52,7 +52,13 @@ const useProducts = () => {
       
       // Log barcodes for debugging
       const productsData = res.data.data || res.data;
-     
+      if (Array.isArray(productsData)) {
+        productsData.forEach((_product: any, _index: number) => {
+          //CONSOLE.log(`🔍 Product ${index + 1} barcodes:`, product.barcodes);
+          //CONSOLE.log(`🔍 Product ${index + 1} barcodes type:`, typeof product.barcodes);
+          //CONSOLE.log(`🔍 Product ${index + 1} barcodes is array:`, Array.isArray(product.barcodes));
+        });
+      }
       
       setProducts(productsData);
       setHasLoaded(true); // تم تحميل البيانات
@@ -213,6 +219,7 @@ const useProducts = () => {
               // تحويل المواصفات إلى التنسيق المطلوب للـ API
               const formattedSpecs = parsed.map((spec: any) => {
                 const specificationId = spec._id.split('_')[0]; // أخذ ID المواصفة الأساسي
+              //  const _valueIndex = spec._id.split('_')[1]; // أخذ index القيمة
                 
                 // Ensure we have a proper title - use the spec title if available, otherwise use a fallback
                 let title = spec.title;
@@ -286,9 +293,15 @@ const useProducts = () => {
       //CONSOLE.log('Store field in payload:', payload.store);
     try {
       if (editId) {
-      
+        //CONSOLE.log('🔍 Updating product with ID:', editId);
+        //CONSOLE.log('🔍 Update URL:', `${BASE_URL}meta/products/${editId}`);
+        await axios.put(`${BASE_URL}meta/products/${editId}`, payload);
+        showSuccess('تم تعديل المنتج بنجاح', 'نجح التحديث');
       } else {
-        
+        //CONSOLE.log('🔍 Creating new product');
+        //CONSOLE.log('🔍 Create URL:', `${BASE_URL}products`);
+        await axios.post(`${BASE_URL}products`, payload);
+        //CONSOLE.log('Product created successfully:', response.data);
         showSuccess('تم إضافة المنتج بنجاح', 'نجح الإضافة');
       }
       // تحديث القائمة فقط
@@ -330,7 +343,7 @@ const useProducts = () => {
   const deleteProduct = async (productId: string | number) => {
     try {
       await axios.delete(`${BASE_URL}meta/products/${productId}?storeId=${getStoreId()}`);
-      //CONSOLE.log('Product deleted successfully:');
+      //CONSOLE.log('Product deleted successfully:', response.data);
       showSuccess('تم حذف المنتج بنجاح', 'نجح الحذف');
       // تحديث القائمة فقط
       await fetchProducts(true);

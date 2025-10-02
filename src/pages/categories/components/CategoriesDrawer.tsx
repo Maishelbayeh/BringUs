@@ -29,6 +29,7 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
   // استخدام النظام العام للفالديشين
   const {
     errors,
+    validateForm: _validateFormData,
  
     clearAllErrors,
     setErrors,

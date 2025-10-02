@@ -30,7 +30,7 @@ const PaymentVariants: React.FC = () => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<PaymentVariant | undefined>();
-
+  const [_isFormValid, setIsFormValid] = useState(false);
   const drawerRef = useRef<PaymentVariantsDrawerRef>(null);
   
   const [variants, setVariants] = useState<PaymentVariant[]>([
@@ -136,8 +136,9 @@ const PaymentVariants: React.FC = () => {
     setSelectedVariant(undefined);
   };
 
-  const handleValidationChange = () => {
-   
+  const handleValidationChange = (isValid: boolean) => {
+    //CONSOLE.log('PaymentVariants validation changed:', isValid);
+    setIsFormValid(isValid);
   };
 
   return (

@@ -1,6 +1,6 @@
 // src/components/CustomBarChart.tsx
 import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip,CartesianGrid, Cell } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
 import { useTranslation } from 'react-i18next';
 
 const data = [
@@ -62,10 +62,10 @@ const CustomBarChart: React.FC = () => {
             }}
           >
             <defs>
-              {data.map((entry, index) => (
+              {data.map((_entry, index) => (
                 <linearGradient key={index} id={`colorGradient${index}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={entry.color} stopOpacity={0.8} />
-                  <stop offset="100%" stopColor={entry.color} stopOpacity={0.4} />
+                  <stop offset="0%" stopColor={_entry.color} stopOpacity={0.8} />
+                  <stop offset="100%" stopColor={_entry.color} stopOpacity={0.4} />
                 </linearGradient>
               ))}
             </defs>
@@ -110,7 +110,7 @@ const CustomBarChart: React.FC = () => {
               animationDuration={2000}
               animationEasing="ease-out"
             >
-              {data.map((index) => (
+              {data.map((_entry, index) => (
                 <Cell key={`cell-${index}`} fill={`url(#colorGradient${index})`} />
               ))}
             </Bar>

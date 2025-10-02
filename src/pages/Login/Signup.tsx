@@ -40,7 +40,7 @@ const Signup: React.FC = () => {
     phone?: string; 
     terms?: string; 
   }>({});
- 
+  const [_isLoading, setIsLoading] = useState(false);
   const [showStoreWizard, setShowStoreWizard] = useState(false);
 
   
@@ -93,7 +93,7 @@ const Signup: React.FC = () => {
     
     if (!validateForm()) return;
     
-   
+    setIsLoading(true);
     
     try {
       // Simulate API call
@@ -104,7 +104,7 @@ const Signup: React.FC = () => {
     } catch (error) {
       //CONSOLE.error('Signup error:', error);
     } finally {
-      
+      setIsLoading(false);
     }
   };
 

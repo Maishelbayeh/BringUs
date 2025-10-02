@@ -19,9 +19,7 @@ const Units: React.FC = () => {
 
   const {
     units,  
-    
     fetchUnits,
-    
     deleteUnit
   } = useUnits();
 

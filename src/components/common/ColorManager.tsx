@@ -30,7 +30,7 @@ const ColorManager: React.FC<ColorManagerProps> = ({
     addColorsToProduct,
     removeColorsFromProduct,
     replaceProductColors,
-
+    
   } = useProducts();
 
   useEffect(() => {
@@ -145,6 +145,7 @@ const ColorManager: React.FC<ColorManagerProps> = ({
       ) : (
         <Grid container spacing={2}>
           {colors.map((colorGroup, groupIndex) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={groupIndex}>
               <Box
                 border={1}
                 borderColor="divider"
@@ -190,6 +191,7 @@ const ColorManager: React.FC<ColorManagerProps> = ({
                   ))}
                 </Box>
               </Box>
+            </Grid>
           ))}
         </Grid>
       )}

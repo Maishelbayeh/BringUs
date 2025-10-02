@@ -4,6 +4,7 @@ import { BASE_URL } from '../constants/api';
 import { handleApiError } from '../utils/handleApiError';
 import useLanguage from './useLanguage';
 import { useToastContext } from '../contexts/ToastContext';
+// import { get } from 'http';
 import { getStoreId } from '../utils/storeUtils';
 
 interface DeliveryMethodsResponse extends ApiResponse<DelieveryMethod[]> {
@@ -27,7 +28,7 @@ interface UseDeliveryMethodsOptions {
 const storeId = localStorage.getItem('storeId');
 const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
   const { t } = useLanguage();
-  const { showSuccess} = useToastContext();
+  const { showSuccess } = useToastContext();
   const [deliveryMethods, setDeliveryMethods] = useState<DelieveryMethod[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -155,13 +156,11 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
   }, [shouldWaitForRateLimit, retryAfter]);
 
   // Get all delivery methods
-  const fetchDeliveryMethods = useCallback(async () => {
+  const fetchDeliveryMethods = useCallback(async (_fetchOptions: UseDeliveryMethodsOptions = {}) => {
     setLoading(true);
     setError(null);
 
     try {
-     
-
       const response = await makeRequest(`${BASE_URL}delivery-methods/store/${storeId}`, {
         method: 'GET',
         headers: getAuthHeaders(),
