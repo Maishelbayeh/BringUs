@@ -114,10 +114,10 @@ const ProductsLabelsDrawer: React.FC<Props> = ({
            
             <div >
               <CustomInput  
-                label={isRTL ? t('productsLabels.nameAr') : t('productsLabels.nameEn')}
+                label={ t('productsLabels.nameAr') }
                 value={form.nameAr}
                 onChange={e => handleFormChange('nameAr', e.target.value)}
-                placeholder={isRTL ? t('productsLabels.nameArPlaceholder') : t('productsLabels.nameEnPlaceholder')}
+                placeholder={ t('productsLabels.nameArPlaceholder')}
                 required
                 className={getErrorStyle('nameAr')}
               />
@@ -127,10 +127,10 @@ const ProductsLabelsDrawer: React.FC<Props> = ({
             {/* الوصف الإنجليزي */}
             <div >
               <CustomInput
-                label={isRTL ? t('productsLabels.nameEn') : t('productsLabels.nameAr')}
+                label={ t('productsLabels.nameEn') }
                 value={form.nameEn}
                 onChange={e => handleFormChange('nameEn', e.target.value)}
-                placeholder={isRTL ? t('productsLabels.nameEnPlaceholder') : t('productsLabels.nameArPlaceholder')}
+                placeholder={ t('productsLabels.nameEnPlaceholder')}
                 required
                 dir="ltr"
                 className={getErrorStyle('nameEn')}
@@ -140,10 +140,10 @@ const ProductsLabelsDrawer: React.FC<Props> = ({
             </div>
             <div className="md:col-span-2">
               <CustomTextArea
-                label={isRTL ? t('productsLabels.descriptionAr') : t('productsLabels.descriptionEn')}
+                label={ t('productsLabels.descriptionAr') }
                 value={form.descriptionAr}
                 onChange={e => handleFormChange('descriptionAr', e.target.value)}
-                placeholder={isRTL ? t('productsLabels.descriptionArPlaceholder') : t('productsLabels.descriptionEnPlaceholder')}
+                placeholder={ t('productsLabels.descriptionArPlaceholder') }
               
                 className={getErrorStyle('descriptionAr')}
               />
@@ -151,10 +151,10 @@ const ProductsLabelsDrawer: React.FC<Props> = ({
             </div>
             <div className="md:col-span-2">
               <CustomTextArea
-                      label={isRTL ? t('productsLabels.descriptionEn') : t('productsLabels.descriptionAr')}
+                      label={ t('productsLabels.descriptionEn')}
                 value={form.descriptionEn}
                 onChange={e => handleFormChange('descriptionEn', e.target.value)}
-                placeholder={isRTL ? t('productsLabels.descriptionEnPlaceholder') : t('productsLabels.descriptionArPlaceholder')}
+                placeholder={ t('productsLabels.descriptionEnPlaceholder') }
                
                 className={getErrorStyle('descriptionEn')}
               />
