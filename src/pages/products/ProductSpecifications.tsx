@@ -164,7 +164,7 @@ const ProductSpecifications: React.FC = () => {
               <div className="p-3 border-b border-gray-100">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate max-w-[150px]">
                       {isRTL ? spec.titleAr : spec.titleEn}
                     </h3>
                     <p className="text-xs text-gray-500 truncate">
