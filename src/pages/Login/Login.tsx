@@ -25,11 +25,30 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login, isLoading: authLoading, error: authError } = useAuth();
   const { storeSlug: _storeSlug } = useStoreUrls();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+  const [formData, setFormData] = useState(() => {
+    // Load saved credentials if rememberMe was previously selected
+    const savedEmail = localStorage.getItem('savedEmail');
+    const savedPassword = localStorage.getItem('savedPassword');
+    const rememberMeFlag = localStorage.getItem('rememberMe');
+    
+    console.log('Loading saved credentials:', {
+      savedEmail,
+      savedPassword: savedPassword ? '***' : null,
+      rememberMeFlag
+    });
+    
+    return {
+      email: savedEmail || '',
+      password: savedPassword || ''
+    };
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    // Check if user previously selected "Remember Me"
+    const isRemembered = localStorage.getItem('rememberMe') === 'true';
+    console.log('Remember Me state loaded:', isRemembered);
+    return isRemembered;
+  });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,8 +87,27 @@ const Login: React.FC = () => {
     try {
       const result = await login({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        rememberMe: rememberMe
       });
+      
+      // Save credentials if rememberMe is checked
+      if (rememberMe) {
+        localStorage.setItem('savedEmail', formData.email);
+        localStorage.setItem('savedPassword', formData.password);
+        localStorage.setItem('rememberMe', 'true');
+        console.log('Credentials saved:', {
+          email: formData.email,
+          password: '***',
+          rememberMe: true
+        });
+      } else {
+        // Clear saved credentials if rememberMe is unchecked
+        localStorage.removeItem('savedEmail');
+        localStorage.removeItem('savedPassword');
+        localStorage.removeItem('rememberMe');
+        console.log('Credentials cleared');
+      }
       localStorage.setItem('userId', result?.user.id || '');
       localStorage.setItem('storeId', result?.storeId || '');
       localStorage.setItem('userName', result?.user.firstName || '');
@@ -248,6 +286,8 @@ const Login: React.FC = () => {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
                   />
                   <span className="ml-2 text-sm text-gray-600">

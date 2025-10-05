@@ -46,6 +46,7 @@ interface LoginResponse {
 interface LoginCredentials {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export const useAuth = () => {
@@ -72,8 +73,20 @@ export const useAuth = () => {
       }
 
       if (data.success && data.userStatus === 'active') {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userInfo', JSON.stringify(data.user));
+        // Store token and user info based on rememberMe preference
+        if (credentials.rememberMe) {
+          // Persistent storage - survives browser restart
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userInfo', JSON.stringify(data.user));
+          localStorage.setItem('rememberMe', 'true');
+          console.log('Token saved to localStorage (persistent)');
+        } else {
+          // Session storage - cleared when browser closes
+          sessionStorage.setItem('token', data.token);
+          sessionStorage.setItem('userInfo', JSON.stringify(data.user));
+          localStorage.removeItem('rememberMe');
+          console.log('Token saved to sessionStorage (temporary)');
+        }
         
         // حفظ بيانات المستخدم
         updateUserData(data.user);
@@ -134,6 +147,7 @@ export const useAuth = () => {
   };
 // -----------------------------------------------logout---------------------------------------------------------
   const logout = () => {
+    // Clear both localStorage and sessionStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('userInfo');
@@ -142,6 +156,13 @@ export const useAuth = () => {
     localStorage.removeItem('storeInfo');
     localStorage.removeItem('storeLogo');
     localStorage.removeItem('isOwner');
+    localStorage.removeItem('rememberMe');
+    localStorage.removeItem('savedEmail');
+    localStorage.removeItem('savedPassword');
+    
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('userInfo');
+    
     updateStoreId("");
     
     // Dispatch custom event for store context update
@@ -149,12 +170,24 @@ export const useAuth = () => {
   };
 // -----------------------------------------------getCurrentUser---------------------------------------------------------
   const getCurrentUser = () => {
-    const userInfo = localStorage.getItem('userInfo');
+    // Check both localStorage and sessionStorage for user info
+    const userInfo = localStorage.getItem('userInfo') || sessionStorage.getItem('userInfo');
     return userInfo ? JSON.parse(userInfo) : null;
   };
 // -----------------------------------------------getToken---------------------------------------------------------
   const getToken = () => {
-    return localStorage.getItem('token');
+    // Check both localStorage and sessionStorage for token
+    const localToken = localStorage.getItem('token');
+    const sessionToken = sessionStorage.getItem('token');
+    const token = localToken || sessionToken;
+    
+    console.log('Getting token:', {
+      hasLocalToken: !!localToken,
+      hasSessionToken: !!sessionToken,
+      hasToken: !!token
+    });
+    
+    return token;
   };
 // -----------------------------------------------isAuthenticated---------------------------------------------------------
   const isAuthenticated = () => {
