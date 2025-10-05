@@ -146,26 +146,33 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
         setInternalError(validation.errorMessage || 'Invalid files selected');
         onValidationErrorChange && onValidationErrorChange(validation.errorMessage || 'Invalid files selected');
 
-        const newPreviews: string[] = [];
-        newFiles.forEach(file => {
-          const reader = new FileReader();
-          reader.onload = e => {
-            if (e.target?.result) {
-              newPreviews.push(e.target.result as string);
-              if (multiple) {
-                setPreviews(prev => {
-                  const merged = [...prev, ...newPreviews];
-                  setFileCount(merged.length);
-                  return merged;
-                });
-              } else {
-                setPreviews([...newPreviews]);
-                setFileCount(newPreviews.length);
-              }
-            }
-          };
-          reader.readAsDataURL(file);
-        });
+        // Create previews for validation error case
+        const createPreviews = async (files: File[]) => {
+          const previewPromises = files.map(file => {
+            return new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = e => {
+                resolve(e.target?.result as string);
+              };
+              reader.readAsDataURL(file);
+            });
+          });
+          
+          const newPreviews = await Promise.all(previewPromises);
+          
+          if (multiple) {
+            setPreviews(prev => {
+              const merged = [...prev, ...newPreviews];
+              setFileCount(merged.length);
+              return merged;
+            });
+          } else {
+            setPreviews(newPreviews);
+            setFileCount(newPreviews.length);
+          }
+        };
+        
+        createPreviews(newFiles);
         return;
       } else {
         // Clear any internal error/block if previously set
@@ -183,27 +190,33 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
       onChange(multiple ? updatedFiles : updatedFiles[0]);
     }
 
-    // استبدال الصور الموجودة بالصور الجديدة
-    const newPreviews: string[] = [];
-    newFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        if (e.target?.result) {
-          newPreviews.push(e.target.result as string);
-          if (multiple) {
-            setPreviews(prev => {
-              const merged = [...prev, ...newPreviews];
-              setFileCount(merged.length);
-              return merged;
-            });
-          } else {
-            setPreviews([...newPreviews]);
-            setFileCount(newPreviews.length);
-          }
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    // Create previews for successful validation case
+    const createPreviews = async (files: File[]) => {
+      const previewPromises = files.map(file => {
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            resolve(e.target?.result as string);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+      
+      const newPreviews = await Promise.all(previewPromises);
+      
+      if (multiple) {
+        setPreviews(prev => {
+          const merged = [...prev, ...newPreviews];
+          setFileCount(merged.length);
+          return merged;
+        });
+      } else {
+        setPreviews(newPreviews);
+        setFileCount(newPreviews.length);
+      }
+    };
+    
+    createPreviews(newFiles);
   };
 
   const handleClick = () => {

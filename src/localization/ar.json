@@ -756,7 +756,21 @@
     "addButton": "إضافة فئة",
     "category": "فئة",
     "deleteConfirmTitle": "تأكيد حذف الفئة",
-    "deleteConfirmMessage": "هل أنت متأكد من حذف هذه الفئة؟"
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذه الفئة؟",
+    "success": {
+      "updateSuccess": "تم تعديل التصنيف بنجاح",
+      "createSuccess": "تم إضافة التصنيف بنجاح",
+      "deleteSuccess": "تم حذف التصنيف بنجاح",
+      "uploadImageSuccess": "تم رفع الصورة بنجاح"
+    },
+    "errors": {
+      "fetchError": "فشل في جلب التصنيفات",
+      "updateError": "فشل في حفظ التصنيف",
+      "deleteError": "فشل في حذف التصنيف",
+      "uploadImageError": "فشل في رفع الصورة",
+      "validationError": "خطأ في التحقق",
+      "saveError": "خطأ في الحفظ"
+    }
   },
   "products": {
     "title": "المنتجات",
@@ -811,7 +825,51 @@
     "searchSpecifications": "البحث في المواصفات...",
     "deleteSpecConfirmTitle": "تأكيد حذف المواصفة",
     "deleteSpecConfirmMessage": "هل أنت متأكد من حذف هذه المواصفة؟",
-    "specification": "مواصفة"
+    "specification": "مواصفة",
+    "success": {
+      "updateSuccess": "تم تعديل مواصفة المنتج بنجاح",
+      "createSuccess": "تم إضافة مواصفة المنتج بنجاح",
+      "deleteSuccess": "تم حذف مواصفة المنتج بنجاح"
+    },
+    "errors": {
+      "fetchError": "فشل في جلب مواصفات المنتجات",
+      "updateError": "فشل في حفظ مواصفة المنتج",
+      "deleteError": "فشل في حذف مواصفة المنتج",
+      "validationError": "خطأ في التحقق",
+      "saveError": "خطأ في الحفظ"
+    },
+    "productSuccess": {
+      "updateSuccess": "تم تعديل المنتج بنجاح",
+      "createSuccess": "تم إضافة المنتج بنجاح",
+      "deleteSuccess": "تم حذف المنتج بنجاح",
+      "uploadImageSuccess": "تم رفع الصورة بنجاح",
+      "uploadImagesSuccess": "تم رفع الصور بنجاح",
+      "uploadMainImageSuccess": "تم رفع الصورة الأساسية بنجاح",
+      "addVariantSuccess": "تم إضافة المتغير بنجاح",
+      "updateVariantSuccess": "تم تحديث المتغير بنجاح",
+      "deleteVariantSuccess": "تم حذف المتغير بنجاح",
+      "addColorsSuccess": "تم إضافة الألوان بنجاح",
+      "removeColorsSuccess": "تم حذف الألوان بنجاح",
+      "replaceColorsSuccess": "تم استبدال الألوان بنجاح"
+    },
+    "productErrors": {
+      "fetchError": "فشل في جلب المنتجات",
+      "updateError": "فشل في حفظ المنتج",
+      "deleteError": "فشل في حذف المنتج",
+      "uploadImageError": "فشل في رفع الصورة",
+      "uploadImagesError": "فشل في رفع الصور",
+      "uploadMainImageError": "فشل في رفع الصورة الأساسية",
+      "addVariantError": "فشل في إضافة المتغير",
+      "updateVariantError": "فشل في تحديث المتغير",
+      "deleteVariantError": "فشل في حذف المتغير",
+      "fetchVariantsError": "فشل في جلب متغيرات المنتج",
+      "addColorsError": "فشل في إضافة الألوان",
+      "removeColorsError": "فشل في حذف الألوان",
+      "replaceColorsError": "فشل في استبدال الألوان",
+      "validationError": "خطأ في التحقق",
+      "saveError": "خطأ في الحفظ",
+      "unexpectedError": "حدث خطأ غير متوقع"
+    }
   },
   "subcategories": {
     "title": "الفئات الفرعية",
@@ -1319,8 +1377,20 @@
     "helpTitle": "ملاحظات مهمة:",
     "helpAr": "• الاسم العربي سيظهر للعملاء العرب",
     "helpEn": "• الاسم الإنجليزي سيظهر للعملاء الناطقين بالإنجليزية",
-    "helpUnique": "• يجب أن يكون الاسم فريداً وغير مكرر"
-    
+    "helpUnique": "• يجب أن يكون الاسم فريداً وغير مكرر",
+    "success": {
+      "updateSuccess": "تم تعديل الوحدة بنجاح",
+      "createSuccess": "تم إضافة الوحدة بنجاح",
+      "deleteSuccess": "تم حذف الوحدة بنجاح"
+    },
+    "errors": {
+      "fetchError": "فشل في جلب الوحدات",
+      "updateError": "فشل في حفظ الوحدة",
+      "deleteError": "فشل في حذف الوحدة",
+      "validationError": "خطأ في التحقق",
+      "saveError": "خطأ في الحفظ",
+      "missingStoreId": "معرف المتجر مفقود. لا يمكن حفظ الوحدة."
+    }
   },
 
   "productsLabels": {
@@ -1343,7 +1413,19 @@
     "editLabel": "تعديل علامة منتج",
     "deleteLabel": "حذف علامة منتج",
     "deleteConfirmTitle": "تأكيد حذف علامة المنتج",
-    "deleteConfirmMessage": "هل أنت متأكد من حذف هذه العلامة المنتج؟"
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذه العلامة المنتج؟",
+    "success": {
+      "updateSuccess": "تم تعديل علامة المنتج بنجاح",
+      "createSuccess": "تم إضافة علامة المنتج بنجاح",
+      "deleteSuccess": "تم حذف علامة المنتج بنجاح"
+    },
+    "errors": {
+      "fetchError": "فشل في جلب علامات المنتج",
+      "updateError": "فشل في حفظ علامة المنتج",
+      "deleteError": "فشل في حذف علامة المنتج",
+      "validationError": "خطأ في التحقق",
+      "saveError": "خطأ في الحفظ"
+    }
   },
   "store": {
     "basicInfo": "المعلومات الأساسية",

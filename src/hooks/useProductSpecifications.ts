@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 import { getStoreId } from '../utils/storeUtils';
@@ -10,6 +11,7 @@ const useProductSpecifications = () => {
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
+  const { t } = useTranslation();
  
 
   // جلب جميع مواصفات المنتجات
@@ -33,13 +35,13 @@ const useProductSpecifications = () => {
       return data;
     } catch (err: any) {
       //CONSOLE.error('Error fetching specifications:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب مواصفات المنتجات';
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.errors.fetchError');
       showError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [hasLoaded, showError]); // إزالة specifications.length من dependencies
+  }, [hasLoaded, showError, t]); // إزالة specifications.length من dependencies
 
   // إضافة أو تعديل مواصفة منتج
   const saveSpecification = async (form: any, editId?: string | number | null) => {
@@ -67,12 +69,12 @@ const useProductSpecifications = () => {
         console.log('🔄 Sending PUT request to:', `${BASE_URL}meta/product-specifications/${editId}`);
         await axios.put(`${BASE_URL}meta/product-specifications/${editId}`, payload);
         //CONSOLE.log('Specification updated successfully:', response.data);
-        showSuccess('تم تعديل مواصفة المنتج بنجاح', 'نجح التحديث');
+        showSuccess(t('products.success.updateSuccess'), t('general.success'));
       } else {
         console.log('🔄 Sending POST request to:', `${BASE_URL}meta/product-specifications`);
         await axios.post(`${BASE_URL}meta/product-specifications`, payload);
         //CONSOLE.log('Specification created successfully:', response.data);
-        showSuccess('تم إضافة مواصفة المنتج بنجاح', 'نجح الإضافة');
+        showSuccess(t('products.success.createSuccess'), t('general.success'));
       }
       // تحديث القائمة فقط
       await fetchSpecifications(true);
@@ -83,10 +85,10 @@ const useProductSpecifications = () => {
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في البيانات');
+        showError(`${t('products.errors.validationError')}: ${validationErrors}`, t('general.error'));
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حفظ مواصفة المنتج';
-        showError(errorMessage, 'خطأ في الحفظ');
+        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.errors.updateError');
+        showError(errorMessage, t('products.errors.saveError'));
       }
       
       throw err;
@@ -98,7 +100,7 @@ const useProductSpecifications = () => {
     try {
       await axios.delete(`${BASE_URL}meta/product-specifications/${specificationId}`);
       //CONSOLE.log('Specification deleted successfully:', response.data);
-      showSuccess('تم حذف مواصفة المنتج بنجاح', 'نجح الحذف');
+      showSuccess(t('products.success.deleteSuccess'), t('general.success'));
       // تحديث القائمة فقط
       await fetchSpecifications(true);
       return true;
@@ -108,10 +110,10 @@ const useProductSpecifications = () => {
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في الحذف');
+        showError(`${t('products.errors.validationError')}: ${validationErrors}`, t('general.error'));
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حذف مواصفة المنتج';
-        showError(errorMessage, 'خطأ في الحذف');
+        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.errors.deleteError');
+        showError(errorMessage, t('general.error'));
       }
       
       throw err;

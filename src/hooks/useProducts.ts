@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 
@@ -13,6 +14,7 @@ const useProducts = () => {
   const [lastFetchTime, setLastFetchTime] = useState<number>(0); // لتتبع آخر وقت تم فيه جلب البيانات
   const [hasError, setHasError] = useState(false); // لتتبع وجود خطأ
   const { showSuccess, showError } = useToastContext();
+  const { t } = useTranslation();
 
   // جلب جميع المنتجات
   const fetchProducts = useCallback(async (forceRefresh: boolean = false) => {
@@ -67,7 +69,7 @@ const useProducts = () => {
       return res.data.data || res.data;
     } catch (err: any) {
       //CONSOLE.error('Error fetching products:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب المنتجات';
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.fetchError');
       showError(errorMessage);
       // تعيين حالة الخطأ لمنع الاستدعاءات المتكررة
       setHasError(true);
@@ -77,7 +79,7 @@ const useProducts = () => {
     } finally {
       setLoading(false);
     }
-  }, [hasLoaded, products, loading, lastFetchTime, hasError, showError]);
+  }, [hasLoaded, products, loading, lastFetchTime, hasError, showError, t]);
 
   // إضافة أو تعديل منتج
   const saveProduct = async (form: any, editId?: string | number | null) => {
@@ -296,13 +298,13 @@ const useProducts = () => {
         //CONSOLE.log('🔍 Updating product with ID:', editId);
         //CONSOLE.log('🔍 Update URL:', `${BASE_URL}meta/products/${editId}`);
         await axios.put(`${BASE_URL}meta/products/${editId}`, payload);
-        showSuccess('تم تعديل المنتج بنجاح', 'نجح التحديث');
+        showSuccess(t('products.productSuccess.updateSuccess'), t('general.success'));
       } else {
         //CONSOLE.log('🔍 Creating new product');
         //CONSOLE.log('🔍 Create URL:', `${BASE_URL}products`);
         await axios.post(`${BASE_URL}products`, payload);
         //CONSOLE.log('Product created successfully:', response.data);
-        showSuccess('تم إضافة المنتج بنجاح', 'نجح الإضافة');
+        showSuccess(t('products.productSuccess.createSuccess'), t('general.success'));
       }
       // تحديث القائمة فقط
       await fetchProducts(true);
@@ -317,22 +319,22 @@ const useProducts = () => {
         const errors = err.response.data.errors;
         if (Array.isArray(errors)) {
           errors.forEach((error: any) => {
-            if (error.msg) showError(error.msg, 'خطأ في البيانات');
-            else if (typeof error === 'string') showError(error, 'خطأ في البيانات');
+            if (error.msg) showError(error.msg, t('general.error'));
+            else if (typeof error === 'string') showError(error, t('general.error'));
           });
         } else if (typeof errors === 'object') {
           Object.values(errors).forEach((msg: any) => {
-            if (msg) showError(msg, 'خطأ في البيانات');
+            if (msg) showError(msg, t('general.error'));
           });
         } else if (typeof errors === 'string') {
-          showError(errors, 'خطأ في البيانات');
+          showError(errors, t('general.error'));
         }
       } else if (err?.response?.data?.error) {
-        showError(err.response.data.error, 'خطأ في البيانات');
+        showError(err.response.data.error, t('general.error'));
       } else if (err?.response?.data?.message) {
-        showError(err.response.data.message, 'خطأ في البيانات');
+        showError(err.response.data.message, t('general.error'));
       } else {
-        showError('حدث خطأ غير متوقع', 'خطأ');
+        showError(t('products.productErrors.unexpectedError'), t('general.error'));
       }
       
       throw err;
@@ -344,7 +346,7 @@ const useProducts = () => {
     try {
       await axios.delete(`${BASE_URL}meta/products/${productId}?storeId=${getStoreId()}`);
       //CONSOLE.log('Product deleted successfully:', response.data);
-      showSuccess('تم حذف المنتج بنجاح', 'نجح الحذف');
+      showSuccess(t('products.productSuccess.deleteSuccess'), t('general.success'));
       // تحديث القائمة فقط
       await fetchProducts(true);
       return true;
@@ -356,22 +358,22 @@ const useProducts = () => {
         const errors = err.response.data.errors;
         if (Array.isArray(errors)) {
           errors.forEach((error: any) => {
-            if (error.msg) showError(error.msg, 'خطأ في الحذف');
-            else if (typeof error === 'string') showError(error, 'خطأ في الحذف');
+            if (error.msg) showError(error.msg, t('general.error'));
+            else if (typeof error === 'string') showError(error, t('general.error'));
           });
         } else if (typeof errors === 'object') {
           Object.values(errors).forEach((msg: any) => {
-            if (msg) showError(msg, 'خطأ في الحذف');
+            if (msg) showError(msg, t('general.error'));
           });
         } else if (typeof errors === 'string') {
-          showError(errors, 'خطأ في الحذف');
+          showError(errors, t('general.error'));
         }
       } else if (err?.response?.data?.error) {
-        showError(err.response.data.error, 'خطأ في الحذف');
+        showError(err.response.data.error, t('general.error'));
       } else if (err?.response?.data?.message) {
-        showError(err.response.data.message, 'خطأ في الحذف');
+        showError(err.response.data.message, t('general.error'));
       } else {
-        showError('حدث خطأ غير متوقع', 'خطأ');
+        showError(t('products.productErrors.unexpectedError'), t('general.error'));
       }
       
       throw err;
@@ -396,8 +398,8 @@ const useProducts = () => {
       return response.data.imageUrl || response.data.data?.url;
     } catch (err: any) {
       //CONSOLE.error('Error uploading product image:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة';
-      showError(errorMessage, 'خطأ في رفع الصورة');
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.uploadImageError');
+      showError(errorMessage, t('general.error'));
       throw err;
     }
   };
@@ -423,8 +425,8 @@ const useProducts = () => {
       return images.map((img: any) => img.imageUrl || img.url);
     } catch (err: any) {
       //CONSOLE.error('Error uploading product images:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصور';
-      showError(errorMessage, 'خطأ في رفع الصور');
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.uploadImagesError');
+      showError(errorMessage, t('general.error'));
       throw err;
     }
   };
@@ -447,8 +449,8 @@ const useProducts = () => {
       return response.data.imageUrl || response.data.data?.url;
     } catch (err: any) {
       //CONSOLE.error('Error uploading single image:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة';
-      showError(errorMessage, 'خطأ في رفع الصورة');
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.uploadImageError');
+      showError(errorMessage, t('general.error'));
       throw err;
     }
   };
@@ -471,8 +473,8 @@ const useProducts = () => {
       
       return imageUrl;
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة الأساسية';
-      showError(errorMessage, 'خطأ في رفع الصورة الأساسية');
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.uploadMainImageError');
+      showError(errorMessage, t('general.error'));
       throw err;
     }
   };
@@ -757,17 +759,17 @@ const useProducts = () => {
             });
           } else if (typeof errors === 'object') {
             Object.values(errors).forEach((msg: any) => {
-              if (msg) showError(msg, 'خطأ في البيانات');
+              if (msg) showError(msg, t('general.error'));
             });
           } else if (typeof errors === 'string') {
-            showError(errors, 'خطأ في البيانات');
+            showError(errors, t('general.error'));
           }
         } else if (errorData?.error) {
           showError(errorData.error, 'خطأ في البيانات');
         } else if (errorData?.message) {
           showError(errorData.message, 'خطأ في البيانات');
         } else {
-          showError('حدث خطأ غير متوقع', 'خطأ');
+          showError(t('products.productErrors.unexpectedError'), t('general.error'));
         }
         throw new Error(errorData.message || 'Failed to add variant');
       }
@@ -775,7 +777,7 @@ const useProducts = () => {
       const data = await response.json();
       
       // Show success toast
-      showSuccess('تم إضافة المتغير بنجاح', 'نجح الإضافة');
+      showSuccess(t('products.productSuccess.addVariantSuccess'), t('general.success'));
       
       // Refresh products list
       await fetchProducts(true);
@@ -812,17 +814,17 @@ const useProducts = () => {
             });
           } else if (typeof errors === 'object') {
             Object.values(errors).forEach((msg: any) => {
-              if (msg) showError(msg, 'خطأ في الحذف');
+              if (msg) showError(msg, t('general.error'));
             });
           } else if (typeof errors === 'string') {
-            showError(errors, 'خطأ في الحذف');
+            showError(errors, t('general.error'));
           }
         } else if (errorData?.error) {
           showError(errorData.error, 'خطأ في الحذف');
         } else if (errorData?.message) {
           showError(errorData.message, 'خطأ في الحذف');
         } else {
-          showError('حدث خطأ غير متوقع', 'خطأ');
+          showError(t('products.productErrors.unexpectedError'), t('general.error'));
         }
         throw new Error(errorData.message || 'Failed to delete variant');
       }
@@ -830,7 +832,7 @@ const useProducts = () => {
       const data = await response.json();
       
       // Show success toast
-      showSuccess('تم حذف المتغير بنجاح', 'نجح الحذف');
+      showSuccess(t('products.productSuccess.deleteVariantSuccess'), t('general.success'));
       
       // Refresh products list
       await fetchProducts(true);
@@ -1031,17 +1033,17 @@ const useProducts = () => {
             });
           } else if (typeof errors === 'object') {
             Object.values(errors).forEach((msg: any) => {
-              if (msg) showError(msg, 'خطأ في البيانات');
+              if (msg) showError(msg, t('general.error'));
             });
           } else if (typeof errors === 'string') {
-            showError(errors, 'خطأ في البيانات');
+            showError(errors, t('general.error'));
           }
         } else if (errorData?.error) {
           showError(errorData.error, 'خطأ في البيانات');
         } else if (errorData?.message) {
           showError(errorData.message, 'خطأ في البيانات');
         } else {
-          showError('حدث خطأ غير متوقع', 'خطأ');
+          showError(t('products.productErrors.unexpectedError'), t('general.error'));
         }
         throw new Error(errorData.message || 'Failed to update variant');
       }
@@ -1049,7 +1051,7 @@ const useProducts = () => {
       const data = await response.json();
       
       // Show success toast
-      showSuccess('تم تحديث المتغير بنجاح', 'نجح التحديث');
+      showSuccess(t('products.productSuccess.updateVariantSuccess'), t('general.success'));
       
       // Refresh products list
       await fetchProducts(true);
@@ -1071,7 +1073,7 @@ const useProducts = () => {
       }
       return [];
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب متغيرات المنتج';
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.fetchVariantsError');
       showError(errorMessage);
       return [];
     }
@@ -1086,7 +1088,7 @@ const useProducts = () => {
       });
 
       if (response.data && response.data.success) {
-        showSuccess('تم إضافة الألوان بنجاح', 'نجح الإضافة');
+        showSuccess(t('products.productSuccess.addColorsSuccess'), t('general.success'));
         
         // Refresh products list
         await fetchProducts(true);
@@ -1096,8 +1098,8 @@ const useProducts = () => {
       
       throw new Error('Failed to add colors');
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في إضافة الألوان';
-      showError(errorMessage, 'خطأ في إضافة الألوان');
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.addColorsError');
+      showError(errorMessage, t('general.error'));
       throw err;
     }
   };
@@ -1113,7 +1115,7 @@ const useProducts = () => {
       });
 
       if (response.data && response.data.success) {
-        showSuccess('تم حذف الألوان بنجاح', 'نجح الحذف');
+        showSuccess(t('products.productSuccess.removeColorsSuccess'), t('general.success'));
         
         // Refresh products list
         await fetchProducts(true);
@@ -1123,8 +1125,8 @@ const useProducts = () => {
       
       throw new Error('Failed to remove colors');
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حذف الألوان';
-      showError(errorMessage, 'خطأ في حذف الألوان');
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.removeColorsError');
+      showError(errorMessage, t('general.error'));
       throw err;
     }
   };
@@ -1138,7 +1140,7 @@ const useProducts = () => {
       });
 
       if (response.data && response.data.success) {
-        showSuccess('تم استبدال الألوان بنجاح', 'نجح الاستبدال');
+        showSuccess(t('products.productSuccess.replaceColorsSuccess'), t('general.success'));
         
         // Refresh products list
         await fetchProducts(true);
@@ -1148,8 +1150,8 @@ const useProducts = () => {
       
       throw new Error('Failed to replace colors');
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في استبدال الألوان';
-      showError(errorMessage, 'خطأ في استبدال الألوان');
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.replaceColorsError');
+      showError(errorMessage, t('general.error'));
       throw err;
     }
   };

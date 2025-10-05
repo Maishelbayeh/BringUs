@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 import { getStoreId } from './useLocalStorage';
@@ -9,6 +10,7 @@ const useProductLabel = () => {
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
+  const { t } = useTranslation();
   const STORE_ID = getStoreId() || '';
   // جلب جميع مواصفات المنتجات
   const fetchProductLabels = useCallback(async (forceRefresh: boolean = false) => {
@@ -29,13 +31,13 @@ const useProductLabel = () => {
       return data;
     } catch (err: any) {
       //CONSOLE.error('Error fetching product labels:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب التصنيفات';
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('productsLabels.errors.fetchError');
       showError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [hasLoaded, productLabels.length, showError]);
+  }, [hasLoaded, productLabels.length, showError, t]);
 
   // إضافة أو تعديل وحدة
   const saveProductLabel = async (form: any, editId?: string | number | null, _isRTL: boolean = false) => {
@@ -57,11 +59,11 @@ const useProductLabel = () => {
       if (editId) {
         await axios.put(`${BASE_URL}meta/product-labels/${editId}`, payload);
         //CONSOLE.log('Product label updated successfully:', response.data);
-        showSuccess('تم تعديل التصنيف بنجاح', 'نجح التحديث');
+        showSuccess(t('productsLabels.success.updateSuccess'), t('general.success'));
       } else {
         await axios.post(`${BASE_URL}meta/product-labels`, payload);
         //CONSOLE.log('Product label created successfully:', response.data);
-        showSuccess('تم إضافة التصنيف بنجاح', 'نجح الإضافة');
+        showSuccess(t('productsLabels.success.createSuccess'), t('general.success'));
       }
       // تحديث القائمة فقط
       await fetchProductLabels(true);
@@ -72,10 +74,10 @@ const useProductLabel = () => {
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في البيانات');
+        showError(`${t('productsLabels.errors.validationError')}: ${validationErrors}`, t('general.error'));
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حفظ التصنيف';
-        showError(errorMessage, 'خطأ في الحفظ');
+        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('productsLabels.errors.updateError');
+        showError(errorMessage, t('productsLabels.errors.saveError'));
       }
       
       throw err;
@@ -87,7 +89,7 @@ const useProductLabel = () => {
     try {
       await axios.delete(`${BASE_URL}meta/product-labels/${productLabelId}`);
       //CONSOLE.log('Product label deleted successfully:', response.data);
-      showSuccess('تم حذف التصنيف بنجاح', 'نجح الحذف');
+      showSuccess(t('productsLabels.success.deleteSuccess'), t('general.success'));
       // تحديث القائمة فقط
       await fetchProductLabels(true);
       return true;
@@ -97,10 +99,10 @@ const useProductLabel = () => {
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في الحذف');
+        showError(`${t('productsLabels.errors.validationError')}: ${validationErrors}`, t('general.error'));
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حذف التصنيف';
-        showError(errorMessage, 'خطأ في الحذف');
+        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('productsLabels.errors.deleteError');
+        showError(errorMessage, t('general.error'));
       }
       
       throw err;

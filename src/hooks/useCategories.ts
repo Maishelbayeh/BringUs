@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { getStoreId } from '../utils/storeUtils';
 import categoryImage from '../assets/category.jpg';
@@ -25,6 +26,7 @@ const useCategories = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
+  const { t } = useTranslation();
   
 
 const STORE_ID = getStoreId() || '';
@@ -59,11 +61,11 @@ const STORE_ID = getStoreId() || '';
       return data;
     } catch (err: any) {
       //CONSOLE.error('Error fetching categories:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب التصنيفات';
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('categories.errors.fetchError');
       showError(errorMessage);
       throw err;
     }
-  }, [hasLoaded, categories.length, showError]);
+  }, [hasLoaded, categories.length, showError, t]);
 
   // إضافة أو تعديل تصنيف
   const saveCategory = async (form: any, editId?: string | number | null, _isRTL: boolean = false) => {
@@ -105,13 +107,13 @@ const STORE_ID = getStoreId() || '';
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         //CONSOLE.log('Category updated successfully:', response.data);
-        showSuccess('تم تعديل التصنيف بنجاح', 'نجح التحديث');
+        showSuccess(t('categories.success.updateSuccess'), t('general.success'));
       } else {
          await axios.post('https://bringus-backend.onrender.com/api/categories', payload, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         //CONSOLE.log('Category created successfully:', response.data);
-        showSuccess('تم إضافة التصنيف بنجاح', 'نجح الإضافة');
+        showSuccess(t('categories.success.createSuccess'), t('general.success'));
       }
       // تحديث القائمة فقط
       await fetchCategories(true);
@@ -122,10 +124,10 @@ const STORE_ID = getStoreId() || '';
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في البيانات');
+        showError(`${t('categories.errors.validationError')}: ${validationErrors}`, t('general.error'));
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حفظ التصنيف';
-        showError(errorMessage, 'خطأ في الحفظ');
+        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('categories.errors.updateError');
+        showError(errorMessage, t('categories.errors.saveError'));
       }
       
       throw err;
@@ -141,7 +143,7 @@ const STORE_ID = getStoreId() || '';
       }); 
         
       //CONSOLE.log('Category deleted successfully:', response.data);
-      showSuccess('تم حذف التصنيف بنجاح', 'نجح الحذف');
+      showSuccess(t('categories.success.deleteSuccess'), t('general.success'));
       // تحديث القائمة فقط
       await fetchCategories(true);
       return true;
@@ -151,10 +153,10 @@ const STORE_ID = getStoreId() || '';
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في الحذف');
+        showError(`${t('categories.errors.validationError')}: ${validationErrors}`, t('general.error'));
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حذف التصنيف';
-        showError(errorMessage, 'خطأ في الحذف');
+        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('categories.errors.deleteError');
+        showError(errorMessage, t('general.error'));
       }
       
       throw err;
@@ -171,7 +173,7 @@ const STORE_ID = getStoreId() || '';
         headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       //CONSOLE.log('Image uploaded successfully:', res.data);
-      showSuccess('تم رفع الصورة بنجاح', 'نجح رفع الصورة');
+      showSuccess(t('categories.success.uploadImageSuccess'), t('general.success'));
       return res.data.imageUrl;
     } catch (err: any) {
       //CONSOLE.error('Error uploading image:', err);
@@ -179,10 +181,10 @@ const STORE_ID = getStoreId() || '';
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في رفع الصورة: ${validationErrors}`, 'خطأ في رفع الصورة');
+        showError(`${t('categories.errors.uploadImageError')}: ${validationErrors}`, t('general.error'));
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في رفع الصورة';
-        showError(errorMessage, 'خطأ في رفع الصورة');
+        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('categories.errors.uploadImageError');
+        showError(errorMessage, t('general.error'));
       }
       
       throw err;
@@ -203,12 +205,12 @@ const STORE_ID = getStoreId() || '';
       //CONSOLE.log('showError function:', showError);
       
       try {
-        showSuccess('هذا اختبار للتوست الناجح', 'اختبار التوست');
+        showSuccess(t('general.success'), t('general.success'));
         //CONSOLE.log('Success toast called');
         
         setTimeout(() => {
           try {
-            showError('هذا اختبار للتوست الفاشل', 'اختبار الخطأ');
+            showError(t('general.error'), t('general.error'));
             //CONSOLE.log('Error toast called');
           } catch (error) {
             //CONSOLE.error('Error calling showError:', error);

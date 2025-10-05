@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 import { getStoreId } from '../utils/storeUtils';
@@ -9,6 +10,7 @@ const useUnits = () => {
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const { showSuccess, showError } = useToastContext();
+  const { t } = useTranslation();
 
   // جلب جميع الوحدات
   const fetchUnits = useCallback(async (forceRefresh: boolean = false) => {
@@ -28,19 +30,19 @@ const useUnits = () => {
       return data;
     } catch (err: any) {
       //CONSOLE.error('Error fetching units:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في جلب الوحدات';
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('units.errors.fetchError');
       showError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [hasLoaded, units.length, showError]);
+  }, [hasLoaded, units.length, showError, t]);
 
   // إضافة أو تعديل وحدة
   const saveUnit = async (form: any, editId?: string | number | null, _isRTL: boolean = false) => {
     const storeId = getStoreId();
     if (!storeId) {
-      showError('Store ID is missing. Cannot save unit.');
+      showError(t('units.errors.missingStoreId'));
       return;
     }
     
@@ -59,11 +61,11 @@ const useUnits = () => {
         // For PUT, backend might expect storeId in payload or might get it from URL/auth
         const updatePayload = { ...payload, storeId };
         await axios.put(`${BASE_URL}meta/units/${editId}`, updatePayload);
-        showSuccess('تم تعديل الوحدة بنجاح', 'نجح التحديث');
+        showSuccess(t('units.success.updateSuccess'), t('general.success'));
       } else {
         // For POST, send storeId in the URL
         await axios.post(`${BASE_URL}meta/units`, payload);
-        showSuccess('تم إضافة الوحدة بنجاح', 'نجح الإضافة');
+        showSuccess(t('units.success.createSuccess'), t('general.success'));
       }
       await fetchUnits(true);
       return true;
@@ -72,10 +74,10 @@ const useUnits = () => {
       
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في البيانات');
+        showError(`${t('units.errors.validationError')}: ${validationErrors}`, t('general.error'));
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حفظ الوحدة';
-        showError(errorMessage, 'خطأ في الحفظ');
+        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('units.errors.updateError');
+        showError(errorMessage, t('units.errors.saveError'));
       }
       
       throw err;
@@ -87,7 +89,7 @@ const useUnits = () => {
     try {
       await axios.delete(`${BASE_URL}meta/units/${unitId}`);
       //CONSOLE.log('Unit deleted successfully:', response.data);
-      showSuccess('تم حذف الوحدة بنجاح', 'نجح الحذف');
+      showSuccess(t('units.success.deleteSuccess'), t('general.success'));
       await fetchUnits(true);
       return true;
     } catch (err: any) {
@@ -95,10 +97,10 @@ const useUnits = () => {
       
       if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`خطأ في التحقق: ${validationErrors}`, 'خطأ في الحذف');
+        showError(`${t('units.errors.validationError')}: ${validationErrors}`, t('general.error'));
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'فشل في حذف الوحدة';
-        showError(errorMessage, 'خطأ في الحذف');
+        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('units.errors.deleteError');
+        showError(errorMessage, t('general.error'));
       }
       
       throw err;
