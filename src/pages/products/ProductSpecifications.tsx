@@ -198,7 +198,7 @@ const ProductSpecifications: React.FC = () => {
                 </div>
 
                 {/* Badges */}
-                <div className="flex items-center gap-1 flex-wrap">
+                <div className="flex items-center gap-1 ">
                   {spec.category && (
                     <span 
                       className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-[120px]"
