@@ -47,6 +47,8 @@ const useUnits = () => {
     const payload: any = {
       nameAr: form.nameAr?.trim() || '',
       nameEn: form.nameEn?.trim() || '',
+      descriptionAr: form.descriptionAr?.trim() || '',
+      descriptionEn: form.descriptionEn?.trim() || '',
       symbol: form.symbol?.trim() || '',
       isActive: form.isActive !== undefined ? form.isActive : true,
      store:storeId
