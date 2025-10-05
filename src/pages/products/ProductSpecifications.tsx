@@ -99,7 +99,7 @@ const ProductSpecifications: React.FC = () => {
       {/* Loading State */}
       {loading ? (
         <div 
-          className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+          className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-4"
          style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
         >
     
@@ -150,7 +150,7 @@ const ProductSpecifications: React.FC = () => {
         </div>
       ) : (
         <div 
-          className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+          className="bg-white rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-4"
           style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
         >
           {filteredSpecifications.map((spec) => (
@@ -163,11 +163,17 @@ const ProductSpecifications: React.FC = () => {
               {/* Header */}
               <div className="p-3 border-b border-gray-100">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate max-w-[150px]">
+                  <div className="flex-1 min-w-0">
+                    <h3 
+                      className="text-sm font-semibold text-gray-900 mb-1 truncate"
+                      title={isRTL ? spec.titleAr : spec.titleEn}
+                    >
                       {isRTL ? spec.titleAr : spec.titleEn}
                     </h3>
-                    <p className="text-xs text-gray-500 truncate">
+                    <p 
+                      className="text-xs text-gray-500 truncate"
+                      title={isRTL ? spec.titleEn : spec.titleAr}
+                    >
                       {isRTL ? spec.titleEn : spec.titleAr}
                     </p>
                   </div>
@@ -194,7 +200,10 @@ const ProductSpecifications: React.FC = () => {
                 {/* Badges */}
                 <div className="flex items-center gap-1 flex-wrap">
                   {spec.category && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                    <span 
+                      className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-[120px]"
+                      title={isRTL ? spec.category.nameAr : spec.category.nameEn}
+                    >
                       {isRTL ? spec.category.nameAr : spec.category.nameEn}
                     </span>
                   )}
@@ -225,10 +234,16 @@ const ProductSpecifications: React.FC = () => {
                 <div className="space-y-1">
                   {spec.values?.slice(0, 3).map((value: any, index: number) => (
                     <div key={value._id || index} className="flex items-center justify-between p-1.5 bg-gray-50 rounded">
-                      <span className="text-xs text-gray-800 font-medium truncate flex-1">
+                      <span 
+                        className="text-xs text-gray-800 font-medium truncate flex-1 min-w-0"
+                        title={isRTL ? value.valueAr : value.valueEn}
+                      >
                         {isRTL ? value.valueAr : value.valueEn}
                       </span>
-                      <span className="text-xs text-gray-500 ml-1 truncate max-w-16">
+                      <span 
+                        className="text-xs text-gray-500 ml-1 truncate max-w-16 min-w-0"
+                        title={isRTL ? value.valueEn : value.valueAr}
+                      >
                         {isRTL ? value.valueEn : value.valueAr}
                       </span>
                     </div>
