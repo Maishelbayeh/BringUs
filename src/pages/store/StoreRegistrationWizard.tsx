@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { 
-  Close, 
-  ArrowBack, 
+  Close,  
   Store, 
   Person,
   CheckCircle,
@@ -55,10 +53,9 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   
   // استخدام الـ hooks
   const { createUser, checkEmailExists } = useUser();
-  const { createStore, uploadStoreLogo, updateStore } = useStore();
+  const { createStore, uploadStoreLogo } = useStore();
   const { createOwner } = useOwner();
   const { sendOTP } = useOTP();
-  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [merchantData, setMerchantData] = useState<MerchantData>({
     firstName: '',
@@ -97,22 +94,9 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   
   // إضافة state للتحكم في OTP
   const [showOTP, setShowOTP] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [registrationData, setRegistrationData] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // معالجة نجاح التحقق من OTP
-  const handleOTPSuccess = () => {
-    console.log('✅ تم التحقق من الإيميل بنجاح');
-    setShowOTP(false);
-    setShowSuccess(true);
-    
-    // الانتقال للصفحة الرئيسية بعد 3 ثوان
-    setTimeout(() => {
-      onClose();
-      resetWizardData();
-      navigate('/login');
-    }, 10000);
-  };
 
   // معالجة إعادة إرسال OTP
   const handleOTPResend = () => {
@@ -129,32 +113,33 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
     setRegistrationData(null);
   };
 
-  // دالة إعادة تعيين بيانات الويزرد
-  const resetWizardData = () => {
-    setCurrentStep(1);
-    setMerchantData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      password: '',
-      confirmPassword: '',
-      addresses: [{
-        type: 'home',
-        street: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: '',
-        isDefault: true
-      }]
-    });
-    setMerchantErrors({});
-    setStoreData(null);
-    setShowOTP(false);
-    setShowSuccess(false);
-    setRegistrationData(null);
+  // دالة استرجاع البيانات المحفوظة من localStorage
+  const loadSavedStoreData = () => {
+    try {
+      const savedData = localStorage.getItem('tempStoreData');
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        // التحقق من أن البيانات حديثة (أقل من 24 ساعة)
+        const isDataRecent = Date.now() - parsedData.timestamp < 24 * 60 * 60 * 1000;
+        
+        if (isDataRecent) {
+          console.log('📂 تم استرجاع بيانات المتجر المحفوظة:', parsedData);
+          setStoreData(parsedData);
+          return true;
+        } else {
+          // البيانات قديمة، احذفها
+          localStorage.removeItem('tempStoreData');
+          console.log('🗑️ تم حذف البيانات القديمة');
+        }
+      }
+    } catch (error) {
+      console.error('❌ خطأ في استرجاع البيانات المحفوظة:', error);
+      localStorage.removeItem('tempStoreData');
+    }
+    return false;
   };
+
+  // دالة إعادة تعيين بيانات الويزرد
 
   const validateField = (name: string, value: string) => {
     let error = '';
@@ -201,33 +186,33 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         if (!value || !value.trim()) {
           error = t('signup.phoneRequired');
         } else {
-          // Remove all spaces and special characters except + and numbers
-          const cleanPhone = value.replace(/[^\d+]/g, '');
+          const cleanValue = value.replace(/\s/g, '');
+          console.log('cleanValue', cleanValue);
           
-          // Check if it contains only numbers and + symbol
-          if (!/^[\+]?[\d]+$/.test(cleanPhone)) {
-            error = t('signup.phoneNumbersOnly');
-          }
-          // Check if it starts with + (international format)
-          else if (cleanPhone.startsWith('+')) {
-            // For international numbers starting with +
-            if (cleanPhone.length < 8) {
-              error = t('signup.phoneTooShort');
-            } else if (cleanPhone.length > 16) {
-              error = t('signup.phoneTooLong');
-            } else if (!/^\+[1-9]\d{7,15}$/.test(cleanPhone)) {
-              error = t('signup.phoneInvalidFormat');
+          if (cleanValue.startsWith('970') || cleanValue.startsWith('972')) {
+            console.log('cleanValue2', cleanValue);
+            const code = cleanValue.startsWith('970') ? '970' : '972';
+            const numberWithoutCode = cleanValue.slice(code.length);
+            console.log(numberWithoutCode);
+            
+            // 🚫 تحقق: عدم السماح ببدء الجزء المحلي بـ 0
+            if (numberWithoutCode.startsWith('0')) {
+              error = t('store.whatsappNoLeadingZero'); // لا تبدأ بـ 0 بعد المقدمة
             }
-          }
-          // Check if it doesn't start with + (local format)
-          else {
-            // For local numbers (without country code)
-            if (cleanPhone.length < 7) {
-              error = t('signup.phoneTooShort');
-            } else if (cleanPhone.length > 15) {
-              error = t('signup.phoneTooLong');
-            } else if (!/^[1-9]\d{6,14}$/.test(cleanPhone)) {
-              error = t('signup.phoneInvalidFormat');
+            // ✅ تحقق: الطول الكلي يجب أن يكون 12 رقمًا بالضبط (مثلاً +970598765432)
+            else if (cleanValue.length !== 12) {
+              error = t('store.whatsappLengthError'); // الطول غير صحيح
+            }
+            // ✅ تحقق من أن الباقي كله أرقام
+            else if (!/^\d+$/.test(numberWithoutCode)) {
+              error = t('store.whatsappInvalidDigits'); // يجب أن يحتوي على أرقام فقط
+            }
+          } else {
+            // تحقق عام للأرقام الدولية الأخرى
+            if (cleanValue.length < 8 || cleanValue.length > 15) {
+              error = t('store.whatsappLengthError');
+            } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
+              error = t('store.whatsappInvalidFormat');
             }
           }
         }
@@ -322,33 +307,33 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
     if (!merchantData.phone || !merchantData.phone.trim()) {
       newErrors.phone = t('signup.phoneRequired');
     } else {
-      // Remove all spaces and special characters except + and numbers
-      const cleanPhone = merchantData.phone.replace(/[^\d+]/g, '');
+      const cleanValue = merchantData.phone.replace(/\s/g, '');
+      console.log('cleanValue', cleanValue);
       
-      // Check if it contains only numbers and + symbol
-      if (!/^[\+]?[\d]+$/.test(cleanPhone)) {
-        newErrors.phone = t('signup.phoneNumbersOnly');
-      }
-      // Check if it starts with + (international format)
-      else if (cleanPhone.startsWith('+')) {
-        // For international numbers starting with +
-        if (cleanPhone.length < 8) {
-          newErrors.phone = t('signup.phoneTooShort');
-        } else if (cleanPhone.length > 16) {
-          newErrors.phone = t('signup.phoneTooLong');
-        } else if (!/^\+[1-9]\d{7,15}$/.test(cleanPhone)) {
-          newErrors.phone = t('signup.phoneInvalidFormat');
+      if (cleanValue.startsWith('970') || cleanValue.startsWith('972')) {
+        console.log('cleanValue2', cleanValue);
+        const code = cleanValue.startsWith('970') ? '970' : '972';
+        const numberWithoutCode = cleanValue.slice(code.length);
+        console.log(numberWithoutCode);
+        
+        // 🚫 تحقق: عدم السماح ببدء الجزء المحلي بـ 0
+        if (numberWithoutCode.startsWith('0')) {
+          newErrors.phone = t('store.whatsappNoLeadingZero'); // لا تبدأ بـ 0 بعد المقدمة
         }
-      }
-      // Check if it doesn't start with + (local format)
-      else {
-        // For local numbers (without country code)
-        if (cleanPhone.length < 7) {
-          newErrors.phone = t('signup.phoneTooShort');
-        } else if (cleanPhone.length > 15) {
-          newErrors.phone = t('signup.phoneTooLong');
-        } else if (!/^[1-9]\d{6,14}$/.test(cleanPhone)) {
-          newErrors.phone = t('signup.phoneInvalidFormat');
+        // ✅ تحقق: الطول الكلي يجب أن يكون 12 رقمًا بالضبط (مثلاً +970598765432)
+        else if (cleanValue.length !== 12) {
+          newErrors.phone = t('store.whatsappLengthError'); // الطول غير صحيح
+        }
+        // ✅ تحقق من أن الباقي كله أرقام
+        else if (!/^\d+$/.test(numberWithoutCode)) {
+          newErrors.phone = t('store.whatsappInvalidDigits'); // يجب أن يحتوي على أرقام فقط
+        }
+      } else {
+        // تحقق عام للأرقام الدولية الأخرى
+        if (cleanValue.length < 8 || cleanValue.length > 15) {
+          newErrors.phone = t('store.whatsappLengthError');
+        } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
+          newErrors.phone = t('store.whatsappInvalidFormat');
         }
       }
     }
@@ -367,15 +352,34 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       return;
     }
     
-    try {
-      
-      setCurrentStep(2);
+      try {
+        // حفظ بيانات المتجر في localStorage قبل الانتقال للمرحلة الثانية
+        const storeDataToSave = {
+          ...storeData,
+          timestamp: Date.now() // إضافة timestamp للتحقق من صحة البيانات
+        };
+        
+        localStorage.setItem('tempStoreData', JSON.stringify(storeDataToSave));
+        console.log('💾 تم حفظ بيانات المتجر مؤقتاً:', storeDataToSave);
+        
+        setCurrentStep(2);
       
     } catch (error) {
       //CONSOLE.error('❌ خطأ في حفظ بيانات المتجر:', error);
      
     }
   };
+
+  // استرجاع البيانات المحفوظة عند تحميل المكون
+  useEffect(() => {
+    if (isOpen) {
+      const hasLoadedData = loadSavedStoreData();
+      if (hasLoadedData) {
+        console.log('✅ تم استرجاع بيانات المتجر بنجاح');
+        console.log('📊 البيانات المحملة:', storeData);
+      }
+    }
+  }, [isOpen]);
 
   // التحقق من صحة نموذج التاجر
   useEffect(() => {
@@ -458,6 +462,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         return;
       }
 
+      setIsSubmitting(true);
+
       // 1. إنشاء المتجر أولاً بدون لوجو
       console.log('🔄 إنشاء المتجر بدون لوجو...');
       const storeDataWithoutLogo = {
@@ -480,16 +486,14 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         console.log('🔄 رفع اللوقو للمتجر الجديد:', store.id || store._id);
         try {
           const logoResult = await uploadStoreLogo(storeLogoFile, store.id || store._id);
-          if (logoResult) {
-            console.log('✅ تم رفع اللوقو بنجاح:', logoResult);
-            // تحديث المتجر باللوقو الجديد
-            const updatedStore = await updateStore(store.id || store._id || '', { logo: logoResult });
-            if (updatedStore) {
-              console.log('✅ تم تحديث المتجر باللوقو الجديد:', updatedStore);
-              // تحديث store في state
-              setStoreData((prev: any) => ({ ...prev, createdStore: updatedStore }));
-            }
-          }
+           if (logoResult) {
+           console.log('✅ تم رفع اللوقو بنجاح:', logoResult);
+          //   const updatedStore = await updateStore(store.id || store._id || '', { logo: logoResult });
+          //   if (updatedStore) {
+            
+          //     setStoreData((prev: any) => ({ ...prev, createdStore: updatedStore }));
+          //   }
+           }
         } catch (logoError) {
           console.error('❌ خطأ في رفع اللوقو:', logoError);
           // لا نوقف العملية إذا فشل رفع اللوقو
@@ -575,6 +579,10 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       console.log('Store:', store);
       console.log('Owner:', owner);
       
+      // مسح البيانات المؤقتة بعد نجاح التسجيل
+      localStorage.removeItem('tempStoreData');
+      console.log('🗑️ تم مسح البيانات المؤقتة بعد نجاح التسجيل');
+      
       // حفظ بيانات التسجيل
       setRegistrationData({ user, store, owner });
       
@@ -605,6 +613,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
     } catch (error) {
       
       alert('حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -629,6 +639,10 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       }]
     });
     setMerchantErrors({});
+    
+    // مسح البيانات المحفوظة مؤقتاً
+    localStorage.removeItem('tempStoreData');
+    console.log('🗑️ تم مسح البيانات المؤقتة');
   };
 
   if (!isOpen) return null;
@@ -648,7 +662,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
-                {currentStep === 1 ? t('store.createStore') : t('store.registerMerchant')}
+                {currentStep === 1 ? t('general.next') : t('store.registerMerchant')}
               </h2>
               <p className="text-sm text-gray-600">
                 {currentStep === 1 ? t('store.storeStepDesc') : t('store.merchantStepDesc')}
@@ -705,64 +719,11 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {showSuccess ? (
-           
-            <div className="min-h-[400px] flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
-              <div className="text-center max-w-md mx-auto p-8">
-                {/* Success Icon with Animation */}
-                <div className="relative mb-8">
-                  <div className="w-32 h-32 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce">
-                    <CheckCircle className="text-white text-5xl" />
-                  </div>
-                  {/* Ripple Effect */}
-                  <div className="absolute inset-0 w-32 h-32 bg-green-400 rounded-full mx-auto animate-ping opacity-20"></div>
-                </div>
-                
-                {/* Success Title */}
-                <h2 className={`text-4xl font-bold text-gray-800 mb-4 animate-pulse ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {t('storeRegistration.successTitle')}
-                </h2>
-                
-                {/* Success Message */}
-                <p className={`text-xl text-gray-600 mb-6 animate-pulse ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {t('storeRegistration.successMessage')}
-                </p>
-                
-                {/* Additional Info */}
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 mb-8 shadow-lg transform transition-all duration-1000 hover:scale-105">
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3 animate-pulse">
-                      <span className="text-white text-sm font-bold">✨</span>
-                    </div>
-                    <h3 className="text-lg font-semibold text-green-800">
-                      {t('storeRegistration.welcomeMessage')}
-                    </h3>
-                  </div>
-                  <p className={`text-sm text-green-700 leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {t('storeRegistration.successInfo')}
-                  </p>
-                </div>
-                
-                {/* Loading Animation */}
-                <div className="flex items-center justify-center space-x-3">
-                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-green-500 border-t-transparent"></div>
-                  <span className={`text-lg text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {t('storeRegistration.redirecting')}
-                  </span>
-                </div>
-                
-                {/* Progress Bar */}
-                <div className="mt-6 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full animate-pulse"></div>
-                </div>
-              </div>
-            </div>
-          ) : showOTP ? (
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] relative">
+          {showOTP ? (
             // OTP Verification Step
             <OTPVerification
               email={merchantData.email}
-              onVerificationSuccess={handleOTPSuccess}
               onResendCode={handleOTPResend}
               onBack={handleOTPBack}
             />
@@ -775,10 +736,11 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                 onSubmit={handleStoreDataChange}
                 onValidate={setIsStoreValid}
                 onLogoFileChange={handleLogoFileChange}
+                initialData={storeData}
               />
               
               {/* Navigation Buttons */}
-              <div className="flex justify-end items-center mt-8 pt-6 border-t border-gray-200">
+              <div className="flex justify-end items-center mt-8 pt-6 border-t border-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="flex flex-col items-end gap-2">
                   {!isStoreValid && (
                     <span className="text-xs text-red-500">
@@ -786,11 +748,11 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                     </span>
                   )}
                   <CustomButton
-                    text={isStoreValid ? t('store.createStore') : t('store.createStore')}
+                    text={t('general.next')}
                     color={isStoreValid ? "primary" : "gray"}
                     textColor="white"
                     action={handleStoreSubmit}
-                    icon={isStoreValid ? <Store className="w-4 h-4" /> : undefined}
+                   
                     className="flex items-center gap-2"
                     disabled={!isStoreValid}
                   />
@@ -811,7 +773,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
 
               <form onSubmit={(e) => { e.preventDefault(); handleMerchantSubmit(); }} className="space-y-6">
                 {/* First Name and Last Name */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
                   <CustomInput
                     label={t('signup.firstName')}
                     type="text"
@@ -871,33 +833,33 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                         if (!trimmedVal) {
                           phoneError = t('signup.phoneRequired');
                         } else {
-                          // Remove all spaces and special characters except + and numbers
-                          const cleanPhone = trimmedVal.replace(/[^\d+]/g, '');
+                          const cleanValue = trimmedVal.replace(/\s/g, '');
+                          console.log('cleanValue', cleanValue);
                           
-                          // Check if it contains only numbers and + symbol
-                          if (!/^[\+]?[\d]+$/.test(cleanPhone)) {
-                            phoneError = t('signup.phoneNumbersOnly');
-                          }
-                          // Check if it starts with + (international format)
-                          else if (cleanPhone.startsWith('+')) {
-                            // For international numbers starting with +
-                            if (cleanPhone.length < 8) {
-                              phoneError = t('signup.phoneTooShort');
-                            } else if (cleanPhone.length > 16) {
-                              phoneError = t('signup.phoneTooLong');
-                            } else if (!/^\+[1-9]\d{7,15}$/.test(cleanPhone)) {
-                              phoneError = t('signup.phoneInvalidFormat');
+                          if (cleanValue.startsWith('970') || cleanValue.startsWith('972')) {
+                            console.log('cleanValue2', cleanValue);
+                            const code = cleanValue.startsWith('970') ? '970' : '972';
+                            const numberWithoutCode = cleanValue.slice(code.length);
+                            console.log(numberWithoutCode);
+                            
+                            // 🚫 تحقق: عدم السماح ببدء الجزء المحلي بـ 0
+                            if (numberWithoutCode.startsWith('0')) {
+                              phoneError = t('store.whatsappNoLeadingZero'); // لا تبدأ بـ 0 بعد المقدمة
                             }
-                          }
-                          // Check if it doesn't start with + (local format)
-                          else {
-                            // For local numbers (without country code)
-                            if (cleanPhone.length < 7) {
-                              phoneError = t('signup.phoneTooShort');
-                            } else if (cleanPhone.length > 15) {
-                              phoneError = t('signup.phoneTooLong');
-                            } else if (!/^[1-9]\d{6,14}$/.test(cleanPhone)) {
-                              phoneError = t('signup.phoneInvalidFormat');
+                            // ✅ تحقق: الطول الكلي يجب أن يكون 12 رقمًا بالضبط (مثلاً +970598765432)
+                            else if (cleanValue.length !== 12) {
+                              phoneError = t('store.whatsappLengthError'); // الطول غير صحيح
+                            }
+                            // ✅ تحقق من أن الباقي كله أرقام
+                            else if (!/^\d+$/.test(numberWithoutCode)) {
+                              phoneError = t('store.whatsappInvalidDigits'); // يجب أن يحتوي على أرقام فقط
+                            }
+                          } else {
+                            // تحقق عام للأرقام الدولية الأخرى
+                            if (cleanValue.length < 8 || cleanValue.length > 15) {
+                              phoneError = t('store.whatsappLengthError');
+                            } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
+                              phoneError = t('store.whatsappInvalidFormat');
                             }
                           }
                         }
@@ -910,23 +872,14 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                       }}
                       required
                       error=""
-                      placeholder={t('signup.phonePlaceholder')}
+                     
                     />
                     {merchantErrors.phone && (
-                      <span className="mt-1 text-xs text-red-600 block">{merchantErrors.phone}</span>
+                      <span className="mt-1 text-xs text-red-600 block" dir={isRTL ? 'rtl' : 'ltr'}>{merchantErrors.phone}</span>
                     )}
-                    {!merchantErrors.phone && merchantData.phone && merchantData.phone.trim().length > 0 && (() => {
-                      const cleanPhone = merchantData.phone.replace(/[^\d+]/g, '');
-                      if (cleanPhone.startsWith('+')) {
-                        return cleanPhone.length >= 8 && cleanPhone.length <= 16 && /^\+[1-9]\d{7,15}$/.test(cleanPhone);
-                      } else {
-                        return cleanPhone.length >= 7 && cleanPhone.length <= 15 && /^[1-9]\d{6,14}$/.test(cleanPhone);
-                      }
-                    })() && (
-                      <span className="mt-1 text-xs text-green-600 block">{t('signup.phoneValid')}</span>
-                    )}
+                   
                     {!merchantErrors.phone && (!merchantData.phone || !merchantData.phone.trim()) && (
-                      <span className="mt-1 text-xs text-gray-500 block">{t('signup.phoneRequired')}</span>
+                      <span className="mt-1 text-xs text-gray-500 block" dir={isRTL ? 'rtl' : 'ltr'}  >{t('signup.phoneRequired')}</span>
                     )}
                   </div>
                 </div>
@@ -1011,8 +964,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                 {/* Password */}
                 <div className="space-y-2">
                   <div className="relative">
-                    <label htmlFor="password" className={`block mb-2 text-sm font-medium text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('signup.password')}
+                    <label htmlFor="password" className={`block mb-2 text-sm font-medium text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      {t('signup.password')}<span className={`${isRTL ? 'mr-1' : 'ml-1'} text-red-500`}>*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -1035,7 +988,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                         onClick={() => setShowPassword(!showPassword)}
                         className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors ${isRTL ? 'left-3' : 'right-3'}`}
                       >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                        {showPassword ? <Visibility /> :<VisibilityOff /> }
                       </button>
                     </div>
                     {merchantErrors.password && (
@@ -1047,8 +1000,8 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                 {/* Confirm Password */}
                 <div className="space-y-2">
                   <div className="relative">
-                    <label htmlFor="confirmPassword" className={`block mb-2 text-sm font-medium text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('signup.confirmPassword')}
+                    <label htmlFor="confirmPassword" className={`block mb-2 text-sm font-medium text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      {t('signup.confirmPassword')} <span className={`${isRTL ? 'mr-1' : 'ml-1'} text-red-500`}>*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -1071,11 +1024,14 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors ${isRTL ? 'left-3' : 'right-3'}`}
                       >
-                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        {showConfirmPassword ? <Visibility /> :<VisibilityOff />}
                       </button>
-                      {/* Green check icon when passwords match */}
-                      {merchantData.confirmPassword && merchantData.password === merchantData.confirmPassword && !merchantErrors.confirmPassword && (
-                        <div className={`absolute top-1/2 transform -translate-y-1/2 ${isRTL ? 'right-12' : 'left-12'}`}>
+                      {/* Green check icon when passwords match - positioned after text */}
+                      {merchantData.confirmPassword && 
+                       merchantData.password === merchantData.confirmPassword && 
+                       !merchantErrors.confirmPassword && 
+                       merchantData.password.length <= 20 && (
+                        <div className={`absolute top-1/2 transform -translate-y-1/2 ${isRTL ? 'left-12' : 'right-12'} z-10 pointer-events-none`}>
                           <CheckCircle className="text-green-500 text-lg" />
                         </div>
                       )}
@@ -1093,34 +1049,61 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
                     color="gray"
                     textColor="gray-700"
                     bordercolor="gray-300"
-                    action={() => setCurrentStep(1)}
-                    icon={<ArrowBack className="w-4 h-4" />}
+                    action={() => {
+                      // استرجاع البيانات المحفوظة عند الرجوع
+                      const hasLoadedData = loadSavedStoreData();
+                      if (hasLoadedData) {
+                        console.log('📂 تم استرجاع بيانات المتجر عند الرجوع');
+                      }
+                      setCurrentStep(1);
+                    }}
+                   
                     className="flex items-center gap-2"
                   />
                   
                   <div className={`${isRTL ? 'flex-row-reverse' : 'flex-row'} flex items-center gap-4`}>
-                    <span className="text-sm text-gray-500">
-                      {t('storeRegistration.step')} 2/2
-                    </span>
-                    <div className="flex flex-col items-end gap-2">
+                   
+                    <div className={`${isRTL ? 'items-start' : 'items-end'} flex flex-col  gap-2 justify-end`}>
                       {!isMerchantValid && (
                         <span className="text-xs text-red-500">
                           {t('storeRegistration.completeMerchantInfo')}
                         </span>
                       )}
                       <CustomButton
-                        text={isMerchantValid ? t('store.registerMerchant') : t('store.registerMerchant')}
-                        color={isMerchantValid ? "primary" : "gray"}
+                        text={isSubmitting ? t('store.registering') : (isMerchantValid ? t('store.registerMerchant') : t('store.registerMerchant'))}
+                        color={isMerchantValid && !isSubmitting ? "primary" : "gray"}
                         textColor="white"
                         type="submit"
-                        icon={isMerchantValid ? <Person className="w-4 h-4" /> : undefined}
+                        icon={isSubmitting ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        ) : (isMerchantValid ? <Person className="w-4 h-4" /> : undefined)}
                         className="flex items-center gap-2"
-                        disabled={!isMerchantValid}
+                        disabled={!isMerchantValid || isSubmitting}
                       />
                     </div>
                   </div>
                 </div>
               </form>
+            </div>
+          )}
+          
+          {/* Loading Overlay */}
+          {isSubmitting && (
+            <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center z-20">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-500 border-t-transparent mx-auto mb-6"></div>
+                <p className="text-xl font-semibold text-gray-700 mb-2">
+                  {t('store.registering')}
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  {t('store.pleaseWait')}
+                </p>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+              </div>
             </div>
           )}
         </div>

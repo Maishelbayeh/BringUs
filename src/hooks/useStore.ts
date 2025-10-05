@@ -48,7 +48,7 @@ interface StoreData {
   nameEn: string;           // اسم المتجر بالإنجليزية
   descriptionAr?: string;   // وصف المتجر بالعربية
   descriptionEn?: string;   // وصف المتجر بالإنجليزية
-  slug: string;             // رابط المتجر
+  slug?: string;             // رابط المتجر
   logo: {
     public_id: string | null;
     url: string | null;

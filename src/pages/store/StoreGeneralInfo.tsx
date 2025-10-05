@@ -36,6 +36,7 @@ interface StoreGeneralInfoProps {
   onSubmit?: (data: any) => Promise<any> | void;      // دالة إرسال البيانات
   onValidate?: (isValid: boolean) => void; // دالة التحقق من صحة البيانات
   onLogoFileChange?: (file: File | null) => void; // دالة تمرير ملف اللوجو
+  initialData?: any; // البيانات الأولية المحفوظة
 }
 
 /**
@@ -44,13 +45,13 @@ interface StoreGeneralInfoProps {
 interface ValidationErrors {
   nameAr?: string;
   nameEn?: string;
-  slug?: string;
+  // slug?: string;
   email?: string;
   phone?: string;
   whatsappNumber?: string;
 }
 
-const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidate, onLogoFileChange }) => {
+const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidate, onLogoFileChange, initialData }) => {
   
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
@@ -97,7 +98,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     nameEn: '',
     descriptionAr: '',
     descriptionEn: '',
-    slug: '',
+    // slug: '',
     
     // لوجو المتجر
     logo: {
@@ -164,13 +165,13 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         }
         break;
         
-      case 'slug':
-        if (!value.trim()) {
-          error = t('store.slugRequired');
-        } else if (!/^[a-z0-9-]+$/.test(value)) {
-          error = t('store.slugInvalid');
-        }
-        break;
+      // case 'slug':
+      //   if (!value.trim()) {
+      //     error = t('store.slugRequired');
+      //   } else if (!/^[a-z0-9-]+$/.test(value)) {
+      //     error = t('store.slugInvalid');
+      //   }
+      //   break;
         
       case 'email':
         if (!value.trim()) {
@@ -189,8 +190,64 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
       //   break;
         
       case 'whatsappNumber':
-        if (value && !/^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/\s/g, ''))) {
-          error = t('store.whatsappInvalid');
+  if (value) {
+    const cleanValue = value.replace(/\s/g, '');
+
+     if (cleanValue.startsWith('970') || cleanValue.startsWith('972')) {
+     
+      const code = cleanValue.startsWith('970') ? '970' : '972';
+      const numberWithoutCode = cleanValue.slice(code.length);
+console.log(numberWithoutCode);
+      // 🚫 تحقق: عدم السماح ببدء الجزء المحلي بـ 0
+      if (numberWithoutCode.startsWith('0')) {
+        error = t('store.whatsappNoLeadingZero'); // لا تبدأ بـ 0 بعد المقدمة
+      }
+      // ✅ تحقق: الطول الكلي يجب أن يكون 12 رقمًا بالضبط (مثلاً +970598765432)
+      else if (cleanValue.length !== 12) {
+        // +970 = 4 خانات + 9 أرقام = 13 طول السلسلة
+        error = t('store.whatsappLengthError'); // الطول غير صحيح
+      }
+      // ✅ تحقق من أن الباقي كله أرقام
+      else if (!/^\d+$/.test(numberWithoutCode)) {
+        error = t('store.whatsappInvalidDigits'); // يجب أن يحتوي على أرقام فقط
+      }
+    } 
+    else {
+      // تحقق عام للأرقام الدولية الأخرى
+      if (cleanValue.length < 8 || cleanValue.length > 15) {
+        error = t('store.whatsappLengthError');
+      } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
+        error = t('store.whatsappInvalidFormat');
+      }
+    }
+  }
+  break;
+
+        if (value) {
+          // إزالة المسافات والحصول على الرقم النظيف
+          const cleanValue = value.replace(/\s/g, '');
+          
+          // التحقق من أن الرقم يحتوي على أكثر من المقدمة فقط
+          if (cleanValue.length <= 4) {
+            error = t('store.whatsappInvalid');
+          } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
+            error = t('store.whatsappInvalid');
+          } else {
+            // تحقق خاص لأرقام فلسطين وإسرائيل
+            if (cleanValue.startsWith('+970') || cleanValue.startsWith('+972')) {
+              const dialCode = cleanValue.startsWith('+970') ? '970' : '972';
+              const numberWithoutCode = cleanValue.replace(`+${dialCode}`, '');
+              
+              // التحقق من عدم بداية الرقم بـ 0 (المركز الرابع)
+              if (numberWithoutCode.startsWith('0')) {
+                error = t('store.whatsappInvalid');
+              }
+              // التحقق من طول الرقم (يجب أن يكون 9 أرقام بالضبط)
+              else if (numberWithoutCode.length !== 9) {
+                error = t('store.whatsappInvalid');
+              }
+            }
+          }
         }
         break;
     }
@@ -205,7 +262,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     // التحقق من جميع الحقول المطلوبة
     newErrors.nameAr = validateField('nameAr', form.nameAr);
     newErrors.nameEn = validateField('nameEn', form.nameEn);
-    newErrors.slug = validateField('slug', form.slug);
+    //  newErrors.slug = validateField('slug', form.slug);
     newErrors.email = validateField('email', form.contact.email);
     // newErrors.phone = validateField('phone', form.contact.phone);
     newErrors.whatsappNumber = validateField('whatsappNumber', form.whatsappNumber);
@@ -581,6 +638,59 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
   };
 
  
+  // تحميل البيانات الأولية المحفوظة
+  useEffect(() => {
+    console.log('🔍 فحص البيانات الأولية:', { initialData, isDataLoaded, isEditMode });
+    if (initialData && !isDataLoaded && !isEditMode) {
+      console.log('📂 تحميل البيانات الأولية المحفوظة:', initialData);
+      
+      // تحديث النموذج بالبيانات المحفوظة
+      setForm({
+        nameAr: initialData.nameAr || '',
+        nameEn: initialData.nameEn || '',
+        descriptionAr: initialData.descriptionAr || '',
+        descriptionEn: initialData.descriptionEn || '',
+        //  slug: initialData.slug || '',
+        logo: initialData.logo || { public_id: null, url: null },
+        settings: {
+          lahzaToken: initialData.settings?.lahzaToken || '',
+          lahzaSecretKey: initialData.settings?.lahzaSecretKey || '',
+          mainColor: initialData.settings?.mainColor || '#1976d2',
+          language: initialData.settings?.language || 'ar',
+          currency: initialData.settings?.currency || 'ILS',
+          storeDiscount: initialData.settings?.storeDiscount || 0,
+          timezone: initialData.settings?.timezone || 'Asia/Amman',
+          taxRate: initialData.settings?.taxRate || 0,
+          shippingEnabled: initialData.settings?.shippingEnabled ?? true,
+          storeSocials: {
+            ...SOCIAL_MEDIA.reduce((acc, s) => ({ ...acc, [s.key]: '' }), {} as Record<string, string>),
+            ...initialData.settings?.storeSocials
+          },
+        },
+        whatsappNumber: initialData.whatsappNumber || '',
+        contact: {
+          email: initialData.contact?.email || '',
+          phone: initialData.contact?.phone || '',
+          address: {
+            street: initialData.contact?.address?.street || '',
+            city: initialData.contact?.address?.city || '',
+            state: initialData.contact?.address?.state || '',
+            zipCode: initialData.contact?.address?.zipCode || '',
+            country: initialData.contact?.address?.country || ''
+          }
+        }
+      });
+      
+      // عرض اللوجو المحفوظ إذا كان موجوداً
+      if (initialData.logo?.url) {
+        setLogoPreview(initialData.logo.url);
+      }
+      
+      setIsDataLoaded(true);
+      console.log('✅ تم تحميل البيانات الأولية بنجاح');
+    }
+  }, [initialData, isDataLoaded, isEditMode]);
+
   useEffect(() => {
     const fetchStoreData = async () => {
       const storeId = getCurrentStoreId();
@@ -614,7 +724,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
               nameEn: store.nameEn || '',
               descriptionAr: store.descriptionAr || '',
               descriptionEn: store.descriptionEn || '',
-              slug: store.slug || '',
+              //  slug: store.slug || '',
               logo: logoData,
               settings: {
                 lahzaToken: store.settings?.lahzaToken || '',
@@ -662,7 +772,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
     };
 
     fetchStoreData();
-  }, [isDataLoaded, getCurrentStoreId]); // إضافة getCurrentStoreId
+  }, [isDataLoaded, getCurrentStoreId]); 
 
     const handleLahzaTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -689,7 +799,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
       const hasRequiredFields = Boolean(
         form.nameAr.trim() && 
         form.nameEn.trim() && 
-        form.slug.trim() && 
+        //  form.slug.trim() && 
         form.contact.email.trim() && 
         form.whatsappNumber.trim()
       );
@@ -705,14 +815,15 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
       // التحقق من صحة رقم الهاتف
       const isPhoneValid = Boolean(
         form.whatsappNumber.trim() && 
-        /^[\+]?[1-9][\d]{0,15}$/.test(form.whatsappNumber.replace(/\s/g, ''))
+        form.whatsappNumber.replace(/\s/g, '').length > 4 &&
+        /^[\+]?[1-9][\d]{4,15}$/.test(form.whatsappNumber.replace(/\s/g, ''))
       );
       
       const isValid = hasRequiredFields && hasNoErrors && isEmailValid && isPhoneValid;
       
       onValidate(isValid);
     }
-  }, [errors, form.nameAr, form.nameEn, form.slug, form.contact.email, form.whatsappNumber, onValidate]);
+  }, [errors, form.nameAr, form.nameEn,  form.contact.email, form.whatsappNumber, onValidate]);
 
  
   return (
@@ -794,7 +905,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
         </div>
 </div>
         {/* رابط المتجر */}
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <CustomInput
             label={t('store.slug')}
             name="slug"
@@ -804,7 +915,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             placeholder={t('store.slugPlaceholder')}
             error={errors.slug}
           />
-        </div>
+        </div> */}
       
 
       {/* لوجو المتجر */}
@@ -998,7 +1109,7 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
             label={t('store.whatsapp')}
             value={form.whatsappNumber}
             onChange={handleWhatsAppChange}
-            placeholder={t('store.whatsappPlaceholder')}
+         
             error={errors.whatsappNumber}
             required
           />

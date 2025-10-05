@@ -55,6 +55,7 @@ interface AuthResponse {
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
+  user?: T; // إضافة دعم لـ user field
   message?: string;
   error?: string;
 }
@@ -93,10 +94,17 @@ export const useUser = () => {
       );
 
       console.log('📥 استجابة API:', response.data);
+      console.log('📊 response.data.data:', response.data.data);
+      console.log('📊 response.data.user:', response.data.user);
 
       if (response.data.success) {
-        console.log('✅ تم إنشاء المستخدم بنجاح:', response.data.data);
-        return response.data.data || null;
+        console.log('✅ تم إنشاء المستخدم بنجاح');
+        // التحقق من وجود البيانات في data أو user
+        const userData = response.data.data || response.data.user;
+        console.log('📊 بيانات المستخدم المستخرجة:', userData);
+        console.log('📊 نوع البيانات:', typeof userData);
+        console.log('📊 هل البيانات موجودة؟', !!userData);
+        return userData || null;
       } else {
         console.log('❌ فشل في إنشاء المستخدم:', response.data.message);
         throw new Error(response.data.message || 'فشل في إنشاء المستخدم');

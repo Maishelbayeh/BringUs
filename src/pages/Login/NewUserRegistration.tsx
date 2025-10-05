@@ -89,23 +89,6 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
   };
 
  
-  const handleOTPSuccess = () => {
-    console.log('✅ تم التحقق من الإيميل بنجاح');
-    showSuccess(t('newUser.success'), t('general.success'));
-    
-    // إعادة تعيين الفورم
-    resetForm();
-    
-   
-    if (onUserCreated) {
-      onUserCreated();
-    } else {
-      // إعادة توجيه للصفحة الرئيسية بعد النجاح
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-    }
-  };
 
   // معالجة إعادة إرسال OTP
   const handleOTPResend = () => {
@@ -230,9 +213,36 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
     if (!formData.phone) {
       newErrors.phone = t('signup.phoneRequired');
       console.log('❌ رقم الهاتف مطلوب');
-    } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = t('signup.phoneInvalid');
-      console.log('❌ رقم الهاتف غير صحيح');
+    } else {
+      const cleanValue = formData.phone.replace(/\s/g, '');
+      console.log('cleanValue', cleanValue);
+      
+      if (cleanValue.startsWith('970') || cleanValue.startsWith('972')) {
+        console.log('cleanValue2', cleanValue);
+        const code = cleanValue.startsWith('970') ? '970' : '972';
+        const numberWithoutCode = cleanValue.slice(code.length);
+        console.log(numberWithoutCode);
+        
+        // 🚫 تحقق: عدم السماح ببدء الجزء المحلي بـ 0
+        if (numberWithoutCode.startsWith('0')) {
+          newErrors.phone = t('store.whatsappNoLeadingZero'); // لا تبدأ بـ 0 بعد المقدمة
+        }
+        // ✅ تحقق: الطول الكلي يجب أن يكون 12 رقمًا بالضبط (مثلاً +970598765432)
+        else if (cleanValue.length !== 12) {
+          newErrors.phone = t('store.whatsappLengthError'); // الطول غير صحيح
+        }
+        // ✅ تحقق من أن الباقي كله أرقام
+        else if (!/^\d+$/.test(numberWithoutCode)) {
+          newErrors.phone = t('store.whatsappInvalidDigits'); // يجب أن يحتوي على أرقام فقط
+        }
+      } else {
+        // تحقق عام للأرقام الدولية الأخرى
+        if (cleanValue.length < 8 || cleanValue.length > 15) {
+          newErrors.phone = t('store.whatsappLengthError');
+        } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
+          newErrors.phone = t('store.whatsappInvalidFormat');
+        }
+      }
     }
     
     if (!agreeTerms) {
@@ -368,7 +378,6 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
     return (
       <OTPVerification
         email={formData.email}
-        onVerificationSuccess={handleOTPSuccess}
         onResendCode={handleOTPResend}
         onBack={handleOTPBack}
       />
@@ -381,7 +390,7 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
 
 
       <div className="w-full max-w-2xl">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 relative">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <PersonAdd className="text-white text-2xl" />
@@ -567,7 +576,7 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
                     onClick={() => setShowPassword(!showPassword)}
                     className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors ${language === 'ARABIC' ? 'left-3' : 'right-3'}`}
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <Visibility /> :<VisibilityOff />}
                   </button>
                 </div>
                 {errors.password && (
@@ -604,7 +613,7 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors ${language === 'ARABIC' ? 'left-3' : 'right-3'}`}
                   >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    {showConfirmPassword ? <Visibility /> :<VisibilityOff />}
                   </button>
                  
                   {formData.confirmPassword && formData.password === formData.confirmPassword && !errors.confirmPassword && (
@@ -647,6 +656,21 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
               ) : <PersonAdd />}
             />
+            
+            {/* Loading Overlay */}
+            {(isLoading || createUserLoading) && (
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent mx-auto mb-4"></div>
+                  <p className="text-lg font-semibold text-gray-700 mb-2">
+                    {t('newUser.creatingUser')}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {t('newUser.pleaseWait')}
+                  </p>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </div>

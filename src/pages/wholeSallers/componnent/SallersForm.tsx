@@ -73,7 +73,7 @@ const SallersForm: React.FC<SallersFormProps> = ({ form, onFormChange, onPhoneCh
         onChange={onPhoneChange || (() => {})}
         error={errors.mobile}
         required
-        placeholder="5xxxxxxxx"
+        
       />
 
       {/* Discount */}

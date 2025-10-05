@@ -38,7 +38,8 @@
     "success": "Success",
     "error": "Error",
     "create": "Create",
-    "update": "Update"
+    "update": "Update",
+    "next": "Next"
   },
   "subscription": {
     "title": "Subscription Renewal",
@@ -206,7 +207,10 @@
       "sending": "Sending...",
       "resend_in": "Resend in {{seconds}} seconds",
       "wrong_email": "Wrong email?",
-      "change_email": "Change Email"
+      "change_email": "Change Email",
+      "successTitle": "Verification Successful!",
+      "successMessage": "Your email has been verified successfully. Welcome to BringUs!",
+      "redirecting": "Redirecting..."
     }
   },
   "login": {
@@ -1385,6 +1389,7 @@
     "pinterest": "Pinterest",
     "linkedin": "LinkedIn",
     "whatsapp": "WhatsApp",
+    "registering": "Registering...",
     "nameArRequired": "Store name in Arabic is required",
     "nameArMinLength": "Store name in Arabic must be at least 3 characters",
     "nameEnRequired": "Store name in English is required",
@@ -1396,6 +1401,10 @@
     "phoneRequired": "Phone number is required",
     "phoneInvalid": "Please enter a valid phone number",
     "whatsappInvalid": "Please enter a valid WhatsApp number",
+    "whatsappInvalidFormat": "WhatsApp number format is invalid, it must start with + and contain only numbers",
+    "whatsappNoLeadingZero": "WhatsApp number cannot start with 0 after the dial code +970 or +972",
+    "whatsappLengthError": "WhatsApp number must be 9 digits after the dial code",
+    "whatsappInvalidDigits": "WhatsApp number must contain only numbers",
     "editStoreInfo": "Edit Store Information",
     "addNewStore": "Add New Store",
     "editModeDescription": "You can edit the current store information",

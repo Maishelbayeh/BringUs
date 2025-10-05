@@ -235,7 +235,7 @@ const Login: React.FC = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors ${language === 'ARABIC' ? 'left-3' : 'right-3'}`}
                     >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                      {showPassword ? <Visibility /> :<VisibilityOff />}
                     </button>
                   </div>
                   {errors.password && (

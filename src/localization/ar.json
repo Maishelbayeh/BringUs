@@ -38,7 +38,8 @@
     "success": "نجح",
     "error": "خطأ",
     "create": "إنشاء",
-    "update": "تحديث"
+    "update": "تحديث",
+    "next": "التالي"
   },
   "subscription": {
     "title": "تجديد الاشتراك",
@@ -206,7 +207,10 @@
       "sending": "جاري الإرسال...",
       "resend_in": "إعادة الإرسال خلال {{seconds}} ثانية",
       "wrong_email": "البريد الإلكتروني خاطئ؟",
-      "change_email": "تغيير البريد الإلكتروني"
+      "change_email": "تغيير البريد الإلكتروني",
+      "successTitle": "تم التحقق بنجاح!",
+      "successMessage": "تم التحقق من بريدك الإلكتروني بنجاح. مرحباً بك في BringUs!",
+      "redirecting": "جاري الانتقال..."
     }
   },
   "login": {
@@ -1390,6 +1394,7 @@
     "pinterest": "بينتيريست",
     "linkedin": "لينكد إن",
     "whatsapp": "واتساب",
+    "registering": "جاري التسجيل...",
     "nameArRequired": "اسم المتجر بالعربية مطلوب",
     "nameArMinLength": "اسم المتجر بالعربية يجب أن يكون 3 أحرف على الأقل",
     "nameEnRequired": "اسم المتجر بالإنجليزية مطلوب",
@@ -1401,6 +1406,10 @@
     "phoneRequired": "رقم الهاتف مطلوب",
     "phoneInvalid": "يرجى إدخال رقم هاتف صحيح",
     "whatsappInvalid": "يرجى إدخال رقم واتساب صحيح",
+    "whatsappInvalidFormat": "صيغة رقم الواتساب غير صحيحة، يجب أن يبدأ بـ + ويتبعه أرقام فقط.",
+    "whatsappNoLeadingZero": "لا يمكن أن يبدأ الرقم بـ 0 بعد المقدمة +970 أو +972.",
+    "whatsappLengthError": "يجب أن يكون الرقم بعد المقدمة مكونًا من 9 أرقام .",
+    "whatsappInvalidDigits": "يجب أن يحتوي رقم الواتساب على أرقام فقط.",
     "editStoreInfo": "تعديل معلومات المتجر",
     "addNewStore": "إضافة متجر جديد",
     "editModeDescription": "يمكنك تعديل معلومات المتجر الحالي",

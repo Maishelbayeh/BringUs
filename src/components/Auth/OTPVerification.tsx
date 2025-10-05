@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import useOTP from '../../hooks/useOTP';
 import useLanguage from '../../hooks/useLanguage';
 import { 
@@ -10,26 +11,26 @@ import {
 
 interface OTPVerificationProps {
   email: string;
-  onVerificationSuccess?: () => void;
   onResendCode?: () => void;
   onBack?: () => void;
 }
 
 const OTPVerification: React.FC<OTPVerificationProps> = ({ 
   email, 
-  onVerificationSuccess, 
   onResendCode, 
   
 }) => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { verifyOTP, resendOTP, loading, error: otpError, reset } = useOTP();
+  const navigate = useNavigate();
 
   // 5-digit OTP state
   const [otp, setOtp] = useState(['', '', '', '', '']);
   const [resendLoading, setResendLoading] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Refs for input fields
   const inputRefs = [
@@ -92,7 +93,12 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
       const otpString = otp.join('');
       const result = await verifyOTP(email, otpString);
       if (result.success) {
-        onVerificationSuccess && onVerificationSuccess();
+        setShowSuccess(true);
+        
+        // الانتقال للهوم بيج بعد 3 ثوان
+        setTimeout(() => {
+          navigate('/');
+        }, 3000);
       }
     } catch (err) {
       console.error('OTP verification error:', err);
@@ -125,8 +131,53 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
     }
   }, [countdown]);
 
+  // إذا تم التحقق بنجاح، اعرض رسالة النجاح
+  if (showSuccess) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center p-6 bg-gradient-to-br from-green-50 to-emerald-100 z-50">
+        <div className="w-full max-w-md">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8">
+            <div className="text-center">
+              {/* Success Icon with Animation */}
+              <div className="relative mb-8">
+                <div className="w-24 h-24 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce">
+                  <CheckCircle className="text-white text-4xl" />
+                </div>
+                {/* Ripple Effect */}
+                <div className="absolute inset-0 w-24 h-24 bg-green-400 rounded-full mx-auto animate-ping opacity-20"></div>
+              </div>
+              
+              {/* Success Title */}
+              <h2 className={`text-3xl font-bold text-gray-800 mb-4 animate-pulse ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+                {t('auth.otp.successTitle', 'تم التحقق بنجاح!')}
+              </h2>
+              
+              {/* Success Message */}
+              <p className={`text-lg text-gray-600 mb-6 animate-pulse ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+                {t('auth.otp.successMessage', 'تم التحقق من بريدك الإلكتروني بنجاح. مرحباً بك في BringUs!')}
+              </p>
+              
+              {/* Loading Animation */}
+              <div className="flex items-center justify-center space-x-3 mb-6">
+                <div className="animate-spin rounded-full h-6 w-6 border-4 border-green-500 border-t-transparent"></div>
+                <span className={`text-base text-gray-600 font-medium ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+                  {t('auth.otp.redirecting', 'جاري الانتقال...')}
+                </span>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className=" flex items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="fixed inset-0 flex items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-indigo-100 z-50">
       <div className="w-full max-w-md">
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8">
           {/* Header */}

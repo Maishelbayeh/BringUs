@@ -8,6 +8,23 @@
   width: 6px;
   height: 6px;
 }
+.react-tel-input .flag-dropdown,.react-tel-input .selected-flag{
+  border-radius:8px 0 0 8px !important;
+}
+.react-tel-input .flag-dropdown.open .selected-flag {
+  background: #fff;
+  border-radius: 8px 0 0 0;
+}
+.react-tel-input {
+  
+  direction: ltr !important;
+ 
+}
+.react-tel-input .country-list .country,.react-tel-input .country-list .search {
+  text-align: left !important;
+}
+
+
 ::-webkit-scrollbar-thumb {
   background: #c1b6e3;
   border-radius: 8px;

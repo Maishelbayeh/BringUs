@@ -13,6 +13,8 @@ interface CustomButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
   style?: React.CSSProperties;
   bordercolor?: string;
   size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+  loadingText?: string;
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
@@ -29,6 +31,8 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   type = 'button',
   disabled = false,
   size = 'md',
+  loading = false,
+  loadingText,
   ...props
 }) => {
   const { language } = useLanguage();
@@ -38,10 +42,16 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   if (alignment === 'right') justifyContent = 'flex-end';
 
   const handleClick = () => {
-    if (!disabled && action && type !== 'submit') {
+    if (!disabled && !loading && action && type !== 'submit') {
       action();
     }
   };
+
+  // تحديد النص والأيقونة حسب حالة التحميل
+  const displayText = loading ? (loadingText || text) : text;
+  const displayIcon = loading ? (
+    <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
+  ) : icon;
 
   // تحديد حجم الزر
   const getSizeClasses = () => {
@@ -61,7 +71,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       onClick={handleClick}
       disabled={disabled}
       className={`${isRTL ? 'flex-row' :'flex-row-reverse' } flex items-center font-medium rounded-lg ${getSizeClasses()} focus:outline-none transition-all duration-200 ${
-        disabled 
+        disabled || loading
           ? 'opacity-40 cursor-not-allowed bg-gray-200 text-gray-400 border-gray-200 hover:bg-gray-200 hover:text-gray-400' 
           : `text-${textColor} bg-${color} shadow-sm border border-${bordercolor} hover:bg-${color}-light hover:text-${textColor} cursor-pointer hover:shadow-md`
       } ${className}`}
@@ -71,8 +81,8 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       }}
       {...props}
     >
-      {icon && <span className="flex items-center">{icon}</span>}
-      <span>{text}</span>
+      {displayIcon && <span className="flex items-center">{displayIcon}</span>}
+      <span>{displayText}</span>
     </button>
   );
 };
