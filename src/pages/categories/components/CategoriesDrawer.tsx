@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CustomButton from '../../../components/common/CustomButton';
 import CategoriesForm from './CategoriesForm';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +24,7 @@ interface CategoriesDrawerProps {
 const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRTL, title, form, onFormChange, onSubmit, isSubcategory, categories, allCategories }) => {
   const { t } = useTranslation();
   const { uploadCategoryImage } = useCategories();
+  const [isImageUploading, setIsImageUploading] = useState(false);
  
   
   // استخدام النظام العام للفالديشين
@@ -46,9 +47,17 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
   const onImageChangeLocal = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
-      const url = await uploadCategoryImage(file);
-      if (onFormChange) {
-        onFormChange({ target: { name: 'image', value: url } } as any);
+      try {
+        setIsImageUploading(true);
+        const url = await uploadCategoryImage(file);
+        if (onFormChange) {
+          onFormChange({ target: { name: 'image', value: url } } as any);
+        }
+      } catch (error) {
+        console.error('Image upload failed:', error);
+        // Handle error - you might want to show a toast notification here
+      } finally {
+        setIsImageUploading(false);
       }
     }
   };
@@ -156,6 +165,7 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
   // دالة إغلاق الدراور مع مسح رسائل الخطأ
   const handleClose = () => {
     clearAllErrors();
+    setIsImageUploading(false); // Reset loading state when closing
     onClose();
   };
 
@@ -195,13 +205,23 @@ const CategoriesDrawer: React.FC<CategoriesDrawerProps> = ({ open, onClose, isRT
             text={t('common.cancel')}
             action={handleClose}
             bordercolor="primary"
+            disabled={isImageUploading}
           />
-          <CustomButton
-            color="primary"
-            textColor="white"
-            text={t('common.save')}
-            onClick={handleSave}
-          />
+          <div className="flex items-center gap-2">
+            {isImageUploading && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                <span>{t('common.uploadingImage')}</span>
+              </div>
+            )}
+            <CustomButton
+              color="primary"
+              textColor="white"
+              text={t('common.save')}
+              onClick={handleSave}
+              disabled={isImageUploading}
+            />
+          </div>
         </div>
       </div>
     </div>

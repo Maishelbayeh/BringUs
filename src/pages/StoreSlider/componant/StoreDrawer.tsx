@@ -19,9 +19,10 @@ interface StoreSliderDrawerProps {
   subcategories?: { id: number; name: string }[];
   renderFooter?: React.ReactNode;
   saving?: boolean;
+  isImageUploading?: boolean;
 }
 
-const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, onSave, form, onFormChange, onImageChange, onFileChange, errors, isRTL, mode = 'slider', renderFooter, saving = false }) => {
+const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, onSave, form, onFormChange, onImageChange, onFileChange, errors, isRTL, mode = 'slider', renderFooter, saving = false, isImageUploading = false }) => {
   const { t } = useTranslation();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -65,19 +66,27 @@ const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, on
               text={t('common.cancel')}
               action={onClose}
               bordercolor="primary"
-              disabled={saving}
+              disabled={saving || isImageUploading}
             />
-            <CustomButton
-              color="primary"
-              textColor="white"
-              text={saving ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : t('common.save')}
-              type="submit"
-              onClick={handleSubmit}
-              disabled={saving}
-              icon={saving ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              ) : undefined}
-            />
+            <div className="flex items-center gap-2">
+              {isImageUploading && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span>{t('common.uploadingImage')}</span>
+                </div>
+              )}
+              <CustomButton
+                color="primary"
+                textColor="white"
+                text={saving ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : t('common.save')}
+                type="submit"
+                onClick={handleSubmit}
+                disabled={saving || isImageUploading}
+                icon={saving ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                ) : undefined}
+              />
+            </div>
           </div>
         )}
       </div>

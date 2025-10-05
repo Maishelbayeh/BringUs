@@ -163,6 +163,7 @@ export const usePaymentMethods = () => {
   // Create payment method with all data in one request
   const createPaymentMethodWithFiles = useCallback(async (formData: PaymentMethodWithFiles) => {
     const token = getToken();
+    console.log('createPaymentMethodWithFiles', formData);
     if (!token) return null;
 
     try {

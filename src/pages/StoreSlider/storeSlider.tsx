@@ -36,6 +36,7 @@ const StoreSliderPage: React.FC = () => {
   const [sliderToDelete, setSliderToDelete] = useState<StoreSlider | null>(null);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
   const [saving, setSaving] = useState(false);
+  const [isImageUploading, setIsImageUploading] = useState(false);
   const [showSliderPreview, setShowSliderPreview] = useState(false);
   const storeId = localStorage.getItem('storeId') || '687505893fbf3098648bfe16';
   // Store Slider Hook
@@ -77,11 +78,18 @@ const StoreSliderPage: React.FC = () => {
     setForm({ ...form, imageUrl: imageUrl });
   };
 
-  const handleFileChange = (file: File | null) => {
+  const handleFileChange = async (file: File | null) => {
     console.log('handleFileChange called with:', file);
     if (file) {
-      // حفظ الملف للرفع لاحقاً
-      setForm({ ...form, selectedFile: file, imageUrl: URL.createObjectURL(file) });
+      try {
+        setIsImageUploading(true);
+        // حفظ الملف للرفع لاحقاً
+        setForm({ ...form, selectedFile: file, imageUrl: URL.createObjectURL(file) });
+      } catch (error) {
+        console.error('Error handling file:', error);
+      } finally {
+        setIsImageUploading(false);
+      }
     } else {
       console.log('No file selected, clearing imageUrl');
       setForm({ ...form, selectedFile: null, imageUrl: '' });
@@ -136,6 +144,7 @@ const StoreSliderPage: React.FC = () => {
     setForm(formData);
     setEditSlider(slider);
     setDrawerMode('edit');
+    setIsImageUploading(false); // Reset loading state when opening drawer
     setShowDrawer(true);
   };
 
@@ -143,6 +152,7 @@ const StoreSliderPage: React.FC = () => {
     setForm(initialForm);
     setEditSlider(null);
     setDrawerMode('add');
+    setIsImageUploading(false); // Reset loading state when opening drawer
     setShowDrawer(true);
   };
 
@@ -215,6 +225,7 @@ const StoreSliderPage: React.FC = () => {
       setEditSlider(null);
       setForm(initialForm);
       setFormErrors({});
+      setIsImageUploading(false); // Reset loading state when closing
     } catch (error) {
       console.error('Error saving slider:', error);
     } finally {
@@ -469,7 +480,7 @@ const StoreSliderPage: React.FC = () => {
       </div>
       <StoreSliderDrawer
         open={showDrawer}
-        onClose={() => { setShowDrawer(false); setEditSlider(null); setForm(initialForm); setFormErrors({}); }}
+        onClose={() => { setShowDrawer(false); setEditSlider(null); setForm(initialForm); setFormErrors({}); setIsImageUploading(false); }}
         onSave={handleSave}
         form={form}
         onFormChange={handleFormChange}
@@ -479,17 +490,24 @@ const StoreSliderPage: React.FC = () => {
         isRTL={isRTL}
         mode="slider"
         saving={saving}
+        isImageUploading={isImageUploading}
         renderFooter={(
           <div className={`flex justify-between gap-2 px-6 py-4 border-t border-primary/20 bg-white rounded-b-2xl`}>
             <CustomButton
               color="white"
               textColor="primary"
               text={t('common.cancel')}
-              action={() => { setShowDrawer(false); setEditSlider(null); setForm(initialForm); }}
+              action={() => { setShowDrawer(false); setEditSlider(null); setForm(initialForm); setIsImageUploading(false); }}
               bordercolor="primary"
-              disabled={saving}
+              disabled={saving || isImageUploading}
             />
             <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {isImageUploading && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span>{t('common.uploadingImage')}</span>
+                </div>
+              )}
               {drawerMode === 'edit' && editSlider && (
                 <CustomButton
                   color="red-100"
@@ -497,7 +515,7 @@ const StoreSliderPage: React.FC = () => {
                   text={t('common.delete', 'Delete')}
                   action={() => handleDelete(editSlider)}
                   className="min-w-[100px]"
-                  disabled={saving}
+                  disabled={saving || isImageUploading}
                 />
               )}
               <CustomButton
@@ -507,7 +525,7 @@ const StoreSliderPage: React.FC = () => {
                 type="submit"
                 onClick={() => handleSave(form)}
                 className="min-w-[100px]"
-                disabled={saving}
+                disabled={saving || isImageUploading}
                 icon={saving ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                 ) : undefined}
