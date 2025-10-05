@@ -226,6 +226,7 @@
     "forgotPassword": "Forgot password?",
     "signInButton": "Sign In",
     "signInSubmitting": "Signing in...",
+    "verifyEmail": "Verify Email",
     "createAccount": "Create Account",
     "auth": {
     "forgot_password": {

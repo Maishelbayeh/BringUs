@@ -52,10 +52,12 @@ interface LoginCredentials {
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEmailNotVerified, setIsEmailNotVerified] = useState(false);
 // -----------------------------------------------login---------------------------------------------------------
   const login = async (credentials: LoginCredentials): Promise<LoginResponse | null> => {
     setIsLoading(true);
     setError(null);
+    setIsEmailNotVerified(false);
 
     try {
       const response = await fetch(`${BASE_URL}${LOGIN}`, {
@@ -139,6 +141,12 @@ export const useAuth = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
       setError(errorMessage);
+      
+      // Check if the error is about email not being verified
+      if (errorMessage.includes('Email is not verified') || errorMessage.includes('البريد الإلكتروني غير مؤكد')) {
+        setIsEmailNotVerified(true);
+      }
+      
       //CONSOLE.error('❌ خطأ في تسجيل الدخول:', errorMessage);
       return null;
     } finally {
@@ -181,11 +189,7 @@ export const useAuth = () => {
     const sessionToken = sessionStorage.getItem('token');
     const token = localToken || sessionToken;
     
-    console.log('Getting token:', {
-      hasLocalToken: !!localToken,
-      hasSessionToken: !!sessionToken,
-      hasToken: !!token
-    });
+   
     
     return token;
   };
@@ -225,5 +229,6 @@ export const useAuth = () => {
     isAuthenticatedSuperAdmin,
     isLoading,
     error,
+    isEmailNotVerified,
   };
 }; 

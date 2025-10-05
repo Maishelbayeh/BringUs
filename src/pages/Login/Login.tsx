@@ -23,7 +23,7 @@ const Login: React.FC = () => {
   const { t } = useTranslation();
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
-  const { login, isLoading: authLoading, error: authError } = useAuth();
+  const { login, isLoading: authLoading, error: authError, isEmailNotVerified } = useAuth();
   const { storeSlug: _storeSlug } = useStoreUrls();
   const [formData, setFormData] = useState(() => {
     // Load saved credentials if rememberMe was previously selected
@@ -229,7 +229,18 @@ const Login: React.FC = () => {
               {/* عرض رسائل الخطأ العامة */}
               {authError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                  {authError}
+                  <div className="flex items-center justify-between">
+                    <span>{authError}</span>
+                    {isEmailNotVerified && (
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/email-verification?email=${encodeURIComponent(formData.email)}`)}
+                        className="ml-3 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                      >
+                        {t('login.verifyEmail')}
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
               

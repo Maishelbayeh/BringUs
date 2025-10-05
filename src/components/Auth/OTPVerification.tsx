@@ -204,7 +204,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
             
             {/* OTP Input Section */}
             <div className="space-y-4">
-              <h3 className={`text-lg font-semibold text-gray-800 flex items-center gap-2 ${language === 'ARABIC' ? 'text-right' : 'text-left'}`}>
+              <h3 className={`text-lg font-semibold text-gray-800 flex items-center gap-2 ${language === 'ARABIC' ? 'text-right justify-end' : 'text-left justify-start'}`}>
                 <CheckCircle className="text-green-500" />
                 {t('auth.otp.verification_code')}
               </h3>

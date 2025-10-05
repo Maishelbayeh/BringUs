@@ -227,7 +227,7 @@
   
     "signInButton": "تسجيل الدخول",
     "signInSubmitting": "جاري تسجيل الدخول...",
-   
+    "verifyEmail": "تأكيد الإيميل",
     "createAccount": "إنشاء حساب",
     "auth": {
     "forgot_password": {
