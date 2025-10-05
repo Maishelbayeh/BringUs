@@ -84,13 +84,17 @@ const TableCell: React.FC<TableCellProps> = ({
       statusValue = i18n.language === 'ARABIC' ? 'نشط' : 'Active';
       colorClass = 'bg-green-100 text-green-700 px-3 py-1 rounded-md';
     }
+    else if (value === false) {
+      statusValue = i18n.language === 'ARABIC' ? 'غير نشط' : 'Inactive';
+      colorClass = 'bg-red-100 text-red-700 px-3 py-1 rounded-md';
+    }
     else if (value === 'Active') {
       statusValue = i18n.language === 'ARABIC' ? 'نشط' : 'Active';
       colorClass = 'bg-green-100 text-green-700 px-3 py-1 rounded-md';
     }
     else if (value === 'Inactive') {
       statusValue = i18n.language === 'ARABIC' ? 'غير نشط' : 'Inactive';
-      colorClass = 'bg-gray-200 text-gray-500 px-3 py-1 rounded-md';
+      colorClass = 'bg-red-100 text-red-700 px-3 py-1 rounded-md';
     } else if (value === 'Paid' || value === 'مدفوع') {
       statusValue = i18n.language === 'ARABIC' ? 'مدفوع' : 'Paid';
       colorClass = 'bg-green-100 text-green-700 px-3 py-1 rounded-md';
