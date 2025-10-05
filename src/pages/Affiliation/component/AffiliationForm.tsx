@@ -82,7 +82,7 @@ const AffiliationForm: React.FC<AffiliationFormProps> = ({ form, onFormChange, o
           onChange={onPhoneChange || (() => {})}
           error={errors.mobile}
           required
-          placeholder="5xxxxxxxxx"
+          
         />
         
         {/* Percent */}

@@ -156,36 +156,36 @@ export const validateWhatsAppNumber = (value: string, t: any): string | undefine
   if (!value.trim()) {
     return t('validation.required', 'This field is required');
   }
-  const cleanNumber = value.replace(/[\s\-\(\)]/g, '');
   
-  // Check for Palestinian numbers (+970)
-  if (cleanNumber.startsWith('970') || cleanNumber.startsWith('+970')) {
-    if (!/^(\+970|970)[5][0-9]{8}$/.test(cleanNumber)) {
-      return t('validation.invalidWhatsApp', 'Please enter a valid Palestinian WhatsApp number');
+  const cleanValue = value.replace(/\s/g, '');
+  console.log('cleanValue', cleanValue);
+  
+  if (cleanValue.startsWith('970') || cleanValue.startsWith('972')) {
+    console.log('cleanValue2', cleanValue);
+    const code = cleanValue.startsWith('970') ? '970' : '972';
+    const numberWithoutCode = cleanValue.slice(code.length);
+    console.log(numberWithoutCode);
+    
+    // 🚫 تحقق: عدم السماح ببدء الجزء المحلي بـ 0
+    if (numberWithoutCode.startsWith('0')) {
+      return t('store.whatsappNoLeadingZero'); // لا تبدأ بـ 0 بعد المقدمة
     }
-  }
-  // Check for   numbers (+972) - including 1948 territories
-  else if (cleanNumber.startsWith('972') || cleanNumber.startsWith('+972')) {
-    //   mobile numbers can start with 50, 51, 52, 53, 54, 55, 58
-    const  Pattern = /^(\+972|972)[5][0-8][0-9]{7}$/;
-    if (! Pattern.test(cleanNumber)) {
-      return t('validation.invalidWhatsApp', 'Please enter a valid   WhatsApp number');
+    // ✅ تحقق: الطول الكلي يجب أن يكون 12 رقمًا بالضبط (مثلاً +970598765432)
+    else if (cleanValue.length !== 12) {
+      return t('store.whatsappLengthError'); // الطول غير صحيح
     }
-  }
-  // Check for local   numbers (starting with 0)
-  else if (cleanNumber.startsWith('0') && cleanNumber.length === 10) {
-    // Local   mobile numbers: 050, 051, 052, 053, 054, 055, 058
-    if (!/^0[5][0-8][0-9]{7}$/.test(cleanNumber)) {
-      return t('validation.invalidWhatsApp', 'Please enter a valid   WhatsApp number');
+    // ✅ تحقق من أن الباقي كله أرقام
+    else if (!/^\d+$/.test(numberWithoutCode)) {
+      return t('store.whatsappInvalidDigits'); // يجب أن يحتوي على أرقام فقط
     }
-  }
-  // Invalid format
-  else {
-    return t('validation.invalidWhatsApp', 'Please enter a valid Palestinian or   WhatsApp number');
+  } else {
+    // تحقق عام للأرقام الدولية الأخرى
+    if (cleanValue.length < 8 || cleanValue.length > 15) {
+      return t('store.whatsappLengthError');
+    } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
+      return t('store.whatsappInvalidFormat');
+    }
   }
   
-  if (cleanNumber.length < 9 || cleanNumber.length > 12) {
-    return t('validation.whatsAppLength', 'WhatsApp number should be 9-12 digits');
-  }
   return undefined;
 }; 

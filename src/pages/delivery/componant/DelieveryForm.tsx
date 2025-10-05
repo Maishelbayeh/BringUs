@@ -184,7 +184,7 @@ const DeliveryAreaForm = forwardRef<FormRef, Props>(({ area, onSubmit, language,
           clearFieldError('whatsappNumber');
         }}
         required
-        placeholder="5xxxxxxxxx"
+        
         error={errors.whatsappNumber}
       />
     </div>
