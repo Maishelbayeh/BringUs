@@ -87,7 +87,7 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, isRTL, onAdd, o
               <span className={`ml-2 mr-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-200 text-primary`}>{isRTL ? 'فرعية' : 'Sub'}</span>
             )}
             {/* أزرار الإدارة */}
-            <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+            <div className="flex items-center gap-1 opacity-100 xl:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
               <button onClick={e => { e.stopPropagation(); onAdd(cat.id); }} className="p-1 rounded-full hover:bg-primary/10 text-primary" title="إضافة فرعية"><FiPlus /></button>
               <button onClick={e => { e.stopPropagation(); onEdit(cat); }} className="p-1 rounded-full hover:bg-blue-100 text-blue-600" title="تعديل"><FiEdit /></button>
               <button onClick={e => { e.stopPropagation(); onDelete(cat); }} className="p-1 rounded-full hover:bg-red-100 text-red-600" title="حذف"><FiTrash2 /></button>
