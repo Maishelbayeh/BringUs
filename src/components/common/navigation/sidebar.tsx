@@ -68,8 +68,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   // الاستماع لتحديث بيانات المتجر
   useEffect(() => {
     const handleStoreDataUpdate = (event: CustomEvent) => {
-      const {  logo } = event.detail;
-      const newStoreName = language === 'ARABIC' ? localStorage.getItem('storeNameAr') : localStorage.getItem('storeNameEn');
+      const { logo } = event.detail;
+      const newStoreName = getStoreName(language);
       setStoreName(newStoreName || 'BringUs');
       if (logo?.url) {
         setStoreLogo(logo.url);
@@ -81,6 +81,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     return () => {
       window.removeEventListener('storeDataUpdated', handleStoreDataUpdate as EventListener);
     };
+  }, [language]);
+
+  // Update store name when language changes
+  useEffect(() => {
+    const newStoreName = getStoreName(language);
+    setStoreName(newStoreName || 'BringUs');
   }, [language]);
 
   const menuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);

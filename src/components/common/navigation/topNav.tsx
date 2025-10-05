@@ -44,8 +44,8 @@ console.log(role);
   // الاستماع لتحديث بيانات المتجر
   useEffect(() => {
     const handleStoreDataUpdate = (event: CustomEvent) => {
-      const {  logo } = event.detail;
-      const newStoreName = language === 'ARABIC' ? localStorage.getItem('storeNameAr') : localStorage.getItem('storeNameEn');
+      const { logo } = event.detail;
+      const newStoreName = getStoreName(language);
       setStoreName(newStoreName || 'bring us');
       if (logo?.url) {
         setStoreLogo(logo.url);
@@ -57,6 +57,12 @@ console.log(role);
     return () => {
       window.removeEventListener('storeDataUpdated', handleStoreDataUpdate as EventListener);
     };
+  }, [language]);
+
+  // Update store name when language changes
+  useEffect(() => {
+    const newStoreName = getStoreName(language);
+    setStoreName(newStoreName || 'bring us');
   }, [language]);
 
   return (
