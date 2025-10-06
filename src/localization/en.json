@@ -696,7 +696,10 @@
       "searchSpecifications": "Search specifications...",
       "deleteSpecConfirmTitle": "Confirm Delete Specification",
       "deleteSpecConfirmMessage": "Are you sure you want to delete this specification?",
+      "deleteVariantConfirmTitle": "Confirm Delete Variant",
+      "deleteVariantConfirmMessage": "Are you sure you want to delete this variant?",
       "specification": "specification",
+      "variant": "variant",
       "success": {
         "updateSuccess": "Product specification updated successfully",
         "createSuccess": "Product specification added successfully",

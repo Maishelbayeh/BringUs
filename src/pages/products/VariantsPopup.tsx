@@ -337,7 +337,7 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                                 <h4 className="text-sm font-semibold text-gray-700 mb-2">
                                   {isRTL ? 'الباركود' : 'Barcodes'}
                                 </h4>
-                                <div className="flex flex-wrap gap-2">
+                                <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
                                   {variant.barcodes.map((barcode: string, idx: number) => (
                                     <div key={idx} className={`flex flex-col items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
                                       <CustomBarcode 

@@ -825,7 +825,10 @@
     "searchSpecifications": "البحث في المواصفات...",
     "deleteSpecConfirmTitle": "تأكيد حذف المواصفة",
     "deleteSpecConfirmMessage": "هل أنت متأكد من حذف هذه المواصفة؟",
+    "deleteVariantConfirmTitle": "تأكيد حذف المتغير",
+    "deleteVariantConfirmMessage": "هل أنت متأكد من حذف هذا المتغير؟",
     "specification": "مواصفة",
+    "variant": "متغير",
     "success": {
       "updateSuccess": "تم تعديل مواصفة المنتج بنجاح",
       "createSuccess": "تم إضافة مواصفة المنتج بنجاح",

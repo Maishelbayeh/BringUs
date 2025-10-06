@@ -3,6 +3,8 @@ import VariantsPopup from './VariantsPopup';
 import ProductsDrawer from './ProductsDrawer';
 import useProductSpecifications from '../../hooks/useProductSpecifications';
 import useProducts from '../../hooks/useProducts';
+import PermissionModal from '../../components/common/PermissionModal';
+import { useTranslation } from 'react-i18next';
 
 
 interface VariantManagerProps {
@@ -37,10 +39,13 @@ const VariantManager: React.FC<VariantManagerProps> = ({
   tags,
   units
 }) => {
+  const { t } = useTranslation();
   const [showVariantDrawer, setShowVariantDrawer] = useState(false);
   const [editingVariant, setEditingVariant] = useState<any | null>(null);
   const [localVariants, setLocalVariants] = useState<any[]>(variants);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [variantToDelete, setVariantToDelete] = useState<any | null>(null);
   const productsFormRef = useRef<any>(null);
 
   // دالة لإعادة تحميل المتغيرات من API
@@ -695,25 +700,32 @@ const VariantManager: React.FC<VariantManagerProps> = ({
     }
   };
 
-  const handleDeleteVariant = async (variant: any) => {
+  const handleDeleteVariantClick = (variant: any) => {
+    setVariantToDelete(variant);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteVariant = async () => {
+    if (!variantToDelete) return;
+    
     try {
-      const confirmed = window.confirm(
-        isRTL 
-          ? `هل أنت متأكد من حذف المتغير "${variant.nameAr || variant.nameEn}"؟`
-          : `Are you sure you want to delete the variant "${variant.nameAr || variant.nameEn}"?`
-      );
-
-      if (!confirmed) return;
-
-      await onDeleteVariant(variant);
+      await onDeleteVariant(variantToDelete);
       
       // إعادة تحميل المتغيرات من API لجلب البيانات المحدثة
       await refreshVariants();
+      
+      setShowDeleteModal(false);
+      setVariantToDelete(null);
       
       // Show success message
     } catch (error) {
       console.error('Error deleting variant:', error);
     }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setVariantToDelete(null);
   };
 
   return (
@@ -724,7 +736,7 @@ const VariantManager: React.FC<VariantManagerProps> = ({
         variants={localVariants}
         parentProduct={parentProduct}
         onEditVariant={handleEditVariant}
-        onDeleteVariant={handleDeleteVariant}
+        onDeleteVariant={handleDeleteVariantClick}
         onAddVariant={onAddVariant}
         isRTL={isRTL}
         isLoading={isLoading}
@@ -750,6 +762,18 @@ const VariantManager: React.FC<VariantManagerProps> = ({
         onFieldValidation={() => {}}
         showValidation={false}
         productsFormRef={productsFormRef}
+      />
+      
+      <PermissionModal
+        isOpen={showDeleteModal}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleDeleteVariant}
+        title={t('products.deleteVariantConfirmTitle') || 'Confirm Delete Variant'}
+        message={t('products.deleteVariantConfirmMessage') || 'Are you sure you want to delete this variant?'}
+        itemName={variantToDelete ? (isRTL ? variantToDelete.nameAr : variantToDelete.nameEn) : ''}
+        itemType={t('products.variant') || 'variant'}
+        isRTL={isRTL}
+        severity="danger"
       />
     </>
   );

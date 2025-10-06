@@ -902,13 +902,13 @@ const ProductsPage: React.FC = () => {
         return;
       }
 
-      const confirmed = window.confirm(
-        isRTL 
-          ? `هل أنت متأكد من حذف المتغير "${variant.nameAr || variant.nameEn}"؟`
-          : `Are you sure you want to delete the variant "${variant.nameAr || variant.nameEn}"?`
-      );
+      // const confirmed = window.confirm(
+      //   isRTL 
+      //     ? `هل أنت متأكد من حذف المتغير "${variant.nameAr || variant.nameEn}"؟`
+      //     : `Are you sure you want to delete the variant "${variant.nameAr || variant.nameEn}"?`
+      // );
 
-      if (!confirmed) return;
+      // if (!confirmed) return;
 
       console.log('🔍 handleDeleteVariant - Deleting variant:', variant._id, 'from product:', selectedProductInfo._id);
       
