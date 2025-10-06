@@ -117,6 +117,8 @@ const ProductsPage: React.FC = () => {
   const [visibleTableData, setVisibleTableData] = useState<any[]>([]);
   const [_viewMode, _setViewMode] = useState<'table' | 'tree'>('table');
   const [showVariantsPopup, setShowVariantsPopup] = useState(false);
+  const [additionalImagesUploading, setAdditionalImagesUploading] = useState(false);
+  const [mainImageUploading, setMainImageUploading] = useState(false);
   const [selectedProductVariants, setSelectedProductVariants] = useState<any[]>([]);
   const [selectedProductInfo, setSelectedProductInfo] = useState<any | null>(null);
   const location = useLocation();
@@ -1313,6 +1315,7 @@ const ProductsPage: React.FC = () => {
     }
 
     try {
+      setAdditionalImagesUploading(true);
       const fileArray = Array.isArray(files) ? files : [files];
       
       // رفع الصور إلى Cloudflare
@@ -1332,6 +1335,8 @@ const ProductsPage: React.FC = () => {
       const newForm = { ...form, images: imageUrls };
       //CONSOLE.log('🔍 handleImageChange (fallback) - newForm.barcodes:', newForm.barcodes);
       setForm(newForm);
+    } finally {
+      setAdditionalImagesUploading(false);
     }
   };
 
@@ -1347,7 +1352,7 @@ const ProductsPage: React.FC = () => {
     }
 
     try {
-   
+      setMainImageUploading(true);
       // رفع الصورة الرئيسية إلى Cloudflare
       const uploadedUrl = await uploadMainImage(file);
     
@@ -1365,6 +1370,8 @@ const ProductsPage: React.FC = () => {
       const newForm = { ...form, mainImage: imageUrl };
     
       setForm(newForm);
+    } finally {
+      setMainImageUploading(false);
     }
   };
   //-------------------------------------------- handleSubmit -------------------------------------------
@@ -1606,6 +1613,8 @@ const ProductsPage: React.FC = () => {
         showValidation={true}
         // مرر ref إلى ProductsForm عبر ProductsDrawer
         productsFormRef={productsFormRef}
+        mainImageUploading={mainImageUploading}
+        additionalImagesUploading={additionalImagesUploading}
       />
 
       {/* ------------------------------------------- PermissionModal ------------------------------------------- */}

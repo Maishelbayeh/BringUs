@@ -55,7 +55,8 @@ interface ProductsFormProps {
   validationErrors?: { [key: string]: string };
   onFieldValidation?: (fieldName: string, value: any) => void;
   showValidation?: boolean;
-
+  mainImageUploading?: boolean;
+  additionalImagesUploading?: boolean;
 }
 
 //-------------------------------------------- ProductsForm -------------------------------------------
@@ -73,7 +74,9 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     specifications = [],
     validationErrors = {},
     onFieldValidation,
-    showValidation = true
+    showValidation = true,
+    mainImageUploading = false,
+    additionalImagesUploading = false
   } = props;
   const { i18n, t } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ar-EG' || i18n.language === 'ARABIC';
@@ -208,7 +211,6 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   
   const [showBarcodeSuccess, setShowBarcodeSuccess] = useState(false);
   const [localNewBarcode, setLocalNewBarcode] = useState('');
-  const [mainImageUploading, setMainImageUploading] = useState(false);
   const [showMainImageSuccess, setShowMainImageSuccess] = useState(false);
   const [formattedColors, setFormattedColors] = useState<ColorVariant[]>([]);
   const [hasLocalColorChanges, setHasLocalColorChanges] = useState(false);
@@ -820,32 +822,9 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     // مسح رسالة الخطأ إذا كانت الصورة صالحة
     setImageErrors(prev => ({ ...prev, mainImage: '' }));
 
-    try {
-      setMainImageUploading(true);
-      setShowMainImageSuccess(false);
-      console.log('🔍 Starting main image upload...');
-      
-      // Use the uploadMainImage function if available
-      if (uploadMainImage) {
-        const uploadedUrl = await uploadMainImage(file);
-        console.log('🔍 Image uploaded successfully:', uploadedUrl);
-        handleInputChange('mainImage', uploadedUrl);
-        setShowMainImageSuccess(true);
-      } else {
-        // Fallback: just call onMainImageChange
-        console.log('🔍 uploadMainImage not available, using onMainImageChange');
-        handleMainImageChangeWithValidation(file);
-        setShowMainImageSuccess(true);
-      }
-      
-    } catch (error) {
-      console.error('🔍 Error uploading main image:', error);
-      alert(isRTL ? 'فشل في رفع الصورة الأساسية' : 'Failed to upload main image');
-      handleInputChange('mainImage', null as any);
-      setShowMainImageSuccess(false);
-    } finally {
-      setMainImageUploading(false);
-    }
+    // Use onMainImageChange to handle upload with loading state
+    console.log('🔍 Calling onMainImageChange for main image upload...');
+    onMainImageChange(file);
   };
 
   // expose getCurrentBarcode and getImageErrors to parent
@@ -1596,6 +1575,16 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
               appendOnly={true}
               multiple={true}
             />
+            
+            {/* مؤشر التحميل للصور الإضافية */}
+            {additionalImagesUploading && (
+              <div className="mt-3 flex items-center justify-center p-3 bg-blue-50 rounded-lg">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-2"></div>
+                <span className="text-blue-600 text-sm">
+                  {isRTL ? 'جاري رفع الصور الإضافية...' : 'Uploading additional images...'}
+                </span>
+              </div>
+            )}
             
             {/* معاينة الصور الإضافية الموجودة */}
             {Array.isArray(form.images) && form.images.length > 0 && form.images.some((img: any) => img && img !== null) && (

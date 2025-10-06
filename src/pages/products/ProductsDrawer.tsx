@@ -53,8 +53,10 @@ interface ProductsDrawerProps {
   onFieldValidation?: (fieldName: string, value: any) => void;
   showValidation?: boolean;
   productsFormRef?: any; // أضف هذا السطر
+  mainImageUploading?: boolean;
+  additionalImagesUploading?: boolean;
 }
-const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onMainImageChange, uploadMainImage, onSubmit, categories = [], tags = [], units = [], specifications = [], validationErrors = {}, onFieldValidation, showValidation = true, productsFormRef }) => {
+const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onMainImageChange, uploadMainImage, onSubmit, categories = [], tags = [], units = [], specifications = [], validationErrors = {}, onFieldValidation, showValidation = true, productsFormRef, mainImageUploading = false, additionalImagesUploading = false }) => {
   if (!open) return null;
   
   //-------------------------------------------- return ------------------------------------------- 
@@ -110,6 +112,8 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               validationErrors={validationErrors}
               onFieldValidation={onFieldValidation}
               showValidation={showValidation}
+              mainImageUploading={mainImageUploading}
+              additionalImagesUploading={additionalImagesUploading}
             />
           </div>
         </form>
@@ -131,6 +135,7 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
             text={isRTL ? 'حفظ' : 'Save'}
             type="submit"
             form="product-form"
+            disabled={mainImageUploading || additionalImagesUploading}
           />
         </div>
       </div>
