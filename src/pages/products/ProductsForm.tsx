@@ -67,7 +67,6 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     onTagsChange,
     onImageChange,
     onMainImageChange,
-    uploadMainImage,
     categories = [],
     tags = [],
     units = [],
@@ -155,24 +154,6 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     onImageChange(files);
   };
 
-  const handleMainImageChangeWithValidation = (file: File | null) => {
-    if (!file) {
-      setImageErrors(prev => ({ ...prev, mainImage: '' }));
-      onMainImageChange(file);
-      return;
-    }
-
-    const validation = validateImageFileI18n(file, t);
-    
-    if (!validation.isValid) {
-      setImageErrors(prev => ({ ...prev, mainImage: validation.errorMessage || '' }));
-      return; // لا نستدعي onMainImageChange إذا كان هناك خطأ
-    }
-
-    // مسح رسالة الخطأ إذا كانت الصورة صالحة
-    setImageErrors(prev => ({ ...prev, mainImage: '' }));
-    onMainImageChange(file);
-  };
 
   // دالة لإرجاع أخطاء الصور
   // const _getImageErrors = () => {
