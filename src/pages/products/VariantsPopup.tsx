@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 import CustomBarcode from '../../components/common/CustomBarcode';
+import { getStoreInfo } from '../../utils/storeUtils';
+import { currencyOptions } from '../../data/currencyOptions';
 
 interface VariantsPopupProps {
   isOpen: boolean;
@@ -26,6 +27,43 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
 }) => {
   const [expandedVariants, setExpandedVariants] = useState<Set<string>>(new Set());
   const [localVariants, setLocalVariants] = useState<any[]>(variants);
+
+  // دالة للحصول على رمز العملة
+  const getCurrencySymbol = (): string => {
+    const storeInfo = getStoreInfo();
+    const storeCurrency = storeInfo?.settings?.currency || 'ILS';
+    
+    // البحث عن رمز العملة في قائمة العملات المتاحة
+    const currency = currencyOptions.find(option => option.code === storeCurrency);
+    if (currency) {
+      // إرجاع رمز العملة المناسب
+      const symbols: { [key: string]: string } = {
+        'ILS': '₪',
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£',
+        'SAR': 'ر.س',
+        'AED': 'د.إ',
+        'QAR': 'ر.ق',
+        'KWD': 'د.ك',
+        'BHD': 'د.ب',
+        'OMR': 'ر.ع',
+        'JOD': 'د.أ',
+        'EGP': 'ج.م',
+        'LBP': 'ل.ل',
+        'TRY': '₺',
+        'JPY': '¥',
+        'CNY': '¥',
+        'INR': '₹',
+        'CAD': 'C$',
+        'AUD': 'A$',
+        'CHF': 'CHF'
+      };
+      return symbols[storeCurrency] || storeCurrency;
+    }
+    
+    return '₪'; // رمز افتراضي
+  };
 
   // تحديث البيانات المحلية عند تغيير variants prop
   useEffect(() => {
@@ -138,7 +176,7 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
               </div>
               
               {/* Variants List */}
-              <div className="space-y-4">
+              <div className="space-y-4 ">
                 {localVariants.map((variant, idx) => {
                   const variantId = variant._id || variant.id || idx.toString();
                   const isExpanded = expandedVariants.has(variantId);
@@ -151,14 +189,61 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                         onClick={() => toggleVariant(variantId)}
                       >
                         <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
-                          {/* Product Image */}
-                          <div className={`flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'} `}>
-                            <img
-                              src={variant.mainImage || (variant.images && variant.images[0]) || DEFAULT_PRODUCT_IMAGE}
-                              alt={variant.nameAr}
-                              className={`w-16 h-16 object-cover rounded-lg border border-gray-200 ${isRTL ? 'mr-2' : 'ml-2'} `}
-                            />
-                          </div>
+                           {/* Product Image */}
+                           <div className={`flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'} `}>
+                             {(() => {
+                               // التحقق من وجود صورة صالحة
+                               const hasMainImage = variant.mainImage && variant.mainImage !== null && variant.mainImage !== '';
+                               const hasImages = variant.images && Array.isArray(variant.images) && variant.images.length > 0 && variant.images[0] && variant.images[0] !== '';
+                               
+                               if (hasMainImage || hasImages) {
+                                 const imageSrc = hasMainImage ? variant.mainImage : variant.images[0];
+                                 return (
+                                   <img
+                                     src={imageSrc}
+                                     alt={variant.nameAr || 'Product Image'}
+                                     className={`w-16 h-16 object-cover rounded-lg border border-gray-200 ${isRTL ? 'mr-2' : 'ml-2'} `}
+                                     onError={(e) => {
+                                       // إذا فشل تحميل الصورة، أظهر صورة no_image
+                                       e.currentTarget.src = '/no_image.png';
+                                     }}
+                                   />
+                                 );
+                               }
+                               
+                               // إذا لم تكن هناك صورة، أظهر صورة no_image
+                               return (
+                                 <img
+                                   src="/no_image.png"
+                                   alt="No Image"
+                                   className={`w-16 h-16 object-cover rounded-lg border border-gray-200 ${isRTL ? 'mr-2' : 'ml-2'} `}
+                                   onError={(e) => {
+                                     // إذا فشل تحميل صورة no_image، أظهر placeholder
+                                     e.currentTarget.style.display = 'none';
+                                     e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                   }}
+                                 />
+                               );
+                             })()}
+                             
+                             {/* Placeholder fallback */}
+                             <div className={`hidden w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-300 rounded-lg border border-gray-300 flex items-center justify-center relative overflow-hidden ${isRTL ? 'mr-2' : 'ml-2'} `}>
+                               {/* خلفية متدرجة */}
+                               <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-50"></div>
+                               
+                               {/* أيقونة المنتج */}
+                               <div className="relative z-10 flex flex-col items-center">
+                                 <svg className="w-6 h-6 text-gray-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                 </svg>
+                                 <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                               </div>
+                               
+                               {/* تأثيرات زخرفية */}
+                               <div className="absolute top-1 right-1 w-2 h-2 bg-blue-200 rounded-full opacity-60"></div>
+                               <div className="absolute bottom-1 left-1 w-1.5 h-1.5 bg-purple-200 rounded-full opacity-60"></div>
+                             </div>
+                           </div>
                           
                           {/* Product Name and Price */}
                           <div className={`flex-1 ${isRTL ? 'mr-2' : 'ml-2'} `}>
@@ -166,7 +251,7 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                               {isRTL ? variant.nameAr : variant.nameEn}
                             </h3>
                             <p className={`text-gray-600 text-sm ${isRTL ? 'mr-2' : 'ml-2' } ${isRTL ? 'text-right' : 'text-left'} `}>
-                              {isRTL ? 'السعر:' : 'Price:'} ${variant.price || 0}
+                              {isRTL ? 'السعر:' : 'Price:'} {getCurrencySymbol()}{variant.price || 0}
                             </p>
                           </div>
                         </div>
@@ -211,7 +296,7 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                       {/* Collapsible Content */}
                       {isExpanded && (
                         <div className={`p-6 bg-white flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
-                          <div className={`space-y-4 `}>
+                          <div className={`space-y-4 w-full `}>
                             {/* Description */}
                             <div className={`${isRTL ? 'text-right' : 'text-left'} `}>
                               <h4 className="text-sm font-semibold text-gray-700 mb-2">
@@ -280,11 +365,11 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                                   {isRTL ? 'السعر' : 'Price'}
                                 </div>
                                 <div className={`text-lg font-bold text-blue-800 ${isRTL ? 'text-right' : 'text-left'} `}>
-                                  ${variant.price || 0}
+                                  {getCurrencySymbol()}{variant.price || 0}
                                 </div>
                                 {variant.compareAtPrice && variant.compareAtPrice > variant.price && (
                                   <div className={`text-sm text-gray-500 line-through ${isRTL ? 'text-right' : 'text-left'} `}>
-                                    ${variant.compareAtPrice}
+                                    {getCurrencySymbol()}{variant.compareAtPrice}
                                   </div>
                                 )}
                               </div>
@@ -340,28 +425,29 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                                           {spec.title}: {spec.value}
                                         </span>
                                         <div className={`text-xs text-purple-600 mt-1 ${isRTL ? 'text-right' : 'text-left'} `}>
-                                          {isRTL ? 'الكمية:' : 'Quantity:'} {spec.quantity || 0} | {isRTL ? 'السعر الإضافي:' : 'Additional Price:'} ${spec.price || 0}
+                                          {isRTL ? 'الكمية:' : 'Quantity:'} {spec.quantity || 0} 
+                                          {/* | {isRTL ? 'السعر الإضافي:' : 'Additional Price:'} {getCurrencySymbol()}{spec.price || 0} */}
                                         </div>
                                       </div>
-                                      <div className={`text-right ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                      {/* <div className={`text-right ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
                                         <span className={`text-sm font-medium text-purple-600 ${isRTL ? 'text-right' : 'text-left'} `}>
-                                          ${((spec.quantity || 0) * (spec.price || 0)).toFixed(2)}
+                                          {getCurrencySymbol()}{((spec.quantity || 0) * (spec.price || 0)).toFixed(2)}
                                         </span>
-                                      </div>
+                                      </div> */}
                                     </div>
                                   ))}
                                   {/* Total for specifications */}
-                                  <div className={`mt-2 pt-2 border-t border-purple-200 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
+                                  {/* <div className={`mt-2 pt-2 border-t border-purple-200 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
                                     <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
                                       <span className={`text-sm text-gray-600 ${isRTL ? 'text-right' : 'text-left'} `}>
                                         {isRTL ? 'مجموع المواصفات:' : 'Specifications Total:'}
                                       </span>
                                       <span className={`font-medium text-purple-600 ${isRTL ? 'text-right' : 'text-left'} `}>
-                                        ${variant.specificationValues.reduce((total: number, spec: any) => 
+                                        {getCurrencySymbol()}{variant.specificationValues.reduce((total: number, spec: any) => 
                                           total + ((spec.quantity || 0) * (spec.price || 0)), 0).toFixed(2)}
                                       </span>
                                     </div>
-                                  </div>
+                                  </div> */}
                                 </div>
                               ) : (
                                 <span className={`text-gray-500 text-sm ${isRTL ? 'text-right' : 'text-left'} `}>
