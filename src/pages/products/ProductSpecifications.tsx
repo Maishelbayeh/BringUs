@@ -16,7 +16,7 @@ const ProductSpecifications: React.FC = () => {
   const [editingSpec, setEditingSpec] = useState<any>(null);
   // const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({}); // No longer needed here
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [specToDelete,  ] = useState<any>(null);
+  const [specToDelete, setSpecToDelete] = useState<any>(null);
   const [search, setSearch] = useState('');
   const { storeSlug } = useStoreUrls();
   const {
@@ -44,12 +44,27 @@ const ProductSpecifications: React.FC = () => {
            categoryName.includes(searchTerm);
   });
 
-  const handleDelete = async (item: any) => {
+  const handleDeleteClick = (item: any) => {
+    setSpecToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    if (!specToDelete) return;
+    
     try {
-      await deleteSpecification(item._id || item.id);
+      await deleteSpecification(specToDelete._id || specToDelete.id);
+      setShowDeleteModal(false);
+      setSpecToDelete(null);
+      fetchSpecifications(true); // Re-fetch data after deleting
     } catch (error) {
       //CONSOLE.error('Error deleting specification:', error);
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowDeleteModal(false);
+    setSpecToDelete(null);
   };
 
   const handleEdit = (spec: any) => {
@@ -189,7 +204,7 @@ const ProductSpecifications: React.FC = () => {
                     </button>
                     <button
                       className="bg-red-500/90 hover:bg-red-500 text-white rounded-full p-1.5 shadow hover:scale-110 transition-transform duration-200"
-                      onClick={e => { e.stopPropagation(); handleDelete(spec); }}
+                      onClick={e => { e.stopPropagation(); handleDeleteClick(spec); }}
                       title={t('common.delete')}
                     >
                       <TrashIcon className="w-4 h-4" />
@@ -286,8 +301,8 @@ const ProductSpecifications: React.FC = () => {
 
       <PermissionModal
         isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={() => handleDelete(specToDelete)}
+        onClose={handleCloseModal}
+        onConfirm={handleDelete}
         title={t('products.deleteSpecConfirmTitle') || 'Confirm Delete Specification'}
         message={t('products.deleteSpecConfirmMessage') || 'Are you sure you want to delete this specification?'}
         itemName={specToDelete ? (isRTL ? specToDelete.titleAr : specToDelete.titleEn) : ''}
