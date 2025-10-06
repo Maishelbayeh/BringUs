@@ -83,14 +83,6 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
     onSpecificationChange(updatedSpecifications);
   };
 
-  const handlePriceChange = (specId: string, valueId: string, newPrice: number) => {
-    const updatedSpecifications = selectedSpecifications.map(spec => 
-      spec.specId === specId && spec.valueId === valueId
-        ? { ...spec, price: Math.max(0, newPrice) }
-        : spec
-    );
-    onSpecificationChange(updatedSpecifications);
-  };
 
   const removeSpecification = (specId: string, valueId: string) => {
     const updatedSpecifications = selectedSpecifications.filter(spec => 
@@ -240,7 +232,7 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                                   <label className={`block text-sm font-medium text-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
                                     {isRTL ? 'الكمية المتاحة:' : 'Available Quantity:'}
                                   </label>
-                                  <div className="flex items-center space-x-3">
+                                  <div className="flex items-center ">
                                     <button
                                       type="button"
                                       onClick={() => handleQuantityChange(spec._id, selectedValue.valueId, selectedValue.quantity - 1)}
@@ -254,7 +246,7 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                                       type="number"
                                       value={selectedValue.quantity}
                                       onChange={(e) => handleQuantityChange(spec._id, selectedValue.valueId, parseInt(e.target.value) || 0)}
-                                      className="w-20 h-10 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      className="mx-2 w-20 h-10 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                       min="0"
                                       placeholder="0"
                                     />
@@ -269,7 +261,7 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                                   </div>
                                 </div>
 
-                                {/* Price Section */}
+                                {/* Price Section 
                                 <div className="space-y-2">
                                   <label className={`block text-sm font-medium text-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
                                     {isRTL ? 'السعر الإضافي:' : 'Additional Price:'}
@@ -288,10 +280,10 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                                       <span className="text-gray-500 text-sm">$</span>
                                     </div>
                                   </div>
-                                </div>
+                                </div>*/}
                               </div>
 
-                              {/* Individual Summary */}
+                              {/* Individual Summary
                               <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                                 <div className="flex items-center justify-between">
                                   <span className="text-sm text-gray-600">
@@ -301,7 +293,7 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                                     {selectedValue.quantity} × ${selectedValue.price.toFixed(2)} = ${(selectedValue.quantity * selectedValue.price).toFixed(2)}
                                   </span>
                                 </div>
-                              </div>
+                              </div> */}
                             </div>
                           ))}
                         </div>
@@ -320,14 +312,14 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                                 {isRTL ? 'القيم المختارة:' : 'Selected values:'} {selectedValues.map(v => v.value).join(', ')}
                               </p>
                             </div>
-                            <div className="text-right">
+                            {/* <div className="text-right">
                               <p className="text-sm text-gray-600">
                                 {isRTL ? 'المجموع:' : 'Total:'}
                               </p>
                               <p className="font-medium text-blue-600">
                                 ${selectedValues.reduce((total, val) => total + (val.quantity * val.price), 0).toFixed(2)}
                               </p>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       </div>
@@ -383,18 +375,19 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                                 {selected.value}
                               </p>
                               <p className="text-xs text-gray-600">
-                                {isRTL ? 'الكمية:' : 'Quantity:'} {selected.quantity} | {isRTL ? 'السعر الإضافي:' : 'Additional Price:'} ${selected.price.toFixed(2)}
+                                {isRTL ? 'الكمية:' : 'Quantity:'} {selected.quantity} 
+                                {/* | {isRTL ? 'السعر الإضافي:' : 'Additional Price:'} ${selected.price.toFixed(2)} */}
                               </p>
                             </div>
-                            <div className="text-right">
+                            {/* <div className="text-right">
                               <p className="font-medium text-blue-600">
                                 ${(selected.quantity * selected.price).toFixed(2)}
                               </p>
-                            </div>
+                            </div> */}
                           </div>
                         ))}
                       </div>
-                      <div className="mt-3 pt-3 border-t border-gray-200">
+                      {/* <div className="mt-3 pt-3 border-t border-gray-200">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-gray-600">
                             {isRTL ? 'مجموع المواصفة:' : 'Specification total:'}
@@ -403,13 +396,13 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                             ${specValues.reduce((total, val) => total + (val.quantity * val.price), 0).toFixed(2)}
                           </span>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   );
                 })}
               </div>
               
-              {/* Total */}
+              {/* Total 
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray-800 text-lg">
@@ -419,7 +412,7 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                     ${selectedSpecifications.reduce((total, spec) => total + (spec.quantity * spec.price), 0).toFixed(2)}
                   </span>
                 </div>
-              </div>
+              </div>*/}
             </div>
 
             {/* Modal Footer */}
