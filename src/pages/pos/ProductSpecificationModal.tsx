@@ -131,7 +131,7 @@ const ProductSpecificationModal: React.FC<ProductSpecificationModalProps> = ({
         return selectedValue?.quantity || 0;
       }));
     } else {
-      availableStock = product.stock || 0;
+      availableStock = product.availableQuantity || 0;
     }
     
     if (newQuantity <= availableStock) {
@@ -183,7 +183,7 @@ const ProductSpecificationModal: React.FC<ProductSpecificationModalProps> = ({
       return selectedValue?.quantity || 0;
     }));
   } else {
-    availableStock = product.stock || 0;
+    availableStock = product.availableQuantity || 0;
   }
   
   // Since the + button is disabled when quantity >= availableStock, 
@@ -456,7 +456,7 @@ const ProductSpecificationModal: React.FC<ProductSpecificationModalProps> = ({
                 return selectedValue?.quantity || 0;
               }));
             } else {
-              availableStock = product.stock || 0;
+              availableStock = product.availableQuantity || 0;
             }
             
             return (

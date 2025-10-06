@@ -148,7 +148,7 @@ const ProductTreeView: React.FC<ProductTreeViewProps> = ({
 
             {/* Available Quantity */}
             <div className="flex-shrink-0 w-20 px-2">
-              {renderStock(product.availableQuantity || product.stock, product)}
+              {renderStock(product.availableQuantity , product)}
             </div>
 
             {/* Visibility */}

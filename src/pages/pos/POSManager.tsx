@@ -590,7 +590,7 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
                 {/* Stock Display */}
                 <div className="mb-2">
                   {(() => {
-                    const stock = product.stock || 0;
+                    const stock = product.availableQuantity || 0;
                     const isLowStock = stock <= (product.lowStockThreshold || 5);
                     const isOutOfStock = stock === 0;
                     
