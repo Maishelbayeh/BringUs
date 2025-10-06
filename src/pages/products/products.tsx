@@ -269,10 +269,10 @@ const ProductsPage: React.FC = () => {
         
         // Log for debugging
         if (isVariantOfAnotherProduct) {
-          console.log(`🔍 Filtered out variant: ${product.nameEn} (${productId}) - found in variants list`);
+          // console.log(`🔍 Filtered out variant: ${product.nameEn} (${productId}) - found in variants list`);
         }
         if (isDefinitelyVariant) {
-          console.log(`🔍 Filtered out variant: ${product.nameEn} (${productId}) - isParent: ${product.isParent}, hasVariants: ${product.hasVariants}`);
+          // console.log(`🔍 Filtered out variant: ${product.nameEn} (${productId}) - isParent: ${product.isParent}, hasVariants: ${product.hasVariants}`);
         }
         
         return shouldShow && !isDefinitelyVariant;
@@ -280,11 +280,11 @@ const ProductsPage: React.FC = () => {
     : [];
   
   // Log filtered results
-  console.log(`🔍 Total products: ${products?.length || 0}`);
-  console.log(`🔍 Filtered products: ${filteredProducts.length}`);
-  console.log(`🔍 Filtered product names:`, filteredProducts.map(p => p.nameEn));
-  console.log(`🔍 Products with variants:`, products?.filter(p => p.hasVariants).map(p => p.nameEn));
-  console.log(`🔍 Variant products:`, products?.filter(p => p.isParent === false).map(p => p.nameEn));
+  // console.log(`🔍 Total products: ${products?.length || 0}`);
+  // console.log(`🔍 Filtered products: ${filteredProducts.length}`);
+  // console.log(`🔍 Filtered product names:`, filteredProducts.map(p => p.nameEn));
+  // console.log(`🔍 Products with variants:`, products?.filter(p => p.hasVariants).map(p => p.nameEn));
+  // console.log(`🔍 Variant products:`, products?.filter(p => p.isParent === false).map(p => p.nameEn));
   if (sort === 'alpha') {
     filteredProducts = [...filteredProducts].sort((a, b) => (isRTL ? a.nameAr.localeCompare(b.nameAr) : a.nameEn.localeCompare(b.nameEn)));
   } else if (sort === 'newest') {
@@ -939,16 +939,16 @@ const ProductsPage: React.FC = () => {
   const handleEdit = (product: any) => {
     const originalProduct = product.originalProduct || product;
     
-    console.log('🔍 handleEdit - originalProduct:', originalProduct);
-    console.log('🔍 handleEdit - originalProduct.categoryIds:', originalProduct.categoryIds);
-    console.log('🔍 handleEdit - originalProduct.categories:', originalProduct.categories);
-    console.log('🔍 handleEdit - originalProduct.category:', originalProduct.category);
+    // console.log('🔍 handleEdit - originalProduct:', originalProduct);
+    // console.log('🔍 handleEdit - originalProduct.categoryIds:', originalProduct.categoryIds);
+    // console.log('🔍 handleEdit - originalProduct.categories:', originalProduct.categories);
+    // console.log('🔍 handleEdit - originalProduct.category:', originalProduct.category);
     
     // Handle colors from original product data - pass raw colors data to let ProductsForm handle conversion
     const productColors = originalProduct.colors || [];
-    console.log('🔍 handleEdit - originalProduct.colors:', originalProduct.colors);
-    console.log('🔍 handleEdit - productColors type:', typeof productColors);
-    console.log('🔍 handleEdit - productColors is array:', Array.isArray(productColors));
+    // console.log('🔍 handleEdit - originalProduct.colors:', originalProduct.colors);
+    // console.log('🔍 handleEdit - productColors type:', typeof productColors);
+    // console.log('🔍 handleEdit - productColors is array:', Array.isArray(productColors));
     
     const maintainStock = (originalProduct.availableQuantity || originalProduct.stock || 0) > 0 ? 'Y' : 'N';
     const unitId = originalProduct.unit?._id || originalProduct.unitId || (typeof originalProduct.unit === 'string' ? originalProduct.unit : '');
@@ -956,8 +956,8 @@ const ProductsPage: React.FC = () => {
     const subcategoryId = originalProduct.subcategory?._id || originalProduct.subcategoryId || (typeof originalProduct.subcategory === 'string' ? originalProduct.subcategory : '');
     const storeId = originalProduct.store?._id || originalProduct.storeId || (typeof originalProduct.store === 'string' ? originalProduct.store : '');
     const tags = (originalProduct.productLabels || []).map((l: any) => typeof l === 'object' ? String(l._id || l.id) : String(l));
-    console.log('🔍 handleEdit - originalProduct.productLabels:', originalProduct.productLabels);
-    console.log('🔍 handleEdit - processed tags:', tags);
+    // console.log('🔍 handleEdit - originalProduct.productLabels:', originalProduct.productLabels);
+    // console.log('🔍 handleEdit - processed tags:', tags);
 
     // Extract specifications and convert to the format expected by the form
     const specifications = originalProduct.specifications || [];
@@ -1035,6 +1035,7 @@ const ProductsPage: React.FC = () => {
       barcodes: Array.isArray(originalProduct.barcodes) ? originalProduct.barcodes.filter((barcode: string) => barcode && barcode.trim()) : [],
       newBarcode: '',
       videoUrl: originalProduct.videoUrl || '',
+      lowStockThreshold: originalProduct.lowStockThreshold || 10,
     };
     
    
@@ -1092,6 +1093,7 @@ const ProductsPage: React.FC = () => {
       categoryId: '',
       categoryIds: [],
       tags: [],
+      lowStockThreshold: 10, // Ensure lowStockThreshold is properly initialized
     });
     setEditProduct(null);
     setDrawerMode('add');
@@ -1402,6 +1404,7 @@ const ProductsPage: React.FC = () => {
         originalPrice: parseFloat(form.originalPrice) || 0,
         availableQuantity: parseInt(String(form.availableQuantity)) || 0,
         stock: parseInt(String(form.totalSpecificationQuantities)) || 0,
+        lowStockThreshold: parseInt(String(form.lowStockThreshold)) || 10,
 
         productOrder: parseInt(String(form.productOrder)) || 0,
         visibility: form.visibility === 'Y',

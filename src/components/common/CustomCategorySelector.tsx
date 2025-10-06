@@ -142,7 +142,7 @@ const CustomCategorySelector: React.FC<CustomCategorySelectorProps> = ({
 
   // Update internal state when props change
   useEffect(() => {
-    console.log('🔍 CustomCategorySelector - selectedCategories prop changed:', selectedCategories);
+    // console.log('🔍 CustomCategorySelector - selectedCategories prop changed:', selectedCategories);
     setSelectedIds(selectedCategories);
   }, [selectedCategories]);
 
@@ -326,12 +326,12 @@ const CustomCategorySelector: React.FC<CustomCategorySelectorProps> = ({
   const selectedNames = getSelectedCategoryNames();
   
   // Debug logging
-  console.log('🔍 CustomCategorySelector render:', {
-    selectedIds,
-    selectedNames,
-    categoriesCount: categories.length,
-    isOpen
-  });
+  // console.log('🔍 CustomCategorySelector render:', {
+  //   selectedIds,
+  //   selectedNames,
+  //   categoriesCount: categories.length,
+  //   isOpen
+  // });
 
   return (
     <div className={`custom-category-selector ${className}`}>

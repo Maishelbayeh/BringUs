@@ -83,12 +83,9 @@ const useProducts = () => {
 
   // إضافة أو تعديل منتج
   const saveProduct = async (form: any, editId?: string | number | null) => {
-    //CONSOLE.log('Saving product with form:', form, 'editId:', editId, 'isRTL:', isRTL);
-    //CONSOLE.log('Store ID from form:', form.storeId);
-    //CONSOLE.log('Form barcodes:', form.barcodes);
-    //CONSOLE.log('Form barcodes type:', typeof form.barcodes);
-    //CONSOLE.log('Form barcodes is array:', Array.isArray(form.barcodes));
-    
+   
+    // Debug: Check lowStockThreshold value
+    console.log('🔍 saveProduct - form.lowStockThreshold:', form.lowStockThreshold);
     const payload: any = {
       nameAr: form.nameAr?.trim() || '',
       nameEn: form.nameEn?.trim() || '',
@@ -117,7 +114,7 @@ const useProducts = () => {
       costPrice: parseFloat(form.costPrice) || 0,
       availableQuantity: parseInt(String(form.availableQuantity)) || 0,
       stock: parseInt(String(form.availableQuantity)) || 0,
-      lowStockThreshold: parseInt(String(form.lowStockThreshold)) || 5,
+      lowStockThreshold: parseInt(String(form.lowStockThreshold || 10)) || 10,
       productOrder: parseInt(String(form.productOrder)) || 0,
       visibility: form.visibility === 'Y' || form.visibility === true,
       isActive: form.isActive !== undefined ? form.isActive : true,
@@ -258,10 +255,9 @@ const useProducts = () => {
       storeId: form.storeId || getStoreId(),
     };
 
-    // Debug logging for videoUrl
-    console.log('🔍 useProducts - saveProduct - form.videoUrl:', form.videoUrl);
-    console.log('🔍 useProducts - saveProduct - payload.videoUrl:', payload.videoUrl);
-
+    // Debug logging for lowStockThreshold
+    console.log('🔍 saveProduct - lowStockThreshold value:', form.lowStockThreshold);
+  
     // Remove unit if invalid
     if (
       payload.unit === null ||
