@@ -153,7 +153,7 @@ const SubscriptionHistory: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `https://bringus-backend.onrender.com/subscription/stores/${storeId}/history?page=${page}&limit=10`,
+        `https://bringus-backend.onrender.com/api/subscription/stores/${storeId}/history?page=${page}&limit=10`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -211,7 +211,7 @@ const getDaysUntilExpiry = () => {
     setIsDisablingAutoRenew(true);
     try {
       const response = await axios.patch(
-        `https://bringus-backend.onrender.com/subscription/stores/${storeId}/disable-auto-renewal`,
+        `https://bringus-backend.onrender.com/api/subscription/stores/${storeId}/disable-auto-renewal`,
         {},
         {
           headers: {

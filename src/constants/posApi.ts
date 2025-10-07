@@ -1,5 +1,5 @@
 // POS API Configuration
-export const POS_API_BASE_URL = 'https://bringus-backend.onrender.com/pos-cart';
+export const POS_API_BASE_URL = 'https://bringus-backend.onrender.com/api/pos-cart';
 
 // API Endpoints
 export const POS_API_ENDPOINTS = {

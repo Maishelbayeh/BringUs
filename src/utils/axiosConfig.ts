@@ -3,7 +3,7 @@ import { getAuthToken } from './apiUtils';
 
 // Create axios instance with base configuration
 const apiClient = axios.create({
-  baseURL: 'https://bringus-backend.onrender.com/',
+  baseURL: 'https://bringus-backend.onrender.com/api/',
   timeout: 10000,
 });
 

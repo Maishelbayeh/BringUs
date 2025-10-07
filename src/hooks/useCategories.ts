@@ -51,7 +51,7 @@ const STORE_ID = getStoreId() || '';
 
     
     try {
-      const url = `https://bringus-backend.onrender.com/categories/store/${STORE_ID}`;
+      const url = `https://bringus-backend.onrender.com/api/categories/store/${STORE_ID}`;
       const res = await axios.get(url, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -109,13 +109,13 @@ const STORE_ID = getStoreId() || '';
     //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
-         await axios.put(`https://bringus-backend.onrender.com/categories/${editId}`, payload, {
+         await axios.put(`https://bringus-backend.onrender.com/api/categories/${editId}`, payload, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         //CONSOLE.log('Category updated successfully:', response.data);
         showSuccess(t('categories.success.updateSuccess'), t('general.success'));
       } else {
-         await axios.post('https://bringus-backend.onrender.com/categories', payload, {
+         await axios.post('https://bringus-backend.onrender.com/api/categories', payload, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         //CONSOLE.log('Category created successfully:', response.data);
@@ -140,7 +140,7 @@ const STORE_ID = getStoreId() || '';
   const deleteCategory = async (categoryId: string | number) => {
     //CONSOLE.log('Deleting category with id:', categoryId);
     try {
-      await axios.delete(`https://bringus-backend.onrender.com/categories/${categoryId}?storeId=${STORE_ID}`, {
+      await axios.delete(`https://bringus-backend.onrender.com/api/categories/${categoryId}?storeId=${STORE_ID}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       }); 
         
@@ -177,7 +177,7 @@ const STORE_ID = getStoreId() || '';
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
-      const res = await axios.post('https://bringus-backend.onrender.com/categories/upload-image', formData, {
+      const res = await axios.post('https://bringus-backend.onrender.com/api/categories/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       //CONSOLE.log('Image uploaded successfully:', res.data);
