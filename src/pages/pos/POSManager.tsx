@@ -9,20 +9,40 @@ import { getStoreId } from '../../utils/storeUtils';
 import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 import ProductSpecificationModal from './ProductSpecificationModal';
 import useLanguage from '../../hooks/useLanguage';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 
 interface POSManagerProps {
   cartId?: string;
   onNewOrder?: (cartId: string) => void;
+  onCartUpdate?: (completedCartId?: string) => void;
+  isLoadingTab?: boolean;
+  // Pre-loaded data to avoid re-fetching
+  products?: any[];
+  categories?: any[];
+  specifications?: any[];
 }
 
-const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
+const POSManager: React.FC<POSManagerProps> = ({ 
+  cartId, 
+  onNewOrder, 
+  onCartUpdate, 
+  isLoadingTab = false,
+  products: propProducts,
+  categories: propCategories,
+  specifications: propSpecifications
+}) => {
   const { isRTL } = useLanguage();
 
-  // Hooks
-  const { products, fetchProducts } = useProducts();
-  const { categories, fetchCategories } = useCategories();
-  const { specifications, fetchSpecifications } = useProductSpecifications();
+  // Hooks (for fallback if props are not provided)
+  const { products: hookProducts } = useProducts();
+  const { categories: hookCategories } = useCategories();
+  const { specifications: hookSpecifications } = useProductSpecifications();
   const pos = usePOS();
+  
+  // Use props data if available, otherwise fall back to hooks
+  const products = propProducts || hookProducts;
+  const categories = propCategories || hookCategories;
+  const specifications = propSpecifications || hookSpecifications;
   
   // Get store ID
   const storeId = getStoreId();
@@ -32,6 +52,8 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showSpecModal, setShowSpecModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [isCartLoading, setIsCartLoading] = useState(false);
+  const [isClearingCart, setIsClearingCart] = useState(false);
   const [toast, setToast] = useState<{
     show: boolean;
     type: 'success' | 'error' | 'info';
@@ -45,23 +67,42 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
     message: ''
   });
 
-  // Load data on component mount
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-    fetchSpecifications();
-    if (storeId) {
-      pos.getAllCarts(storeId);
-    }
-  }, [fetchProducts, fetchCategories, fetchSpecifications, storeId]);
+  // Confirmation modal state
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type?: 'warning' | 'danger' | 'info' | 'success';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
 
-  // Load cart when cartId changes
+  // Data is now loaded by parent component (POSTabsManager)
+  // No need to load data here anymore
+
+  // Load cart when cartId changes - only if it's different from current cart
   useEffect(() => {
-    if (cartId) {
+    if (cartId && pos.currentCart?._id !== cartId) {
       console.log('Loading cart for cartId:', cartId);
-      pos.getCart(cartId);
+      setIsCartLoading(true);
+      
+      // Clear current cart immediately to prevent data leakage
+      pos.setCurrentCart(null);
+      
+      pos.getCart(cartId).then((result) => {
+        if (result.success) {
+          console.log('Cart loaded successfully:', result.data);
+        }
+        setIsCartLoading(false);
+      }).catch(() => {
+        setIsCartLoading(false);
+      });
     }
-  }, [cartId]);
+  }, [cartId, pos.currentCart?._id]);
 
   // Show toast notification
   const showToast = (type: 'success' | 'error' | 'info', title: string, message: string, orderNumber?: string) => {
@@ -82,6 +123,27 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
   // Hide toast
   const hideToast = () => {
     setToast(prev => ({ ...prev, show: false }));
+  };
+
+  // Show confirmation modal
+  const showConfirmationModal = (
+    title: string, 
+    message: string, 
+    onConfirm: () => void, 
+    type: 'warning' | 'danger' | 'info' | 'success' = 'warning'
+  ) => {
+    setConfirmationModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+      type
+    });
+  };
+
+  // Close confirmation modal
+  const closeConfirmationModal = () => {
+    setConfirmationModal(prev => ({ ...prev, isOpen: false }));
   };
 
   // Create new cart
@@ -195,9 +257,11 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
   const addToCart = async (product: any, quantity: number, selectedSpecs: { [key: string]: string }, selectedColor: string = '') => {
     if (!pos.currentCart) return;
     
+    const currentCartId = pos.currentCart._id;
+    
     try {
       const result = await pos.addToCart(
-        pos.currentCart._id,
+        currentCartId,
         product,
         quantity,
         null,
@@ -213,16 +277,21 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
           value: selectedColor
         }] : []
       );
-      
+       onCartUpdate?.();
       if (result.success) {
+        // Close the specification modal after successful addition
+       
+        setSelectedProduct(null);
+        
+        // Notify parent component that cart was updated (data already updated in usePOS)
+       
+         setShowSpecModal(false);
+        // Show toast after update is complete
         const productName = isRTL ? product.nameAr : product.nameEn;
         showToast('success', 
           isRTL ? 'تم الإضافة بنجاح' : 'Added Successfully',
           isRTL ? `تم إضافة ${productName} للسلة` : `${productName} added to cart`
         );
-        // Close the specification modal after successful addition
-        setShowSpecModal(false);
-        setSelectedProduct(null);
       } else {
         showToast('error',
           isRTL ? 'خطأ في الإضافة' : 'Error Adding Item',
@@ -242,14 +311,20 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
   const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (!pos.currentCart) return;
     
+    const currentCartId = pos.currentCart._id;
+    
     if (newQuantity <= 0) {
-      await pos.removeFromCart(pos.currentCart._id, itemId);
+      await pos.removeFromCart(currentCartId, itemId);
+      onCartUpdate?.();
       return;
     }
 
     try {
-      const result = await pos.updateCartItem(pos.currentCart._id, itemId, newQuantity);
-      if (!result.success) {
+      const result = await pos.updateCartItem(currentCartId, itemId, newQuantity);
+      if (result.success) {
+        // Notify parent component that cart was updated (data already updated in usePOS)
+        onCartUpdate?.();
+      } else {
         showToast('error',
           isRTL ? 'خطأ في تحديث الكمية' : 'Error Updating Quantity',
           result.message || (isRTL ? 'حدث خطأ في تحديث الكمية' : 'Error updating quantity')
@@ -268,9 +343,14 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
   const removeFromCart = async (itemId: string) => {
     if (!pos.currentCart) return;
     
+    const currentCartId = pos.currentCart._id;
+    
     try {
-      const result = await pos.removeFromCart(pos.currentCart._id, itemId);
+      const result = await pos.removeFromCart(currentCartId, itemId);
       if (result.success) {
+        // Notify parent component that cart was updated (data already updated in usePOS)
+        onCartUpdate?.();
+        // Show toast after update is complete
         showToast('success',
           isRTL ? 'تم الحذف بنجاح' : 'Removed Successfully',
           isRTL ? 'تم حذف المنتج من السلة' : 'Product removed from cart'
@@ -310,8 +390,19 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
           result.data?.orderNumber || 'N/A'
         );
         
-        // Create new cart after completion
-        await handleCreateNewCart();
+        // Delete the completed cart
+        const cartId = pos.currentCart._id;
+        console.log('Deleting completed cart:', cartId);
+        const deleteResult = await pos.deleteCart(cartId);
+        
+        if (deleteResult.success) {
+          console.log('Cart deleted successfully after completion');
+        } else {
+          console.warn('Failed to delete cart after completion:', deleteResult.message);
+        }
+        
+        // Notify parent component that cart was completed and deleted
+        onCartUpdate?.(cartId);
       } else {
         showToast('error',
           isRTL ? 'فشل في إنشاء الطلب' : 'Failed to Create Order',
@@ -328,12 +419,37 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
   };
 
   // Clear cart
-  const handleClearCart = async () => {
+  const handleClearCart = () => {
     if (!pos.currentCart) return;
     
+    const itemCount = pos.currentCart.items?.length || 0;
+    
+    if (itemCount > 0) {
+      showConfirmationModal(
+        isRTL ? 'تأكيد مسح السلة' : 'Confirm Cart Clear',
+        isRTL 
+          ? `هل أنت متأكد من مسح جميع العناصر من السلة؟\n\nتحتوي على ${itemCount} عنصر${itemCount > 1 ? 'ات' : ''}.\n\nسيتم حذف جميع العناصر نهائياً.`
+          : `Are you sure you want to clear all items from the cart?\n\nIt contains ${itemCount} item${itemCount > 1 ? 's' : ''}.\n\nAll items will be permanently removed.`,
+        () => executeClearCart(),
+        'warning'
+      );
+    }
+  };
+
+  // Execute the actual cart clearing
+  const executeClearCart = async () => {
+    if (!pos.currentCart || isClearingCart) return;
+    
+    const currentCartId = pos.currentCart._id;
+    setIsClearingCart(true);
+    
     try {
-      const result = await pos.clearCart(pos.currentCart._id);
+      const result = await pos.clearCart(currentCartId);
       if (result.success) {
+        // Notify parent component that cart was updated (data already updated in usePOS)
+        onCartUpdate?.();
+        
+        // Show toast after update is complete
         showToast('success',
           isRTL ? 'تم مسح السلة بنجاح' : 'Cart Cleared Successfully',
           isRTL ? 'تم مسح جميع المنتجات من السلة' : 'All products removed from cart'
@@ -344,12 +460,18 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
           result.message || (isRTL ? 'حدث خطأ في مسح السلة' : 'Error clearing cart')
         );
       }
+      
+      // Close the modal
+      closeConfirmationModal();
     } catch (error) {
       console.error('Error clearing cart:', error);
       showToast('error',
         isRTL ? 'خطأ في مسح السلة' : 'Error Clearing Cart',
         isRTL ? 'حدث خطأ في مسح السلة' : 'Error clearing cart'
       );
+      closeConfirmationModal();
+    } finally {
+      setIsClearingCart(false);
     }
   };
 
@@ -478,15 +600,29 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
                 <span className="text-sm">{isRTL ? 'سلة جديدة' : 'New Cart'}</span>
               </button> */}
               
-              {pos.currentCart && (
-                <button
-                  onClick={handleClearCart}
-                  className="flex items-center space-x-1 rtl:space-x-reverse bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span className="text-sm">{isRTL ? 'مسح السلة' : 'Clear Cart'}</span>
-                </button>
-              )}
+                {pos.currentCart && (
+                  <button
+                    onClick={() => !isCartLoading && !isClearingCart && handleClearCart()}
+                    disabled={isCartLoading || isClearingCart}
+                    className={`flex items-center space-x-1 rtl:space-x-reverse px-3 py-2 rounded-lg transition-colors ${
+                      isCartLoading || isClearingCart
+                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                        : 'bg-red-600 text-white hover:bg-red-700'
+                    }`}
+                  >
+                    {isClearingCart ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                    <span className="text-sm">
+                      {isClearingCart 
+                        ? (isRTL ? 'جاري المسح...' : 'Clearing...') 
+                        : (isRTL ? 'مسح السلة' : 'Clear Cart')
+                      }
+                    </span>
+                  </button>
+                )}
             </div>
           </div>
         </div>
@@ -513,8 +649,13 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
                 className={`w-full ${isRTL ?  'pr-10 pl-16': 'pl-10 pr-16'} py-2 lg:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base`}
               />
               <button
-                onClick={() => smartSearch(searchTerm)}
-                className={`absolute ${isRTL ? 'left-2' :'right-2' } top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-2 lg:px-4 py-1 rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-1 rtl:space-x-reverse`}
+                onClick={() => !isCartLoading && smartSearch(searchTerm)}
+                disabled={isCartLoading}
+                className={`absolute ${isRTL ? 'left-2' :'right-2' } top-1/2 transform -translate-y-1/2 px-2 lg:px-4 py-1 rounded-md transition-colors flex items-center space-x-1 rtl:space-x-reverse ${
+                  isCartLoading 
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
                 <Search className="w-3 h-3 lg:w-4 lg:h-4" />
                 <span className="text-xs lg:text-sm hidden sm:inline">{isRTL ? 'بحث' : 'Search'}</span>
@@ -556,8 +697,10 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
             {filteredProducts.map((product) => (
               <div
                 key={product._id || product.id}
-                onClick={() => handleProductClick(product)}
-                className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-2 lg:p-4 cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => !isCartLoading && handleProductClick(product)}
+                className={`relative bg-white rounded-lg shadow-sm border border-gray-200 p-2 lg:p-4 transition-shadow ${
+                  isCartLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:shadow-md'
+                }`}
               >
                 <div className="aspect-square mb-2 lg:mb-3 rounded-lg overflow-hidden bg-gray-100">
                   <img
@@ -642,14 +785,28 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
 
           {/* Cart Items */}
           <div className="flex-1 overflow-y-auto mb-4 lg:mb-6">
-            {!pos.currentCart || !pos.currentCart.items || pos.currentCart.items.length === 0 ? (
+            {isCartLoading || isLoadingTab ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-gray-600 text-sm">
+                    {isRTL ? 'جاري تحميل الطلب...' : 'Loading order...'}
+                  </p>
+                </div>
+              </div>
+            ) : !pos.currentCart || !pos.currentCart.items || pos.currentCart.items.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-gray-500">
                 <ShoppingCart className="w-8 h-8 mb-2" />
                 <p>{isRTL ? 'لا توجد عناصر في السلة' : 'No items in cart'}</p>
                 {!pos.currentCart && (
                   <button
-                    onClick={handleCreateNewCart}
-                    className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    onClick={() => !isCartLoading && handleCreateNewCart()}
+                    disabled={isCartLoading}
+                    className={`mt-2 px-4 py-2 rounded-lg transition-colors ${
+                      isCartLoading 
+                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
                   >
                     {isRTL ? 'إنشاء سلة جديدة' : 'Create New Cart'}
                   </button>
@@ -698,8 +855,13 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
                         )}
                       </div>
                       <button
-                        onClick={() => removeFromCart(item._id)}
-                        className="text-red-500 hover:text-red-700 ml-2 rtl:ml-0 rtl:mr-2"
+                        onClick={() => !isCartLoading && removeFromCart(item._id)}
+                        disabled={isCartLoading}
+                        className={`ml-2 rtl:ml-0 rtl:mr-2 ${
+                          isCartLoading 
+                            ? 'text-gray-400 cursor-not-allowed' 
+                            : 'text-red-500 hover:text-red-700'
+                        }`}
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -707,15 +869,25 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-1 lg:space-x-2 rtl:space-x-reverse">
                         <button
-                          onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                          className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 text-xs lg:text-sm"
+                          onClick={() => !isCartLoading && updateQuantity(item._id, item.quantity - 1)}
+                          disabled={isCartLoading}
+                          className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full flex items-center justify-center text-xs lg:text-sm ${
+                            isCartLoading 
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                              : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                          }`}
                         >
                           -
                         </button>
                         <span className="w-6 lg:w-8 text-center text-xs lg:text-sm">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                          className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 text-xs lg:text-sm"
+                          onClick={() => !isCartLoading && updateQuantity(item._id, item.quantity + 1)}
+                          disabled={isCartLoading}
+                          className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full flex items-center justify-center text-xs lg:text-sm ${
+                            isCartLoading 
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                              : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                          }`}
                         >
                           +
                         </button>
@@ -756,15 +928,25 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
                       return sum + ((item.priceAtAdd || 0) * item.quantity);
                     }, 0) || 0;
                     
-                    console.log('Calculated total:', calculatedTotal, 'API total:', apiTotal);
+                    console.log('Calculated total:', calculatedTotal, 'API total:', apiTotal, 'Items count:', pos.currentCart.items?.length || 0);
+                    
+                    // If no items, return 0
+                    if (!pos.currentCart.items || pos.currentCart.items.length === 0) {
+                      return '0.00';
+                    }
+                    
                     return calculatedTotal.toFixed(2);
                   })()}
                 </span>
               </div>
               <button
                 onClick={handleCompleteOrder}
-                disabled={pos.isLoading}
-                className="w-full bg-green-600 text-white py-2 lg:py-3 px-3 lg:px-4 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm lg:text-base"
+                disabled={pos.isLoading || isCartLoading}
+                className={`w-full py-2 lg:py-3 px-3 lg:px-4 rounded-lg font-medium transition-colors flex items-center justify-center text-sm lg:text-base ${
+                  pos.isLoading || isCartLoading
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
               >
                 {pos.isLoading ? (
                   <>
@@ -806,7 +988,7 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
               ? 'bg-gradient-to-r from-red-50 to-rose-50 border-red-500 shadow-red-100' 
               : 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-500 shadow-blue-100'
           }`}>
-            <div className="flex items-start">
+            <div className={`flex items-start isRTL ${isRTL ? 'flex-row' : 'flex-row-reverse'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               <div className="flex-shrink-0">
                 {toast.type === 'success' && (
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -874,6 +1056,17 @@ const POSManager: React.FC<POSManagerProps> = ({ cartId, onNewOrder }) => {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        onClose={closeConfirmationModal}
+        onConfirm={confirmationModal.onConfirm}
+        title={confirmationModal.title}
+        message={confirmationModal.message}
+        type={confirmationModal.type || 'warning'}
+        isLoading={isClearingCart}
+      />
     </div>
   );
 };

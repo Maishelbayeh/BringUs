@@ -5,6 +5,7 @@ export interface POSCart {
   _id: string;
   sessionId: string;
   cartName: string;
+  cartNameAr: string;
   admin: string;
   store: string;
   customer: {
@@ -68,7 +69,7 @@ export interface UsePOSResult {
   
   // Cart operations
   createCart: (storeId: string) => Promise<{ success: boolean; data?: any; message?: string }>;
-  getCart: (cartId: string) => Promise<{ success: boolean; data?: POSCart; message?: string }>;
+  getCart: (cartId: string, forceRefresh?: boolean) => Promise<{ success: boolean; data?: POSCart; message?: string }>;
   getAllCarts: (storeId: string, status?: string) => Promise<{ success: boolean; data?: POSCart[]; message?: string }>;
   
   // Item operations
@@ -95,6 +96,8 @@ export function usePOS(): UsePOSResult {
   const [currentCart, setCurrentCart] = useState<POSCart | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoadedCarts, setHasLoadedCarts] = useState<boolean>(false);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
   // Use the centralized headers function
   const getAuthHeaders = getPOSApiHeaders;
@@ -141,11 +144,17 @@ export function usePOS(): UsePOSResult {
   }, []);
 
   // Get specific POS cart
-  const getCart = useCallback(async (cartId: string) => {
-    // Avoid duplicate calls for the same cart
-    if (currentCart && currentCart._id === cartId) {
+  const getCart = useCallback(async (cartId: string, forceRefresh: boolean = false) => {
+    // Avoid duplicate calls for the same cart unless forceRefresh is true
+    if (!forceRefresh && currentCart && currentCart._id === cartId) {
       console.log('Cart already loaded, skipping duplicate call');
       return { success: true, data: currentCart };
+    }
+    
+    // Clear current cart immediately to prevent data leakage (only if switching carts)
+    if (currentCart && currentCart._id !== cartId) {
+      console.log('Clearing current cart before loading new one');
+      setCurrentCart(null);
     }
     
     setIsLoading(true);
@@ -183,7 +192,14 @@ export function usePOS(): UsePOSResult {
   }, [currentCart]);
 
   // Get all POS carts
-  const getAllCarts = useCallback(async (storeId: string, status: string = 'active') => {
+  const getAllCarts = useCallback(async (storeId: string, status: string = 'active', forceRefresh: boolean = false) => {
+    // Check if data is already loaded and not forcing refresh
+    const now = Date.now();
+    if (hasLoadedCarts && !forceRefresh && (now - lastFetchTime) < 500) { // 10 seconds cache
+      console.log('Carts already loaded recently, skipping API call');
+      return { success: true, data: carts };
+    }
+
     setIsLoading(true);
     setError(null);
     
@@ -202,6 +218,8 @@ export function usePOS(): UsePOSResult {
           items: cart.items || []
         }));
         setCarts(cartsData);
+        setHasLoadedCarts(true);
+        setLastFetchTime(now);
       }
       
       return result;
@@ -212,10 +230,16 @@ export function usePOS(): UsePOSResult {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [hasLoadedCarts, lastFetchTime, carts]);
 
   // Add item to POS cart
   const addToCart = useCallback(async (cartId: string, product: any, quantity: number, variant?: any, selectedSpecifications?: any[], selectedColors?: any[]) => {
+    // Ensure we're working with the correct cart
+    if (currentCart && currentCart._id !== cartId) {
+      console.warn('Adding to different cart than current, clearing current cart first');
+      setCurrentCart(null);
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -265,10 +289,16 @@ export function usePOS(): UsePOSResult {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [currentCart]);
 
   // Update item in POS cart
   const updateCartItem = useCallback(async (cartId: string, itemId: string, quantity: number) => {
+    // Ensure we're working with the correct cart
+    if (currentCart && currentCart._id !== cartId) {
+      console.warn('Updating different cart than current, clearing current cart first');
+      setCurrentCart(null);
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -304,10 +334,16 @@ export function usePOS(): UsePOSResult {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [currentCart]);
 
   // Remove item from POS cart
   const removeFromCart = useCallback(async (cartId: string, itemId: string) => {
+    // Ensure we're working with the correct cart
+    if (currentCart && currentCart._id !== cartId) {
+      console.warn('Removing from different cart than current, clearing current cart first');
+      setCurrentCart(null);
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -342,7 +378,7 @@ export function usePOS(): UsePOSResult {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [currentCart]);
 
   // Update POS cart customer info
   const updateCustomer = useCallback(async (cartId: string, customer: any) => {
@@ -429,7 +465,7 @@ export function usePOS(): UsePOSResult {
     
     try {
       const response = await fetch(POS_API_ENDPOINTS.CLEAR_CART(cartId), {
-        method: 'PUT',
+        method: 'POST',
         headers: getAuthHeaders()
       });
       
@@ -440,11 +476,12 @@ export function usePOS(): UsePOSResult {
         const cartData = {
           ...result.data,
           items: result.data.items || [],
-          total: result.data.total || 0,
-          subtotal: result.data.subtotal || 0,
+          // Force total to 0 if items array is empty
+          total: (result.data.items && result.data.items.length === 0) ? 0 : (result.data.total || 0),
+          subtotal: (result.data.items && result.data.items.length === 0) ? 0 : (result.data.subtotal || 0),
           status: result.data.status || 'active'
         };
-        console.log('Adding to cart, setting current cart:', cartData);
+        console.log('Clearing cart, setting current cart:', cartData);
         setCurrentCart(cartData);
         // Update carts list
         setCarts(prev => prev.map(cart => cart._id === cartId ? cartData : cart));
