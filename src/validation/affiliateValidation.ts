@@ -1,4 +1,4 @@
-import { ValidationSchema, PATTERNS } from '../utils/validation';
+import { ValidationSchema, PATTERNS, validateWhatsApp } from '../utils/validation';
 import { TFunction } from 'i18next';
 
 /**
@@ -126,11 +126,14 @@ export const validateAffiliateWithDuplicates = (
     errors.lastName = t('validation.maxLength', { max: 50 });
   }
 
-  // Mobile validation
+  // Mobile validation - using advanced WhatsApp validation
   if (!form.mobile || form.mobile.trim() === '') {
     errors.mobile = t('validation.required');
-  } else if (!PATTERNS.phone.test(form.mobile)) {
-    errors.mobile = t('validation.phoneInvalid');
+  } else {
+    const whatsappError = validateWhatsApp(form.mobile, t);
+    if (whatsappError) {
+      errors.mobile = whatsappError;
+    }
   }
 
   // Percent validation
