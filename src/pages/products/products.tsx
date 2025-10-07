@@ -315,9 +315,9 @@ const ProductsPage: React.FC = () => {
       compareAtPrice: product.compareAtPrice,
       originalPrice: product.originalPrice,
       unit: product.unit ? (isRTL ? product.unit.nameAr : product.unit.nameEn) : '',
-      availableQuantity: product.availableQuantity || product.stock || 0,
+      availableQuantity: product.availableQuantity || 0,
       hasVariants: product.hasVariants,
-      maintainStock: (product.availableQuantity || product.stock || 0) > 0 ? (isRTL ? 'نعم' : 'Yes') : (isRTL ? 'لا' : 'No'),
+      maintainStock: (product.availableQuantity || 0) > 0 ? (isRTL ? 'نعم' : 'Yes') : (isRTL ? 'لا' : 'No'),
       visibility: product.visibility ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden'),
       productLabels: product.productLabels && product.productLabels.length > 0 
         ? product.productLabels.map((label: any) => {
@@ -713,7 +713,7 @@ const ProductsPage: React.FC = () => {
         }))
       : [];
     
-    const maintainStock = (originalProduct.availableQuantity || originalProduct.stock || 0) > 0 ? 'Y' : 'N';
+    const maintainStock = (originalProduct.availableQuantity || 0) > 0 ? 'Y' : 'N';
     
     // Extract productLabels and convert to array of IDs
     const productLabels = originalProduct.productLabels || [];
@@ -951,7 +951,7 @@ const ProductsPage: React.FC = () => {
     // console.log('🔍 handleEdit - productColors type:', typeof productColors);
     // console.log('🔍 handleEdit - productColors is array:', Array.isArray(productColors));
     
-    const maintainStock = (originalProduct.availableQuantity || originalProduct.stock || 0) > 0 ? 'Y' : 'N';
+    const maintainStock = (originalProduct.availableQuantity  || 0) > 0 ? 'Y' : 'N';
     const unitId = originalProduct.unit?._id || originalProduct.unitId || (typeof originalProduct.unit === 'string' ? originalProduct.unit : '');
     const categoryId = originalProduct.category?._id || originalProduct.categoryId || (typeof originalProduct.category === 'string' ? originalProduct.category : '');
     const subcategoryId = originalProduct.subcategory?._id || originalProduct.subcategoryId || (typeof originalProduct.subcategory === 'string' ? originalProduct.subcategory : '');

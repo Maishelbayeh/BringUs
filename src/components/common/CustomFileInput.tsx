@@ -38,6 +38,7 @@ interface CustomFileInputProps {
   maxImageSizeMB?: number;
   /** Additional validation options for images */
   imageValidationOptions?: ImageValidationOptions;
+  required?: boolean;
 }
 
 const CustomFileInput: React.FC<CustomFileInputProps> = ({ 
@@ -56,7 +57,8 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   appendOnly = false,
   onValidationErrorChange,
   maxImageSizeMB = 10,
-  imageValidationOptions = {}
+  imageValidationOptions = {},
+  required = false
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -277,7 +279,7 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   return (
     <div className="mb-4 w-full">
       <label htmlFor={id} className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${currentLanguage === 'ARABIC' ? 'text-right' : 'text-left'}`} style={style}>
-        {label}
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div
         className={`flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed  text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary w-full p-2.5 ${disabled || isBlocked ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:bg-primary/10'} transition-all duration-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${(error || internalError) ? 'border-red-500' : ''}`}

@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CustomTable } from '../../components/common/CustomTable';
-import CustomButton from '../../components/common/CustomButton';
-import AdvertisementForm from './AdvertisementForm';
+import AdvertisementDrawer from './AdvertisementDrawer';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import PermissionModal from '@/components/common/PermissionModal';
 import { useAdvertisements } from '../../hooks/useAdvertisements';
 import { useStoreUrls } from '@/hooks/useStoreUrls';
+import { 
+  validateAdvertisementForm, 
+  validateAdvertisementField, 
+  AdvertisementValidationErrors 
+} from '../../validation/advertisementValidation';
 
 const AdvertisementPage = () => {
   const { t, i18n } = useTranslation();
@@ -19,8 +23,7 @@ const AdvertisementPage = () => {
 
   const {
     advertisements,
-    loading,
-    error,
+    // error,
     createAdvertisement,
     updateAdvertisement,
     deleteAdvertisement,
@@ -38,6 +41,8 @@ const AdvertisementPage = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [mode, setMode] = useState<'html' | 'image'>('html');
   const [image, setImage] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [errors, setErrors] = useState<AdvertisementValidationErrors>({});
 
   // جلب البيانات عند التحميل
   useEffect(() => {
@@ -114,6 +119,7 @@ const AdvertisementPage = () => {
     setEditIndex(null);
     setMode('html');
     setImage(null);
+    setErrors({});
     setDrawerOpen(true);
   };
 
@@ -129,6 +135,7 @@ const AdvertisementPage = () => {
       setMode('html');
       setImage(null);
     }
+    setErrors({});
     setDrawerOpen(true);
   };
 
@@ -149,8 +156,43 @@ const AdvertisementPage = () => {
     }
   };
 
+  // Handle field change with validation
+  const handleFieldChange = (fieldName: string, value: any) => {
+    const error = validateAdvertisementField(
+      fieldName as keyof AdvertisementValidationErrors,
+      value,
+      mode,
+      t as any
+    );
+    
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      if (error) {
+        newErrors[fieldName as keyof AdvertisementValidationErrors] = error;
+      } else {
+        delete newErrors[fieldName as keyof AdvertisementValidationErrors];
+      }
+      return newErrors;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    const formData = {
+      title: formTitle,
+      htmlContent: formHtml,
+      image,
+      mode,
+    };
+    
+    const validationErrors = validateAdvertisementForm(formData, t as any);
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
     
     setFormLoading(true);
     
@@ -166,7 +208,6 @@ const AdvertisementPage = () => {
         formData.append('file', blob, 'advertisement-image.png');
 
         // Upload to backend
-        //https://bringus-backend.onrender.com/api/advertisements/upload-image
         const uploadRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://bringus-backend.onrender.com/api/'}advertisements/upload-image`, {
           method: 'POST',
           body: formData,
@@ -205,6 +246,7 @@ const AdvertisementPage = () => {
       setFormStatus('Active');
       setMode('html');
       setImage(null);
+      setErrors({});
     } catch (error) {
       //CONSOLE.error('Submit error:', error);
     } finally {
@@ -225,8 +267,8 @@ const AdvertisementPage = () => {
         isRtl={i18n.language === 'ARABIC'}
         count={data.length}
       />
-      {loading && <div className="text-center py-4">{t('common.loading', 'Loading...')}</div>}
-      {error && <div className="text-center text-red-500 py-2">{error}</div>}
+      {/* {loading && <div className="text-center py-4">{t('common.loading', 'Loading...')}</div>} */}
+      {/* {error && <div className="text-center text-red-500 py-2">{error}</div>} */}
       <CustomTable columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
       
       {/* Permission Modal */}
@@ -244,65 +286,40 @@ const AdvertisementPage = () => {
         requirePermission={true}
       />
       
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
-            dir={isRTL ? 'rtl' : 'ltr'}>
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-primary/20 px-6 py-4">
-              <span className="text-xl font-bold text-primary">
-                {editIndex !== null ? t('advertisement.edit', 'Edit Advertisement') : t('advertisement.add', 'Add Advertisement')}
-              </span>
-              <button 
-                onClick={() => setDrawerOpen(false)} 
-                className="text-primary hover:text-red-500 text-2xl"
-                disabled={formLoading}
-              >
-                ×
-              </button>
-            </div>
-            
-            {/* Form */}
-            <form onSubmit={handleSubmit}>
-              <AdvertisementForm
-                formHtml={formHtml}
-                setFormHtml={setFormHtml}
-                formStatus={formStatus}
-                setFormStatus={setFormStatus}
-                isRTL={isRTL}
-                t={t}
-                handleSubmit={handleSubmit}
-                renderHtml={renderHtml}
-                formTitle={formTitle}
-                setFormTitle={setFormTitle}
-                image={image}
-                setImage={setImage}
-                mode={mode}
-                setMode={setMode}
-              />
-              
-              {/* Footer */}
-              <div className={`flex justify-between gap-2 px-6 py-4 border-t bg-white rounded-b-2xl`}>
-                <CustomButton
-                  color="primary"
-                  textColor="white"
-                  text={formLoading ? t('common.loading', 'Loading...') : (editIndex !== null ? t("deliveryDetails.updateArea") : t("deliveryDetails.createArea"))}
-                  action={() => {}}
-                  type="submit"
-                  disabled={formLoading}
-                />
-                <CustomButton
-                  color="white"
-                  textColor="primary"
-                  text={t("deliveryDetails.cancel")}
-                  action={() => setDrawerOpen(false)}
-                  disabled={formLoading}
-                />
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Advertisement Drawer */}
+      <AdvertisementDrawer
+        open={drawerOpen}
+        onClose={() => {
+          setDrawerOpen(false);
+          setEditIndex(null);
+          setFormHtml('');
+          setFormTitle('');
+          setFormStatus('Active');
+          setMode('html');
+          setImage(null);
+          setImageUploading(false);
+          setErrors({});
+        }}
+        onSave={handleSubmit}
+        formHtml={formHtml}
+        setFormHtml={setFormHtml}
+        formStatus={formStatus}
+        setFormStatus={setFormStatus}
+        formTitle={formTitle}
+        setFormTitle={setFormTitle}
+        isRTL={isRTL}
+        renderHtml={renderHtml}
+        image={image}
+        setImage={setImage}
+        mode={mode}
+        setMode={setMode}
+        editMode={editIndex !== null}
+        saving={formLoading}
+        isImageUploading={imageUploading}
+        setImageUploading={setImageUploading}
+        errors={errors}
+        onFieldChange={handleFieldChange}
+      />
     </div>
   );
 };

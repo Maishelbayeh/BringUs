@@ -76,14 +76,29 @@ export const useAuth = () => {
       }
 
       if (data.success && data.userStatus === 'active') {
+        // ✅ حفظ التوكن في localStorage دائماً (جميع الـ APIs تعتمد عليه)
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userInfo', JSON.stringify(data.user));
+        
+        // Store token and user info based on rememberMe preference
         // Store token and user info based on rememberMe preference using utility functions
         saveAuthToken(data.token, credentials.rememberMe);
         saveUserInfo(data.user, credentials.rememberMe);
         
         if (credentials.rememberMe) {
+          // حفظ إضافي في الكوكيز - يبقى لمدة 30 يوم
+          setCookie('token', data.token, { days: 30 });
+          setCookieObject('userInfo', data.user, { days: 30 });
+          setCookie('rememberMe', 'true', { days: 30 });
+          console.log('✅ Token saved to localStorage + 🍪 Cookies (persistent - 30 days)');
           localStorage.setItem('rememberMe', 'true');
           console.log('Token saved to localStorage (persistent)');
         } else {
+          // حذف الكوكيز إذا كان "تذكرني" غير مفعّل
+          deleteCookie('token');
+          deleteCookie('userInfo');
+          deleteCookie('rememberMe');
+          console.log('✅ Token saved to localStorage only (no cookies)');
           localStorage.removeItem('rememberMe');
           console.log('Token saved to sessionStorage (temporary)');
         }
@@ -154,7 +169,7 @@ export const useAuth = () => {
   };
 // -----------------------------------------------logout---------------------------------------------------------
   const logout = () => {
-    // Clear both localStorage and sessionStorage
+    // Clear localStorage (except savedEmail and savedPassword for "Remember Me")
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('userInfo');
@@ -163,34 +178,84 @@ export const useAuth = () => {
     localStorage.removeItem('storeInfo');
     localStorage.removeItem('storeLogo');
     localStorage.removeItem('isOwner');
-    localStorage.removeItem('rememberMe');
-    localStorage.removeItem('savedEmail');
-    localStorage.removeItem('savedPassword');
+    // NOTE: لا نحذف savedEmail و savedPassword و rememberMe حتى يبقوا محفوظين لـ "تذكرني"
+    // localStorage.removeItem('savedEmail');
+    // localStorage.removeItem('savedPassword');
+    // localStorage.removeItem('rememberMe');
     
+    // Clear sessionStorage
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('userInfo');
+    
+    // Clear cookies (except savedEmail and savedPassword for "Remember Me")
+    deleteCookie('token');
+    deleteCookie('userInfo');
+    // NOTE: لا نحذف savedEmail و savedPassword و rememberMe حتى يبقوا محفوظين لـ "تذكرني"
+    // deleteCookie('savedEmail');
+    // deleteCookie('savedPassword');
+    // deleteCookie('rememberMe');
+    console.log('🗑️ Authentication data cleared (keeping savedEmail & savedPassword for Remember Me)');
     
     updateStoreId("");
     
     // Dispatch custom event for store context update
     window.dispatchEvent(new CustomEvent('userLoggedOut'));
   };
+
+// -----------------------------------------------clearRememberMe---------------------------------------------------------
+  // دالة لحذف بيانات "تذكرني" بشكل كامل (يمكن استخدامها من زر "نسيان البيانات المحفوظة")
+  const clearRememberMe = () => {
+    // Clear from localStorage
+    localStorage.removeItem('savedEmail');
+    localStorage.removeItem('savedPassword');
+    localStorage.removeItem('rememberMe');
+    
+    // Clear from cookies
+    deleteCookie('savedEmail');
+    deleteCookie('savedPassword');
+    deleteCookie('rememberMe');
+    
+    console.log('🗑️ Remember Me data cleared completely');
+  };
 // -----------------------------------------------getCurrentUser---------------------------------------------------------
   const getCurrentUser = () => {
-    // Check both localStorage and sessionStorage for user info
-    const userInfo = localStorage.getItem('userInfo') || sessionStorage.getItem('userInfo');
-    return userInfo ? JSON.parse(userInfo) : null;
+    // Check localStorage first (always saved there), then cookies as fallback
+    const localUserInfo = localStorage.getItem('userInfo');
+    if (localUserInfo) {
+      return JSON.parse(localUserInfo);
+    }
+    
+    const cookieUserInfo = getCookieObject('userInfo');
+    if (cookieUserInfo) {
+      return cookieUserInfo;
+    }
+    
+    const sessionUserInfo = sessionStorage.getItem('userInfo');
+    if (sessionUserInfo) {
+      return JSON.parse(sessionUserInfo);
+    }
+    
+    return null;
   };
 // -----------------------------------------------getToken---------------------------------------------------------
   const getToken = () => {
-    // Check both localStorage and sessionStorage for token
+    // Check localStorage first (always saved there), then cookies as fallback
     const localToken = localStorage.getItem('token');
+    if (localToken) {
+      return localToken;
+    }
+    
+    const cookieToken = getCookie('token');
+    if (cookieToken) {
+      return cookieToken;
+    }
+    
     const sessionToken = sessionStorage.getItem('token');
-    const token = localToken || sessionToken;
+    if (sessionToken) {
+      return sessionToken;
+    }
     
-   
-    
-    return token;
+    return null;
   };
 // -----------------------------------------------isAuthenticated---------------------------------------------------------
   const isAuthenticated = () => {
@@ -219,6 +284,7 @@ export const useAuth = () => {
   return {
     login,
     logout,
+    clearRememberMe,
     getCurrentUser,
     getToken,
     isAuthenticated,

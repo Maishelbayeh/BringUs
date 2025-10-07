@@ -34,7 +34,7 @@ const StoreSliderDrawer: React.FC<StoreSliderDrawerProps> = ({ open, onClose, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className={`max-h-[85vh] bg-white rounded-2xl shadow-xl w-full max-w-md mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
+      <div className={`max-h-[85vh] bg-white rounded-2xl shadow-xl w-full max-w-lg mx-2 relative flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
         dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Header */}
         <div className=" flex items-center justify-between border-b border-primary/20 px-6 py-4">

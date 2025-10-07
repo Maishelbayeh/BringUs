@@ -60,7 +60,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => 
   };
 
   return (
-    <div className={`fixed ${isRTL ? 'top-4 right-4' : 'top-4 left-4'} z-[9999] space-y-3 pointer-events-none`}>
+    <div className={`fixed ${isRTL ? 'top-4 left-4' : 'top-4 right-4'} z-[9999] space-y-3 pointer-events-none`}>
       {toasts.map((toast, index) => (
         <div
           key={toast.id}
@@ -75,7 +75,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => 
             direction: isRTL ? 'rtl' : 'ltr'
           }}
         >
-          <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+          <div className={`gap-3 flex items-start space-x-3 isRTL `} >
             <div className="flex-shrink-0 mt-0.5">
               {getIcon(toast.type)}
             </div>

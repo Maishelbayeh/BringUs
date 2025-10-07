@@ -17,6 +17,7 @@ import CustomButton from '@/components/common/CustomButton';
 import useLanguage from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreUrls } from '@/hooks/useStoreUrls';
+import { setCookie, getCookie, deleteCookie } from '@/utils/cookies';
 
 
 const Login: React.FC = () => {
@@ -26,15 +27,16 @@ const Login: React.FC = () => {
   const { login, isLoading: authLoading, error: authError, isEmailNotVerified } = useAuth();
   const { storeSlug: _storeSlug } = useStoreUrls();
   const [formData, setFormData] = useState(() => {
-    // Load saved credentials if rememberMe was previously selected
-    const savedEmail = localStorage.getItem('savedEmail');
-    const savedPassword = localStorage.getItem('savedPassword');
-    const rememberMeFlag = localStorage.getItem('rememberMe');
+    // Load saved credentials from cookies or localStorage
+    const savedEmail = getCookie('savedEmail') || localStorage.getItem('savedEmail');
+    const savedPassword = getCookie('savedPassword') || localStorage.getItem('savedPassword');
+    const rememberMeFlag = getCookie('rememberMe') || localStorage.getItem('rememberMe');
     
     console.log('Loading saved credentials:', {
       savedEmail,
       savedPassword: savedPassword ? '***' : null,
-      rememberMeFlag
+      rememberMeFlag,
+      source: getCookie('rememberMe') ? 'cookies' : 'localStorage'
     });
     
     return {
@@ -44,9 +46,11 @@ const Login: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(() => {
-    // Check if user previously selected "Remember Me"
-    const isRemembered = localStorage.getItem('rememberMe') === 'true';
-    console.log('Remember Me state loaded:', isRemembered);
+    // Check cookies first, then localStorage
+    const cookieRemember = getCookie('rememberMe') === 'true';
+    const localRemember = localStorage.getItem('rememberMe') === 'true';
+    const isRemembered = cookieRemember || localRemember;
+    console.log('Remember Me state loaded:', isRemembered, 'from', cookieRemember ? 'cookies' : 'localStorage');
     return isRemembered;
   });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -93,20 +97,21 @@ const Login: React.FC = () => {
       
       // Save credentials if rememberMe is checked
       if (rememberMe) {
-        localStorage.setItem('savedEmail', formData.email);
-        localStorage.setItem('savedPassword', formData.password);
-        localStorage.setItem('rememberMe', 'true');
-        console.log('Credentials saved:', {
+        // حفظ البيانات في الكوكيز لمدة 30 يوم
+        setCookie('savedEmail', formData.email, { days: 30 });
+        setCookie('savedPassword', formData.password, { days: 30 });
+        console.log('🍪 Credentials saved to cookies:', {
           email: formData.email,
           password: '***',
           rememberMe: true
         });
       } else {
-        // Clear saved credentials if rememberMe is unchecked
+        // Clear saved credentials from both cookies and localStorage
+        deleteCookie('savedEmail');
+        deleteCookie('savedPassword');
         localStorage.removeItem('savedEmail');
         localStorage.removeItem('savedPassword');
-        localStorage.removeItem('rememberMe');
-        console.log('Credentials cleared');
+        console.log('Credentials cleared from cookies and localStorage');
       }
       localStorage.setItem('userId', result?.user.id || '');
       localStorage.setItem('storeId', result?.storeId || '');
