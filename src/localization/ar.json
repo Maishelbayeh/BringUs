@@ -1246,10 +1246,21 @@
   "advertisement": {
     "inputLabel": "الصق كود HTML هنا",
     "preview": "المعاينة",
+    "htmlContent": "الكود HTML",
+    "type": "نوع الاعلان",
     "status": "الحالة",
+    "htmlRequired": "الكود HTML مطلوب",
     "active": "نشط",
+    "advertisementImage": "صورة الإعلان",
+    "imageRequired": "الصورة مطلوبة",
     "inactive": "غير نشط",
-    "add": "إضافة HTML",
+    "image" :"الصورة",
+    "edit": "تعديل الاعلان",
+    "title":"العنوان",
+    "htmlMinLength":"يجب أن يكون الكود أطول من 10 أحرف",
+    "htmlPlaceholder":"أدخل الكود HTML هنا",
+    "titlePlaceholder":"أدخل عنوان الاعلان",
+    "add": "إضافة اعلان",
     "noPreview": "لا توجد معاينة متاحة"
   },
   "termsConditions": {

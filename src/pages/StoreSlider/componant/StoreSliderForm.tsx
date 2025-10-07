@@ -87,7 +87,7 @@ const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, o
           label={isRTL ? 'رابط الفيديو' : 'Video URL'}
           name="videoUrl"
           value={safeForm.videoUrl}
-          placeholder={isRTL ? 'ادخل رابط YouTube' : 'Enter YouTube URL'}
+          placeholder={isRTL ? 'أدخل رابط فيديو من YouTube أو Facebook أو Instagram أو TikTok أو Twitter(X)' : 'Enter a video link from YouTube, Facebook, Instagram, TikTok, or Twitter(X)'}
           onChange={onFormChange}
           required
           error={errors.videoUrl}

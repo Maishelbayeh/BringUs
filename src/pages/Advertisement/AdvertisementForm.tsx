@@ -2,25 +2,27 @@ import React, { useState } from 'react';
 import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomRadioGroup from '../../components/common/CustomRadioGroup';
 import CustomInput from '../../components/common/CustomInput';
-// import FormImageGallery from '../../components/common/FormImageGallery';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import { createImageValidationFunction } from '../../validation/imageValidation';
+import { AdvertisementValidationErrors } from '../../validation/advertisementValidation';
 
 interface AdvertisementFormProps {
   formHtml: string;
   setFormHtml: (v: string) => void;
   formStatus: 'Active' | 'Inactive';
   setFormStatus: (v: 'Active' | 'Inactive') => void;
-  formTitle?: string;
-  setFormTitle?: (v: string) => void;
+  formTitle: string;
+  setFormTitle: (v: string) => void;
   isRTL: boolean;
   t: any;
-  handleSubmit: (e: React.FormEvent) => void;
   renderHtml?: (html: string) => { __html: string };
   image: string | null;
   setImage: (v: string | null) => void;
   mode: 'html' | 'image';
   setMode: (v: 'html' | 'image') => void;
+  setImageUploading?: (v: boolean) => void;
+  errors?: AdvertisementValidationErrors;
+  onFieldChange?: (fieldName: string, value: any) => void;
 }
 
 const AdvertisementForm: React.FC<AdvertisementFormProps> = ({ 
@@ -28,16 +30,18 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
   setFormHtml, 
   formStatus, 
   setFormStatus, 
-  formTitle = '',
-  setFormTitle = () => {},
+  formTitle,
+  setFormTitle,
   isRTL, 
   t, 
-  handleSubmit, 
   renderHtml,
   image,
   setImage,
   mode,
-  setMode
+  setMode,
+  setImageUploading: setImageUploadingProp,
+  errors = {},
+  onFieldChange
 }) => {
   // fallback renderHtml if not provided
   const safeRenderHtml = renderHtml || ((html: string) => {
@@ -51,6 +55,13 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
   // Create image validation function
   const imageValidator = createImageValidationFunction(t);
   const [imageUploading, setImageUploading] = useState(false);
+  
+  // Update parent state when imageUploading changes
+  React.useEffect(() => {
+    if (setImageUploadingProp) {
+      setImageUploadingProp(imageUploading);
+    }
+  }, [imageUploading, setImageUploadingProp]);
 
   // رفع صورة مباشرة عند الاختيار
   const handleImageChange = async (file: File) => {
@@ -61,7 +72,6 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
       const base64 = ev.target?.result as string;
       try {
         const formData = new FormData();
-        // يمكنك استخدام fetch(base64).then(res => res.blob())
         const res = await fetch(base64);
         const blob = await res.blob();
         formData.append('file', blob, file.name || 'advertisement-image.png');
@@ -75,12 +85,13 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
         const uploadData = await uploadRes.json();
         if (uploadData.success && uploadData.data && uploadData.data.url) {
           setImage(uploadData.data.url);
+          if (onFieldChange) {
+            onFieldChange('image', uploadData.data.url);
+          }
         } else {
-          alert('Image upload failed');
           setImage(null);
         }
       } catch (err) {
-        alert('Image upload failed');
         setImage(null);
       } finally {
         setImageUploading(false);
@@ -89,23 +100,8 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
     reader.readAsDataURL(file);
   };
 
-  // تحقق من أن أحد الحقلين موجود عند الإرسال
-  const onSubmit = (e: React.FormEvent) => {
-    if (mode === 'html' && !formHtml.trim()) {
-      alert(t('advertisement.htmlRequired', 'HTML content is required'));
-      e.preventDefault();
-      return;
-    }
-    if (mode === 'image' && !image) {
-      alert(t('advertisement.imageRequired', 'Image is required'));
-      e.preventDefault();
-      return;
-    }
-    handleSubmit(e);
-  };
-
   return (
-    <form className="p-4 flex flex-col space-y-4" onSubmit={onSubmit}>
+    <div className="flex flex-col gap-4">
       {/* اختيار نوع الإعلان */}
       <div>
         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -118,7 +114,13 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
               name="adType"
               value="html"
               checked={mode === 'html'}
-              onChange={() => setMode('html')}
+              onChange={() => {
+                setMode('html');
+                // Clear image error when switching to HTML mode
+                if (onFieldChange) {
+                  onFieldChange('image', null);
+                }
+              }}
             />
             {t('advertisement.typeHtml', 'HTML')}
           </label>
@@ -128,9 +130,15 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
               name="adType"
               value="image"
               checked={mode === 'image'}
-              onChange={() => setMode('image')}
+              onChange={() => {
+                setMode('image');
+                // Clear html error when switching to Image mode
+                if (onFieldChange) {
+                  onFieldChange('htmlContent', '');
+                }
+              }}
             />
-            {t('advertisement.typeImage', 'Image')}
+            {t('advertisement.image', 'Image')}
           </label>
         </div>
       </div>
@@ -139,11 +147,17 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
       <CustomInput
         label={t('advertisement.title', 'Title')}
         value={formTitle}
-        onChange={e => setFormTitle(e.target.value)}
+        onChange={e => {
+          setFormTitle(e.target.value);
+          if (onFieldChange) {
+            onFieldChange('title', e.target.value);
+          }
+        }}
         placeholder={t('advertisement.titlePlaceholder', 'Enter advertisement title')}
         dir={isRTL ? 'rtl' : 'ltr'}
         name="title"
         required
+        error={errors.title}
       />
 
       {/* HTML Content Field */}
@@ -152,11 +166,18 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
           <CustomTextArea
             label={t('advertisement.htmlContent', 'HTML Content')}
             value={formHtml}
-            onChange={e => setFormHtml(e.target.value)}
+            onChange={e => {
+              setFormHtml(e.target.value);
+              if (onFieldChange) {
+                onFieldChange('htmlContent', e.target.value);
+              }
+            }}
             placeholder={t('advertisement.htmlPlaceholder', '<div style="background: red; color: white; padding: 20px;">Your HTML here</div>')}
-            dir={isRTL ? 'rtl' : 'ltr'}
+            dir={ 'ltr'}
             name="htmlContent"
             rows={6}
+            required
+            error={errors.htmlContent}
           />
           {/* HTML Preview */}
           <div className="mb-4">
@@ -187,20 +208,28 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
       {mode === 'image' && (
         <div>
           <CustomFileInput
-            label={t('advertisement.image', 'Advertisement Image')}
+            label={t('advertisement.advertisementImage', 'Advertisement Image')}
             value={image ? [image] : []}
             onChange={file => {
               if (file instanceof File) {
                 handleImageChange(file);
               } else if (typeof file === 'string') {
                 setImage(file);
+                if (onFieldChange) {
+                  onFieldChange('image', file);
+                }
               } else {
                 setImage(null);
+                if (onFieldChange) {
+                  onFieldChange('image', null);
+                }
               }
             }}
             beforeChangeValidate={imageValidator}
             multiple={false}
             isRTL={isRTL}
+            required
+            error={errors.image}
           />
           {imageUploading && (
             <div className="text-primary mt-2">{t('common.loading', 'Uploading image...')}</div>
@@ -220,11 +249,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
         ]}
       />
 
-      {/* زر الإرسال */}
-      <button type="submit" className="btn btn-primary" disabled={imageUploading}>
-        {imageUploading ? t('common.loading', 'Uploading...') : t('advertisement.save', 'Save Advertisement')}
-      </button>
-    </form>
+    </div>
   );
 };
 

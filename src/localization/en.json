@@ -1115,10 +1115,21 @@
   "advertisement": {
     "inputLabel": "Paste your HTML below",
     "preview": "Preview",
+    "htmlContent": "HTML Content",
+    "type": "Advertisement Type",
     "status": "Status",
+    "image":"Image",
+    "title":"Title",
     "active": "Active",
+    "edit": "Edit Advertisement",
+    "titlePlaceholder":"Enter advertisement title",
+    "htmlPlaceholder":"Enter HTML content here",
+    "htmlMinLength":"HTML content must be at least 10 characters",
+    "htmlRequired": "HTML content is required",
+    "imageRequired": "Image is required",
+    "advertisementImage": "Advertisement Image",
     "inactive": "Inactive",
-    "add": "Add HTML",
+    "add": "Add Advertisement",
     "noPreview": "No preview available"
   },
   "termsConditions": {
