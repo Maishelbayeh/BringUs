@@ -25,7 +25,11 @@ const DeliveryMethods: React.FC = () => {
     isRateLimited,
     rateLimitResetTime,
     fetchDeliveryMethods,
-    
+    createDeliveryMethod,
+    updateDeliveryMethod,
+    deleteDeliveryMethod,
+    toggleActiveStatus,
+    setAsDefault,
     clearError,
     clearRateLimit
   } = useDeliveryMethods({
@@ -90,14 +94,22 @@ const DeliveryMethods: React.FC = () => {
     setCurrent(null);
   };
 
-  const handleSave = async (_area: DelieveryMethod) => {
+  const handleSave = async (area: DelieveryMethod) => {
     try {
+      let result;
       if (isEditMode && current?._id) {
-
+        // Update existing delivery method
+        result = await updateDeliveryMethod(current._id, area);
       } else {
-
+        // Create new delivery method
+        result = await createDeliveryMethod(area);
       }
-      closeDrawer();
+      
+      // Only close drawer if the API call was successful
+      if (result !== null && result !== false) {
+        closeDrawer();
+      }
+      // If result is null/false, the hook will have already shown the error via toast
     } catch (err) {
       showError(
         t('deliveryDetails.saveError') || 'Failed to save delivery method',
@@ -113,7 +125,12 @@ const DeliveryMethods: React.FC = () => {
   const confirmDelete = async () => {
     if (deleteModal.area?._id) {
       try {
-
+        const result = await deleteDeliveryMethod(deleteModal.area._id);
+        // If deletion was successful, the hook will have already shown success toast
+        if (!result) {
+          // If result is false, error was already shown by hook
+          console.error('Failed to delete delivery method');
+        }
       } catch (err) {
         showError(
           t('deliveryDetails.deleteError') || 'Failed to delete delivery method',
@@ -131,7 +148,12 @@ const DeliveryMethods: React.FC = () => {
   const handleToggleActive = async (area: DelieveryMethod) => {
     if (area._id) {
       try {
-
+        const result = await toggleActiveStatus(area._id);
+        // If toggle was successful, the hook will have already shown success toast
+        if (!result) {
+          // If result is null, error was already shown by hook
+          console.error('Failed to toggle delivery method status');
+        }
       } catch (err) {
         showError(
           t('deliveryDetails.toggleError') || 'Failed to toggle delivery method status',
@@ -144,7 +166,12 @@ const DeliveryMethods: React.FC = () => {
   const handleSetDefault = async (area: DelieveryMethod) => {
     if (area._id) {
       try {
-
+        const result = await setAsDefault(area._id);
+        // If set default was successful, the hook will have already shown success toast
+        if (!result) {
+          // If result is null, error was already shown by hook
+          console.error('Failed to set default delivery method');
+        }
       } catch (err) {
         showError(
           t('deliveryDetails.setDefaultError') || 'Failed to set default delivery method',
