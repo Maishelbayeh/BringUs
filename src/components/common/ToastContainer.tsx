@@ -75,7 +75,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => 
             direction: isRTL ? 'rtl' : 'ltr'
           }}
         >
-          <div className={`items-start space-x-3 isRTL ${isRTL ? 'flex-row' : 'flex-row-reverse'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className={`gap-3 flex items-start space-x-3 isRTL `} >
             <div className="flex-shrink-0 mt-0.5">
               {getIcon(toast.type)}
             </div>

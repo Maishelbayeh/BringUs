@@ -437,8 +437,8 @@
         "idNoRequired": "يرجى إضافة رقم الهوية"
       },
       "required": "هذا الحقل مطلوب",
-      "minLength": "الحد الأدنى للطول هو {{min}} أحرف",
-      "maxLength": "الحد الأقصى للطول هو {{max}} أحرف",
+      "minLength": "الحد الأدنى للطول هو 3 أحرف",
+      "maxLength": "الحد الأقصى للطول هو 100 أحرف",
       "invalidNumber": "يرجى إدخال رقم صحيح",
       "minValue": "القيمة لا يمكن أن تكون أقل من {{min}}",
       "maxValue": "القيمة لا يمكن أن تتجاوز {{max}}",
@@ -1261,7 +1261,17 @@
     "htmlPlaceholder":"أدخل الكود HTML هنا",
     "titlePlaceholder":"أدخل عنوان الاعلان",
     "add": "إضافة اعلان",
-    "noPreview": "لا توجد معاينة متاحة"
+    "noPreview": "لا توجد معاينة متاحة",
+    "createdSuccessfully": "تم إنشاء الإعلان بنجاح",
+    "updatedSuccessfully": "تم تحديث الإعلان بنجاح",
+    "deletedSuccessfully": "تم حذف الإعلان بنجاح",
+    "statusUpdatedSuccessfully": "تم تحديث حالة الإعلان بنجاح",
+    "fetchFailed": "فشل في جلب الإعلانات",
+    "createFailed": "فشل في إنشاء الإعلان",
+    "updateFailed": "فشل في تحديث الإعلان",
+    "deleteFailed": "فشل في حذف الإعلان",
+    "statusUpdateFailed": "فشل في تحديث حالة الإعلان",
+    "fetchActiveFailed": "فشل في جلب الإعلان النشط"
   },
   "termsConditions": {
     "edit": "تعديل الشروط والأحكام",

@@ -23,8 +23,7 @@ const AdvertisementPage = () => {
 
   const {
     advertisements,
-    loading,
-    error,
+    // error,
     createAdvertisement,
     updateAdvertisement,
     deleteAdvertisement,
@@ -268,8 +267,8 @@ const AdvertisementPage = () => {
         isRtl={i18n.language === 'ARABIC'}
         count={data.length}
       />
-      {loading && <div className="text-center py-4">{t('common.loading', 'Loading...')}</div>}
-      {error && <div className="text-center text-red-500 py-2">{error}</div>}
+      {/* {loading && <div className="text-center py-4">{t('common.loading', 'Loading...')}</div>} */}
+      {/* {error && <div className="text-center text-red-500 py-2">{error}</div>} */}
       <CustomTable columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
       
       {/* Permission Modal */}

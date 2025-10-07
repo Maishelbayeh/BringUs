@@ -1130,7 +1130,17 @@
     "advertisementImage": "Advertisement Image",
     "inactive": "Inactive",
     "add": "Add Advertisement",
-    "noPreview": "No preview available"
+    "noPreview": "No preview available",
+    "createdSuccessfully": "Advertisement created successfully",
+    "updatedSuccessfully": "Advertisement updated successfully",
+    "deletedSuccessfully": "Advertisement deleted successfully",
+    "statusUpdatedSuccessfully": "Advertisement status updated successfully",
+    "fetchFailed": "Failed to fetch advertisements",
+    "createFailed": "Failed to create advertisement",
+    "updateFailed": "Failed to update advertisement",
+    "deleteFailed": "Failed to delete advertisement",
+    "statusUpdateFailed": "Failed to update advertisement status",
+    "fetchActiveFailed": "Failed to fetch active advertisement"
   },
   "termsConditions": {
     "edit": "Edit Terms & Conditions",

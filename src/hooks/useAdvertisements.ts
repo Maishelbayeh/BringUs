@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { BASE_URL } from '../constants/api';
 import { useToastContext } from '../contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 export interface Advertisement {
   _id?: string;
@@ -27,6 +28,7 @@ export function useAdvertisements(storeId: string, token: string) {
   const [activeAd, setActiveAd] = useState<Advertisement | null>(null);
   const [pagination, setPagination] = useState<any>(null);
   const { showSuccess, showError } = useToastContext();
+  const { t } = useTranslation();
 
   const API_BASE = `${BASE_URL}advertisements/stores/${storeId}/advertisements`;
 
@@ -65,10 +67,10 @@ export function useAdvertisements(storeId: string, token: string) {
       setPagination(data.data.pagination || null);
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to fetch advertisements');
+      showError(err.message || t('advertisement.fetchFailed'));
       throw err;
     }
-  }, [API_BASE, fetchWithAuth, showError]);
+  }, [API_BASE, fetchWithAuth, showError, t]);
 
   // Get active advertisement
   const getActiveAdvertisement = useCallback(async () => {
@@ -78,10 +80,10 @@ export function useAdvertisements(storeId: string, token: string) {
       setActiveAd(data.data.data || data.data || null);
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to fetch active advertisement');
+      showError(err.message || t('advertisement.fetchActiveFailed'));
       throw err;
     }
-  }, [API_BASE, fetchWithAuth, showError]);
+  }, [API_BASE, fetchWithAuth, showError, t]);
 
   // Create advertisement
   const createAdvertisement = useCallback(async (ad: Partial<Advertisement>) => {
@@ -91,13 +93,13 @@ export function useAdvertisements(storeId: string, token: string) {
         method: 'POST',
         body: JSON.stringify(ad),
       });
-      showSuccess('Advertisement created successfully');
+      showSuccess(t('advertisement.createdSuccessfully'));
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to create advertisement');
+      showError(err.message || t('advertisement.createFailed'));
       throw err;
     }
-  }, [API_BASE, fetchWithAuth, showSuccess, showError]);
+  }, [API_BASE, fetchWithAuth, showSuccess, showError, t]);
 
   // Update advertisement
   const updateAdvertisement = useCallback(async (adId: string, update: Partial<Advertisement>) => {
@@ -107,13 +109,13 @@ export function useAdvertisements(storeId: string, token: string) {
         method: 'PUT',
         body: JSON.stringify(update),
       });
-      showSuccess('Advertisement updated successfully');
+      showSuccess(t('advertisement.updatedSuccessfully'));
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to update advertisement');
+      showError(err.message || t('advertisement.updateFailed'));
       throw err;
     }
-  }, [API_BASE, fetchWithAuth, showSuccess, showError]);
+  }, [API_BASE, fetchWithAuth, showSuccess, showError, t]);
 
   // Delete advertisement
   const deleteAdvertisement = useCallback(async (adId: string) => {
@@ -122,13 +124,13 @@ export function useAdvertisements(storeId: string, token: string) {
       const data = await fetchWithAuth(url, {
         method: 'DELETE',
       });
-      showSuccess('Advertisement deleted successfully');
+      showSuccess(t('advertisement.deletedSuccessfully'));
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to delete advertisement');
+      showError(err.message || t('advertisement.deleteFailed'));
       throw err;
     }
-  }, [API_BASE, fetchWithAuth, showSuccess, showError]);
+  }, [API_BASE, fetchWithAuth, showSuccess, showError, t]);
 
   // Toggle active status
   const toggleActiveStatus = useCallback(async (adId: string) => {
@@ -137,13 +139,13 @@ export function useAdvertisements(storeId: string, token: string) {
       const data = await fetchWithAuth(url, {
         method: 'PATCH',
       });
-      showSuccess('Advertisement status updated successfully');
+      showSuccess(t('advertisement.statusUpdatedSuccessfully'));
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to update advertisement status');
+      showError(err.message || t('advertisement.statusUpdateFailed'));
       throw err;
     }
-  }, [API_BASE, fetchWithAuth, showSuccess, showError]);
+  }, [API_BASE, fetchWithAuth, showSuccess, showError, t]);
 
   return {
     loading,
