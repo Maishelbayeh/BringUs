@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { BASE_URL, LOGIN } from '../constants/api';
 import { updateUserData, updateStoreData, updateStoreId } from './useLocalStorage';
 import { saveAuthToken, saveUserInfo, saveStoreId, getAuthToken } from '../utils/authUtils';
-
+import { setCookie, getCookie, deleteCookie, setCookieObject, getCookieObject } from '../utils/cookies';
+import i18n from 'i18next';
+import useLanguage from './useLanguage';
 interface LoginResponse {
   success: boolean;
   message: string;
+  messageAr?: string;
   token: string;
   storeId: string;
   userStatus: string;
@@ -54,6 +57,7 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEmailNotVerified, setIsEmailNotVerified] = useState(false);
+  useLanguage();
 // -----------------------------------------------login---------------------------------------------------------
   const login = async (credentials: LoginCredentials): Promise<LoginResponse | null> => {
     setIsLoading(true);
@@ -72,7 +76,10 @@ export const useAuth = () => {
       const data: LoginResponse = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'فشل في تسجيل الدخول');
+        const errorMessage = i18n.language === 'ARABIC' && data.messageAr 
+          ? data.messageAr 
+          : data.message || 'فشل في تسجيل الدخول';
+        throw new Error(errorMessage);
       }
 
       if (data.success && data.userStatus === 'active') {
@@ -150,7 +157,10 @@ export const useAuth = () => {
         //CONSOLE.log('✅ تم تسجيل الدخول بنجاح:', data.user);
         return data;
       } else {
-        throw new Error(data.message || 'فشل في تسجيل الدخول');
+        const errorMessage = i18n.language === 'ARABIC' && data.messageAr 
+          ? data.messageAr 
+          : data.message || 'فشل في تسجيل الدخول';
+        throw new Error(errorMessage);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
