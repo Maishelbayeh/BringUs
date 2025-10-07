@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
 import { getAuthHeaders } from '../utils/apiUtils';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 export interface OrderPercentageData {
   totalOrders: number;
@@ -24,6 +26,7 @@ const useOrderPercentage = (): UseOrderPercentageReturn => {
   const [orderPercentage, setOrderPercentage] = useState<OrderPercentageData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isRTL } = useLanguage();
 
   const fetchOrderPercentage = useCallback(async () => {
     setLoading(true);
@@ -50,11 +53,11 @@ const useOrderPercentage = (): UseOrderPercentageReturn => {
       }
     } catch (err: any) {
       console.error('❌ خطأ في جلب نسبة الطلبات:', err);
-      const errorMessage = err?.response?.data?.message || 
-                          err?.response?.data?.error || 
-                          err?.message || 
-                          'حدث خطأ أثناء جلب نسبة الطلبات';
-      setError(errorMessage);
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب نسبة الطلبات' : 'Error Fetching Order Percentage',
+        message: isRTL ? 'فشل في جلب نسبة الطلبات' : 'Failed to fetch order percentage'
+      });
+      setError(errorMsg.message);
     } finally {
       setLoading(false);
     }

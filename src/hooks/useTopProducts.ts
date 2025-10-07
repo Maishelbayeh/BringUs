@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
 import { getAuthHeaders } from '../utils/apiUtils';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 export interface TopProduct {
   _id: string;
@@ -31,6 +33,7 @@ const useTopProducts = (): UseTopProductsReturn => {
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isRTL } = useLanguage();
 
   const fetchTopProducts = useCallback(async () => {
     setLoading(true);
@@ -57,11 +60,11 @@ const useTopProducts = (): UseTopProductsReturn => {
       }
     } catch (err: any) {
       console.error('❌ خطأ في جلب المنتجات الأكثر مبيعاً:', err);
-      const errorMessage = err?.response?.data?.message || 
-                          err?.response?.data?.error || 
-                          err?.message || 
-                          'حدث خطأ أثناء جلب المنتجات الأكثر مبيعاً';
-      setError(errorMessage);
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب المنتجات' : 'Error Fetching Top Products',
+        message: isRTL ? 'فشل في جلب المنتجات الأكثر مبيعاً' : 'Failed to fetch top products'
+      });
+      setError(errorMsg.message);
     } finally {
       setLoading(false);
     }

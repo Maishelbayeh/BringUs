@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 import { getStoreId } from '../utils/storeUtils';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 
 const useProductSpecifications = () => {
@@ -12,6 +14,7 @@ const useProductSpecifications = () => {
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
  
 
   // جلب جميع مواصفات المنتجات
@@ -98,7 +101,7 @@ const useProductSpecifications = () => {
   // حذف مواصفة منتج
   const deleteSpecification = async (specificationId: string | number) => {
     try {
-      await axios.delete(`${BASE_URL}meta/product-specifications/${specificationId}`);
+      await axios.delete(`${BASE_URL}meta/product-specifications/${specificationId}?storeId=${getStoreId()}`);
       //CONSOLE.log('Specification deleted successfully:', response.data);
       showSuccess(t('products.success.deleteSuccess'), t('general.success'));
       // تحديث القائمة فقط
@@ -107,15 +110,24 @@ const useProductSpecifications = () => {
     } catch (err: any) {
       //CONSOLE.error('Error deleting specification:', err);
       
-      // معالجة أخطاء التحقق من الـAPI
-      if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`${t('products.errors.validationError')}: ${validationErrors}`, t('general.error'));
-      } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.errors.deleteError');
-        showError(errorMessage, t('general.error'));
-      }
+      // Handle API error messages with language support
       
+      // Check if this is a "specification in use" error with detailed information
+      if (err?.response?.data?.details?.connectedProducts) {
+        const errorMessage = isRTL && err.response.data.messageAr 
+          ? err.response.data.messageAr 
+          : err.response.data.message || err.response.data.error;
+        
+        showError(errorMessage, isRTL ? 'خطأ في حذف مواصفة المنتج' : 'Error Deleting Product Specification');
+      } else {
+        // Handle other types of errors
+        const errorMsg = getErrorMessage(err, isRTL, {
+          title: isRTL ? 'خطأ في حذف مواصفة المنتج' : 'Error Deleting Product Specification',
+          message: isRTL ? 'فشل في حذف مواصفة المنتج' : 'Failed to delete product specification'
+        });
+        
+        showError(errorMsg.message, t('general.error'));
+      }
       throw err;
     }
   };

@@ -9,6 +9,7 @@ interface StoreContextType {
   setStoreSlug: (slug: string) => void;
   loading: boolean;
   error: string | null;
+  isInitialized: boolean;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -16,7 +17,17 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export const useStoreContext = () => {
   const context = useContext(StoreContext);
   if (context === undefined) {
-    throw new Error('useStoreContext must be used within a StoreProvider');
+    console.error('useStoreContext must be used within a StoreProvider');
+    // Return a fallback context instead of throwing
+    return {
+      currentStore: null,
+      storeSlug: null,
+      setCurrentStore: () => {},
+      setStoreSlug: () => {},
+      loading: false,
+      error: 'StoreContext not available',
+      isInitialized: false
+    };
   }
   return context;
 };
@@ -28,25 +39,34 @@ interface StoreProviderProps {
 export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
   const [currentStore, setCurrentStore] = useState<any>(null);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const { loading, error } = useStore();
 
   // Function to update store data from localStorage
   const updateStoreFromStorage = () => {
-    const storeData = getStoreData();
-    const storeId = getStoreId();
-    
-    console.log('StoreContext - updateStoreFromStorage - storeData:', storeData);
-    console.log('StoreContext - updateStoreFromStorage - storeId:', storeId);
-    
-    if (storeData.info) {
-      setCurrentStore(storeData.info);
-      setStoreSlug(storeData.info.slug);
-      console.log('StoreContext - Setting storeSlug to:', storeData.info.slug);
-    } else {
-      // Clear store data if no store info found
+    try {
+      const storeData = getStoreData();
+      const storeId = getStoreId();
+      
+      console.log('StoreContext - updateStoreFromStorage - storeData:', storeData);
+      console.log('StoreContext - updateStoreFromStorage - storeId:', storeId);
+      
+      if (storeData.info) {
+        setCurrentStore(storeData.info);
+        setStoreSlug(storeData.info.slug);
+        console.log('StoreContext - Setting storeSlug to:', storeData.info.slug);
+      } else {
+        // Clear store data if no store info found
+        setCurrentStore(null);
+        setStoreSlug(null);
+        console.log('StoreContext - No store data found, clearing storeSlug');
+      }
+    } catch (error) {
+      console.error('Error updating store from storage:', error);
       setCurrentStore(null);
       setStoreSlug(null);
-      console.log('StoreContext - No store data found, clearing storeSlug');
+    } finally {
+      setIsInitialized(true);
     }
   };
 
@@ -101,6 +121,7 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
     setStoreSlug: handleSetStoreSlug,
     loading,
     error,
+    isInitialized,
   };
 
   return (

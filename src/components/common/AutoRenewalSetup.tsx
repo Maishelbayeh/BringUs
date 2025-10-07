@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useUserStore } from '@/hooks/useUserStore';
 import { useToastContext } from '@/contexts/ToastContext';
+import { getErrorMessage, getPredefinedErrorMessage } from '@/utils/errorUtils';
+import { getAuthToken } from '@/utils/authUtils';
 
 interface AutoRenewalSetupProps {
   isOpen: boolean;
@@ -86,11 +88,11 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
       };
 
       const response = await axios.post(
-        `https://bringus-backend.onrender.com/api/subscription/stores/${storeId}`,
+        `https://bringus-backend.onrender.com/subscription/stores/${storeId}`,
         subscriptionData,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Authorization': `Bearer ${getAuthToken()}`,
             'Content-Type': 'application/json'
           }
         }
@@ -99,10 +101,17 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
         onClose();
         onClose();
 
-        showSuccess(t('subscription.setupSuccess'), t('subscription.setupSuccessMessage'));
+        // Show success message using utility function
+        const successMsg = getPredefinedErrorMessage('SUBSCRIPTION_SETUP_SUCCESS', isRTL);
+        showSuccess(successMsg.title, successMsg.message);
         onClose();
       }else{
-        showError(t('subscription.setupError'), response.data.message);
+        // Handle error response with language support using utility function
+        const errorMsg = getErrorMessage(response.data, isRTL, {
+          title: isRTL ? 'خطأ في الإعداد' : 'Setup Error',
+          message: isRTL ? 'فشل في إعداد الاشتراك' : 'Failed to setup subscription'
+        });
+        showError(errorMsg.title, errorMsg.message);
       }
       
       // حفظ إعدادات التجديد التلقائي في localStorage
@@ -116,7 +125,14 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
 
     } catch (error: any) {
       console.error('Error setting up subscription:', error);
-      showError(t('subscription.setupError'), error.response?.data?.message || 'Failed to setup subscription');
+      
+      // Handle error messages using utility function
+      const errorMsg = getErrorMessage(error, isRTL, {
+        title: isRTL ? 'خطأ في الإعداد' : 'Setup Error',
+        message: isRTL ? 'فشل في إعداد الاشتراك' : 'Failed to setup subscription'
+      });
+      
+      showError(errorMsg.title, errorMsg.message);
     } finally {
       setIsLoading(false);
     }

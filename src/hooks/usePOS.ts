@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 import { POS_API_ENDPOINTS, getPOSApiHeaders } from '../constants/posApi';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 export interface POSCart {
   _id: string;
@@ -95,6 +97,7 @@ export function usePOS(): UsePOSResult {
   const [currentCart, setCurrentCart] = useState<POSCart | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const { isRTL } = useLanguage();
 
   // Use the centralized headers function
   const getAuthHeaders = getPOSApiHeaders;
@@ -132,9 +135,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to create cart';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إنشاء السلة' : 'Error Creating Cart',
+        message: isRTL ? 'فشل في إنشاء سلة جديدة' : 'Failed to create new cart'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -174,9 +180,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to get cart';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب السلة' : 'Error Getting Cart',
+        message: isRTL ? 'فشل في جلب السلة' : 'Failed to get cart'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -206,9 +215,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to get carts';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب السلات' : 'Error Getting Carts',
+        message: isRTL ? 'فشل في جلب قائمة السلات' : 'Failed to get carts list'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -259,9 +271,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to add item to cart';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إضافة المنتج' : 'Error Adding Item',
+        message: isRTL ? 'فشل في إضافة المنتج للسلة' : 'Failed to add item to cart'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -298,9 +313,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to update cart item';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث المنتج' : 'Error Updating Item',
+        message: isRTL ? 'فشل في تحديث كمية المنتج' : 'Failed to update cart item'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -336,9 +354,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to remove item from cart';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف المنتج' : 'Error Removing Item',
+        message: isRTL ? 'فشل في حذف المنتج من السلة' : 'Failed to remove item from cart'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -375,9 +396,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to update customer info';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث بيانات العميل' : 'Error Updating Customer Info',
+        message: isRTL ? 'فشل في تحديث بيانات العميل' : 'Failed to update customer info'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -414,9 +438,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to apply discount';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تطبيق الخصم' : 'Error Applying Discount',
+        message: isRTL ? 'فشل في تطبيق الخصم' : 'Failed to apply discount'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -452,9 +479,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to clear cart';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في مسح السلة' : 'Error Clearing Cart',
+        message: isRTL ? 'فشل في مسح السلة' : 'Failed to clear cart'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -481,9 +511,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to delete cart';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف السلة' : 'Error Deleting Cart',
+        message: isRTL ? 'فشل في حذف السلة' : 'Failed to delete cart'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }
@@ -516,9 +549,12 @@ export function usePOS(): UsePOSResult {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to complete cart';
-      setError(errorMessage);
-      return { success: false, message: errorMessage };
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إكمال الطلب' : 'Error Completing Cart',
+        message: isRTL ? 'فشل في إكمال الطلب' : 'Failed to complete cart'
+      });
+      setError(errorMsg.message);
+      return { success: false, message: errorMsg.message };
     } finally {
       setIsLoading(false);
     }

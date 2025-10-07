@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { BASE_URL } from '../constants/api';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 // Types
 export interface StoreSlider {
   _id: string;
@@ -39,6 +41,7 @@ export const useStoreSlider = () => {
   const [storeSliders, setStoreSliders] = useState<StoreSlider[]>([]);
   const [activeSliders, setActiveSliders] = useState<StoreSlider[]>([]);
   const [activeVideos, setActiveVideos] = useState<StoreSlider[]>([]);
+  const { isRTL } = useLanguage();
 
   // Get Store ID from localStorage
   const getStoreId = useCallback(() => {
@@ -70,9 +73,12 @@ export const useStoreSlider = () => {
       } else {
         throw new Error(data.message || 'Failed to fetch store sliders');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب السلايدر' : 'Error Fetching Sliders',
+        message: isRTL ? 'فشل في جلب قائمة السلايدر' : 'Failed to fetch store sliders'
+      });
+      setError(errorMsg.message);
       console.error('Error fetching store sliders:', err);
       return null;
     } finally {
@@ -103,9 +109,12 @@ export const useStoreSlider = () => {
       } else {
         throw new Error(data.message || 'Failed to fetch store slider');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب السلايدر' : 'Error Fetching Slider',
+        message: isRTL ? 'فشل في جلب بيانات السلايدر' : 'Failed to fetch store slider'
+      });
+      setError(errorMsg.message);
       console.error('Error fetching store slider:', err);
       return null;
     } finally {
@@ -190,9 +199,12 @@ export const useStoreSlider = () => {
       } else {
         throw new Error(responseData.message || 'Failed to create store slider');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إنشاء السلايدر' : 'Error Creating Slider',
+        message: isRTL ? 'فشل في إنشاء سلايدر المتجر' : 'Failed to create store slider'
+      });
+      setError(errorMsg.message);
       console.error('Error creating store slider:', err);
       return null;
     } finally {
@@ -232,9 +244,12 @@ export const useStoreSlider = () => {
       } else {
         throw new Error(responseData.message || 'Failed to update store slider');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث السلايدر' : 'Error Updating Slider',
+        message: isRTL ? 'فشل في تحديث سلايدر المتجر' : 'Failed to update store slider'
+      });
+      setError(errorMsg.message);
       console.error('Error updating store slider:', err);
       return null;
     } finally {
@@ -267,9 +282,12 @@ export const useStoreSlider = () => {
       } else {
         throw new Error(data.message || 'Failed to delete store slider');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف السلايدر' : 'Error Deleting Slider',
+        message: isRTL ? 'فشل في حذف سلايدر المتجر' : 'Failed to delete store slider'
+      });
+      setError(errorMsg.message);
       console.error('Error deleting store slider:', err);
       return false;
     } finally {
@@ -302,9 +320,12 @@ export const useStoreSlider = () => {
       } else {
         throw new Error(data.message || 'Failed to toggle active status');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تغيير الحالة' : 'Error Toggling Status',
+        message: isRTL ? 'فشل في تغيير حالة السلايدر' : 'Failed to toggle active status'
+      });
+      setError(errorMsg.message);
       console.error('Error toggling active status:', err);
       return null;
     } finally {

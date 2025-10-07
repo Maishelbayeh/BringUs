@@ -24,7 +24,7 @@
 - `currency*` - العملة (ILS, JOD, USD)
 - `first_name*` - الاسم الأول
 - `last_name*` - الاسم الأخير
-- `callback_url` - رابط العودة (http://localhost:5173/)
+- `callback_url` - رابط العودة (http://localhost:5174/)
 - `metadata` - بيانات إضافية (storeId, userId)
 
 ## تحويل العملات

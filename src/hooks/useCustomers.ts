@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
 import { handleApiError } from '../utils/handleApiError';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 export interface RawCustomer {
   _id: string;
@@ -200,6 +202,7 @@ export const useCustomers = (): UseCustomersReturn => {
   const [pagination, setPagination] = useState<CustomersResponse['pagination'] | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const token = localStorage.getItem('token');
+  const { isRTL } = useLanguage();
   const fetchCustomers = useCallback(async (
     storeId: string,
     forceRefresh: boolean = false,
@@ -246,9 +249,12 @@ export const useCustomers = (): UseCustomersReturn => {
       } else {
         throw new Error('Failed to fetch customers');
       }
-    } catch (err) {
-      const errorMessage = handleApiError(err);
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب العملاء' : 'Error Fetching Customers',
+        message: isRTL ? 'فشل في جلب قائمة العملاء' : 'Failed to fetch customers list'
+      });
+      setError(errorMsg.message);
       //CONSOLE.error('Error fetching customers:', err);
     } finally {
       setLoading(false);
@@ -269,9 +275,12 @@ export const useCustomers = (): UseCustomersReturn => {
       } else {
         throw new Error('Failed to delete customer');
       }
-    } catch (err) {
-      const errorMessage = handleApiError(err);
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف العميل' : 'Error Deleting Customer',
+        message: isRTL ? 'فشل في حذف العميل' : 'Failed to delete customer'
+      });
+      setError(errorMsg.message);
       //CONSOLE.error('Error deleting customer:', err);
       return false;
     }
@@ -290,9 +299,12 @@ export const useCustomers = (): UseCustomersReturn => {
       } else {
         throw new Error('Failed to update customer');
       }
-    } catch (err) {
-      const errorMessage = handleApiError(err);
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث العميل' : 'Error Updating Customer',
+        message: isRTL ? 'فشل في تحديث العميل' : 'Failed to update customer'
+      });
+      setError(errorMsg.message);
       //CONSOLE.error('Error updating customer:', err);
       return false;
     }
@@ -309,9 +321,12 @@ export const useCustomers = (): UseCustomersReturn => {
       } else {
         throw new Error('Failed to create customer');
       }
-    } catch (err) {
-      const errorMessage = handleApiError(err);
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إنشاء العميل' : 'Error Creating Customer',
+        message: isRTL ? 'فشل في إنشاء العميل' : 'Failed to create customer'
+      });
+      setError(errorMsg.message);
       //CONSOLE.error('Error creating customer:', err);
       return false;
     }
@@ -343,9 +358,12 @@ export const useCustomers = (): UseCustomersReturn => {
       } else {
         throw new Error('Failed to fetch customer orders');
       }
-    } catch (err) {
-      const errorMessage = handleApiError(err);
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب طلبات العميل' : 'Error Fetching Customer Orders',
+        message: isRTL ? 'فشل في جلب طلبات العميل' : 'Failed to fetch customer orders'
+      });
+      setError(errorMsg.message);
       console.error('Error fetching customer orders:', err);
       return [];
     }
@@ -377,9 +395,12 @@ export const useCustomers = (): UseCustomersReturn => {
       } else {
         throw new Error('Failed to fetch guest orders');
       }
-    } catch (err) {
-      const errorMessage = handleApiError(err);
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب طلبات الضيف' : 'Error Fetching Guest Orders',
+        message: isRTL ? 'فشل في جلب طلبات الضيف' : 'Failed to fetch guest orders'
+      });
+      setError(errorMsg.message);
       console.error('Error fetching guest orders:', err);
       return [];
     }

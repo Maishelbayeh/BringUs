@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 // Import the store utility function
 import { getStoreId } from '../utils/storeUtils';
@@ -15,6 +17,7 @@ const useProducts = () => {
   const [hasError, setHasError] = useState(false); // لتتبع وجود خطأ
   const { showSuccess, showError } = useToastContext();
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
 
   // جلب جميع المنتجات
   const fetchProducts = useCallback(async (forceRefresh: boolean = false) => {
@@ -69,8 +72,14 @@ const useProducts = () => {
       return res.data.data || res.data;
     } catch (err: any) {
       //CONSOLE.error('Error fetching products:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.fetchError');
-      showError(errorMessage);
+      
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب المنتجات' : 'Error Fetching Products',
+        message: isRTL ? 'فشل في جلب قائمة المنتجات' : 'Failed to fetch products list'
+      });
+      
+      showError(errorMsg.message);
       // تعيين حالة الخطأ لمنع الاستدعاءات المتكررة
       setHasError(true);
       setHasLoaded(false);
@@ -310,27 +319,51 @@ const useProducts = () => {
       //CONSOLE.error('Request payload:', payload);
       //CONSOLE.error('Response data:', err?.response?.data);
       
+      // Handle API error messages with language support
+      
       // معالجة أخطاء التحقق من الـAPI
       if (err?.response?.data?.errors) {
         const errors = err.response.data.errors;
         if (Array.isArray(errors)) {
           errors.forEach((error: any) => {
-            if (error.msg) showError(error.msg, t('general.error'));
-            else if (typeof error === 'string') showError(error, t('general.error'));
+            if (error.msg) {
+              const errorMsg = getErrorMessage({ response: { data: { message: error.msg } } }, isRTL, {
+                title: isRTL ? 'خطأ في البيانات' : 'Data Error',
+                message: error.msg
+              });
+              showError(errorMsg.message, t('general.error'));
+            } else if (typeof error === 'string') {
+              const errorMsg = getErrorMessage({ response: { data: { message: error } } }, isRTL, {
+                title: isRTL ? 'خطأ في البيانات' : 'Data Error',
+                message: error
+              });
+              showError(errorMsg.message, t('general.error'));
+            }
           });
         } else if (typeof errors === 'object') {
           Object.values(errors).forEach((msg: any) => {
-            if (msg) showError(msg, t('general.error'));
+            if (msg) {
+              const errorMsg = getErrorMessage({ response: { data: { message: msg } } }, isRTL, {
+                title: isRTL ? 'خطأ في البيانات' : 'Data Error',
+                message: msg
+              });
+              showError(errorMsg.message, t('general.error'));
+            }
           });
         } else if (typeof errors === 'string') {
-          showError(errors, t('general.error'));
+          const errorMsg = getErrorMessage({ response: { data: { message: errors } } }, isRTL, {
+            title: isRTL ? 'خطأ في البيانات' : 'Data Error',
+            message: errors
+          });
+          showError(errorMsg.message, t('general.error'));
         }
-      } else if (err?.response?.data?.error) {
-        showError(err.response.data.error, t('general.error'));
-      } else if (err?.response?.data?.message) {
-        showError(err.response.data.message, t('general.error'));
       } else {
-        showError(t('products.productErrors.unexpectedError'), t('general.error'));
+        // Handle single error message with language support
+        const errorMsg = getErrorMessage(err, isRTL, {
+          title: isRTL ? 'خطأ في حفظ المنتج' : 'Error Saving Product',
+          message: isRTL ? 'فشل في حفظ المنتج' : 'Failed to save product'
+        });
+        showError(errorMsg.message, t('general.error'));
       }
       
       throw err;
@@ -349,29 +382,13 @@ const useProducts = () => {
     } catch (err: any) {
       //CONSOLE.error('Error deleting product:', err);
       
-      // معالجة أخطاء التحقق من الـAPI
-      if (err?.response?.data?.errors) {
-        const errors = err.response.data.errors;
-        if (Array.isArray(errors)) {
-          errors.forEach((error: any) => {
-            if (error.msg) showError(error.msg, t('general.error'));
-            else if (typeof error === 'string') showError(error, t('general.error'));
-          });
-        } else if (typeof errors === 'object') {
-          Object.values(errors).forEach((msg: any) => {
-            if (msg) showError(msg, t('general.error'));
-          });
-        } else if (typeof errors === 'string') {
-          showError(errors, t('general.error'));
-        }
-      } else if (err?.response?.data?.error) {
-        showError(err.response.data.error, t('general.error'));
-      } else if (err?.response?.data?.message) {
-        showError(err.response.data.message, t('general.error'));
-      } else {
-        showError(t('products.productErrors.unexpectedError'), t('general.error'));
-      }
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف المنتج' : 'Error Deleting Product',
+        message: isRTL ? 'فشل في حذف المنتج' : 'Failed to delete product'
+      });
       
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };
@@ -394,8 +411,14 @@ const useProducts = () => {
       return response.data.imageUrl || response.data.data?.url;
     } catch (err: any) {
       //CONSOLE.error('Error uploading product image:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.uploadImageError');
-      showError(errorMessage, t('general.error'));
+      
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في رفع الصورة' : 'Error Uploading Image',
+        message: isRTL ? 'فشل في رفع صورة المنتج' : 'Failed to upload product image'
+      });
+      
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };
@@ -421,8 +444,14 @@ const useProducts = () => {
       return images.map((img: any) => img.imageUrl || img.url);
     } catch (err: any) {
       //CONSOLE.error('Error uploading product images:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.uploadImagesError');
-      showError(errorMessage, t('general.error'));
+      
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في رفع الصور' : 'Error Uploading Images',
+        message: isRTL ? 'فشل في رفع صور المنتج' : 'Failed to upload product images'
+      });
+      
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };
@@ -445,8 +474,14 @@ const useProducts = () => {
       return response.data.imageUrl || response.data.data?.url;
     } catch (err: any) {
       //CONSOLE.error('Error uploading single image:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.uploadImageError');
-      showError(errorMessage, t('general.error'));
+      
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في رفع الصورة' : 'Error Uploading Image',
+        message: isRTL ? 'فشل في رفع الصورة' : 'Failed to upload image'
+      });
+      
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };
@@ -469,8 +504,13 @@ const useProducts = () => {
       
       return imageUrl;
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.uploadMainImageError');
-      showError(errorMessage, t('general.error'));
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في رفع الصورة الأساسية' : 'Error Uploading Main Image',
+        message: isRTL ? 'فشل في رفع الصورة الأساسية للمنتج' : 'Failed to upload main product image'
+      });
+      
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };
@@ -745,27 +785,51 @@ const useProducts = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
+        
+        // Handle API error messages with language support
+        
         // Show all validation errors
         if (errorData?.errors) {
           const errors = errorData.errors;
           if (Array.isArray(errors)) {
             errors.forEach((error: any) => {
-              if (error.msg) showError(error.msg, 'خطأ في البيانات');
-              else if (typeof error === 'string') showError(error, 'خطأ في البيانات');
+              if (error.msg) {
+                const errorMsg = getErrorMessage({ response: { data: { message: error.msg } } }, isRTL, {
+                  title: isRTL ? 'خطأ في البيانات' : 'Data Error',
+                  message: error.msg
+                });
+                showError(errorMsg.message, isRTL ? 'خطأ في البيانات' : 'Data Error');
+              } else if (typeof error === 'string') {
+                const errorMsg = getErrorMessage({ response: { data: { message: error } } }, isRTL, {
+                  title: isRTL ? 'خطأ في البيانات' : 'Data Error',
+                  message: error
+                });
+                showError(errorMsg.message, isRTL ? 'خطأ في البيانات' : 'Data Error');
+              }
             });
           } else if (typeof errors === 'object') {
             Object.values(errors).forEach((msg: any) => {
-              if (msg) showError(msg, t('general.error'));
+              if (msg) {
+                const errorMsg = getErrorMessage({ response: { data: { message: msg } } }, isRTL, {
+                  title: isRTL ? 'خطأ في البيانات' : 'Data Error',
+                  message: msg
+                });
+                showError(errorMsg.message, t('general.error'));
+              }
             });
           } else if (typeof errors === 'string') {
-            showError(errors, t('general.error'));
+            const errorMsg = getErrorMessage({ response: { data: { message: errors } } }, isRTL, {
+              title: isRTL ? 'خطأ في البيانات' : 'Data Error',
+              message: errors
+            });
+            showError(errorMsg.message, t('general.error'));
           }
-        } else if (errorData?.error) {
-          showError(errorData.error, 'خطأ في البيانات');
-        } else if (errorData?.message) {
-          showError(errorData.message, 'خطأ في البيانات');
         } else {
-          showError(t('products.productErrors.unexpectedError'), t('general.error'));
+          const errorMsg = getErrorMessage({ response: { data: errorData } }, isRTL, {
+            title: isRTL ? 'خطأ في إضافة المتغير' : 'Error Adding Variant',
+            message: isRTL ? 'فشل في إضافة متغير المنتج' : 'Failed to add product variant'
+          });
+          showError(errorMsg.message, isRTL ? 'خطأ في البيانات' : 'Data Error');
         }
         throw new Error(errorData.message || 'Failed to add variant');
       }
@@ -800,28 +864,14 @@ const useProducts = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        // Show all validation errors
-        if (errorData?.errors) {
-          const errors = errorData.errors;
-          if (Array.isArray(errors)) {
-            errors.forEach((error: any) => {
-              if (error.msg) showError(error.msg, 'خطأ في الحذف');
-              else if (typeof error === 'string') showError(error, 'خطأ في الحذف');
-            });
-          } else if (typeof errors === 'object') {
-            Object.values(errors).forEach((msg: any) => {
-              if (msg) showError(msg, t('general.error'));
-            });
-          } else if (typeof errors === 'string') {
-            showError(errors, t('general.error'));
-          }
-        } else if (errorData?.error) {
-          showError(errorData.error, 'خطأ في الحذف');
-        } else if (errorData?.message) {
-          showError(errorData.message, 'خطأ في الحذف');
-        } else {
-          showError(t('products.productErrors.unexpectedError'), t('general.error'));
-        }
+        
+        // Handle API error messages with language support
+        const errorMsg = getErrorMessage({ response: { data: errorData } }, isRTL, {
+          title: isRTL ? 'خطأ في حذف المتغير' : 'Error Deleting Variant',
+          message: isRTL ? 'فشل في حذف متغير المنتج' : 'Failed to delete product variant'
+        });
+        
+        showError(errorMsg.message, isRTL ? 'خطأ في الحذف' : 'Delete Error');
         throw new Error(errorData.message || 'Failed to delete variant');
       }
       
@@ -1019,28 +1069,14 @@ const useProducts = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        // Show all validation errors
-        if (errorData?.errors) {
-          const errors = errorData.errors;
-          if (Array.isArray(errors)) {
-            errors.forEach((error: any) => {
-              if (error.msg) showError(error.msg, 'خطأ في البيانات');
-              else if (typeof error === 'string') showError(error, 'خطأ في البيانات');
-            });
-          } else if (typeof errors === 'object') {
-            Object.values(errors).forEach((msg: any) => {
-              if (msg) showError(msg, t('general.error'));
-            });
-          } else if (typeof errors === 'string') {
-            showError(errors, t('general.error'));
-          }
-        } else if (errorData?.error) {
-          showError(errorData.error, 'خطأ في البيانات');
-        } else if (errorData?.message) {
-          showError(errorData.message, 'خطأ في البيانات');
-        } else {
-          showError(t('products.productErrors.unexpectedError'), t('general.error'));
-        }
+        
+        // Handle API error messages with language support
+        const errorMsg = getErrorMessage({ response: { data: errorData } }, isRTL, {
+          title: isRTL ? 'خطأ في تحديث المتغير' : 'Error Updating Variant',
+          message: isRTL ? 'فشل في تحديث متغير المنتج' : 'Failed to update product variant'
+        });
+        
+        showError(errorMsg.message, isRTL ? 'خطأ في البيانات' : 'Data Error');
         throw new Error(errorData.message || 'Failed to update variant');
       }
       
@@ -1069,8 +1105,13 @@ const useProducts = () => {
       }
       return [];
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.fetchVariantsError');
-      showError(errorMessage);
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب المتغيرات' : 'Error Fetching Variants',
+        message: isRTL ? 'فشل في جلب متغيرات المنتج' : 'Failed to fetch product variants'
+      });
+      
+      showError(errorMsg.message);
       return [];
     }
   };
@@ -1094,8 +1135,13 @@ const useProducts = () => {
       
       throw new Error('Failed to add colors');
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.addColorsError');
-      showError(errorMessage, t('general.error'));
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إضافة الألوان' : 'Error Adding Colors',
+        message: isRTL ? 'فشل في إضافة ألوان المنتج' : 'Failed to add product colors'
+      });
+      
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };
@@ -1121,8 +1167,13 @@ const useProducts = () => {
       
       throw new Error('Failed to remove colors');
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.removeColorsError');
-      showError(errorMessage, t('general.error'));
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف الألوان' : 'Error Removing Colors',
+        message: isRTL ? 'فشل في حذف ألوان المنتج' : 'Failed to remove product colors'
+      });
+      
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };
@@ -1146,8 +1197,13 @@ const useProducts = () => {
       
       throw new Error('Failed to replace colors');
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('products.productErrors.replaceColorsError');
-      showError(errorMessage, t('general.error'));
+      // Handle API error messages with language support
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في استبدال الألوان' : 'Error Replacing Colors',
+        message: isRTL ? 'فشل في استبدال ألوان المنتج' : 'Failed to replace product colors'
+      });
+      
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };

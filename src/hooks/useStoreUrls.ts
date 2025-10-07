@@ -2,7 +2,25 @@ import { useStoreContext } from '../contexts/StoreContext';
 import { useAuth } from './useAuth';
 
 export const useStoreUrls = () => {
-  const { storeSlug } = useStoreContext();
+  // Add safety check for context
+  let storeSlug: string | null = null;
+  try {
+    const context = useStoreContext();
+    storeSlug = context.storeSlug;
+  } catch (error) {
+    console.warn('StoreContext not available, using fallback storeSlug');
+    // Fallback to localStorage if context is not available
+    const storeData = localStorage.getItem('storeInfo');
+    if (storeData) {
+      try {
+        const parsed = JSON.parse(storeData);
+        storeSlug = parsed.slug || null;
+      } catch (e) {
+        console.error('Error parsing storeInfo from localStorage:', e);
+      }
+    }
+  }
+  
   const { isAuthenticatedSuperAdmin } = useAuth();
 
   const generateUrl = (path: string): string => {

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 import { getStoreId } from './useLocalStorage';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 const useProductLabel = () => {
   const [productLabels, setProductLabels] = useState<any[]>([]);
@@ -11,6 +13,7 @@ const useProductLabel = () => {
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const STORE_ID = getStoreId() || '';
   // جلب جميع مواصفات المنتجات
   const fetchProductLabels = useCallback(async (forceRefresh: boolean = false) => {
@@ -87,7 +90,7 @@ const useProductLabel = () => {
   // حذف وحدة
   const deleteProductLabel = async (productLabelId: string | number) => {
     try {
-      await axios.delete(`${BASE_URL}meta/product-labels/${productLabelId}`);
+      await axios.delete(`${BASE_URL}meta/product-labels/${productLabelId}?storeId=${STORE_ID}`);
       //CONSOLE.log('Product label deleted successfully:', response.data);
       showSuccess(t('productsLabels.success.deleteSuccess'), t('general.success'));
       // تحديث القائمة فقط
@@ -96,15 +99,24 @@ const useProductLabel = () => {
     } catch (err: any) {
       //CONSOLE.error('Error deleting product label:', err);
       
-      // معالجة أخطاء التحقق من الـAPI
-      if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`${t('productsLabels.errors.validationError')}: ${validationErrors}`, t('general.error'));
-      } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('productsLabels.errors.deleteError');
-        showError(errorMessage, t('general.error'));
-      }
+      // Handle API error messages with language support
       
+      // Check if this is a "label in use" error with detailed information
+      if (err?.response?.data?.details?.connectedProducts) {
+        const errorMessage = isRTL && err.response.data.messageAr 
+          ? err.response.data.messageAr 
+          : err.response.data.message || err.response.data.error;
+        
+        showError(errorMessage, isRTL ? 'خطأ في حذف تسمية المنتج' : 'Error Deleting Product Label');
+      } else {
+        // Handle other types of errors
+        const errorMsg = getErrorMessage(err, isRTL, {
+          title: isRTL ? 'خطأ في حذف تسمية المنتج' : 'Error Deleting Product Label',
+          message: isRTL ? 'فشل في حذف تسمية المنتج' : 'Failed to delete product label'
+        });
+        
+        showError(errorMsg.message, t('general.error'));
+      }
       throw err;
     }
   };

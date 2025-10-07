@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 interface TermsConditions {
   _id: string;
@@ -32,6 +34,7 @@ export const useTermsConditions = (storeId: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { showSuccess, showError } = useToastContext();
+  const { isRTL } = useLanguage();
 
   // Get token from localStorage
   const getToken = () => {
@@ -88,11 +91,14 @@ export const useTermsConditions = (storeId: string) => {
         showSuccess('Terms & conditions loaded successfully');
       }
       return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load terms & conditions';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحميل الشروط والأحكام' : 'Error Loading Terms',
+        message: isRTL ? 'فشل في تحميل الشروط والأحكام' : 'Failed to load terms & conditions'
+      });
+      setError(errorMsg.message);
       if (showToast) {
-        showError(errorMessage);
+        showError(errorMsg.message);
       }
       throw err;
     } finally {
@@ -126,11 +132,14 @@ export const useTermsConditions = (storeId: string) => {
         showSuccess('Terms & conditions created successfully');
       }
       return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create terms & conditions';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إنشاء الشروط والأحكام' : 'Error Creating Terms',
+        message: isRTL ? 'فشل في إنشاء الشروط والأحكام' : 'Failed to create terms & conditions'
+      });
+      setError(errorMsg.message);
       if (showToast) {
-        showError(errorMessage);
+        showError(errorMsg.message);
       }
       throw err;
     } finally {
@@ -164,11 +173,14 @@ export const useTermsConditions = (storeId: string) => {
         showSuccess('Terms & conditions updated successfully');
       }
       return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update terms & conditions';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث الشروط والأحكام' : 'Error Updating Terms',
+        message: isRTL ? 'فشل في تحديث الشروط والأحكام' : 'Failed to update terms & conditions'
+      });
+      setError(errorMsg.message);
       if (showToast) {
-        showError(errorMessage);
+        showError(errorMsg.message);
       }
       throw err;
     } finally {

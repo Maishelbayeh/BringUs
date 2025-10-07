@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { BASE_URL } from '../constants/api';
 import { useToastContext } from '../contexts/ToastContext';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 export interface Advertisement {
   _id?: string;
@@ -27,6 +29,7 @@ export function useAdvertisements(storeId: string, token: string) {
   const [activeAd, setActiveAd] = useState<Advertisement | null>(null);
   const [pagination, setPagination] = useState<any>(null);
   const { showSuccess, showError } = useToastContext();
+  const { isRTL } = useLanguage();
 
   const API_BASE = `${BASE_URL}advertisements/stores/${storeId}/advertisements`;
 
@@ -47,7 +50,11 @@ export function useAdvertisements(storeId: string, token: string) {
       if (!res.ok) throw new Error(data.message || 'API Error');
       return data;
     } catch (err: any) {
-      setError(err.message || 'API Error');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في API' : 'API Error',
+        message: isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server'
+      });
+      setError(errorMsg.message);
       throw err;
     } finally {
       setLoading(false);
@@ -65,7 +72,11 @@ export function useAdvertisements(storeId: string, token: string) {
       setPagination(data.data.pagination || null);
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to fetch advertisements');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب الإعلانات' : 'Error Fetching Advertisements',
+        message: isRTL ? 'فشل في جلب قائمة الإعلانات' : 'Failed to fetch advertisements'
+      });
+      showError(errorMsg.message);
       throw err;
     }
   }, [API_BASE, fetchWithAuth, showError]);
@@ -78,7 +89,11 @@ export function useAdvertisements(storeId: string, token: string) {
       setActiveAd(data.data.data || data.data || null);
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to fetch active advertisement');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب الإعلان النشط' : 'Error Fetching Active Advertisement',
+        message: isRTL ? 'فشل في جلب الإعلان النشط' : 'Failed to fetch active advertisement'
+      });
+      showError(errorMsg.message);
       throw err;
     }
   }, [API_BASE, fetchWithAuth, showError]);
@@ -94,7 +109,11 @@ export function useAdvertisements(storeId: string, token: string) {
       showSuccess('Advertisement created successfully');
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to create advertisement');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إنشاء الإعلان' : 'Error Creating Advertisement',
+        message: isRTL ? 'فشل في إنشاء الإعلان' : 'Failed to create advertisement'
+      });
+      showError(errorMsg.message);
       throw err;
     }
   }, [API_BASE, fetchWithAuth, showSuccess, showError]);
@@ -110,7 +129,11 @@ export function useAdvertisements(storeId: string, token: string) {
       showSuccess('Advertisement updated successfully');
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to update advertisement');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث الإعلان' : 'Error Updating Advertisement',
+        message: isRTL ? 'فشل في تحديث الإعلان' : 'Failed to update advertisement'
+      });
+      showError(errorMsg.message);
       throw err;
     }
   }, [API_BASE, fetchWithAuth, showSuccess, showError]);
@@ -125,7 +148,11 @@ export function useAdvertisements(storeId: string, token: string) {
       showSuccess('Advertisement deleted successfully');
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to delete advertisement');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف الإعلان' : 'Error Deleting Advertisement',
+        message: isRTL ? 'فشل في حذف الإعلان' : 'Failed to delete advertisement'
+      });
+      showError(errorMsg.message);
       throw err;
     }
   }, [API_BASE, fetchWithAuth, showSuccess, showError]);
@@ -140,7 +167,11 @@ export function useAdvertisements(storeId: string, token: string) {
       showSuccess('Advertisement status updated successfully');
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to update advertisement status');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث حالة الإعلان' : 'Error Updating Advertisement Status',
+        message: isRTL ? 'فشل في تحديث حالة الإعلان' : 'Failed to update advertisement status'
+      });
+      showError(errorMsg.message);
       throw err;
     }
   }, [API_BASE, fetchWithAuth, showSuccess, showError]);

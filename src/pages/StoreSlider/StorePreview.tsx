@@ -3,13 +3,23 @@ import { useTranslation } from 'react-i18next';
 
 import CustomButton from '../../components/common/CustomButton';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
+import { getStoreInfo } from '../../utils/storeUtils';
 
+  
 const StorePreview: React.FC = () => {
     const { t, i18n } = useTranslation();
   
     const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
     const [device, setDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
-   
+    // Get store slug using the utility function
+    const storeInfo = getStoreInfo();
+    const currentStoreSlug = storeInfo?.slug || null;
+    
+    // Debug logging
+    console.log('🔍 StorePreview - storeInfo:', storeInfo);
+    console.log('🔍 StorePreview - currentStoreSlug:', currentStoreSlug);
+    console.log('🔍 StorePreview - iframe URL:', `https://bringus-main.onrender.com/${currentStoreSlug}/home`); 
+
     return (
         <div className="sm:p-4 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
             <CustomBreadcrumb items={[
@@ -51,7 +61,7 @@ const StorePreview: React.FC = () => {
                                 </div>
                                 <iframe
                                     id="previewFrame"
-                                    src="https://bringus.app/apex/f?p=345:29:1249936637431::::STORE_ID:22"
+                                    src={`https://bringus-main.onrender.com/${currentStoreSlug}/home`}
                                     title="Store Preview"
                                     style={{ flex: 1, width: '100%', height: '100%', border: 'none', borderRadius: '0 0 30px 30px' }}
                                 />
@@ -69,8 +79,7 @@ const StorePreview: React.FC = () => {
                                 </div>
                                 <iframe
                                     id="previewFrame"
-                                    src="https://bringus.app/apex/f?p=345:29:1249936637431::::STORE_ID:22"
-                                    title="Store Preview"
+                                    src={`https://bringus-main.onrender.com/${currentStoreSlug}/home`}                                    title="Store Preview"
                                     style={{ flex: 1, width: '100%', height: '100%', border: 'none', borderRadius: '0 0 20px 20px' }}
                                 />
                             </div>
@@ -83,8 +92,7 @@ const StorePreview: React.FC = () => {
                             <div className="desktop-mirror">
                                 <iframe
                                     id="previewFrame"
-                                    src="https://bringus.app/apex/f?p=345:29:1249936637431::::STORE_ID:22"
-                                    title="Store Preview"
+                                    src={`https://bringus-main.onrender.com/${currentStoreSlug}/home`}                                    title="Store Preview"
                                     style={{ flex: 1, width: '100%', height: '100%', border: 'none', borderRadius: '8px' }}
                                 />
                             </div>

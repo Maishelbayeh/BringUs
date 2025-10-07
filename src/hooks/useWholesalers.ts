@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { BASE_URL } from '../constants/api';
 import { useToastContext } from '../contexts/ToastContext';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 const API_BASE = `${BASE_URL}wholesalers`;
 
@@ -50,6 +52,7 @@ export function useWholesalers(storeId: string, token: string) {
   const [pagination, setPagination] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const { showSuccess, showError } = useToastContext();
+  const { isRTL } = useLanguage();
 
   // Helper for fetch with auth
   const fetchWithAuth = useCallback(async (url: string, options: any = {}) => {
@@ -68,7 +71,11 @@ export function useWholesalers(storeId: string, token: string) {
       if (!res.ok) throw new Error(data.message || 'API Error');
       return data;
     } catch (err: any) {
-      setError(err.message || 'API Error');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في API' : 'API Error',
+        message: isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server'
+      });
+      setError(errorMsg.message);
       throw err;
     } finally {
       setLoading(false);
@@ -87,7 +94,11 @@ export function useWholesalers(storeId: string, token: string) {
       setStats(data.data.stats || null);
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to fetch wholesalers');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب تجار الجملة' : 'Error Fetching Wholesalers',
+        message: isRTL ? 'فشل في جلب قائمة تجار الجملة' : 'Failed to fetch wholesalers list'
+      });
+      showError(errorMsg.message);
       throw err;
     }
   }, [storeId, fetchWithAuth, showError]);

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
 import { getAuthHeaders } from '../utils/apiUtils';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 export interface TopUser {
   userId: string;
@@ -25,6 +27,7 @@ const useTopUsers = (): UseTopUsersReturn => {
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isRTL } = useLanguage();
 
   const fetchTopUsers = useCallback(async () => {
     setLoading(true);
@@ -51,11 +54,11 @@ const useTopUsers = (): UseTopUsersReturn => {
       }
     } catch (err: any) {
       console.error('❌ خطأ في جلب المستخدمين الأكثر مبيعاً:', err);
-      const errorMessage = err?.response?.data?.message || 
-                          err?.response?.data?.error || 
-                          err?.message || 
-                          'حدث خطأ أثناء جلب المستخدمين الأكثر مبيعاً';
-      setError(errorMessage);
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب المستخدمين' : 'Error Fetching Top Users',
+        message: isRTL ? 'فشل في جلب المستخدمين الأكثر مبيعاً' : 'Failed to fetch top users'
+      });
+      setError(errorMsg.message);
     } finally {
       setLoading(false);
     }

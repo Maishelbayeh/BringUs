@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BASE_URL, LOGIN } from '../constants/api';
 import { updateUserData, updateStoreData, updateStoreId } from './useLocalStorage';
+import { saveAuthToken, saveUserInfo, saveStoreId, getAuthToken } from '../utils/authUtils';
 
 interface LoginResponse {
   success: boolean;
@@ -75,17 +76,14 @@ export const useAuth = () => {
       }
 
       if (data.success && data.userStatus === 'active') {
-        // Store token and user info based on rememberMe preference
+        // Store token and user info based on rememberMe preference using utility functions
+        saveAuthToken(data.token, credentials.rememberMe);
+        saveUserInfo(data.user, credentials.rememberMe);
+        
         if (credentials.rememberMe) {
-          // Persistent storage - survives browser restart
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('userInfo', JSON.stringify(data.user));
           localStorage.setItem('rememberMe', 'true');
           console.log('Token saved to localStorage (persistent)');
         } else {
-          // Session storage - cleared when browser closes
-          sessionStorage.setItem('token', data.token);
-          sessionStorage.setItem('userInfo', JSON.stringify(data.user));
           localStorage.removeItem('rememberMe');
           console.log('Token saved to sessionStorage (temporary)');
         }
@@ -97,6 +95,7 @@ export const useAuth = () => {
         if (data.user.role === 'admin' && data.user.store) {
           localStorage.setItem('isOwner', data.user.store.isOwner.toString());
           if (data.user.store?.id) {
+            saveStoreId(data.storeId, credentials.rememberMe);
             updateStoreId(data.storeId);
           }
           
@@ -105,7 +104,7 @@ export const useAuth = () => {
           if (data.user.store?.slug) {
             try {
               // جلب بيانات المتجر الكاملة باستخدام fetch مباشرة
-              const token = localStorage.getItem('token');
+              const token = getAuthToken();
               const storeResponse = await fetch(`${BASE_URL}stores/slug/${data.user.store.slug}`, {
                 headers: {
                   'Authorization': `Bearer ${token}`,

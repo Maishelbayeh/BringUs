@@ -407,13 +407,13 @@ const StockTable: React.FC = () => {
                   <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                     <div className={`flex items-center justify-between mb-2 ${i18n.language === 'ar' || i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
                       <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        {spec.title}
+                        {i18n.language === 'ar' || i18n.language === 'ARABIC' ? spec.titleAr : spec.titleEn}
                       </span>
                       <span className="text-xs text-gray-400">#{index + 1}</span>
                     </div>
                     
                     <div className="mb-2">
-                      <span className="text-sm font-semibold text-gray-800">{spec.value}</span>
+                      <span className="text-sm font-semibold text-gray-800">{i18n.language === 'ar' || i18n.language === 'ARABIC' ? spec.valueAr : spec.valueEn}</span>
                     </div>
                     
                     <div className={`

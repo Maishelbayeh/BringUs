@@ -4,6 +4,7 @@ import { BASE_URL } from '../constants/api';
 import { handleApiError } from '../utils/handleApiError';
 import useLanguage from './useLanguage';
 import { useToastContext } from '../contexts/ToastContext';
+import { getErrorMessage } from '../utils/errorUtils';
 
 interface DeliveryMethodsResponse extends ApiResponse<DelieveryMethod[]> {}
 
@@ -17,7 +18,7 @@ const useDeliveryMethodsByStore = (
   storeId: string,
   options: UseDeliveryMethodsByStoreOptions = {}
 ) => {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { showSuccess } = useToastContext();
   const [deliveryMethods, setDeliveryMethods] = useState<DelieveryMethod[]>([]);
   const [loading, setLoading] = useState(false);

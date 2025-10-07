@@ -12,6 +12,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { StoreProvider } from './contexts/StoreContext';
 import { useAuth } from './hooks/useAuth';
 import PaymentVerificationHandler from './components/common/PaymentVerificationHandler';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Component to check if we're on login page
 const AppContent: React.FC = () => {
@@ -118,11 +119,13 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <StoreProvider>
-          <AppContent />
-        </StoreProvider>
-      </ToastProvider>
+      <ErrorBoundary>
+        <ToastProvider>
+          <StoreProvider>
+            <AppContent />
+          </StoreProvider>
+        </ToastProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

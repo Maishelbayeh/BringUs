@@ -342,17 +342,32 @@ const PointOfSale: React.FC = () => {
           result.data?.orderNumber || 'N/A'
         );
       } else {
-        showToast('error',
-          isRTL ? 'فشل في إنشاء الطلب' : 'Failed to Create Order',
-          result.message || (isRTL ? 'حدث خطأ غير متوقع' : 'An unexpected error occurred')
-        );
+        // Handle API error messages with language support
+        const errorMessage = isRTL && result.messageAr ? result.messageAr : result.message;
+        const errorTitle = isRTL ? 'فشل في إنشاء الطلب' : 'Failed to Create Order';
+        
+        showToast('error', errorTitle, errorMessage || (isRTL ? 'حدث خطأ غير متوقع' : 'An unexpected error occurred'));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error completing order:', error);
-      showToast('error',
-        isRTL ? 'خطأ في إكمال الطلب' : 'Error Completing Order',
-        isRTL ? 'حدث خطأ في إكمال الطلب' : 'Error completing order'
-      );
+      
+      // Handle API error messages with language support
+      let errorMessage = isRTL ? 'حدث خطأ في إكمال الطلب' : 'Error completing order';
+      let errorTitle = isRTL ? 'خطأ في إكمال الطلب' : 'Error Completing Order';
+      
+      // Check if error has API response with language-specific messages
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        if (isRTL && errorData.messageAr) {
+          errorMessage = errorData.messageAr;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      showToast('error', errorTitle, errorMessage);
     }
   };
 
@@ -768,7 +783,13 @@ const PointOfSale: React.FC = () => {
           <div className="border-t border-gray-200 pt-3 lg:pt-4">
             {createOrderError && (
               <div className="mb-3 lg:mb-4 p-2 lg:p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-xs lg:text-sm">
-                {createOrderError}
+                {/* Handle language-specific error messages */}
+                {typeof createOrderError === 'string' 
+                  ? createOrderError 
+                  : (isRTL && createOrderError.messageAr) 
+                    ? createOrderError.messageAr 
+                    : createOrderError.message || createOrderError
+                }
               </div>
             )}
             <div className="flex justify-between items-center mb-3 lg:mb-4">

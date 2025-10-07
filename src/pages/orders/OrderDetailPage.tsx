@@ -112,7 +112,7 @@ const OrderDetailPage: React.FC = () => {
         setError(null);
         
         // Use the new getOrderDetails endpoint
-        const response = await fetch(`https://bringus-backend.onrender.com/api/orders/details/${id}`, {
+        const response = await fetch(`https://bringus-backend.onrender.com/orders/details/${id}`, {
           headers: getAuthHeaders()
         });
         

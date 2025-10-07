@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { BASE_URL } from '../constants/api';
 import { getStoreId } from '../utils/storeUtils';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 const useUnits = () => {
   const [units, setUnits] = useState<any[]>([]);
@@ -11,6 +13,7 @@ const useUnits = () => {
   const [hasLoaded, setHasLoaded] = useState(false);
   const { showSuccess, showError } = useToastContext();
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
 
   // جلب جميع الوحدات
   const fetchUnits = useCallback(async (forceRefresh: boolean = false) => {
@@ -87,7 +90,7 @@ const useUnits = () => {
   // حذف وحدة
   const deleteUnit = async (unitId: string | number) => {
     try {
-      await axios.delete(`${BASE_URL}meta/units/${unitId}`);
+      await axios.delete(`${BASE_URL}meta/units/${unitId}?storeId=${getStoreId()}`);
       //CONSOLE.log('Unit deleted successfully:', response.data);
       showSuccess(t('units.success.deleteSuccess'), t('general.success'));
       await fetchUnits(true);
@@ -95,14 +98,24 @@ const useUnits = () => {
     } catch (err: any) {
       //CONSOLE.error('Error deleting unit:', err);
       
-      if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`${t('units.errors.validationError')}: ${validationErrors}`, t('general.error'));
-      } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('units.errors.deleteError');
-        showError(errorMessage, t('general.error'));
-      }
+      // Handle API error messages with language support
       
+      // Check if this is a "unit in use" error with detailed information
+      if (err?.response?.data?.details?.connectedProducts) {
+        const errorMessage = isRTL && err.response.data.messageAr 
+          ? err.response.data.messageAr 
+          : err.response.data.message || err.response.data.error;
+        
+        showError(errorMessage, isRTL ? 'خطأ في حذف الوحدة' : 'Error Deleting Unit');
+      } else {
+        // Handle other types of errors
+        const errorMsg = getErrorMessage(err, isRTL, {
+          title: isRTL ? 'خطأ في حذف الوحدة' : 'Error Deleting Unit',
+          message: isRTL ? 'فشل في حذف الوحدة' : 'Failed to delete unit'
+        });
+        
+        showError(errorMsg.message, t('general.error'));
+      }
       throw err;
     }
   };

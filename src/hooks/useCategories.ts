@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { getStoreId } from '../utils/storeUtils';
 import categoryImage from '../assets/category.jpg';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 function buildCategoryTree(flatCategories: any[]): any[] {
   if (!Array.isArray(flatCategories)) return [];
@@ -27,6 +29,7 @@ const useCategories = () => {
   const [hasLoaded, setHasLoaded] = useState(false); // للتحقق من تحميل البيانات
   const { showSuccess, showError } = useToastContext();
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   
 
 const STORE_ID = getStoreId() || '';
@@ -48,7 +51,7 @@ const STORE_ID = getStoreId() || '';
 
     
     try {
-      const url = `https://bringus-backend.onrender.com/api/categories/store/${STORE_ID}`;
+      const url = `https://bringus-backend.onrender.com/categories/store/${STORE_ID}`;
       const res = await axios.get(url, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -61,8 +64,11 @@ const STORE_ID = getStoreId() || '';
       return data;
     } catch (err: any) {
       //CONSOLE.error('Error fetching categories:', err);
-      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('categories.errors.fetchError');
-      showError(errorMessage);
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب التصنيفات' : 'Error Fetching Categories',
+        message: isRTL ? 'فشل في جلب قائمة التصنيفات' : 'Failed to fetch categories list'
+      });
+      showError(errorMsg.message);
       throw err;
     }
   }, [hasLoaded, categories.length, showError, t]);
@@ -103,13 +109,13 @@ const STORE_ID = getStoreId() || '';
     //CONSOLE.log('Final payload to send:', payload);
     try {
       if (editId) {
-         await axios.put(`https://bringus-backend.onrender.com/api/categories/${editId}`, payload, {
+         await axios.put(`https://bringus-backend.onrender.com/categories/${editId}`, payload, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         //CONSOLE.log('Category updated successfully:', response.data);
         showSuccess(t('categories.success.updateSuccess'), t('general.success'));
       } else {
-         await axios.post('https://bringus-backend.onrender.com/api/categories', payload, {
+         await axios.post('https://bringus-backend.onrender.com/categories', payload, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         //CONSOLE.log('Category created successfully:', response.data);
@@ -121,15 +127,11 @@ const STORE_ID = getStoreId() || '';
     } catch (err: any) {
       //CONSOLE.error('Error saving category:', err);
       
-      // معالجة أخطاء التحقق من الـAPI
-      if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`${t('categories.errors.validationError')}: ${validationErrors}`, t('general.error'));
-      } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('categories.errors.updateError');
-        showError(errorMessage, t('categories.errors.saveError'));
-      }
-      
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حفظ التصنيف' : 'Error Saving Category',
+        message: isRTL ? 'فشل في حفظ التصنيف' : 'Failed to save category'
+      });
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };
@@ -138,7 +140,7 @@ const STORE_ID = getStoreId() || '';
   const deleteCategory = async (categoryId: string | number) => {
     //CONSOLE.log('Deleting category with id:', categoryId);
     try {
-      await axios.delete(`https://bringus-backend.onrender.com/api/categories/${categoryId}?storeId=${STORE_ID}`, {
+      await axios.delete(`https://bringus-backend.onrender.com/categories/${categoryId}?storeId=${STORE_ID}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       }); 
         
@@ -150,13 +152,19 @@ const STORE_ID = getStoreId() || '';
     } catch (err: any) {
       //CONSOLE.error('Error deleting category:', err);
       
-      // معالجة أخطاء التحقق من الـAPI
-      if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`${t('categories.errors.validationError')}: ${validationErrors}`, t('general.error'));
+      // Check if this is a "category in use" error with detailed information
+      if (err?.response?.data?.details?.connectedProducts) {
+        const errorMessage = isRTL && err.response.data.messageAr 
+          ? err.response.data.messageAr 
+          : err.response.data.message || err.response.data.error;
+        
+        showError(errorMessage, isRTL ? 'خطأ في حذف التصنيف' : 'Error Deleting Category');
       } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('categories.errors.deleteError');
-        showError(errorMessage, t('general.error'));
+        const errorMsg = getErrorMessage(err, isRTL, {
+          title: isRTL ? 'خطأ في حذف التصنيف' : 'Error Deleting Category',
+          message: isRTL ? 'فشل في حذف التصنيف' : 'Failed to delete category'
+        });
+        showError(errorMsg.message, t('general.error'));
       }
       
       throw err;
@@ -169,7 +177,7 @@ const STORE_ID = getStoreId() || '';
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
-      const res = await axios.post('https://bringus-backend.onrender.com/api/categories/upload-image', formData, {
+      const res = await axios.post('https://bringus-backend.onrender.com/categories/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       //CONSOLE.log('Image uploaded successfully:', res.data);
@@ -178,15 +186,11 @@ const STORE_ID = getStoreId() || '';
     } catch (err: any) {
       //CONSOLE.error('Error uploading image:', err);
       
-      // معالجة أخطاء التحقق من الـAPI
-      if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const validationErrors = err.response.data.errors.map((error: any) => error.msg).join(', ');
-        showError(`${t('categories.errors.uploadImageError')}: ${validationErrors}`, t('general.error'));
-      } else {
-        const errorMessage = err?.response?.data?.error || err?.response?.data?.message || t('categories.errors.uploadImageError');
-        showError(errorMessage, t('general.error'));
-      }
-      
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في رفع الصورة' : 'Error Uploading Image',
+        message: isRTL ? 'فشل في رفع صورة التصنيف' : 'Failed to upload category image'
+      });
+      showError(errorMsg.message, t('general.error'));
       throw err;
     }
   };

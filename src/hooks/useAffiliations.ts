@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
 import { getStoreId } from '@/utils/storeUtils';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 export interface Affiliate {
   firstName: string;
@@ -80,6 +82,7 @@ export default function usAffiliations() {
   const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isRTL } = useLanguage();
 
 //------------------------------------------------fetchAffiliates------------------------------------------
   const fetchAffiliates = async () => {
@@ -93,7 +96,11 @@ export default function usAffiliations() {
       });
       setAffiliates(response.data.data || response.data);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'خطأ في جلب بيانات المسوقين');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب المسوقين' : 'Error Fetching Affiliates',
+        message: isRTL ? 'فشل في جلب بيانات المسوقين' : 'Failed to fetch affiliates data'
+      });
+      setError(errorMsg.message);
     } finally {
       setLoading(false);
     }
@@ -113,9 +120,12 @@ export default function usAffiliations() {
       await fetchAffiliates(); // Refresh the list
       return response.data;
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'خطأ في إنشاء المسوق';
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إنشاء المسوق' : 'Error Creating Affiliate',
+        message: isRTL ? 'فشل في إنشاء المسوق' : 'Failed to create affiliate'
+      });
+      setError(errorMsg.message);
+      throw new Error(errorMsg.message);
     } finally {
       setLoading(false);
     }
@@ -133,9 +143,12 @@ export default function usAffiliations() {
       await fetchAffiliates(); // Refresh the list
       return response.data;
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'خطأ في تحديث المسوق';
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث المسوق' : 'Error Updating Affiliate',
+        message: isRTL ? 'فشل في تحديث المسوق' : 'Failed to update affiliate'
+      });
+      setError(errorMsg.message);
+      throw new Error(errorMsg.message);
     } finally {
       setLoading(false);
     }
@@ -152,9 +165,12 @@ export default function usAffiliations() {
       });
       await fetchAffiliates(); // Refresh the list
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'خطأ في حذف المسوق';
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف المسوق' : 'Error Deleting Affiliate',
+        message: isRTL ? 'فشل في حذف المسوق' : 'Failed to delete affiliate'
+      });
+      setError(errorMsg.message);
+      throw new Error(errorMsg.message);
     } finally {
       setLoading(false);
     }
@@ -171,9 +187,12 @@ export default function usAffiliations() {
       });
       return response.data;
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'خطأ في جلب بيانات المسوق';
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب بيانات المسوق' : 'Error Fetching Affiliate',
+        message: isRTL ? 'فشل في جلب بيانات المسوق' : 'Failed to fetch affiliate data'
+      });
+      setError(errorMsg.message);
+      throw new Error(errorMsg.message);
     } finally {
       setLoading(false);
     }
@@ -198,9 +217,12 @@ export default function usAffiliations() {
       
       return response.data;
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'خطأ في تحديث بيانات المسوق';
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث بيانات المسوق' : 'Error Updating Affiliate Data',
+        message: isRTL ? 'فشل في تحديث بيانات المسوق' : 'Failed to update affiliate data'
+      });
+      setError(errorMsg.message);
+      throw new Error(errorMsg.message);
     } finally {
       setLoading(false);
     }

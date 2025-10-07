@@ -368,11 +368,16 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                         </p>
                       </div>
                       <div className="space-y-2">
-                        {specValues.map((selected) => (
+                        {specValues.map((selected) => {
+                          // Find the original specification to get language-specific values
+                          const originalSpec = specifications.find(s => s._id === selected.specId);
+                          const originalValue = originalSpec?.values.find((_, index) => `${originalSpec._id}_${index}` === selected.valueId);
+                          
+                          return (
                           <div key={selected.valueId} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
                             <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
                               <p className="text-sm font-medium text-gray-800">
-                                {selected.value}
+                                {originalValue ? (isRTL ? originalValue.valueAr : originalValue.valueEn) : selected.value}
                               </p>
                               <p className="text-xs text-gray-600">
                                 {isRTL ? 'الكمية:' : 'Quantity:'} {selected.quantity} 
@@ -385,7 +390,8 @@ const SpecificationSelector: React.FC<SpecificationSelectorProps> = ({
                               </p>
                             </div> */}
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                       {/* <div className="mt-3 pt-3 border-t border-gray-200">
                         <div className="flex items-center justify-between">

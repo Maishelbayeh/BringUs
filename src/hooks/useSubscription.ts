@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/axiosConfig';
 import { BASE_URL } from '../constants/api';
 
 interface SubscriptionStatus {
@@ -57,14 +57,8 @@ export const useSubscription = () => {
         return;
       }
 
-      const response = await axios.get<{ success: boolean; data: ApiSubscriptionResponse }>(
-        `${BASE_URL}subscription/stores/${storeId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
-        }
+      const response = await apiClient.get<{ success: boolean; data: ApiSubscriptionResponse }>(
+        `subscription/stores/${storeId}`
       );
 
       if (response.data.success) {

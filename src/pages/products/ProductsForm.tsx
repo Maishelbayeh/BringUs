@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useImperativeHandle, forwardRef, useRef } from 'react';
+import React, { useEffect, useState, useImperativeHandle, forwardRef, useRef, useCallback } from 'react';
 
 import CustomInput from '../../components/common/CustomInput';
 
@@ -424,8 +424,37 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
   const [showBarcodeSuccess, setShowBarcodeSuccess] = useState(false);
 
   const [localNewBarcode, setLocalNewBarcode] = useState('');
+  const [barcodeValidationError, setBarcodeValidationError] = useState<string>('');
 
   const [showMainImageSuccess, setShowMainImageSuccess] = useState(false);
+
+  // Real-time barcode validation function
+  const validateBarcodeRealTime = useCallback((barcode: string) => {
+    if (!barcode || barcode.trim() === '') {
+      setBarcodeValidationError('');
+      return true;
+    }
+
+    const trimmedBarcode = barcode.trim();
+    
+    // Check if barcode contains only letters and numbers
+    if (!/^[a-zA-Z0-9]+$/.test(trimmedBarcode)) {
+      setBarcodeValidationError(isRTL ? 'الباركود يمكن أن يحتوي على أرقام وحروف فقط' : 'Barcode can only contain letters and numbers');
+      return false;
+    }
+
+    // Check if barcode already exists in current barcodes
+    const currentBarcodes = Array.isArray(form.barcodes) ? form.barcodes : [];
+    if (currentBarcodes.includes(trimmedBarcode)) {
+      setBarcodeValidationError(isRTL ? 'الباركود موجود مسبقاً' : 'Barcode already exists');
+      return false;
+    }
+
+    // Check if barcode exists in other products (this would require API call in real implementation)
+    // For now, we'll just clear the error if basic validation passes
+    setBarcodeValidationError('');
+    return true;
+  }, [form.barcodes, isRTL]);
 
   const [formattedColors, setFormattedColors] = useState<ColorVariant[]>([]);
 
@@ -649,13 +678,18 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
         console.log('🔍 ProductsForm - title:', title);
 
+        // استخدام القيم المحددة باللغة إذا كانت متاحة، وإلا استخدم القيم العامة
+        const valueAr = spec.valueAr || spec.value || '';
+        const valueEn = spec.valueEn || spec.value || '';
+        const value = isRTL ? valueAr : valueEn;
+
         return {
 
           specId: spec.specificationId,
 
           valueId: spec.valueId || spec._id,
 
-          value: spec.value || '',
+          value: value,
 
           quantity: spec.quantity || 0,
 
@@ -1065,49 +1099,55 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
   // تحويل مواصفات المنتجات إلى التنسيق المطلوب للمكون الجديد
 
-  const formattedSpecifications = Array.isArray(apiSpecifications) ? apiSpecifications.map((spec: ProductSpecification) => ({
+  const formattedSpecifications = Array.isArray(apiSpecifications) ? apiSpecifications
+    .filter((spec: ProductSpecification) => spec.isActive === true) // Filter only active specifications
+    .sort((a: ProductSpecification, b: ProductSpecification) => (a.sortOrder || 0) - (b.sortOrder || 0)) // Sort by sortOrder
+    .map((spec: ProductSpecification) => ({
 
-    _id: spec._id,
+      _id: spec._id,
 
-    title: isRTL ? spec.titleAr : spec.titleEn,
+      title: isRTL ? spec.titleAr : spec.titleEn,
 
-    titleAr: spec.titleAr,
+      titleAr: spec.titleAr,
 
-    titleEn: spec.titleEn,
+      titleEn: spec.titleEn,
 
-    values: spec.values.map((value, _index) => ({
+      values: spec.values.map((value, _index) => ({
 
-      valueAr: value.valueAr,
+        valueAr: value.valueAr,
 
-      valueEn: value.valueEn
+        valueEn: value.valueEn
 
-    }))
+      }))
 
-  })) : [];
+    })) : [];
 
 
 
   // تحويل specifications prop إلى التنسيق المطلوب إذا كانت موجودة
 
-  const formattedSpecificationsProp = Array.isArray(specifications) ? specifications.map((spec: any) => ({
+  const formattedSpecificationsProp = Array.isArray(specifications) ? specifications
+    .filter((spec: any) => spec.isActive === true) // Filter only active specifications
+    .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)) // Sort by sortOrder
+    .map((spec: any) => ({
 
-    _id: spec._id,
+      _id: spec._id,
 
-    title: isRTL ? spec.titleAr : spec.titleEn,
+      title: isRTL ? spec.titleAr : spec.titleEn,
 
-    titleAr: spec.titleAr,
+      titleAr: spec.titleAr,
 
-    titleEn: spec.titleEn,
+      titleEn: spec.titleEn,
 
-    values: spec.values.map((value: any) => ({
+      values: spec.values.map((value: any) => ({
 
-      valueAr: value.valueAr,
+        valueAr: value.valueAr,
 
-      valueEn: value.valueEn
+        valueEn: value.valueEn
 
-    }))
+      }))
 
-  })) : [];
+    })) : [];
 
 
 
@@ -1493,6 +1533,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
     if (localNewBarcode && localNewBarcode.trim()) {
 
+      // Check for real-time validation errors first
+      if (barcodeValidationError) {
+        return; // Don't add if there's a validation error
+      }
+
       // التحقق من صحة الباركود أولاً
 
       const barcodeError = validateBarcode(localNewBarcode.trim(), t);
@@ -1547,7 +1592,8 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
       setLocalNewBarcode('');
 
-      
+      // Clear validation error
+      setBarcodeValidationError('');
 
       // إظهار رسالة النجاح
 
@@ -1887,13 +1933,16 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
                 { value: '', label: isRTL ? t('products.selectUnit') : 'Select Unit' },
 
-                ...(Array.isArray(units) ? units.map((u: any) => ({ 
+                ...(Array.isArray(units) ? units
+                  .filter((u: any) => u.isActive === true || u.isActive === 'true') // Filter only active units
+                  .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)) // Sort by sortOrder
+                  .map((u: any) => ({ 
 
-                  value: String(u._id || u.id), 
+                    value: String(u._id || u.id), 
 
-                  label: isRTL ? u.nameAr : u.nameEn 
+                    label: isRTL ? u.nameAr : u.nameEn 
 
-                })) : [])
+                  })) : [])
 
               ]}
 
@@ -2131,7 +2180,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
               type="text"
 
-              className={`w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${isRTL ? 'text-right pr-12' : 'text-left pl-12'}`}
+              className={`w-full py-3 px-4 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL ? 'text-right pr-12' : 'text-left pl-12'} ${
+                barcodeValidationError 
+                  ? 'border-red-300 focus:ring-red-500 bg-red-50' 
+                  : 'border-gray-300 focus:ring-purple-500'
+              }`}
 
               placeholder={isRTL ? 'أدخل الباركود واضغط Enter أو انقر على +' : 'Enter barcode and press Enter or click +'}
 
@@ -2142,6 +2195,9 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
                 //CONSOLE.log('🔍 Input onChange:', e.target.value);
 
                 setLocalNewBarcode(e.target.value);
+                
+                // Real-time validation
+                validateBarcodeRealTime(e.target.value);
 
               }}
 
@@ -2165,11 +2221,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
               onClick={addBarcode}
 
-              disabled={!localNewBarcode || !localNewBarcode.trim()}
+              disabled={!localNewBarcode || !localNewBarcode.trim() || !!barcodeValidationError}
 
               className={`absolute top-1/2 transform -translate-y-1/2 w-8 h-8 text-white rounded-full flex items-center justify-center transition-colors ${
 
-                localNewBarcode && localNewBarcode.trim() 
+                localNewBarcode && localNewBarcode.trim() && !barcodeValidationError
 
                   ? 'bg-purple-500 hover:bg-purple-600 cursor-pointer' 
 
@@ -2191,9 +2247,19 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
           
 
+          {/* عرض رسالة الخطأ إذا كان هناك خطأ في التحقق */}
+          {barcodeValidationError && (
+            <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center text-sm">
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {barcodeValidationError}
+            </div>
+          )}
+
           {/* عرض الباركود المُنشأ تحت الحقل */}
 
-          {localNewBarcode && localNewBarcode.trim() && (
+          {localNewBarcode && localNewBarcode.trim() && !barcodeValidationError && (
 
             <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
 
@@ -2552,13 +2618,16 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
                 Array.isArray(tags)
 
-                  ? tags.map((opt: any) => ({
+                  ? tags
+                      .filter((opt: any) => opt.isActive === true || opt.isActive === 'true') // Filter only active labels
+                      .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)) // Sort by sortOrder
+                      .map((opt: any) => ({
 
-                      value: String(opt._id || opt.id),
+                        value: String(opt._id || opt.id),
 
-                      label: isRTL ? opt.nameAr : opt.nameEn
+                        label: isRTL ? opt.nameAr : opt.nameEn
 
-                    }))
+                      }))
 
                   : []
 
@@ -2678,7 +2747,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
                 const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : `Specification ${spec.specId}`;
 
-                
+                // البحث عن القيمة الأصلية للحصول على القيم المحددة باللغة
+                const originalValue = specData?.values?.find((_: any, index: number) => `${specData._id}_${index}` === spec.valueId);
+                const valueAr = originalValue?.valueAr || spec.value;
+                const valueEn = originalValue?.valueEn || spec.value;
+                const value = isRTL ? valueAr : valueEn;
 
                 return {
 
@@ -2686,9 +2759,17 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
                   valueId: spec.valueId,
 
-                  value: spec.value,
+                  value: value,
 
                   title: title,
+
+                  titleAr: specData?.titleAr || title,
+
+                  titleEn: specData?.titleEn || title,
+
+                  valueAr: valueAr,
+
+                  valueEn: valueEn,
 
                   quantity: spec.quantity,
 

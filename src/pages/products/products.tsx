@@ -19,6 +19,7 @@ import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 import TableImage from '../../components/common/TableImage';
 import useToast from '../../hooks/useToast';
 import CustomBarcode from '../../components/common/CustomBarcode';
+import { formatSpecificationValues } from '../../utils/specificationUtils';
 
 import { validateProductWithDuplicates } from '../../validation/productValidation';
 //-------------------------------------------- ColorVariant -------------------------------------------
@@ -336,16 +337,14 @@ const ProductsPage: React.FC = () => {
       specifications: (() => {
         // أولاً نتحقق من قيم المواصفات المختارة (الحقل الجديد)
         if (product.specificationValues && Array.isArray(product.specificationValues) && product.specificationValues.length > 0) {
-          return product.specificationValues.map((spec: any) => {
-            // البحث عن المواصفة في البيانات المحملة للحصول على العنوان الصحيح
-            const specData = Array.isArray(specifications) ? specifications.find((s: any) => s._id === spec.specificationId) : null;
-            const title = specData ? (isRTL ? specData.titleAr : specData.titleEn) : (spec.title || `Specification ${spec.specificationId}`);
-            
-            if (typeof spec === 'object' && spec.value) {
-              return `${title}: ${spec.value}`;
-            }
-            return spec;
-          }).join(', ');
+          // Debug: Log the specification values and language
+          console.log('🔍 Product specifications debug:', {
+            productName: product.nameEn,
+            specificationValues: product.specificationValues,
+            isRTL: isRTL,
+            formatted: formatSpecificationValues(product.specificationValues, isRTL)
+          });
+          return formatSpecificationValues(product.specificationValues, isRTL);
         }
         
         // إذا لم تكن موجودة، نتحقق من المواصفات القديمة
@@ -356,7 +355,9 @@ const ProductsPage: React.FC = () => {
         return product.specifications.map((spec: any) => {
           // التنسيق الجديد: { specificationId, valueId, value, title }
           if (typeof spec === 'object' && spec.value && spec.title) {
-            return `${spec.title}: ${spec.value}`;
+            const title = isRTL ? (spec.titleAr || spec.title) : (spec.titleEn || spec.title);
+            const value = isRTL ? (spec.valueAr || spec.value) : (spec.valueEn || spec.value);
+            return `${title}: ${value}`;
           }
           // التنسيق القديم: populated objects
           else if (typeof spec === 'object' && spec.titleAr && spec.titleEn) {

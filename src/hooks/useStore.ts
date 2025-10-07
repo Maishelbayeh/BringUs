@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import apiClient from '../utils/axiosConfig';
 import { BASE_URL } from '../constants/api';
 import { updateStoreData } from './useLocalStorage';
 
@@ -347,11 +348,13 @@ export const useStore = () => {
   };
 
   const fetchSubscriptionStatus= async()=>{
-    const response=await axios.get(`${BASE_URL}subscription/stores/${localStorage.getItem('storeId')}`,{
-      headers:{
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    })
+    const storeId = localStorage.getItem('storeId');
+    
+    if (!storeId) {
+      throw new Error('Store ID not found');
+    }
+    
+    const response=await apiClient.get(`subscription/stores/${storeId}`);
     const subscriptionStatus = response.data.data;
     return subscriptionStatus;
     // console.log(response.data.data);

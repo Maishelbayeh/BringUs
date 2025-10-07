@@ -4,6 +4,8 @@ import { BASE_URL } from '../constants/api';
 import { getStoreId } from '../utils/storeUtils';
 import { getAuthHeaders } from '../utils/apiUtils';
 import { useStore } from './useStore';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 interface DashboardStats {
   totalOrders: number;
@@ -54,6 +56,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { getStore } = useStore();
+  const { isRTL } = useLanguage();
 
 
 
@@ -251,7 +254,11 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
       setStats(dashboardStats);
     } catch (err: any) {
       console.error('Error fetching dashboard stats:', err);
-      setError(err?.response?.data?.message || 'Failed to fetch dashboard statistics');
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب إحصائيات لوحة التحكم' : 'Error Fetching Dashboard Statistics',
+        message: isRTL ? 'فشل في جلب إحصائيات لوحة التحكم' : 'Failed to fetch dashboard statistics'
+      });
+      setError(errorMsg.message);
     } finally {
       setLoading(false);
     }

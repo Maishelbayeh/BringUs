@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CustomBarcode from '../../components/common/CustomBarcode';
 import { getStoreInfo } from '../../utils/storeUtils';
 import { currencyOptions } from '../../data/currencyOptions';
+import { getSpecificationDisplay } from '../../utils/specificationUtils';
 
 interface VariantsPopupProps {
   isOpen: boolean;
@@ -422,7 +423,7 @@ const VariantsPopup: React.FC<VariantsPopupProps> = ({
                                     <div key={specIdx} className={`flex items-center justify-between p-2 bg-purple-50 rounded-lg border border-purple-200 ${isRTL ? 'flex-row-reverse' : 'flex-row'} `}>
                                       <div className="flex-1">
                                         <span className={`text-sm font-medium text-purple-800 ${isRTL ? 'text-right' : 'text-left'} `}>
-                                          {spec.title}: {spec.value}
+                                          {getSpecificationDisplay(spec, isRTL).fullText}
                                         </span>
                                         <div className={`text-xs text-purple-600 mt-1 ${isRTL ? 'text-right' : 'text-left'} `}>
                                           {isRTL ? 'الكمية:' : 'Quantity:'} {spec.quantity || 0} 

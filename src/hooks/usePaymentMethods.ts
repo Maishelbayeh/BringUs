@@ -3,6 +3,8 @@ import { PaymentMethod } from '../Types';
 import { BASE_URL } from '../constants/api';
 import { useAuth } from './useAuth';
 import { useToast } from './useToast';
+import { getErrorMessage } from '../utils/errorUtils';
+import useLanguage from './useLanguage';
 
 interface PaymentMethodFormData {
   titleAr: string;
@@ -82,6 +84,7 @@ export const usePaymentMethods = () => {
 
   const { getToken } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { isRTL } = useLanguage();
 
   // Get all payment methods
   const fetchPaymentMethods = useCallback(async (params?: {
@@ -123,10 +126,13 @@ export const usePaymentMethods = () => {
         setError(data.message || 'Failed to fetch payment methods');
         showError(data.message || 'Failed to fetch payment methods');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch payment methods';
-      setError(errorMessage);
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب طرق الدفع' : 'Error Fetching Payment Methods',
+        message: isRTL ? 'فشل في جلب قائمة طرق الدفع' : 'Failed to fetch payment methods'
+      });
+      setError(errorMsg.message);
+      showError(errorMsg.message);
     } finally {
       setLoading(false);
     }
@@ -153,9 +159,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to fetch payment method');
         return null;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch payment method';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في جلب طريقة الدفع' : 'Error Fetching Payment Method',
+        message: isRTL ? 'فشل في جلب بيانات طريقة الدفع' : 'Failed to fetch payment method'
+      });
+      showError(errorMsg.message);
       return null;
     }
   }, [getToken, showError]);
@@ -222,9 +231,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to create payment method');
         return null;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create payment method';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إنشاء طريقة الدفع' : 'Error Creating Payment Method',
+        message: isRTL ? 'فشل في إنشاء طريقة الدفع' : 'Failed to create payment method'
+      });
+      showError(errorMsg.message);
       return null;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -290,9 +302,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to update payment method');
         return null;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update payment method';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث طريقة الدفع' : 'Error Updating Payment Method',
+        message: isRTL ? 'فشل في تحديث طريقة الدفع' : 'Failed to update payment method'
+      });
+      showError(errorMsg.message);
       return null;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -322,9 +337,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to create payment method');
         return null;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create payment method';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في إنشاء طريقة الدفع' : 'Error Creating Payment Method',
+        message: isRTL ? 'فشل في إنشاء طريقة الدفع' : 'Failed to create payment method'
+      });
+      showError(errorMsg.message);
       return null;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -354,9 +372,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to update payment method');
         return null;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update payment method';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث طريقة الدفع' : 'Error Updating Payment Method',
+        message: isRTL ? 'فشل في تحديث طريقة الدفع' : 'Failed to update payment method'
+      });
+      showError(errorMsg.message);
       return null;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -385,9 +406,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to delete payment method');
         return false;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete payment method';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف طريقة الدفع' : 'Error Deleting Payment Method',
+        message: isRTL ? 'فشل في حذف طريقة الدفع' : 'Failed to delete payment method'
+      });
+      showError(errorMsg.message);
       return false;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -416,9 +440,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to update payment method status');
         return false;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update payment method status';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تحديث حالة طريقة الدفع' : 'Error Updating Payment Method Status',
+        message: isRTL ? 'فشل في تحديث حالة طريقة الدفع' : 'Failed to update payment method status'
+      });
+      showError(errorMsg.message);
       return false;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -447,9 +474,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to set default payment method');
         return false;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to set default payment method';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في تعيين طريقة الدفع الافتراضية' : 'Error Setting Default Payment Method',
+        message: isRTL ? 'فشل في تعيين طريقة الدفع الافتراضية' : 'Failed to set default payment method'
+      });
+      showError(errorMsg.message);
       return false;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -481,9 +511,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to upload logo');
         return null;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to upload logo';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في رفع الشعار' : 'Error Uploading Logo',
+        message: isRTL ? 'فشل في رفع شعار طريقة الدفع' : 'Failed to upload payment method logo'
+      });
+      showError(errorMsg.message);
       return null;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -521,9 +554,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to upload QR code');
         return null;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to upload QR code';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في رفع رمز QR' : 'Error Uploading QR Code',
+        message: isRTL ? 'فشل في رفع رمز QR' : 'Failed to upload QR code'
+      });
+      showError(errorMsg.message);
       return null;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -564,9 +600,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to upload payment image');
         return null;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to upload payment image';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في رفع صورة الدفع' : 'Error Uploading Payment Image',
+        message: isRTL ? 'فشل في رفع صورة الدفع' : 'Failed to upload payment image'
+      });
+      showError(errorMsg.message);
       return null;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -595,9 +634,12 @@ export const usePaymentMethods = () => {
         showError(data.message || 'Failed to remove payment image');
         return false;
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to remove payment image';
-      showError(errorMessage);
+    } catch (err: any) {
+      const errorMsg = getErrorMessage(err, isRTL, {
+        title: isRTL ? 'خطأ في حذف صورة الدفع' : 'Error Removing Payment Image',
+        message: isRTL ? 'فشل في حذف صورة الدفع' : 'Failed to remove payment image'
+      });
+      showError(errorMsg.message);
       return false;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);

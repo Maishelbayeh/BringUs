@@ -65,14 +65,22 @@ export const fetchWithRetry = async (
 };
 
 /**
+ * Get authentication token from localStorage or sessionStorage
+ * @returns Token string or null if not found
+ */
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
+/**
  * Get authentication headers
  * @returns Headers object with auth token
  */
 export const getAuthHeaders = (): Record<string, string> => {
-  const token = localStorage.getItem('token');
+  const token = getAuthToken();
   return {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
+    ...(token && { 'Authorization': `Bearer ${token}` }),
   };
 };
 
