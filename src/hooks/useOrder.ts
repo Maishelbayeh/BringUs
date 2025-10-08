@@ -108,6 +108,7 @@ export interface CreateOrderData {
 }
 
 export interface CreateOrderResponse {
+  messageAr: string;
   success: boolean;
   message: string;
   data?: any;
@@ -451,6 +452,7 @@ export function useOrder(storeId: string): UseOrderResult {
       return {
         success: false,
         message: errorMessage,
+        messageAr: errorMessage,
         error: errorMessage
       };
     } finally {
@@ -508,6 +510,7 @@ export function useOrder(storeId: string): UseOrderResult {
       return {
         success: false,
         message: errorMessage,
+        messageAr: errorMessage,
         error: errorMessage
       };
     } finally {

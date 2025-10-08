@@ -4,7 +4,7 @@ import { BASE_URL } from '../constants/api';
 import { handleApiError } from '../utils/handleApiError';
 import useLanguage from './useLanguage';
 import { useToastContext } from '../contexts/ToastContext';
-import { getErrorMessage } from '../utils/errorUtils';
+
 // import { get } from 'http';
 import { getStoreId } from '../utils/storeUtils';
 
@@ -28,7 +28,7 @@ interface UseDeliveryMethodsOptions {
 }
 const storeId = localStorage.getItem('storeId');
 const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
-  const { t, isRTL } = useLanguage();
+  const { t} = useLanguage();
   const { showSuccess } = useToastContext();
   const [deliveryMethods, setDeliveryMethods] = useState<DelieveryMethod[]>([]);
   const [loading, setLoading] = useState(false);

@@ -104,9 +104,9 @@ const DeliveryMethods: React.FC = () => {
         // Create new delivery method
         result = await createDeliveryMethod(area);
       }
-      
+      console.log('result', result);
       // Only close drawer if the API call was successful
-      if (result !== null && result !== false) {
+      if (result !== null) {
         closeDrawer();
       }
       // If result is null/false, the hook will have already shown the error via toast

@@ -783,13 +783,7 @@ const PointOfSale: React.FC = () => {
           <div className="border-t border-gray-200 pt-3 lg:pt-4">
             {createOrderError && (
               <div className="mb-3 lg:mb-4 p-2 lg:p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-xs lg:text-sm">
-                {/* Handle language-specific error messages */}
-                {typeof createOrderError === 'string' 
-                  ? createOrderError 
-                  : (isRTL && createOrderError.messageAr) 
-                    ? createOrderError.messageAr 
-                    : createOrderError.message || createOrderError
-                }
+                {createOrderError}
               </div>
             )}
             <div className="flex justify-between items-center mb-3 lg:mb-4">

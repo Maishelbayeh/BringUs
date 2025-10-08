@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../utils/axiosConfig';
-import { BASE_URL } from '../constants/api';
+
 
 interface SubscriptionStatus {
   isActive: boolean;
