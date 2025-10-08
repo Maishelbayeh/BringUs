@@ -26,7 +26,7 @@ interface UseDeliveryMethodsOptions {
   isDefault?: boolean;
   storeId?: string;
 }
-const storeId = localStorage.getItem('storeId');
+
 const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
   const { t} = useLanguage();
   const { showSuccess } = useToastContext();
@@ -158,11 +158,19 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
 
   // Get all delivery methods
   const fetchDeliveryMethods = useCallback(async (_fetchOptions: UseDeliveryMethodsOptions = {}) => {
+    // Use storeId from options first, then from getStoreId()
+    const currentStoreId = options.storeId || getStoreId();
+    
+    if (!currentStoreId) {
+      setError(t('deliveryDetails.errors.storeIdRequired'));
+      return;
+    }
+    
     setLoading(true);
     setError(null);
 
     try {
-      const response = await makeRequest(`${BASE_URL}delivery-methods/store/${storeId}`, {
+      const response = await makeRequest(`${BASE_URL}delivery-methods/store/${currentStoreId}`, {
         method: 'GET',
         headers: getAuthHeaders(),
       });
@@ -202,7 +210,7 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [options, makeRequest]);
+  }, [options.storeId, makeRequest, t]);
 
   // Get delivery methods by store ID (public endpoint)
   const fetchDeliveryMethodsByStoreId = useCallback(async (storeId: string, fetchOptions: { isActive?: boolean; isDefault?: boolean } = {}) => {
@@ -643,9 +651,10 @@ const useDeliveryMethods = (options: UseDeliveryMethodsOptions = {}) => {
     setRetryAfter(null);
   }, []);
 
-  // Initial fetch - only run once on mount
+  // Initial fetch - only run once on mount with storeId check
   useEffect(() => {
-    if (deliveryMethods.length === 0) {
+    const currentStoreId = options.storeId || getStoreId();
+    if (currentStoreId && deliveryMethods.length === 0) {
       fetchDeliveryMethods();
     }
   }, []); // Empty dependency array to run only once
