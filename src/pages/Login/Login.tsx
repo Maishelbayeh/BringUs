@@ -231,23 +231,7 @@ const Login: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* عرض رسائل الخطأ العامة */}
-              {authError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span>{authError}</span>
-                    {isEmailNotVerified && (
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/email-verification?email=${encodeURIComponent(formData.email)}`)}
-                        className="ml-3 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
-                      >
-                        {t('login.verifyEmail')}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
+            
               
               <div className="space-y-2">
                 <CustomInput
@@ -297,7 +281,23 @@ const Login: React.FC = () => {
                   )}
                 </div>
               </div>
-
+  {/* عرض رسائل الخطأ العامة */}
+  {authError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm" dir={language === 'ARABIC' ? 'rtl' : 'ltr'}>
+                  <div className="flex items-center justify-between">
+                    <span>{authError}</span>
+                    {isEmailNotVerified && (
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/email-verification?email=${encodeURIComponent(formData.email)}`)}
+                        className="ml-3 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                      >
+                        {t('login.verifyEmail')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <label className="flex items-center">
                   <input
