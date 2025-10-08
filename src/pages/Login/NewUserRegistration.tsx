@@ -17,6 +17,7 @@ import { useUser } from '@/hooks/useUser';
 import { useToastContext } from '@/contexts/ToastContext';
 import useOTP from '@/hooks/useOTP';
 import { createImageValidationFunction } from '@/validation/imageValidation';
+import { validateWhatsApp } from '@/utils/validation';
 
 interface NewUserRegistrationProps {
   onUserCreated?: () => void;
@@ -210,38 +211,15 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
       console.log('❌ كلمات المرور غير متطابقة');
     }
     
+    // التحقق من رقم الهاتف - استخدام validateWhatsApp المتطور
     if (!formData.phone) {
       newErrors.phone = t('signup.phoneRequired');
       console.log('❌ رقم الهاتف مطلوب');
     } else {
-      const cleanValue = formData.phone.replace(/\s/g, '');
-      console.log('cleanValue', cleanValue);
-      
-      if (cleanValue.startsWith('970') || cleanValue.startsWith('972')) {
-        console.log('cleanValue2', cleanValue);
-        const code = cleanValue.startsWith('970') ? '970' : '972';
-        const numberWithoutCode = cleanValue.slice(code.length);
-        console.log(numberWithoutCode);
-        
-        // 🚫 تحقق: عدم السماح ببدء الجزء المحلي بـ 0
-        if (numberWithoutCode.startsWith('0')) {
-          newErrors.phone = t('store.whatsappNoLeadingZero'); // لا تبدأ بـ 0 بعد المقدمة
-        }
-        // ✅ تحقق: الطول الكلي يجب أن يكون 12 رقمًا بالضبط (مثلاً +970598765432)
-        else if (cleanValue.length !== 12) {
-          newErrors.phone = t('store.whatsappLengthError'); // الطول غير صحيح
-        }
-        // ✅ تحقق من أن الباقي كله أرقام
-        else if (!/^\d+$/.test(numberWithoutCode)) {
-          newErrors.phone = t('store.whatsappInvalidDigits'); // يجب أن يحتوي على أرقام فقط
-        }
-      } else {
-        // تحقق عام للأرقام الدولية الأخرى
-        if (cleanValue.length < 8 || cleanValue.length > 15) {
-          newErrors.phone = t('store.whatsappLengthError');
-        } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
-          newErrors.phone = t('store.whatsappInvalidFormat');
-        }
+      const phoneError = validateWhatsApp(formData.phone, t);
+      if (phoneError) {
+        newErrors.phone = phoneError;
+        console.log('❌ خطأ في تنسيق رقم الهاتف:', phoneError);
       }
     }
     

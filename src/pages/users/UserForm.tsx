@@ -14,6 +14,7 @@ import { useUser } from '@/hooks/useUser';
 import { useToastContext } from '@/contexts/ToastContext';
 
 import CustomRadioGroup from '@/components/common/CustomRadioGroup';
+import { validateWhatsApp } from '@/utils/validation';
 
 interface UserFormProps {
   user?: any; // المستخدم للتعديل
@@ -191,20 +192,15 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
       console.log('❌ Password length validation failed');
     }
 
-    // التحقق من رقم الهاتف
+    // التحقق من رقم الهاتف - استخدام validateWhatsApp المتطور
     if (!formData.phone.trim()) {
       newErrors.phone = t('newUser.phoneRequired');
       console.log('❌ Phone validation failed');
     } else {
-      // التحقق من صحة تنسيق رقم الهاتف
-      const cleanPhone = formData.phone.replace(/[\s\-\(\)]/g, '');
-      
-      if (!/^\+[1-9]\d{1,14}$/.test(cleanPhone)) {
-        newErrors.phone = t('validation.phoneInvalid');
+      const phoneError = validateWhatsApp(formData.phone, t);
+      if (phoneError) {
+        newErrors.phone = phoneError;
         console.log('❌ Phone format validation failed');
-      } else if (cleanPhone.length > 15) {
-        newErrors.phone = t('validation.phoneMaxLength');
-        console.log('❌ Phone length validation failed');
       }
     }
 

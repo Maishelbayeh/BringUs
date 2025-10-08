@@ -1,5 +1,5 @@
 // src/validation/wholesalerValidation.ts
-import { ValidationSchema, PATTERNS } from '../utils/validation';
+import { ValidationSchema, PATTERNS, validateWhatsApp } from '../utils/validation';
 import { TFunction } from 'i18next';
 
 // Interface for the wholesaler form data
@@ -80,11 +80,14 @@ export const validateWholesalerWithDuplicates = (
     errors.lastName = t('validation.minLength', { min: 2 });
   }
 
-  // Mobile validation
+  // Mobile validation - استخدام validateWhatsApp المتطور
   if (!form.mobile || form.mobile.trim() === '') {
     errors.mobile = t('validation.required');
-  } else if (!PATTERNS.phone.test(form.mobile)) {
-    errors.mobile = t('validation.phoneInvalid');
+  } else {
+    const mobileError = validateWhatsApp(form.mobile, t);
+    if (mobileError) {
+      errors.mobile = mobileError;
+    }
   }
 
   // Discount validation

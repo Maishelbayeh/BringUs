@@ -84,30 +84,23 @@ export const useAuth = () => {
 
       if (data.success && data.userStatus === 'active') {
         // ✅ حفظ التوكن في localStorage دائماً (جميع الـ APIs تعتمد عليه)
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userInfo', JSON.stringify(data.user));
-        
-        // Store token and user info based on rememberMe preference
-        // Store token and user info based on rememberMe preference using utility functions
-        saveAuthToken(data.token, credentials.rememberMe);
-        saveUserInfo(data.user, credentials.rememberMe);
+        saveAuthToken(data.token);
+        saveUserInfo(data.user);
         
         if (credentials.rememberMe) {
           // حفظ إضافي في الكوكيز - يبقى لمدة 30 يوم
           setCookie('token', data.token, { days: 30 });
           setCookieObject('userInfo', data.user, { days: 30 });
           setCookie('rememberMe', 'true', { days: 30 });
-          console.log('✅ Token saved to localStorage + 🍪 Cookies (persistent - 30 days)');
           localStorage.setItem('rememberMe', 'true');
-          console.log('Token saved to localStorage (persistent)');
+          console.log('✅ Token saved to localStorage + 🍪 Cookies (persistent - 30 days)');
         } else {
           // حذف الكوكيز إذا كان "تذكرني" غير مفعّل
           deleteCookie('token');
           deleteCookie('userInfo');
           deleteCookie('rememberMe');
-          console.log('✅ Token saved to localStorage only (no cookies)');
           localStorage.removeItem('rememberMe');
-          console.log('Token saved to sessionStorage (temporary)');
+          console.log('✅ Token saved to localStorage only (session will end on browser close)');
         }
         
         // حفظ بيانات المستخدم
@@ -117,7 +110,7 @@ export const useAuth = () => {
         if (data.user.role === 'admin' && data.user.store) {
           localStorage.setItem('isOwner', data.user.store.isOwner.toString());
           if (data.user.store?.id) {
-            saveStoreId(data.storeId, credentials.rememberMe);
+            saveStoreId(data.storeId);
             updateStoreId(data.storeId);
           }
           
