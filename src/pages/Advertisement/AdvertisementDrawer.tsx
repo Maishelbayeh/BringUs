@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import CustomButton from '@/components/common/CustomButton';
 import { AdvertisementValidationErrors } from '../../validation/advertisementValidation';
 
+
 interface AdvertisementDrawerProps {
   open: boolean;
   onClose: () => void;

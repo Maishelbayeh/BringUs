@@ -138,6 +138,16 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
       delete newErrors.mobile;
       setErrors(newErrors);
     }
+    
+    // التحقق من رقم الهاتف في الوقت الحقيقي (real-time validation)
+    // if (value && value.trim() !== '') {
+    //   setTimeout(() => {
+    //     const mobileError = validateWhatsApp(value, t);
+    //     if (mobileError) {
+    //       setErrors(prev => ({ ...prev, mobile: mobileError }));
+    //     }
+    //   }, 500);
+    // }
   };
 
   const handleSave = async () => {

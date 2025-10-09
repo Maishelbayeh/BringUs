@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { currencyOptions } from '../../data/currencyOptions';
 import { getStoreInfo } from '@/utils/storeUtils';
+import { validateWhatsApp } from '@/utils/validation';
 
 // ============================================================================
 // CONSTANTS
@@ -190,63 +191,11 @@ const StoreGeneralInfo: React.FC<StoreGeneralInfoProps> = ({ onSubmit, onValidat
       //   break;
         
       case 'whatsappNumber':
-  if (value) {
-    const cleanValue = value.replace(/\s/g, '');
-
-     if (cleanValue.startsWith('970') || cleanValue.startsWith('972')) {
-     
-      const code = cleanValue.startsWith('970') ? '970' : '972';
-      const numberWithoutCode = cleanValue.slice(code.length);
-console.log(numberWithoutCode);
-      // 🚫 تحقق: عدم السماح ببدء الجزء المحلي بـ 0
-      if (numberWithoutCode.startsWith('0')) {
-        error = t('store.whatsappNoLeadingZero'); // لا تبدأ بـ 0 بعد المقدمة
-      }
-      // ✅ تحقق: الطول الكلي يجب أن يكون 12 رقمًا بالضبط (مثلاً +970598765432)
-      else if (cleanValue.length !== 12) {
-        // +970 = 4 خانات + 9 أرقام = 13 طول السلسلة
-        error = t('store.whatsappLengthError'); // الطول غير صحيح
-      }
-      // ✅ تحقق من أن الباقي كله أرقام
-      else if (!/^\d+$/.test(numberWithoutCode)) {
-        error = t('store.whatsappInvalidDigits'); // يجب أن يحتوي على أرقام فقط
-      }
-    } 
-    else {
-      // تحقق عام للأرقام الدولية الأخرى
-      if (cleanValue.length < 8 || cleanValue.length > 15) {
-        error = t('store.whatsappLengthError');
-      } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
-        error = t('store.whatsappInvalidFormat');
-      }
-    }
-  }
-  break;
-
+        // التحقق من رقم الواتساب - استخدام validateWhatsApp المتطور
         if (value) {
-          // إزالة المسافات والحصول على الرقم النظيف
-          const cleanValue = value.replace(/\s/g, '');
-          
-          // التحقق من أن الرقم يحتوي على أكثر من المقدمة فقط
-          if (cleanValue.length <= 4) {
-            error = t('store.whatsappInvalid');
-          } else if (!/^[\+]?[1-9][\d]{4,15}$/.test(cleanValue)) {
-            error = t('store.whatsappInvalid');
-          } else {
-            // تحقق خاص لأرقام فلسطين وإسرائيل
-            if (cleanValue.startsWith('+970') || cleanValue.startsWith('+972')) {
-              const dialCode = cleanValue.startsWith('+970') ? '970' : '972';
-              const numberWithoutCode = cleanValue.replace(`+${dialCode}`, '');
-              
-              // التحقق من عدم بداية الرقم بـ 0 (المركز الرابع)
-              if (numberWithoutCode.startsWith('0')) {
-                error = t('store.whatsappInvalid');
-              }
-              // التحقق من طول الرقم (يجب أن يكون 9 أرقام بالضبط)
-              else if (numberWithoutCode.length !== 9) {
-                error = t('store.whatsappInvalid');
-              }
-            }
+          const whatsappError = validateWhatsApp(value, t);
+          if (whatsappError) {
+            error = whatsappError;
           }
         }
         break;

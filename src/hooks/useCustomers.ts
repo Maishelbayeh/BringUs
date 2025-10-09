@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
-import { handleApiError } from '../utils/handleApiError';
+
 import { getErrorMessage } from '../utils/errorUtils';
 import useLanguage from './useLanguage';
 

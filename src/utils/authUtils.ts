@@ -3,17 +3,17 @@
  */
 
 /**
- * Get the authentication token from either localStorage or sessionStorage
+ * Get the authentication token from localStorage or sessionStorage (fallback)
  * @returns The authentication token or null if not found
  */
 export const getAuthToken = (): string | null => {
-  // First try localStorage (for "Remember Me" users)
+  // Try localStorage first (tokens are always saved here for API calls)
   const localToken = localStorage.getItem('token');
   if (localToken) {
     return localToken;
   }
   
-  // Then try sessionStorage (for temporary sessions)
+  // Fallback to sessionStorage (legacy support)
   const sessionToken = sessionStorage.getItem('token');
   if (sessionToken) {
     return sessionToken;
@@ -23,22 +23,14 @@ export const getAuthToken = (): string | null => {
 };
 
 /**
- * Save the authentication token to the appropriate storage
+ * Save the authentication token to localStorage (always saved for API calls)
  * @param token - The authentication token
- * @param rememberMe - Whether to save to localStorage (persistent) or sessionStorage (temporary)
  */
-export const saveAuthToken = (token: string, rememberMe: boolean = false): void => {
-  if (rememberMe) {
-    // Save to localStorage for persistent storage
-    localStorage.setItem('token', token);
-    // Clear sessionStorage to avoid conflicts
-    sessionStorage.removeItem('token');
-  } else {
-    // Save to sessionStorage for temporary storage
-    sessionStorage.setItem('token', token);
-    // Clear localStorage to avoid conflicts
-    localStorage.removeItem('token');
-  }
+export const saveAuthToken = (token: string): void => {
+  // Always save to localStorage (required for API calls)
+  localStorage.setItem('token', token);
+  // Clear sessionStorage to avoid conflicts
+  sessionStorage.removeItem('token');
 };
 
 /**
@@ -86,24 +78,16 @@ export const getUserInfo = (): any | null => {
 };
 
 /**
- * Save user info to the appropriate storage
+ * Save user info to localStorage (always saved for API calls)
  * @param userInfo - User information object
- * @param rememberMe - Whether to save to localStorage (persistent) or sessionStorage (temporary)
  */
-export const saveUserInfo = (userInfo: any, rememberMe: boolean = false): void => {
+export const saveUserInfo = (userInfo: any): void => {
   const userInfoString = JSON.stringify(userInfo);
   
-  if (rememberMe) {
-    // Save to localStorage for persistent storage
-    localStorage.setItem('userInfo', userInfoString);
-    // Clear sessionStorage to avoid conflicts
-    sessionStorage.removeItem('userInfo');
-  } else {
-    // Save to sessionStorage for temporary storage
-    sessionStorage.setItem('userInfo', userInfoString);
-    // Clear localStorage to avoid conflicts
-    localStorage.removeItem('userInfo');
-  }
+  // Always save to localStorage (required for API calls)
+  localStorage.setItem('userInfo', userInfoString);
+  // Clear sessionStorage to avoid conflicts
+  sessionStorage.removeItem('userInfo');
 };
 
 /**
@@ -135,21 +119,13 @@ export const getStoreId = (): string | null => {
 };
 
 /**
- * Save store ID to the appropriate storage
+ * Save store ID to localStorage (always saved for API calls)
  * @param storeId - Store ID
- * @param rememberMe - Whether to save to localStorage (persistent) or sessionStorage (temporary)
  */
-export const saveStoreId = (storeId: string, rememberMe: boolean = false): void => {
-  if (rememberMe) {
-    // Save to localStorage for persistent storage
-    localStorage.setItem('storeId', storeId);
-    // Clear sessionStorage to avoid conflicts
-    sessionStorage.removeItem('storeId');
-  } else {
-    // Save to sessionStorage for temporary storage
-    sessionStorage.setItem('storeId', storeId);
-    // Clear localStorage to avoid conflicts
-    localStorage.removeItem('storeId');
-  }
+export const saveStoreId = (storeId: string): void => {
+  // Always save to localStorage (required for API calls)
+  localStorage.setItem('storeId', storeId);
+  // Clear sessionStorage to avoid conflicts
+  sessionStorage.removeItem('storeId');
 };
 
