@@ -4,7 +4,7 @@ import CustomInput from '@/components/common/CustomInput';
 import CustomNumberInput from '@/components/common/CustomNumberInput';
 import CustomSwitch from '@/components/common/CustomSwitch';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 interface StoreSliderFormProps {
   form: any;

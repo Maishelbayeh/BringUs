@@ -44,7 +44,7 @@ export const testSubscriptionAPI = async (storeId: string) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:5001/api/subscription/stores/${storeId}`, {
+    const response = await fetch(`https://bringus-backend.onrender.com/api/subscription/stores/${storeId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

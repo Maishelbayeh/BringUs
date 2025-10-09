@@ -82,7 +82,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
   }>>([]);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [showLahzaCredentialsModal, setShowLahzaCredentialsModal] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, setIsSubmitting] = useState(false);
 
   // Check Lahza credentials status
   const checkLahzaCredentialsStatus = async () => {
@@ -92,7 +92,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
       
       if (!storeId || !token) return false;
       
-      const response = await fetch(`http://localhost:5001/api/stores/${storeId}`, {
+      const response = await fetch(`https://bringus-backend.onrender.com/api/stores/${storeId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

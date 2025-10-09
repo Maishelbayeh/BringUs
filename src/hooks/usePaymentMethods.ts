@@ -11,7 +11,7 @@ interface PaymentMethodFormData {
   titleEn: string;
   descriptionAr?: string;
   descriptionEn?: string;
-  methodType: 'cash' | 'card' | 'digital_wallet' | 'bank_transfer' | 'qr_code' | 'other';
+  methodType: 'cash' | 'card' | 'digital_wallet' | 'bank_transfer' | 'qr_code' | 'lahza' | 'other';
   isActive?: boolean;
   isDefault?: boolean;
   logoUrl?: string;

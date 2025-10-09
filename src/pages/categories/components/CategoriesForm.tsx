@@ -2,8 +2,7 @@ import React from 'react';
 import CustomInput from '../../../components/common/CustomInput';
 import CustomFileInput from '../../../components/common/CustomFileInput';
 import CustomTextArea from '../../../components/common/CustomTextArea';
-import { useTranslation } from 'react-i18next';
-
+// import { useTranslation } from 'react-i18next';
 
 interface CategoriesFormProps {
   form: any;

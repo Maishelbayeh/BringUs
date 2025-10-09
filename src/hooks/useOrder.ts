@@ -148,7 +148,7 @@ export function useOrder(storeId: string): UseOrderResult {
   const fetchOrders = () => {
     setIsLoading(true);
     setError(null);
-    fetch(`http://localhost:5001/api/orders/store/${storeId}`, {
+    fetch(`https://bringus-backend.onrender.com/api/orders/store/${storeId}`, {
       headers: getAuthHeaders()
     })
       .then(res => res.json())
@@ -184,7 +184,7 @@ export function useOrder(storeId: string): UseOrderResult {
       console.log(`🔄 Updating payment status for order ${orderId}:`, { paid, newStatus });
       
       // تحديث حالة الدفع أولاً
-      const paymentResponse = await fetch(`http://localhost:5001/api/orders/${orderId}/payment-status`, {
+      const paymentResponse = await fetch(`https://bringus-backend.onrender.com/api/orders/${orderId}/payment-status`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ paymentStatus: paid ? 'paid' : 'unpaid' }),
@@ -194,7 +194,7 @@ export function useOrder(storeId: string): UseOrderResult {
       
       if (paymentResult.success) {
         // ثم تحديث حالة الطلب
-        const statusResponse = await fetch(`http://localhost:5001/api/orders/${orderId}/status`, {
+        const statusResponse = await fetch(`https://bringus-backend.onrender.com/api/orders/${orderId}/status`, {
           method: 'PUT',
           headers: getAuthHeaders(),
           body: JSON.stringify({ status: newStatus }),
@@ -243,7 +243,7 @@ export function useOrder(storeId: string): UseOrderResult {
       console.log(`🔄 Updating order status for order ${orderId}:`, { status, newPaymentStatus });
       
       // تحديث حالة الطلب أولاً
-      const statusResponse = await fetch(`http://localhost:5001/api/orders/${orderId}/status`, {
+      const statusResponse = await fetch(`https://bringus-backend.onrender.com/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ status }),
@@ -253,7 +253,7 @@ export function useOrder(storeId: string): UseOrderResult {
       
       if (statusResult.success) {
         // ثم تحديث حالة الدفع
-        const paymentResponse = await fetch(`http://localhost:5001/api/orders/${orderId}/payment-status`, {
+        const paymentResponse = await fetch(`https://bringus-backend.onrender.com/api/orders/${orderId}/payment-status`, {
           method: 'PUT',
           headers: getAuthHeaders(),
           body: JSON.stringify({ paymentStatus: newPaymentStatus }),
@@ -419,7 +419,7 @@ export function useOrder(storeId: string): UseOrderResult {
       console.log('Cart items details:', apiOrderData.cartItems);
       console.log('Selected specifications:', apiOrderData.cartItems[0]?.selectedSpecifications);
 
-      const response = await fetch(`http://localhost:5001/api/orders/store/${storeId}`, {
+      const response = await fetch(`https://bringus-backend.onrender.com/api/orders/store/${storeId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -478,7 +478,7 @@ export function useOrder(storeId: string): UseOrderResult {
 
       console.log('Creating guest order with data:', apiOrderData);
 
-      const response = await fetch(`http://localhost:5001/api/orders/store/${storeId}/guest`, {
+      const response = await fetch(`https://bringus-backend.onrender.com/api/orders/store/${storeId}/guest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -527,7 +527,7 @@ export function useOrder(storeId: string): UseOrderResult {
     try {
       console.log(`🗑️ Deleting order ${orderId}`);
       
-      const response = await fetch(`http://localhost:5001/api/orders/${orderId}`, {
+      const response = await fetch(`https://bringus-backend.onrender.com/api/orders/${orderId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
