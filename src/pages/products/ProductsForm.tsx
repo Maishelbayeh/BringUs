@@ -36,12 +36,6 @@ import { currencyOptions } from '@/data/currencyOptions';
 
 
 
-//-------------------------------------------- Image Size Validation -------------------------------------------
-
-import { validateImageFileI18n, validateImageFilesI18n } from '../../validation/imageValidation';
-
-
-
 //-------------------------------------------- ColorVariant -------------------------------------------
 
 interface ColorVariant {
@@ -305,43 +299,17 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
 
 
-  // دوال للتعامل مع الصور مع validation
+  // دوال للتعامل مع الصور بدون validation (الـ validation يتم في الـ backend)
 
   const handleImageChangeWithValidation = (files: File | File[] | null) => {
 
-    if (!files) {
+    // مسح أي رسائل خطأ سابقة
 
-      setImageErrors(prev => ({ ...prev, images: '' }));
-
-      onImageChange(files);
-
-      return;
-
-    }
-
-
-
-    const fileArray = Array.isArray(files) ? files : [files];
-
-    const validation = validateImageFilesI18n(fileArray, t);
+    setImageErrors(prev => ({ ...prev, images: '' }));
 
     
 
-    if (!validation.isValid) {
-
-      console.log('❌ Additional images validation failed:', validation.errorMessage);
-
-      setImageErrors(prev => ({ ...prev, images: validation.errorMessage || '' }));
-
-      return; // لا نستدعي onImageChange إذا كان هناك خطأ
-
-    }
-
-
-
-    // مسح رسالة الخطأ إذا كانت الصور صالحة
-
-    setImageErrors(prev => ({ ...prev, images: '' }));
+    // تمرير الملفات مباشرة للـ backend للتحقق منها
 
     onImageChange(files);
 
@@ -1649,7 +1617,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
 
 
-  // دالة معالجة رفع الصورة الأساسية
+  // دالة معالجة رفع الصورة الأساسية (بدون validation - يتم في الـ backend)
 
   const handleMainImageUpload = async (file: File | null) => {
 
@@ -1671,29 +1639,13 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
 
 
-    // التحقق من حجم الصورة أولاً
-
-    const validation = validateImageFileI18n(file, t);
-
-    if (!validation.isValid) {
-
-      console.log('❌ Main image validation failed:', validation.errorMessage);
-
-      setImageErrors(prev => ({ ...prev, mainImage: validation.errorMessage || '' }));
-
-      return; // إيقاف التحميل إذا كان هناك خطأ
-
-    }
-
-
-
-    // مسح رسالة الخطأ إذا كانت الصورة صالحة
+    // مسح أي رسائل خطأ سابقة
 
     setImageErrors(prev => ({ ...prev, mainImage: '' }));
 
 
 
-    // Use onMainImageChange to handle upload with loading state
+    // تمرير الملف مباشرة للـ backend للتحقق منه ورفعه
 
     console.log('🔍 Calling onMainImageChange for main image upload...');
 
@@ -3177,14 +3129,6 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
               value={form.images || []}
 
               onChange={files => handleImageChangeWithValidation(files)}
-
-              beforeChangeValidate={(files) => {
-
-                const validation = validateImageFilesI18n(files, t);
-
-                return { isValid: validation.isValid, errorMessage: validation.errorMessage };
-
-              }}
 
               onRemoveExisting={(previewUrl, index) => {
 

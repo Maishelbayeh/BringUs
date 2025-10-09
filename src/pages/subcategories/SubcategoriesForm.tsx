@@ -3,7 +3,6 @@ import CustomInput from '../../components/common/CustomInput';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomTextArea from '@/components/common/CustomTextArea';
 import { useTranslation } from 'react-i18next';
-import { createImageValidationFunction } from '../../validation/imageValidation';
 
 interface SubcategoriesFormProps {
   form: any;
@@ -15,8 +14,6 @@ interface SubcategoriesFormProps {
 const SubcategoriesForm: React.FC<SubcategoriesFormProps> = ({ form, onFormChange, onImageChange, isRTL }) => {
   const { t } = useTranslation();
   
-  // Create image validation function
-  const imageValidator = createImageValidationFunction(t);
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <CustomInput label={t('subcategories.nameAr')} name="nameAr" value={form.nameAr} onChange={onFormChange} required />
@@ -29,7 +26,6 @@ const SubcategoriesForm: React.FC<SubcategoriesFormProps> = ({ form, onFormChang
           id="image" 
           value={form.image} 
           onChange={file => onImageChange({ target: { files: file ? [file] : [] } } as any)}
-          beforeChangeValidate={imageValidator}
         />
       </div>
     </div>

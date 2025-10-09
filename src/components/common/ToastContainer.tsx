@@ -11,8 +11,8 @@ interface ToastContainerProps {
 const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => {
   const { isRTL } = useLanguage();
   
-  // //CONSOLE.log('ToastContainer rendered with toasts:', toasts.length, toasts);
-  // //CONSOLE.log('Current language:', language, 'isRTL:', isRTL);
+  console.log('🚨 ToastContainer rendered with toasts:', toasts.length, toasts);
+  console.log('🚨 Current isRTL:', isRTL);
   
   const getIcon = (type: Toast['type']) => {
     switch (type) {

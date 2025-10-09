@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { getStoreId } from '../utils/storeUtils';
-import categoryImage from '../assets/category.jpg';
 import { getErrorMessage } from '../utils/errorUtils';
 import useLanguage from './useLanguage';
 
@@ -51,7 +50,7 @@ const STORE_ID = getStoreId() || '';
 
     
     try {
-      const url = `https://bringus-backend.onrender.com/api/categories/store/${STORE_ID}`;
+      const url = `http://localhost:5001/api/categories/store/${STORE_ID}`;
       const res = await axios.get(url, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -77,10 +76,7 @@ const STORE_ID = getStoreId() || '';
   const saveCategory = async (form: any, editId?: string | number | null, _isRTL: boolean = false) => {
     //CONSOLE.log('Saving category with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
-    // صورة افتراضية للكاتيجوري
-    const DEFAULT_CATEGORY_IMAGE = categoryImage;
-    
-    console.log('Category image:', form.image ? 'User uploaded' : 'Using default', form.image || DEFAULT_CATEGORY_IMAGE);
+    console.log('Category image:', form.image ? 'User uploaded' : 'Will use backend default', form.image || 'null');
     
     // توليد slug تلقائياً من الاسم الإنجليزي إذا لم يكن موجوداً
     const slug = form.slug && form.slug.trim() !== ''
@@ -96,7 +92,7 @@ const STORE_ID = getStoreId() || '';
       descriptionEn: form.descriptionEn ? form.descriptionEn.trim() : '',
       storeId: STORE_ID,
       icon: form.icon || '',
-      image: form.image || DEFAULT_CATEGORY_IMAGE, // استخدام الصورة الافتراضية إذا لم يرفع المستخدم صورة
+      image: (form.image && typeof form.image === 'string' && form.image.trim() !== '') ? form.image : null, // إرسال null إذا لم يتم رفع صورة - سيستخدم الباك إند الصورة الافتراضية
       isActive: form.visible !== undefined ? form.visible : true,
       sortOrder: form.order || 1,
     };
@@ -106,16 +102,17 @@ const STORE_ID = getStoreId() || '';
       payload.parent = form.parentId;
     }
     
-    //CONSOLE.log('Final payload to send:', payload);
+    console.log('🔍 Final payload to send:', payload);
+    console.log('🔍 Image in payload:', payload.image, '(type:', typeof payload.image, ')');
     try {
       if (editId) {
-         await axios.put(`https://bringus-backend.onrender.com/api/categories/${editId}`, payload, {
+         await axios.put(`http://localhost:5001/api/categories/${editId}`, payload, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         //CONSOLE.log('Category updated successfully:', response.data);
         showSuccess(t('categories.success.updateSuccess'), t('general.success'));
       } else {
-         await axios.post('https://bringus-backend.onrender.com/api/categories', payload, {
+         await axios.post('http://localhost:5001/api/categories', payload, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         //CONSOLE.log('Category created successfully:', response.data);
@@ -140,7 +137,7 @@ const STORE_ID = getStoreId() || '';
   const deleteCategory = async (categoryId: string | number) => {
     //CONSOLE.log('Deleting category with id:', categoryId);
     try {
-      await axios.delete(`https://bringus-backend.onrender.com/api/categories/${categoryId}?storeId=${STORE_ID}`, {
+      await axios.delete(`http://localhost:5001/api/categories/${categoryId}?storeId=${STORE_ID}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       }); 
         
@@ -177,7 +174,7 @@ const STORE_ID = getStoreId() || '';
       const formData = new FormData();
       formData.append('image', file);
       formData.append('storeId', STORE_ID);
-      const res = await axios.post('https://bringus-backend.onrender.com/api/categories/upload-image', formData, {
+      const res = await axios.post('http://localhost:5001/api/categories/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       //CONSOLE.log('Image uploaded successfully:', res.data);

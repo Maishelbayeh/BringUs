@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { PaymentMethod } from '../Types';
 import { BASE_URL } from '../constants/api';
 import { useAuth } from './useAuth';
-import { useToast } from './useToast';
+import { useToastContext } from '../contexts/ToastContext';
 import { getErrorMessage } from '../utils/errorUtils';
 import useLanguage from './useLanguage';
 
@@ -41,7 +41,13 @@ interface PaymentMethodWithFiles extends PaymentMethodFormData {
 interface PaymentMethodsResponse {
   success: boolean;
   data: PaymentMethod[];
+  // Old format (backward compatibility)
   message?: string;
+  messageAr?: string;
+  error?: string;
+  errorAr?: string;
+  // New format
+  
   pagination?: {
     currentPage: number;
     totalPages: number;
@@ -53,7 +59,16 @@ interface PaymentMethodsResponse {
 interface PaymentMethodResponse {
   success: boolean;
   data: PaymentMethod;
+  // Old format (backward compatibility)
   message?: string;
+  messageAr?: string;
+  error?: string;
+  errorAr?: string;
+  // New format
+  message_en?: string;
+  message_ar?: string;
+  error_en?: string;
+  error_ar?: string;
 }
 
 interface UploadResponse {
@@ -83,7 +98,7 @@ export const usePaymentMethods = () => {
   });
 
   const { getToken } = useAuth();
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError } = useToastContext();
   const { isRTL } = useLanguage();
 
   // Get all payment methods
@@ -222,21 +237,50 @@ export const usePaymentMethods = () => {
       });
 
       const data: PaymentMethodResponse = await response.json();
+      
+      // Debug: Log the response to see what we're getting
+      console.log('🔍 Payment Method API Response:', data);
 
       if (data.success) {
-        showSuccess('Payment method created successfully');
+        showSuccess(
+          isRTL ? 'تم إنشاء طريقة الدفع بنجاح' : 'Payment method created successfully',
+          isRTL ? 'نجاح' : 'Success'
+        );
         await fetchPaymentMethods(); // Refresh the list
         return data.data;
       } else {
-        showError(data.message || 'Failed to create payment method');
+        // Handle specific Lahza error
+        if (data.error === 'Lahza method already exists' || data.message?.includes('Only one Lahza payment method')) {
+          console.log('🚨 Lahza duplicate error detected:', { error: data.error, message: data.message, messageAr: data.messageAr });
+          
+          const errorMessage = isRTL ? data.messageAr || 'يُسمح بطريقة دفع لحظة واحدة فقط لكل متجر' : data.message || 'Only one Lahza payment method is allowed per store';
+          const errorTitle = isRTL ? 'طريقة دفع لحظة موجودة بالفعل' : 'Lahza Method Already Exists';
+          
+          console.log('🚨 Calling showError with:', { errorMessage, errorTitle, isRTL });
+          const toastId = showError(errorMessage, errorTitle);
+          console.log('🚨 Toast ID returned:', toastId);
+        } else {
+          showError(
+            isRTL ? data.messageAr || 'فشل في إنشاء طريقة الدفع' : data.message || 'Failed to create payment method',
+            isRTL ? 'خطأ في إنشاء طريقة الدفع' : 'Error Creating Payment Method'
+          );
+        }
         return null;
       }
     } catch (err: any) {
-      const errorMsg = getErrorMessage(err, isRTL, {
-        title: isRTL ? 'خطأ في إنشاء طريقة الدفع' : 'Error Creating Payment Method',
-        message: isRTL ? 'فشل في إنشاء طريقة الدفع' : 'Failed to create payment method'
-      });
-      showError(errorMsg.message);
+      // Handle specific Lahza error from response
+      if (err.response?.data?.error === 'Lahza method already exists' || err.response?.data?.message?.includes('Only one Lahza payment method')) {
+        showError(
+          isRTL ? err.response.data.messageAr || 'يُسمح بطريقة دفع لحظة واحدة فقط لكل متجر' : err.response.data.message || 'Only one Lahza payment method is allowed per store',
+          isRTL ? 'طريقة دفع لحظة موجودة بالفعل' : 'Lahza Method Already Exists'
+        );
+      } else {
+        const errorMsg = getErrorMessage(err, isRTL, {
+          title: isRTL ? 'خطأ في إنشاء طريقة الدفع' : 'Error Creating Payment Method',
+          message: isRTL ? 'فشل في إنشاء طريقة الدفع' : 'Failed to create payment method'
+        });
+        showError(errorMsg.message, errorMsg.title);
+      }
       return null;
     }
   }, [getToken, showSuccess, showError, fetchPaymentMethods]);
@@ -295,11 +339,25 @@ export const usePaymentMethods = () => {
       const data: PaymentMethodResponse = await response.json();
 
       if (data.success) {
-        showSuccess('Payment method updated successfully');
+        // Show bilingual success message
+        const successMessage = isRTL 
+          ? (data.messageAr || 'تم تحديث طريقة الدفع بنجاح') 
+          : (data.message || 'Payment method updated successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        
+        showSuccess(successMessage, successTitle);
         await fetchPaymentMethods(); // Refresh the list
         return data.data;
       } else {
-        showError(data.message || 'Failed to update payment method');
+        // Show bilingual error message
+        const errorMessage = isRTL 
+          ? (data.messageAr || 'فشل في تحديث طريقة الدفع') 
+          : (data.message || 'Failed to update payment method');
+        const errorTitle = isRTL 
+          ? (data.errorAr || 'خطأ في تحديث طريقة الدفع') 
+          : (data.error || 'Error Updating Payment Method');
+        
+        showError(errorMessage, errorTitle);
         return null;
       }
     } catch (err: any) {
@@ -307,10 +365,10 @@ export const usePaymentMethods = () => {
         title: isRTL ? 'خطأ في تحديث طريقة الدفع' : 'Error Updating Payment Method',
         message: isRTL ? 'فشل في تحديث طريقة الدفع' : 'Failed to update payment method'
       });
-      showError(errorMsg.message);
+      showError(errorMsg.message, errorMsg.title);
       return null;
     }
-  }, [getToken, showSuccess, showError, fetchPaymentMethods]);
+  }, [getToken, showSuccess, showError, fetchPaymentMethods, isRTL]);
 
   // Create payment method (legacy - without files)
   const createPaymentMethod = useCallback(async (formData: PaymentMethodFormData) => {
@@ -330,11 +388,25 @@ export const usePaymentMethods = () => {
       const data: PaymentMethodResponse = await response.json();
 
       if (data.success) {
-        showSuccess('Payment method created successfully');
+        // Show bilingual success message
+        const successMessage = isRTL 
+          ? (data.messageAr || 'تم إنشاء طريقة الدفع بنجاح') 
+          : (data.message || 'Payment method created successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        
+        showSuccess(successMessage, successTitle);
         await fetchPaymentMethods(); // Refresh the list
         return data.data;
       } else {
-        showError(data.message || 'Failed to create payment method');
+        // Show bilingual error message
+        const errorMessage = isRTL 
+          ? (data.messageAr || 'فشل في إنشاء طريقة الدفع') 
+          : (data.message || 'Failed to create payment method');
+        const errorTitle = isRTL 
+          ? (data.errorAr || 'خطأ في إنشاء طريقة الدفع') 
+          : (data.error || 'Error Creating Payment Method');
+        
+        showError(errorMessage, errorTitle);
         return null;
       }
     } catch (err: any) {
@@ -342,10 +414,10 @@ export const usePaymentMethods = () => {
         title: isRTL ? 'خطأ في إنشاء طريقة الدفع' : 'Error Creating Payment Method',
         message: isRTL ? 'فشل في إنشاء طريقة الدفع' : 'Failed to create payment method'
       });
-      showError(errorMsg.message);
+      showError(errorMsg.message, errorMsg.title);
       return null;
     }
-  }, [getToken, showSuccess, showError, fetchPaymentMethods]);
+  }, [getToken, showSuccess, showError, fetchPaymentMethods, isRTL]);
 
   // Update payment method (legacy - without files)
   const updatePaymentMethod = useCallback(async (id: string, formData: Partial<PaymentMethodFormData>) => {
@@ -365,11 +437,25 @@ export const usePaymentMethods = () => {
       const data: PaymentMethodResponse = await response.json();
 
       if (data.success) {
-        showSuccess('Payment method updated successfully');
+        // Show bilingual success message
+        const successMessage = isRTL 
+          ? (data.messageAr || 'تم تحديث طريقة الدفع بنجاح') 
+          : (data.message || 'Payment method updated successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        
+        showSuccess(successMessage, successTitle);
         await fetchPaymentMethods(); // Refresh the list
         return data.data;
       } else {
-        showError(data.message || 'Failed to update payment method');
+        // Show bilingual error message
+        const errorMessage = isRTL 
+          ? (data.messageAr || 'فشل في تحديث طريقة الدفع') 
+          : (data.message || 'Failed to update payment method');
+        const errorTitle = isRTL 
+          ? (data.errorAr || 'خطأ في تحديث طريقة الدفع') 
+          : (data.error || 'Error Updating Payment Method');
+        
+        showError(errorMessage, errorTitle);
         return null;
       }
     } catch (err: any) {
@@ -377,10 +463,10 @@ export const usePaymentMethods = () => {
         title: isRTL ? 'خطأ في تحديث طريقة الدفع' : 'Error Updating Payment Method',
         message: isRTL ? 'فشل في تحديث طريقة الدفع' : 'Failed to update payment method'
       });
-      showError(errorMsg.message);
+      showError(errorMsg.message, errorMsg.title);
       return null;
     }
-  }, [getToken, showSuccess, showError, fetchPaymentMethods]);
+  }, [getToken, showSuccess, showError, fetchPaymentMethods, isRTL]);
 
   // Delete payment method
   const deletePaymentMethod = useCallback(async (id: string) => {
@@ -399,11 +485,25 @@ export const usePaymentMethods = () => {
       const data = await response.json();
 
       if (data.success) {
-        showSuccess('Payment method deleted successfully');
+        // Show bilingual success message
+        const successMessage = isRTL 
+          ? (data.messageAr || 'تم حذف طريقة الدفع بنجاح') 
+          : (data.message || 'Payment method deleted successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        
+        showSuccess(successMessage, successTitle);
         await fetchPaymentMethods(); // Refresh the list
         return true;
       } else {
-        showError(data.message || 'Failed to delete payment method');
+        // Show bilingual error message
+        const errorMessage = isRTL 
+          ? (data.messageAr || 'فشل في حذف طريقة الدفع') 
+          : (data.message || 'Failed to delete payment method');
+        const errorTitle = isRTL 
+          ? (data.errorAr || 'خطأ في حذف طريقة الدفع') 
+          : (data.error || 'Error Deleting Payment Method');
+        
+        showError(errorMessage, errorTitle);
         return false;
       }
     } catch (err: any) {
@@ -411,10 +511,10 @@ export const usePaymentMethods = () => {
         title: isRTL ? 'خطأ في حذف طريقة الدفع' : 'Error Deleting Payment Method',
         message: isRTL ? 'فشل في حذف طريقة الدفع' : 'Failed to delete payment method'
       });
-      showError(errorMsg.message);
+      showError(errorMsg.message, errorMsg.title);
       return false;
     }
-  }, [getToken, showSuccess, showError, fetchPaymentMethods]);
+  }, [getToken, showSuccess, showError, fetchPaymentMethods, isRTL]);
 
   // Toggle active status
   const toggleActiveStatus = useCallback(async (id: string) => {
@@ -433,11 +533,25 @@ export const usePaymentMethods = () => {
       const data: PaymentMethodResponse = await response.json();
 
       if (data.success) {
-        showSuccess('Payment method status updated successfully');
+        // Show bilingual success message
+        const successMessage = isRTL 
+          ? (data.messageAr || 'تم تحديث حالة طريقة الدفع بنجاح') 
+          : (data.message || 'Payment method status updated successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        
+        showSuccess(successMessage, successTitle);
         await fetchPaymentMethods(); // Refresh the list
         return true;
       } else {
-        showError(data.message || 'Failed to update payment method status');
+        // Show bilingual error message
+        const errorMessage = isRTL 
+          ? (data.messageAr || 'فشل في تحديث حالة طريقة الدفع') 
+          : (data.message || 'Failed to update payment method status');
+        const errorTitle = isRTL 
+          ? (data.errorAr || 'خطأ في تحديث حالة طريقة الدفع') 
+          : (data.error || 'Error Updating Payment Method Status');
+        
+        showError(errorMessage, errorTitle);
         return false;
       }
     } catch (err: any) {
@@ -445,10 +559,10 @@ export const usePaymentMethods = () => {
         title: isRTL ? 'خطأ في تحديث حالة طريقة الدفع' : 'Error Updating Payment Method Status',
         message: isRTL ? 'فشل في تحديث حالة طريقة الدفع' : 'Failed to update payment method status'
       });
-      showError(errorMsg.message);
+      showError(errorMsg.message, errorMsg.title);
       return false;
     }
-  }, [getToken, showSuccess, showError, fetchPaymentMethods]);
+  }, [getToken, showSuccess, showError, fetchPaymentMethods, isRTL]);
 
   // Set as default
   const setAsDefault = useCallback(async (id: string) => {
@@ -467,11 +581,25 @@ export const usePaymentMethods = () => {
       const data: PaymentMethodResponse = await response.json();
 
       if (data.success) {
-        showSuccess('Default payment method set successfully');
+        // Show bilingual success message
+        const successMessage = isRTL 
+          ? (data.messageAr || 'تم تعيين طريقة الدفع الافتراضية بنجاح') 
+          : (data.message || 'Default payment method set successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        
+        showSuccess(successMessage, successTitle);
         await fetchPaymentMethods(); // Refresh the list
         return true;
       } else {
-        showError(data.message || 'Failed to set default payment method');
+        // Show bilingual error message
+        const errorMessage = isRTL 
+          ? (data.messageAr || 'فشل في تعيين طريقة الدفع الافتراضية') 
+          : (data.message || 'Failed to set default payment method');
+        const errorTitle = isRTL 
+          ? (data.errorAr || 'خطأ في تعيين طريقة الدفع الافتراضية') 
+          : (data.error || 'Error Setting Default Payment Method');
+        
+        showError(errorMessage, errorTitle);
         return false;
       }
     } catch (err: any) {
@@ -479,10 +607,10 @@ export const usePaymentMethods = () => {
         title: isRTL ? 'خطأ في تعيين طريقة الدفع الافتراضية' : 'Error Setting Default Payment Method',
         message: isRTL ? 'فشل في تعيين طريقة الدفع الافتراضية' : 'Failed to set default payment method'
       });
-      showError(errorMsg.message);
+      showError(errorMsg.message, errorMsg.title);
       return false;
     }
-  }, [getToken, showSuccess, showError, fetchPaymentMethods]);
+  }, [getToken, showSuccess, showError, fetchPaymentMethods, isRTL]);
 
   // Upload logo (legacy - separate endpoint)
   const uploadLogo = useCallback(async (id: string, file: File) => {

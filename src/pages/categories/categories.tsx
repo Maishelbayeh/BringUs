@@ -242,6 +242,9 @@ const CategoriesPage: React.FC = () => {
     if (file) {
       const url = await uploadCategoryImage(file);
       setForm(f => ({ ...f, image: url }));
+    } else {
+      // If no file selected (user removed image), set to null for backend default
+      setForm(f => ({ ...f, image: null }));
     }
   };
 

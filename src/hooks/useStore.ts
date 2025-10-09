@@ -3,6 +3,8 @@ import axios from 'axios';
 import apiClient from '../utils/axiosConfig';
 import { BASE_URL } from '../constants/api';
 import { updateStoreData } from './useLocalStorage';
+import { useToastContext } from '../contexts/ToastContext';
+import useLanguage from './useLanguage';
 
 
 interface StoreSocials {
@@ -92,8 +94,16 @@ interface StoreResponse {
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
+  // Old format (backward compatibility)
   message?: string;
+  messageAr?: string;
   error?: string;
+  errorAr?: string;
+  // New format
+  message_en?: string;
+  message_ar?: string;
+  error_en?: string;
+  error_ar?: string;
 }
 
 
@@ -101,6 +111,8 @@ export const useStore = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { showSuccess, showError } = useToastContext();
+  const { isRTL } = useLanguage();
 
  
   const handleApiError = (err: any, defaultMessage: string): string => {
@@ -227,6 +239,14 @@ export const useStore = () => {
         const storeData = response.data.data;
         //CONSOLE.log('✅ تم تحديث المتجر بنجاح:', storeData);
         
+        // Show bilingual success message from API response
+        const successMessage = isRTL 
+          ? (response.data.messageAr || 'تم تحديث المتجر بنجاح') 
+          : (response.data.message || 'Store updated successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        
+        showSuccess(successMessage, successTitle);
+        
         // تحديث البيانات في localStorage
         if (storeData) {
           updateStoreData(storeData);
@@ -237,6 +257,13 @@ export const useStore = () => {
         throw new Error(response.data.message || 'فشل في تحديث المتجر');
       }
     } catch (err: any) {
+      // Show bilingual error message
+      const errorMessage = isRTL
+        ? (err.response?.data?.messageAr || 'حدث خطأ أثناء تحديث المتجر')
+        : (err.response?.data?.message || 'An error occurred while updating the store');
+      const errorTitle = isRTL ? 'خطأ' : 'Error';
+      
+      showError(errorMessage, errorTitle);
       handleApiError(err, 'حدث خطأ أثناء تحديث المتجر');
       return null;
     } finally {

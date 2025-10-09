@@ -8,7 +8,10 @@ import CustomInput from '../../../components/common/CustomInput';
 import CustomTextArea from '../../../components/common/CustomTextArea';
 import CustomSwitch from '../../../components/common/CustomSwitch';
 import { validatePaymentForm } from './paymentValidation';
-import { createImageValidationFunction } from '../../../validation/imageValidation';
+import LahzaCredentialsModal from '../../../components/common/LahzaCredentialsModal';
+import { useToast } from '../../../hooks/useToast';
+import { getErrorMessage } from '../../../utils/errorUtils';
+import useLanguage from '../../../hooks/useLanguage';
 
 interface Props {
   method: PaymentMethod | null;
@@ -25,6 +28,7 @@ interface Props {
   language: 'ENGLISH' | 'ARABIC';
   isEditMode?: boolean;
   onValidationChange?: (isValid: boolean) => void;
+  onSubmittingChange?: (isSubmitting: boolean) => void;
 }
 
 interface ValidationErrors {
@@ -40,15 +44,16 @@ interface ValidationErrors {
 }
 
 export interface PaymentFormRef {
-  handleSubmit: () => void;
+  handleSubmit: () => Promise<void>;
 }
 
-const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, language, onValidationChange, isEditMode }, ref) => {
+const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, language, onValidationChange, isEditMode, onSubmittingChange }, ref) => {
   const { t } = useTranslation();
   const isRTL = language === 'ARABIC';
+  const { showError, showSuccess } = useToast();
+  const { isRTL: isRTLHook } = useLanguage();
+  const finalIsRTL = isRTL || isRTLHook;
   
-  // Create image validation function
-  const imageValidator = createImageValidationFunction(t);
 
   // Form state
   const [formData, setFormData] = useState<Partial<PaymentMethod>>({
@@ -76,42 +81,108 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
     altText: string;
   }>>([]);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [showLahzaCredentialsModal, setShowLahzaCredentialsModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check Lahza credentials status
+  const checkLahzaCredentialsStatus = async () => {
+    try {
+      const storeId = localStorage.getItem('storeId') || sessionStorage.getItem('storeId');
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      
+      if (!storeId || !token) return false;
+      
+      const response = await fetch(`http://localhost:5001/api/stores/${storeId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        const storeData = data.data;
+        const hasToken = Boolean(storeData.settings?.lahzaToken && storeData.settings.lahzaToken.trim() !== '');
+        const hasSecretKey = Boolean(storeData.settings?.lahzaSecretKey && storeData.settings.lahzaSecretKey.trim() !== '');
+        return hasToken && hasSecretKey;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking Lahza credentials:', error);
+      return false;
+    }
+  };
 
   // Expose handleSubmit function to parent
   useImperativeHandle(ref, () => ({
-    handleSubmit: () => {
+    handleSubmit: async () => {
       if (validateForm()) {
-        const newMethod: PaymentMethod & {
-          logoFile?: File | null;
-          qrCodeFile?: File | null;
-          paymentImageFiles?: Array<{
-            file: File;
-            imageType: 'logo' | 'banner' | 'qr_code' | 'payment_screenshot' | 'other' | 'lahza';
-            altText: string;
-          }>;
-        } = {
-          _id: method?._id,
-          id: method?.id,
-          titleAr: formData.titleAr || '',
-          titleEn: formData.titleEn || '',
-          descriptionAr: formData.descriptionAr || '',
-          descriptionEn: formData.descriptionEn || '',
-          methodType: formData.methodType || 'other',
-          isActive: formData.isActive !== undefined ? formData.isActive : true,
-          isDefault: formData.isDefault !== undefined ? formData.isDefault : false,
-          logoUrl: method?.logoUrl,
-          qrCode: formData.qrCode,
-          paymentImages: formData.paymentImages || [],
-          store: method?.store,
-          createdAt: method?.createdAt,
-          updatedAt: new Date().toISOString(),
-          // Add file data
-          logoFile: logoFile,
-          qrCodeFile: qrCodeFile,
-          paymentImageFiles: paymentImageFiles,
-        };
+        setIsSubmitting(true);
+        onSubmittingChange?.(true);
+        
+        try {
+          const newMethod: PaymentMethod & {
+            logoFile?: File | null;
+            qrCodeFile?: File | null;
+            paymentImageFiles?: Array<{
+              file: File;
+              imageType: 'logo' | 'banner' | 'qr_code' | 'payment_screenshot' | 'other' | 'lahza';
+              altText: string;
+            }>;
+          } = {
+            _id: method?._id,
+            id: method?.id,
+            titleAr: formData.titleAr || '',
+            titleEn: formData.titleEn || '',
+            descriptionAr: formData.descriptionAr || '',
+            descriptionEn: formData.descriptionEn || '',
+            methodType: formData.methodType || 'other',
+            isActive: formData.isActive !== undefined ? formData.isActive : true,
+            isDefault: formData.isDefault !== undefined ? formData.isDefault : false,
+            logoUrl: method?.logoUrl,
+            qrCode: formData.qrCode,
+            paymentImages: formData.paymentImages || [],
+            store: method?.store,
+            createdAt: method?.createdAt,
+            updatedAt: new Date().toISOString(),
+            // Add file data
+            logoFile: logoFile,
+            qrCodeFile: qrCodeFile,
+            paymentImageFiles: paymentImageFiles,
+          };
 
-        onSubmit(newMethod);
+          // If Lahza method, check credentials before submitting
+          if (formData.methodType === 'lahza') {
+            const hasCredentials = await checkLahzaCredentialsStatus();
+            if (!hasCredentials) {
+              showError(
+                finalIsRTL 
+                  ? 'يرجى إدخال بيانات اعتماد لحظة أولاً' 
+                  : 'Please enter Lahza credentials first',
+                finalIsRTL ? 'بيانات اعتماد مطلوبة' : 'Credentials Required'
+              );
+              setShowLahzaCredentialsModal(true);
+              setIsSubmitting(false);
+              onSubmittingChange?.(false);
+              return;
+            }
+          }
+
+          await onSubmit(newMethod);
+          setIsSubmitting(false);
+          onSubmittingChange?.(false);
+        } catch (error: any) {
+          // Handle API errors with bilingual messages
+          const errorMsg = getErrorMessage(error, finalIsRTL, {
+            title: finalIsRTL ? 'خطأ في حفظ طريقة الدفع' : 'Error Saving Payment Method',
+            message: finalIsRTL ? 'فشل في حفظ طريقة الدفع' : 'Failed to save payment method'
+          });
+          showError(errorMsg.message, errorMsg.title);
+          setIsSubmitting(false);
+          onSubmittingChange?.(false);
+        }
       }
     }
   }));
@@ -293,6 +364,11 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     clearError(field as keyof ValidationErrors);
+    
+    // If user selects Lahza as payment method type, open credentials modal
+    if (field === 'methodType' && value === 'lahza') {
+      setShowLahzaCredentialsModal(true);
+    }
   };
 
   const handleQrCodeChange = (field: 'enabled' | 'qrCodeUrl' | 'qrCodeImage' | 'qrCodeData', value: any) => {
@@ -307,6 +383,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
   };
 
   return (
+    <>
     <div className="flex flex-col p-6">
       <div className="space-y-6">
         
@@ -318,6 +395,37 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
           options={METHOD_TYPES}
           error={errors.methodType}
         />
+        
+        {/* Lahza Credentials Info */}
+        {formData.methodType === 'lahza' && (
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <div>
+                  <h4 className="font-semibold text-purple-800">
+                    {isRTL ? 'بيانات اعتماد لحظة' : 'Lahza Credentials'}
+                  </h4>
+                  <p className="text-sm text-purple-700">
+                    {isRTL 
+                      ? 'مطلوب لتفعيل الدفع عبر لحظة' 
+                      : 'Required to activate Lahza payment'
+                    }
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLahzaCredentialsModal(true)}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+              >
+                {isRTL ? 'إدارة بيانات الاعتماد' : 'Manage Credentials'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Title Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -415,7 +523,6 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
                 onChange={handleQrCodeFileChange}
                 placeholder={t('paymentMethods.chooseFile')}
                 style={{ textAlign: isRTL ? 'right' : 'left' }}
-                beforeChangeValidate={imageValidator}
               />
             </div>
           )}
@@ -432,7 +539,6 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
             onChange={handleLogoFileChange}
             placeholder={t('paymentMethods.chooseFile')}
             style={{ textAlign: isRTL ? 'right' : 'left' }}
-            beforeChangeValidate={imageValidator}
           />
 
           {/* File validation error */}
@@ -490,7 +596,6 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
                   value={imageFile.file.name || ''}
                   onChange={(files) => handlePaymentImageFileChange(files, index)}
                   placeholder={t('paymentMethods.chooseFile')}
-                  beforeChangeValidate={imageValidator}
                 />
 
                 <CustomSelect
@@ -532,6 +637,37 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
    */}
       </div>
     </div>
+
+      {/* Lahza Credentials Modal */}
+      <LahzaCredentialsModal
+        isOpen={showLahzaCredentialsModal}
+        onClose={() => setShowLahzaCredentialsModal(false)}
+        onCredentialsSaved={async () => {
+          // Credentials saved successfully, check if we need to reopen
+          if (formData.methodType === 'lahza') {
+            const hasCredentials = await checkLahzaCredentialsStatus();
+            if (!hasCredentials) {
+              // Still no credentials, keep modal open
+              showError(
+                finalIsRTL 
+                  ? 'يرجى إدخال بيانات اعتماد لحظة صحيحة' 
+                  : 'Please enter valid Lahza credentials',
+                finalIsRTL ? 'بيانات اعتماد غير صحيحة' : 'Invalid Credentials'
+              );
+            } else {
+              // Credentials are now valid, close modal
+              showSuccess(
+                finalIsRTL 
+                  ? 'تم حفظ بيانات اعتماد لحظة بنجاح' 
+                  : 'Lahza credentials saved successfully',
+                finalIsRTL ? 'نجاح' : 'Success'
+              );
+            }
+          }
+        }}
+        isRTL={finalIsRTL}
+      />
+    </>
   );
 });
 
