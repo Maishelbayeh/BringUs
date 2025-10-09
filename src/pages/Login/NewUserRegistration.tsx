@@ -16,7 +16,7 @@ import { getUserData, getStoreId } from '@/hooks/useLocalStorage';
 import { useUser } from '@/hooks/useUser';
 import { useToastContext } from '@/contexts/ToastContext';
 import useOTP from '@/hooks/useOTP';
-import { createImageValidationFunction } from '@/validation/imageValidation';
+// import { createImageValidationFunction } from '@/validation/imageValidation';
 import { validateWhatsApp } from '@/utils/validation';
 
 interface NewUserRegistrationProps {

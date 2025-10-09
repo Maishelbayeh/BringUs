@@ -17,7 +17,7 @@ interface StoreSliderFormProps {
 }
 
 const StoreSliderForm: React.FC<StoreSliderFormProps> = ({ form, onFormChange, onFileChange, errors, isRTL}) => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   
   console.log('StoreSliderForm render - form.type:', form.type);
   console.log('StoreSliderForm render - form:', form);

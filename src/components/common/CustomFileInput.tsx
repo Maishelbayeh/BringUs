@@ -56,8 +56,6 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   onRemoveExisting,
   appendOnly = false,
   onValidationErrorChange,
-  maxImageSizeMB = 10,
-  imageValidationOptions = {},
   required = false
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);

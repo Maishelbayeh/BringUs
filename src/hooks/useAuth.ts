@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BASE_URL, LOGIN } from '../constants/api';
 import { updateUserData, updateStoreData, updateStoreId } from './useLocalStorage';
 import { saveAuthToken, saveUserInfo, saveStoreId, getAuthToken } from '../utils/authUtils';
-import { setCookie, getCookie, deleteCookie, setCookieObject, getCookieObject } from '../utils/cookies';
+import { setCookie, deleteCookie, setCookieObject } from '../utils/cookies';
 import i18n from 'i18next';
 import useLanguage from './useLanguage';
 interface LoginResponse {

@@ -29,7 +29,7 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
   isLoading = false,
   specifications = []
 }) => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   
   
   // state للمواصفات المختارة
