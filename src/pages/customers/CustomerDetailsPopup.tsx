@@ -132,7 +132,7 @@ const CustomerDetailsPopup: React.FC<CustomerDetailsPopupProps> = ({
                   {t('customers.address') || 'Address'}: <span className="font-semibold">{customer.addressSummary}</span>
                 </span>
               )}
-              <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.phone')}: <span className="font-semibold">{customer.phone}</span></span>
+              <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.phone')}: <span className="font-semibold" dir='ltr'>{customer.phone}</span></span>
             </div>
             <div className="flex flex-wrap gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
               <span className="bg-gray-100 rounded px-3 py-1 text-sm">{t('customers.role')}: <span className="font-semibold">{customer.role}</span></span>
