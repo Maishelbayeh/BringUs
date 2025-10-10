@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { createImageValidationFunction, ImageValidationOptions } from '../../validation/imageValidation';
+import { ImageValidationOptions } from '../../validation/imageValidation';
 
 interface CustomFileInputProps {
   label: string;
@@ -56,8 +56,6 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   onRemoveExisting,
   appendOnly = false,
   onValidationErrorChange,
-  maxImageSizeMB = 10,
-  imageValidationOptions = {},
   required = false
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -71,18 +69,14 @@ const CustomFileInput: React.FC<CustomFileInputProps> = ({
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
 
-  // Create validation function with options
-  const imageValidationOptionsWithSize: ImageValidationOptions = {
-    maxSizeMB: maxImageSizeMB,
-    ...imageValidationOptions
-  };
-  
-  const defaultImageValidator = createImageValidationFunction(t, imageValidationOptionsWithSize);
-
   // Unified validator for selection and removal
   const validateFiles = (filesToValidate: File[]): { isValid: boolean; errorMessage?: string } => {
+    // Only validate if beforeChangeValidate is explicitly provided
+    // Otherwise, let the backend handle all validation (with bilingual error messages)
     if (beforeChangeValidate) return beforeChangeValidate(filesToValidate);
-    return defaultImageValidator(filesToValidate);
+    
+    // No default validation - backend will handle it
+    return { isValid: true };
   };
 
   // تحميل الصور الموجودة مسبقاً

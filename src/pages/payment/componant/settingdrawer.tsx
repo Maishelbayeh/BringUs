@@ -26,28 +26,33 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
     }
   }, [open]);
   
+  // Reset isSubmitting when modal opens or closes
+  useEffect(() => {
+    if (!open) {
+      setIsSubmitting(false);
+    }
+  }, [open]);
+  
   if (!open) return null;
   const isRTL = language === 'ARABIC';
   
   const handleSave = async () => {
     if (isSubmitting || !formRef.current) return;
     
-    setIsSubmitting(true);
     try {
-      formRef.current.handleSubmit();
+      await formRef.current.handleSubmit();
     } catch (error) {
       console.error('Error submitting payment form:', error);
-      setIsSubmitting(false);
     }
   };
 
-  // Wrap onSave to reset submission state after success
+  // Wrap onSave to close modal after success
   const handleFormSubmit = async (method: PaymentMethod) => {
     try {
       await onSave(method);
-      setIsSubmitting(false);
+      // Close modal on success
+      onClose();
     } catch (error) {
-      setIsSubmitting(false);
       throw error;
     }
   };
@@ -86,6 +91,7 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
             onCancel={handleClose} 
             language={language} 
             isEditMode={isEditMode}
+            onSubmittingChange={setIsSubmitting}
           />
         </div>
 

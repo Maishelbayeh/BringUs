@@ -132,7 +132,7 @@ const CategoriesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || i18n.language === 'ARABIC';
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState<{ id?: string | number; nameAr: string; nameEn: string; parentId: string | number | null; image: string; order: number; visible: boolean; descriptionAr: string; descriptionEn: string; icon: string }>(
+  const [form, setForm] = useState<{ id?: string | number; nameAr: string; nameEn: string; parentId: string | number | null; image: string | null; order: number; visible: boolean; descriptionAr: string; descriptionEn: string; icon: string }>(
     { nameAr: '', nameEn: '', parentId: null, image: '', order: 1, visible: true, descriptionAr: '', descriptionEn: '', icon: '' }
   );
   const [editId, setEditId] = useState<string | number | null>(null);
@@ -242,6 +242,9 @@ const CategoriesPage: React.FC = () => {
     if (file) {
       const url = await uploadCategoryImage(file);
       setForm(f => ({ ...f, image: url }));
+    } else {
+      // If no file selected (user removed image), set to null for backend default
+      setForm(f => ({ ...f, image: null }));
     }
   };
 

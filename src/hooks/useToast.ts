@@ -15,10 +15,10 @@ const useToast = () => {
       isVisible: true,
     };
 
-    //CONSOLE.log('Adding toast:', toast);
+    console.log('🚨 Adding toast:', toast);
     setToasts(prev => {
       const newToasts = [...prev, toast];
-      //CONSOLE.log('Updated toasts array:', newToasts);
+      console.log('🚨 Updated toasts array:', newToasts);
       return newToasts;
     });
 
@@ -51,8 +51,10 @@ const useToast = () => {
   }, [addToast]);
 
   const showError = useCallback((message: string, title?: string, duration?: number) => {
-    //CONSOLE.log('showError called with:', { message, title, duration });
-    return addToast({ type: 'error', title, message, duration });
+    console.log('🚨 showError called with:', { message, title, duration });
+    const toastId = addToast({ type: 'error', title, message, duration });
+    console.log('🚨 showError returning toastId:', toastId);
+    return toastId;
   }, [addToast]);
 
   const showWarning = useCallback((message: string, title?: string, duration?: number) => {

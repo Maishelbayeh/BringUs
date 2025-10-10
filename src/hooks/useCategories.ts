@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { useToastContext } from '../contexts/ToastContext';
 import { getStoreId } from '../utils/storeUtils';
-import categoryImage from '../assets/category.jpg';
 import { getErrorMessage } from '../utils/errorUtils';
 import useLanguage from './useLanguage';
 
@@ -77,10 +76,7 @@ const STORE_ID = getStoreId() || '';
   const saveCategory = async (form: any, editId?: string | number | null, _isRTL: boolean = false) => {
     //CONSOLE.log('Saving category with form:', form, 'editId:', editId, 'isRTL:', isRTL);
     
-    // صورة افتراضية للكاتيجوري
-    const DEFAULT_CATEGORY_IMAGE = categoryImage;
-    
-    console.log('Category image:', form.image ? 'User uploaded' : 'Using default', form.image || DEFAULT_CATEGORY_IMAGE);
+    console.log('Category image:', form.image ? 'User uploaded' : 'Will use backend default', form.image || 'null');
     
     // توليد slug تلقائياً من الاسم الإنجليزي إذا لم يكن موجوداً
     const slug = form.slug && form.slug.trim() !== ''
@@ -96,7 +92,7 @@ const STORE_ID = getStoreId() || '';
       descriptionEn: form.descriptionEn ? form.descriptionEn.trim() : '',
       storeId: STORE_ID,
       icon: form.icon || '',
-      image: form.image || DEFAULT_CATEGORY_IMAGE, // استخدام الصورة الافتراضية إذا لم يرفع المستخدم صورة
+      image: (form.image && typeof form.image === 'string' && form.image.trim() !== '') ? form.image : null, // إرسال null إذا لم يتم رفع صورة - سيستخدم الباك إند الصورة الافتراضية
       isActive: form.visible !== undefined ? form.visible : true,
       sortOrder: form.order || 1,
     };
@@ -106,7 +102,8 @@ const STORE_ID = getStoreId() || '';
       payload.parent = form.parentId;
     }
     
-    //CONSOLE.log('Final payload to send:', payload);
+    console.log('🔍 Final payload to send:', payload);
+    console.log('🔍 Image in payload:', payload.image, '(type:', typeof payload.image, ')');
     try {
       if (editId) {
          await axios.put(`https://bringus-backend.onrender.com/api/categories/${editId}`, payload, {

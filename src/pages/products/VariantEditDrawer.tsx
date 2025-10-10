@@ -6,8 +6,7 @@ import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomFileInput from '../../components/common/CustomFileInput';
 import CustomSwitch from '../../components/common/CustomSwitch';
 // import MultiSelect from '../../components/common/MultiSelect';
-import { createImageValidationFunction } from '../../validation/imageValidation';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 interface VariantEditDrawerProps {
   isOpen: boolean;
@@ -30,10 +29,8 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
   isLoading = false,
   specifications = []
 }) => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   
-  // Create image validation function
-  const imageValidator = createImageValidationFunction(t);
   
   // state للمواصفات المختارة
   const [selectedSpecifications, setSelectedSpecifications] = useState<any[]>([]);
@@ -379,7 +376,6 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
                   onChange={file => onFormChange({ target: { name: 'mainImage', value: file } } as any)}
                   multiple={false}
                   isRTL={isRTL}
-                  beforeChangeValidate={imageValidator}
                 />
                 <CustomFileInput
                   label={isRTL ? 'الصور الإضافية' : 'Additional Images'}
@@ -388,7 +384,6 @@ const VariantEditDrawer: React.FC<VariantEditDrawerProps> = ({
                   onChange={files => onFormChange({ target: { name: 'images', value: files } } as any)}
                   multiple={true}
                   isRTL={isRTL}
-                  beforeChangeValidate={imageValidator}
                 />
                 <CustomInput
                   label={isRTL ? 'رابط فيديو المتغير' : 'Variant Video URL'}

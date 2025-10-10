@@ -3,7 +3,6 @@ import CustomTextArea from '../../components/common/CustomTextArea';
 import CustomRadioGroup from '../../components/common/CustomRadioGroup';
 import CustomInput from '../../components/common/CustomInput';
 import CustomFileInput from '../../components/common/CustomFileInput';
-import { createImageValidationFunction } from '../../validation/imageValidation';
 import { AdvertisementValidationErrors } from '../../validation/advertisementValidation';
 
 interface AdvertisementFormProps {
@@ -52,8 +51,6 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
     }
   });
 
-  // Create image validation function
-  const imageValidator = createImageValidationFunction(t);
   const [imageUploading, setImageUploading] = useState(false);
   
   // Update parent state when imageUploading changes
@@ -225,7 +222,6 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 }
               }
             }}
-            beforeChangeValidate={imageValidator}
             multiple={false}
             isRTL={isRTL}
             required

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BASE_URL, LOGIN } from '../constants/api';
 import { updateUserData, updateStoreData, updateStoreId } from './useLocalStorage';
 import { saveAuthToken, saveUserInfo, saveStoreId, getAuthToken } from '../utils/authUtils';
-import { setCookie, getCookie, deleteCookie, setCookieObject, getCookieObject } from '../utils/cookies';
+import { setCookie, deleteCookie, setCookieObject } from '../utils/cookies';
 import i18n from 'i18next';
 import useLanguage from './useLanguage';
 interface LoginResponse {
@@ -172,7 +172,7 @@ export const useAuth = () => {
   };
 // -----------------------------------------------logout---------------------------------------------------------
   const logout = () => {
-    // Clear localStorage (except savedEmail and savedPassword for "Remember Me")
+    // Clear both localStorage and sessionStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('userInfo');
@@ -181,84 +181,34 @@ export const useAuth = () => {
     localStorage.removeItem('storeInfo');
     localStorage.removeItem('storeLogo');
     localStorage.removeItem('isOwner');
-    // NOTE: لا نحذف savedEmail و savedPassword و rememberMe حتى يبقوا محفوظين لـ "تذكرني"
-    // localStorage.removeItem('savedEmail');
-    // localStorage.removeItem('savedPassword');
-    // localStorage.removeItem('rememberMe');
+    localStorage.removeItem('rememberMe');
+    localStorage.removeItem('savedEmail');
+    localStorage.removeItem('savedPassword');
     
-    // Clear sessionStorage
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('userInfo');
-    
-    // Clear cookies (except savedEmail and savedPassword for "Remember Me")
-    deleteCookie('token');
-    deleteCookie('userInfo');
-    // NOTE: لا نحذف savedEmail و savedPassword و rememberMe حتى يبقوا محفوظين لـ "تذكرني"
-    // deleteCookie('savedEmail');
-    // deleteCookie('savedPassword');
-    // deleteCookie('rememberMe');
-    console.log('🗑️ Authentication data cleared (keeping savedEmail & savedPassword for Remember Me)');
     
     updateStoreId("");
     
     // Dispatch custom event for store context update
     window.dispatchEvent(new CustomEvent('userLoggedOut'));
   };
-
-// -----------------------------------------------clearRememberMe---------------------------------------------------------
-  // دالة لحذف بيانات "تذكرني" بشكل كامل (يمكن استخدامها من زر "نسيان البيانات المحفوظة")
-  const clearRememberMe = () => {
-    // Clear from localStorage
-    localStorage.removeItem('savedEmail');
-    localStorage.removeItem('savedPassword');
-    localStorage.removeItem('rememberMe');
-    
-    // Clear from cookies
-    deleteCookie('savedEmail');
-    deleteCookie('savedPassword');
-    deleteCookie('rememberMe');
-    
-    console.log('🗑️ Remember Me data cleared completely');
-  };
 // -----------------------------------------------getCurrentUser---------------------------------------------------------
   const getCurrentUser = () => {
-    // Check localStorage first (always saved there), then cookies as fallback
-    const localUserInfo = localStorage.getItem('userInfo');
-    if (localUserInfo) {
-      return JSON.parse(localUserInfo);
-    }
-    
-    const cookieUserInfo = getCookieObject('userInfo');
-    if (cookieUserInfo) {
-      return cookieUserInfo;
-    }
-    
-    const sessionUserInfo = sessionStorage.getItem('userInfo');
-    if (sessionUserInfo) {
-      return JSON.parse(sessionUserInfo);
-    }
-    
-    return null;
+    // Check both localStorage and sessionStorage for user info
+    const userInfo = localStorage.getItem('userInfo') || sessionStorage.getItem('userInfo');
+    return userInfo ? JSON.parse(userInfo) : null;
   };
 // -----------------------------------------------getToken---------------------------------------------------------
   const getToken = () => {
-    // Check localStorage first (always saved there), then cookies as fallback
+    // Check both localStorage and sessionStorage for token
     const localToken = localStorage.getItem('token');
-    if (localToken) {
-      return localToken;
-    }
-    
-    const cookieToken = getCookie('token');
-    if (cookieToken) {
-      return cookieToken;
-    }
-    
     const sessionToken = sessionStorage.getItem('token');
-    if (sessionToken) {
-      return sessionToken;
-    }
+    const token = localToken || sessionToken;
     
-    return null;
+   
+    
+    return token;
   };
 // -----------------------------------------------isAuthenticated---------------------------------------------------------
   const isAuthenticated = () => {
@@ -287,7 +237,6 @@ export const useAuth = () => {
   return {
     login,
     logout,
-    clearRememberMe,
     getCurrentUser,
     getToken,
     isAuthenticated,
