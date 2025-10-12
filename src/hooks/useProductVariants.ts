@@ -12,7 +12,7 @@ const useProductVariants = () => {
   // جلب كل المتغيرات
   const fetchAllVariants = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/meta/product-variants');
+      const res = await axios.get('https://bringus-backend.onrender.com/api/meta/product-variants');
       setVariants(res.data);
       showSuccess(isRTL ? 'تم جلب جميع متغيرات المنتجات بنجاح' : 'All product variants fetched successfully');
       return res.data;
@@ -29,7 +29,7 @@ const useProductVariants = () => {
   // جلب متغيرات المنتجات حسب storeId
   const fetchVariantsByStore = async (storeId: string) => {
     try {
-      const res = await axios.get('http://localhost:5001/api/meta/product-variants/by-store', { params: { storeId } });
+      const res = await axios.get('https://bringus-backend.onrender.com/api/meta/product-variants/by-store', { params: { storeId } });
       setVariants(res.data);
       showSuccess(isRTL ? 'تم جلب متغيرات المنتجات الخاصة بالمتجر بنجاح' : 'Store product variants fetched successfully');
       return res.data;
@@ -46,7 +46,7 @@ const useProductVariants = () => {
   // إضافة متغير منتج
   const addVariant = async (data: any) => {
     try {
-      const res = await axios.post('http://localhost:5001/api/meta/product-variants', data);
+      const res = await axios.post('https://bringus-backend.onrender.com/api/meta/product-variants', data);
       showSuccess(isRTL ? 'تم إضافة متغير المنتج بنجاح' : 'Product variant added successfully');
       return res.data;
     } catch (err: any) {
@@ -62,7 +62,7 @@ const useProductVariants = () => {
   // تعديل متغير منتج
   const updateVariant = async (id: string, data: any) => {
     try {
-      const res = await axios.put(`http://localhost:5001/api/meta/product-variants/${id}`, data);
+      const res = await axios.put(`https://bringus-backend.onrender.com/api/meta/product-variants/${id}`, data);
       showSuccess(isRTL ? 'تم تعديل متغير المنتج بنجاح' : 'Product variant updated successfully');
       return res.data;
     } catch (err: any) {
@@ -78,7 +78,7 @@ const useProductVariants = () => {
   // حذف متغير منتج
   const deleteVariant = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5001/api/meta/product-variants/${id}`);
+      await axios.delete(`https://bringus-backend.onrender.com/api/meta/product-variants/${id}`);
       showSuccess(isRTL ? 'تم حذف متغير المنتج بنجاح' : 'Product variant deleted successfully');
       return true;
     } catch (err: any) {
