@@ -5,7 +5,7 @@ import AffiliationForm from './AffiliationForm';
 import { useValidation } from '../../../hooks/useValidation';
 import { affiliateValidationSchema, validateAffiliateWithDuplicates } from '../../../validation/affiliateValidation';
 import useAffiliations from '../../../hooks/useAffiliations';
-import { getStoreId, generateAffiliateLink, isAffiliateLinkUnique } from '../../../utils/storeUtils';
+import { getStoreId } from '../../../utils/storeUtils';
 
 interface AffiliationDrawerProps {
   open: boolean;
@@ -86,6 +86,8 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
   useEffect(() => {
     if (open) {
       if (initialData) {
+        console.log('📋 Initial Data for Edit:', initialData);
+        
         // تحويل البيانات من API إلى شكل النموذج
         const formData = {
           firstName: initialData.firstName || '',
@@ -94,6 +96,7 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
           password: '', // لا نعرض كلمة المرور في التعديل
           mobile: initialData.mobile || '',
           address: initialData.address || '',
+          affiliateLink: initialData.affiliateLink || initialData.affiliateCode || '',
           percent: initialData.percent || 0,
           status: initialData.status || 'Active',
           bankInfo: initialData.bankInfo || {
@@ -109,21 +112,11 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
           },
           notes: initialData.notes || ''
         };
+        
+        console.log('📝 Form Data after mapping:', formData);
         setForm(formData);
       } else {
-        // إنشاء رابط مسوق فريد عند إضافة مسوق جديد
-        let uniqueLink = '';
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        while (!uniqueLink && attempts < maxAttempts) {
-          const generatedLink = generateAffiliateLink();
-          if (generatedLink && isAffiliateLinkUnique(generatedLink, affiliates || [])) {
-            uniqueLink = generatedLink;
-          }
-          attempts++;
-        }
-        
+        // Creating new affiliate - backend will generate the link
         setForm({
           email: '',
           password: '',
@@ -133,7 +126,7 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
           percent: 0,
           status: 'Active',
           address: '',
-          affiliateLink: uniqueLink,
+          affiliateLink: '', // Backend will generate this
           bankInfo: {
             bankName: '',
             accountNumber: '',
@@ -208,7 +201,8 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
     const validation = validateAffiliateWithDuplicates(
       formData as any,
       affiliates || [],
-      t
+      t,
+      isEdit // Pass isEdit flag to skip password validation in edit mode
     );
 
     if (!validation.isValid) {
@@ -220,18 +214,24 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
     clearAllErrors();
 
     try {
-      // Check required fields
-      if (!form.firstName || !form.lastName || !form.email || !form.password || !form.mobile || !form.address) {
-        setErrors({ general: 'جميع الحقول المطلوبة يجب ملؤها' });
+      // Check required fields (password is only required for new affiliates)
+      const requiredFields = !isEdit 
+        ? (!form.firstName || !form.lastName || !form.email || !form.password || !form.mobile || !form.address)
+        : (!form.firstName || !form.lastName || !form.email || !form.mobile || !form.address);
+        
+      if (requiredFields) {
+        const errorMsg = isRTL 
+          ? 'جميع الحقول المطلوبة يجب ملؤها' 
+          : 'All required fields must be filled';
+        setErrors({ general: errorMsg });
         return;
       }
 
       // Prepare data for API
-      const apiData = {
+      const apiData: any = {
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
-        password: form.password,
         mobile: form.mobile,
         address: form.address,
         affiliateLink: form.affiliateLink || '',
@@ -256,12 +256,23 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
 
       if (isEdit && (initialData?._id || initialData?.id)) {
         // Update existing affiliate
+        // Only include password if it's provided and not empty
+        if (form.password && form.password.trim() !== '') {
+          apiData.password = form.password;
+        }
+        // If password is empty, don't include it in the update request
+        
         await updateAffiliate({
           _id: initialData._id || initialData.id,
           ...apiData
         });
       } else {
-        // Create new affiliate
+        // Create new affiliate (password is required)
+        if (!form.password || form.password.trim() === '') {
+          setErrors({ password: isRTL ? 'كلمة المرور مطلوبة' : 'Password is required' });
+          return;
+        }
+        apiData.password = form.password;
         await createAffiliate(apiData);
       }
 
@@ -294,6 +305,7 @@ const AffiliationDrawer: React.FC<AffiliationDrawerProps> = ({
             isRTL={isRTL} 
             errors={errors}
             affiliates={affiliates}
+            isEdit={isEdit}
           />
         </div>
         

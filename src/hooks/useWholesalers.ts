@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { BASE_URL } from '../constants/api';
 import { useToastContext } from '../contexts/ToastContext';
-import { getErrorMessage } from '../utils/errorUtils';
 import useLanguage from './useLanguage';
 
 const API_BASE = `${BASE_URL}wholesalers`;
@@ -68,19 +67,24 @@ export function useWholesalers(storeId: string, token: string) {
         },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'API Error');
+      if (!res.ok) {
+        // Throw error with full data for bilingual handling
+        const error: any = new Error(data.message || 'API Error');
+        error.response = { data };
+        throw error;
+      }
       return data;
     } catch (err: any) {
-      const errorMsg = getErrorMessage(err, isRTL, {
-        title: isRTL ? 'خطأ في API' : 'API Error',
-        message: isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server'
-      });
-      setError(errorMsg.message);
+      const errorData = err?.response?.data;
+      const errorMsg = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في الاتصال بالخادم')
+        : (errorData?.message || errorData?.message_en || 'Failed to connect to server');
+      setError(errorMsg);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, isRTL]);
 
   // Get all wholesalers
   const getWholesalers = useCallback(async (params: any = {}) => {
@@ -94,14 +98,15 @@ export function useWholesalers(storeId: string, token: string) {
       setStats(data.data.stats || null);
       return data.data;
     } catch (err: any) {
-      const errorMsg = getErrorMessage(err, isRTL, {
-        title: isRTL ? 'خطأ في جلب تجار الجملة' : 'Error Fetching Wholesalers',
-        message: isRTL ? 'فشل في جلب قائمة تجار الجملة' : 'Failed to fetch wholesalers list'
-      });
-      showError(errorMsg.message);
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في جلب قائمة تجار الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to fetch wholesalers list');
+      const errorTitle = isRTL ? 'خطأ في جلب تجار الجملة' : 'Error Fetching Wholesalers';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showError]);
+  }, [storeId, fetchWithAuth, showError, isRTL]);
 
   // Get single wholesaler
   const getWholesaler = useCallback(async (wholesalerId: string) => {
@@ -110,10 +115,15 @@ export function useWholesalers(storeId: string, token: string) {
       const data = await fetchWithAuth(url);
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to fetch wholesaler');
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في جلب بيانات تاجر الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to fetch wholesaler');
+      const errorTitle = isRTL ? 'خطأ' : 'Error';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showError]);
+  }, [storeId, fetchWithAuth, showError, isRTL]);
 
   // Create wholesaler
   const createWholesaler = useCallback(async (wholesaler: Partial<Wholesaler>) => {
@@ -124,13 +134,25 @@ export function useWholesalers(storeId: string, token: string) {
         method: 'POST',
         body: JSON.stringify(wholesaler),
       });
-      showSuccess('Wholesaler created successfully');
+      
+      // Show success message
+      const successMessage = isRTL 
+        ? (data?.messageAr || data?.message_ar || 'تم إنشاء تاجر الجملة بنجاح')
+        : (data?.message || data?.message_en || 'Wholesaler created successfully');
+      const successTitle = isRTL ? 'نجاح' : 'Success';
+      showSuccess(successMessage, successTitle);
+      
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to create wholesaler');
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في إنشاء تاجر الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to create wholesaler');
+      const errorTitle = isRTL ? 'خطأ في الإنشاء' : 'Error Creating';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showSuccess, showError]);
+  }, [storeId, fetchWithAuth, showSuccess, showError, isRTL]);
 
   // Update wholesaler
   const updateWholesaler = useCallback(async (wholesalerId: string, update: Partial<Wholesaler>) => {
@@ -140,13 +162,24 @@ export function useWholesalers(storeId: string, token: string) {
         method: 'PUT',
         body: JSON.stringify(update),
       });
-      showSuccess('Wholesaler updated successfully');
+      
+      const successMessage = isRTL 
+        ? (data?.messageAr || data?.message_ar || 'تم تحديث تاجر الجملة بنجاح')
+        : (data?.message || data?.message_en || 'Wholesaler updated successfully');
+      const successTitle = isRTL ? 'نجاح' : 'Success';
+      showSuccess(successMessage, successTitle);
+      
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to update wholesaler');
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في تحديث تاجر الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to update wholesaler');
+      const errorTitle = isRTL ? 'خطأ في التحديث' : 'Error Updating';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showSuccess, showError]);
+  }, [storeId, fetchWithAuth, showSuccess, showError, isRTL]);
 
   // Delete wholesaler
   const deleteWholesaler = useCallback(async (wholesalerId: string) => {
@@ -155,13 +188,24 @@ export function useWholesalers(storeId: string, token: string) {
       const data = await fetchWithAuth(url, {
         method: 'DELETE',
       });
-      showSuccess('Wholesaler deleted successfully');
+      
+      const successMessage = isRTL 
+        ? (data?.messageAr || data?.message_ar || 'تم حذف تاجر الجملة بنجاح')
+        : (data?.message || data?.message_en || 'Wholesaler deleted successfully');
+      const successTitle = isRTL ? 'نجاح' : 'Success';
+      showSuccess(successMessage, successTitle);
+      
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to delete wholesaler');
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في حذف تاجر الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to delete wholesaler');
+      const errorTitle = isRTL ? 'خطأ في الحذف' : 'Error Deleting';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showSuccess, showError]);
+  }, [storeId, fetchWithAuth, showSuccess, showError, isRTL]);
 
   // Verify wholesaler
   const verifyWholesaler = useCallback(async (wholesalerId: string, verifiedBy: string) => {
@@ -171,13 +215,24 @@ export function useWholesalers(storeId: string, token: string) {
         method: 'PATCH',
         body: JSON.stringify({ verifiedBy }),
       });
-      showSuccess('Wholesaler verified successfully');
+      
+      const successMessage = isRTL 
+        ? (data?.messageAr || data?.message_ar || 'تم التحقق من تاجر الجملة بنجاح')
+        : (data?.message || data?.message_en || 'Wholesaler verified successfully');
+      const successTitle = isRTL ? 'نجاح' : 'Success';
+      showSuccess(successMessage, successTitle);
+      
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to verify wholesaler');
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في التحقق من تاجر الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to verify wholesaler');
+      const errorTitle = isRTL ? 'خطأ' : 'Error';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showSuccess, showError]);
+  }, [storeId, fetchWithAuth, showSuccess, showError, isRTL]);
 
   // Update status
   const updateStatus = useCallback(async (wholesalerId: string, status: string) => {
@@ -187,13 +242,24 @@ export function useWholesalers(storeId: string, token: string) {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       });
-      showSuccess('Wholesaler status updated successfully');
+      
+      const successMessage = isRTL 
+        ? (data?.messageAr || data?.message_ar || 'تم تحديث حالة تاجر الجملة بنجاح')
+        : (data?.message || data?.message_en || 'Wholesaler status updated successfully');
+      const successTitle = isRTL ? 'نجاح' : 'Success';
+      showSuccess(successMessage, successTitle);
+      
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to update wholesaler status');
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في تحديث حالة تاجر الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to update wholesaler status');
+      const errorTitle = isRTL ? 'خطأ' : 'Error';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showSuccess, showError]);
+  }, [storeId, fetchWithAuth, showSuccess, showError, isRTL]);
 
   // Bulk update status
   const bulkUpdateStatus = useCallback(async (wholesalerIds: string[], status: string) => {
@@ -203,13 +269,24 @@ export function useWholesalers(storeId: string, token: string) {
         method: 'PATCH',
         body: JSON.stringify({ wholesalerIds, status }),
       });
-      showSuccess(`${wholesalerIds.length} wholesalers status updated successfully`);
+      
+      const successMessage = isRTL 
+        ? (data?.messageAr || data?.message_ar || `تم تحديث حالة ${wholesalerIds.length} تاجر جملة بنجاح`)
+        : (data?.message || data?.message_en || `${wholesalerIds.length} wholesalers status updated successfully`);
+      const successTitle = isRTL ? 'نجاح' : 'Success';
+      showSuccess(successMessage, successTitle);
+      
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to bulk update wholesaler status');
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في تحديث حالة تجار الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to bulk update wholesaler status');
+      const errorTitle = isRTL ? 'خطأ' : 'Error';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showSuccess, showError]);
+  }, [storeId, fetchWithAuth, showSuccess, showError, isRTL]);
 
   // Bulk delete
   const bulkDelete = useCallback(async (wholesalerIds: string[]) => {
@@ -219,13 +296,24 @@ export function useWholesalers(storeId: string, token: string) {
         method: 'DELETE',
         body: JSON.stringify({ wholesalerIds }),
       });
-      showSuccess(`${wholesalerIds.length}  wholesalers deleted successfully`);
+      
+      const successMessage = isRTL 
+        ? (data?.messageAr || data?.message_ar || `تم حذف ${wholesalerIds.length} تاجر جملة بنجاح`)
+        : (data?.message || data?.message_en || `${wholesalerIds.length} wholesalers deleted successfully`);
+      const successTitle = isRTL ? 'نجاح' : 'Success';
+      showSuccess(successMessage, successTitle);
+      
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to bulk delete wholesalers');
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في حذف تجار الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to bulk delete wholesalers');
+      const errorTitle = isRTL ? 'خطأ' : 'Error';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showSuccess, showError]);
+  }, [storeId, fetchWithAuth, showSuccess, showError, isRTL]);
 
   // Get stats only
   const getStats = useCallback(async () => {
@@ -235,10 +323,15 @@ export function useWholesalers(storeId: string, token: string) {
       setStats(data.data);
       return data.data;
     } catch (err: any) {
-      showError(err.message || 'Failed to fetch wholesaler statistics');
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في جلب إحصائيات تجار الجملة')
+        : (errorData?.message || errorData?.message_en || 'Failed to fetch wholesaler statistics');
+      const errorTitle = isRTL ? 'خطأ' : 'Error';
+      showError(errorMessage, errorTitle);
       throw err;
     }
-  }, [storeId, fetchWithAuth, showError]);
+  }, [storeId, fetchWithAuth, showError, isRTL]);
 
   return {
     loading,

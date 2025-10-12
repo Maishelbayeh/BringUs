@@ -55,8 +55,10 @@ interface ProductsDrawerProps {
   productsFormRef?: any; // أضف هذا السطر
   mainImageUploading?: boolean;
   additionalImagesUploading?: boolean;
+  allProducts?: any[]; // For barcode duplicate check
+  editId?: string | number | null; // Current product ID when editing
 }
-const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onMainImageChange, uploadMainImage, onSubmit, categories = [], tags = [], units = [], specifications = [], validationErrors = {}, onFieldValidation, showValidation = true, productsFormRef, mainImageUploading = false, additionalImagesUploading = false }) => {
+const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, title, drawerMode = 'add', form, onFormChange, onTagsChange, onImageChange, onMainImageChange, uploadMainImage, onSubmit, categories = [], tags = [], units = [], specifications = [], validationErrors = {}, onFieldValidation, showValidation = true, productsFormRef, mainImageUploading = false, additionalImagesUploading = false, allProducts = [], editId = null }) => {
   if (!open) return null;
   
   //-------------------------------------------- return ------------------------------------------- 
@@ -114,6 +116,8 @@ const ProductsDrawer: React.FC<ProductsDrawerProps> = ({ open, onClose, isRTL, t
               showValidation={showValidation}
               mainImageUploading={mainImageUploading}
               additionalImagesUploading={additionalImagesUploading}
+              allProducts={allProducts}
+              editId={editId}
             />
           </div>
         </form>

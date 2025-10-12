@@ -1619,6 +1619,8 @@ const ProductsPage: React.FC = () => {
         productsFormRef={productsFormRef}
         mainImageUploading={mainImageUploading}
         additionalImagesUploading={additionalImagesUploading}
+        allProducts={products}
+        editId={editProduct?._id || editProduct?.id || null}
       />
 
       {/* ------------------------------------------- PermissionModal ------------------------------------------- */}

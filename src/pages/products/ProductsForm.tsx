@@ -30,7 +30,7 @@ import { type CategoryNode } from '@/utils/categoryUtils';
 
 import { useValidation } from '@/hooks/useValidation';
 
-import { productValidationSchema, validateBarcode } from '@/validation/productValidation';
+import { productValidationSchema, validateBarcode, checkDuplicateBarcode } from '@/validation/productValidation';
 import { getStoreInfo } from '@/utils/storeUtils';
 import { currencyOptions } from '@/data/currencyOptions';
 
@@ -112,6 +112,10 @@ interface ProductsFormProps {
 
   additionalImagesUploading?: boolean;
 
+  allProducts?: any[]; // For barcode duplicate check
+
+  editId?: string | number | null; // Current product ID when editing
+
 }
 
 
@@ -148,7 +152,11 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
     mainImageUploading = false,
 
-    additionalImagesUploading = false
+    additionalImagesUploading = false,
+
+    allProducts = [],
+
+    editId = null
 
   } = props;
 
@@ -393,6 +401,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
   const [localNewBarcode, setLocalNewBarcode] = useState('');
   const [barcodeValidationError, setBarcodeValidationError] = useState<string>('');
+  const [quantityValidationError, setQuantityValidationError] = useState<string>('');
 
   const [showMainImageSuccess, setShowMainImageSuccess] = useState(false);
 
@@ -405,24 +414,67 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
     const trimmedBarcode = barcode.trim();
     
-    // Check if barcode contains only letters and numbers
+    // 1. Check format - only letters and numbers
     if (!/^[a-zA-Z0-9]+$/.test(trimmedBarcode)) {
       setBarcodeValidationError(isRTL ? 'الباركود يمكن أن يحتوي على أرقام وحروف فقط' : 'Barcode can only contain letters and numbers');
       return false;
     }
 
-    // Check if barcode already exists in current barcodes
+    // 2. Check if barcode already exists in current product's barcodes
     const currentBarcodes = Array.isArray(form.barcodes) ? form.barcodes : [];
     if (currentBarcodes.includes(trimmedBarcode)) {
-      setBarcodeValidationError(isRTL ? 'الباركود موجود مسبقاً' : 'Barcode already exists');
+      setBarcodeValidationError(isRTL ? 'الباركود موجود مسبقاً في هذا المنتج' : 'Barcode already exists in this product');
       return false;
     }
 
-    // Check if barcode exists in other products (this would require API call in real implementation)
-    // For now, we'll just clear the error if basic validation passes
+    // 3. Check if barcode exists in other products
+    if (checkDuplicateBarcode(trimmedBarcode, allProducts, editId)) {
+      setBarcodeValidationError(isRTL ? '⚠️ الباركود موجود في منتج آخر' : '⚠️ Barcode exists in another product');
+      return false;
+    }
+
+    // 4. Validate using backend validation rules
+    const backendValidationError = validateBarcode(trimmedBarcode, t);
+    if (backendValidationError) {
+      setBarcodeValidationError(backendValidationError);
+      return false;
+    }
+
+    // All checks passed
     setBarcodeValidationError('');
     return true;
-  }, [form.barcodes, isRTL]);
+  }, [form.barcodes, allProducts, editId, isRTL, t]);
+
+  // Real-time quantity validation function
+  const validateQuantityRealTime = useCallback((quantity: string) => {
+    if (!quantity || quantity.trim() === '') {
+      setQuantityValidationError('');
+      return true;
+    }
+
+    const numQuantity = parseInt(quantity);
+    
+    // Check if quantity is a valid number
+    if (isNaN(numQuantity)) {
+      setQuantityValidationError(isRTL ? 'الكمية يجب أن تكون رقماً' : 'Quantity must be a number');
+      return false;
+    }
+
+    // Check if quantity is negative
+    if (numQuantity < 0) {
+      setQuantityValidationError(isRTL ? 'الكمية لا يمكن أن تكون سالبة' : 'Quantity cannot be negative');
+      return false;
+    }
+
+    // Check if quantity is too large
+    if (numQuantity > 1000000) {
+      setQuantityValidationError(isRTL ? 'الكمية لا يمكن أن تتجاوز مليون' : 'Quantity cannot exceed 1,000,000');
+      return false;
+    }
+
+    setQuantityValidationError('');
+    return true;
+  }, [isRTL]);
 
   const [formattedColors, setFormattedColors] = useState<ColorVariant[]>([]);
 
@@ -2786,6 +2838,7 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
      
       <div className="bg-white rounded-lg border border-gray-200 p-6 mt-4">
 
+<div className="space-y-2">
 <CustomInput
 
   label={isRTL ? t('products.availableQuantity') : 'Available Quantity'}
@@ -2794,9 +2847,17 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
   value={form.stock || ''}
 
-  onChange={(e) => handleInputChange('stock', e.target.value)}
+  onChange={(e) => {
+    const value = e.target.value;
+    handleInputChange('stock', value);
+    
+    // Real-time validation
+    if (!specificationDetails || specificationDetails.length === 0) {
+      validateQuantityRealTime(value);
+    }
+  }}
 
-  className={getFieldErrorClass('stock')}
+  className={`${getFieldErrorClass('stock')} ${quantityValidationError ? 'border-red-300 focus:ring-red-500 bg-red-50' : ''}`}
 
   type="number"
 
@@ -2814,7 +2875,18 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
 />
 
+{/* عرض رسالة الخطأ إذا كان هناك خطأ في التحقق */}
+{quantityValidationError && (
+  <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center text-sm">
+    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+    </svg>
+    {quantityValidationError}
+  </div>
+)}
+
 {renderFieldError('availableQuantity')}
+</div>
 
 <p className="text-xs text-gray-500 mt-1">
 

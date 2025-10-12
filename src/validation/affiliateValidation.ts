@@ -88,7 +88,8 @@ const checkDuplicateAffiliate = (
 export const validateAffiliateWithDuplicates = (
   form: AffiliateFormData & { id?: string | number },
   allAffiliates: any[],
-  t: TFunction
+  t: TFunction,
+  isEdit: boolean = false
 ): { isValid: boolean; errors: { [key: string]: string } } => {
   const errors: { [key: string]: string } = {};
 
@@ -99,13 +100,26 @@ export const validateAffiliateWithDuplicates = (
     errors.email = t('validation.emailInvalid');
   }
 
-  // Password validation
-  if (!form.password || form.password.trim() === '') {
-    errors.password = t('validation.required');
-  } else if (form.password.trim().length < 6) {
-    errors.password = t('validation.minLength', { min: 6 });
-  } else if (form.password.trim().length > 50) {
-    errors.password = t('validation.maxLength', { max: 50 });
+  // Password validation (only required for new affiliates)
+  if (!isEdit) {
+    // Creating new affiliate - password is required
+    if (!form.password || form.password.trim() === '') {
+      errors.password = t('validation.required');
+    } else if (form.password.trim().length < 6) {
+      errors.password = t('validation.minLength', { min: 6 });
+    } else if (form.password.trim().length > 50) {
+      errors.password = t('validation.maxLength', { max: 50 });
+    }
+  } else {
+    // Editing existing affiliate - password is optional
+    // Only validate if password is provided
+    if (form.password && form.password.trim() !== '') {
+      if (form.password.trim().length < 6) {
+        errors.password = t('validation.minLength', { min: 6 });
+      } else if (form.password.trim().length > 50) {
+        errors.password = t('validation.maxLength', { max: 50 });
+      }
+    }
   }
 
   // First Name validation

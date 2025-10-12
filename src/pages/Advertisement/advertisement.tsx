@@ -208,7 +208,7 @@ const AdvertisementPage = () => {
         formData.append('file', blob, 'advertisement-image.png');
 
         // Upload to backend
-        const uploadRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://bringus-backend.onrender.com/api/'}advertisements/upload-image`, {
+        const uploadRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api/'}advertisements/upload-image`, {
           method: 'POST',
           body: formData,
           headers: {
