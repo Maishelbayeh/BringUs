@@ -124,7 +124,14 @@
     "createdAt": "تاريخ الإنشاء",
     "updatedAt": "آخر تحديث",
     "days": "أيام",
-    "notPopular": "غير شائع"
+    "notPopular": "غير شائع",
+    "planCreated": "تمت إضافة خطة الاشتراك بنجاح",
+    "planUpdated": "تم تعديل خطة الاشتراك بنجاح",
+    "planDeleted": "تم حذف خطة الاشتراك بنجاح",
+    "planStatusUpdated": "تم تحديث حالة الخطة بنجاح",
+    "planPopularityUpdated": "تم تحديث شعبية الخطة بنجاح",
+    "readMore": "قراءة المزيد",
+    "readLess": "قراءة أقل"
   },
   "subscriptionHistory": {
     "title": "تاريخ الاشتراكات",
