@@ -360,18 +360,20 @@ const SubscriptionPlans: React.FC = () => {
 
         {/* View Plan Modal */}
         {showViewModal && selectedPlan && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className={`bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto ${isRTL ? 'text-right' : 'text-left'}`}
+              style={{ direction: isRTL ? 'rtl' : 'ltr' }}
+            >
+              <div className={`flex justify-between items-center mb-6 pb-4 border-b`}>
                 <h3 className="text-xl font-bold text-gray-900">
-                  {isRTL ? selectedPlan.nameAr : selectedPlan.name}
+                  {isRTL ? 'عرض الخطة' : 'View Plan'}
                 </h3>
                 <button
                   onClick={() => {
                     setShowViewModal(false);
                     setSelectedPlan(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -379,90 +381,135 @@ const SubscriptionPlans: React.FC = () => {
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {/* Plan Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">{t('subscriptionPlans.details')}</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.name')}:</span>
-                        <span className="font-medium">{isRTL ? selectedPlan.nameAr : selectedPlan.name}</span>
-                      </div>
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.description')}:</span>
-                        <span className="font-medium">{isRTL ? selectedPlan.descriptionAr : selectedPlan.description}</span>
-                      </div>
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.type')}:</span>
-                        <span className="font-medium">{getPlanTypeLabel(selectedPlan.type)}</span>
-                      </div>
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.duration')}:</span>
-                        <span className="font-medium">{selectedPlan.duration} {t('subscriptionPlans.days')}</span>
-                      </div>
+              <div className="space-y-6">
+                {/* Plan Details Section */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-base">
+                    {isRTL ? 'تفاصيل الخطة' : t('subscriptionPlans.details')}
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.name')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {isRTL ? selectedPlan.nameAr : selectedPlan.name}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.description')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {isRTL ? selectedPlan.descriptionAr : selectedPlan.description}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.type')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {getPlanTypeLabel(selectedPlan.type)}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.duration')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {selectedPlan.duration} {t('subscriptionPlans.days')}
+                      </span>
                     </div>
                   </div>
+                </div>
 
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">{t('subscriptionPlans.pricing')}</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.price')}:</span>
-                        <span className="font-medium text-lg text-purple-600">
-                          {selectedPlan.price === 0 ? (
-                            t('subscriptionPlans.free')
-                          ) : (
-                            `${getCurrencySymbol(selectedPlan.currency)}${selectedPlan.price}`
-                          )}
+                {/* Pricing Information Section */}
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-base">
+                    {isRTL ? 'معلومات التسعير' : t('subscriptionPlans.pricing')}
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.price')}
+                      </span>
+                      <span className={`text-base font-semibold text-purple-600 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {selectedPlan.price === 0 ? (
+                          t('subscriptionPlans.free')
+                        ) : (
+                          `${getCurrencySymbol(selectedPlan.currency)}${selectedPlan.price}`
+                        )}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.currency')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {selectedPlan.currency}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Information Section */}
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-base">
+                    {isRTL ? 'معلومات الحالة' : t('subscriptionPlans.status')}
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4 py-2 items-center">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.isActive')}
+                      </span>
+                      <span className={`${isRTL ? 'text-left' : 'text-right'}`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                          selectedPlan.isActive 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {selectedPlan.isActive ? t('subscriptionPlans.active') : t('subscriptionPlans.inactive')}
                         </span>
-                      </div>
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.currency')}:</span>
-                        <span className="font-medium">{selectedPlan.currency}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Status Information */}
-                <div className="border-t pt-4">
-                  <h4 className="font-medium text-gray-900 mb-2">{t('subscriptionPlans.status')}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-sm text-gray-500">{t('subscriptionPlans.isActive')}:</span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        selectedPlan.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {selectedPlan.isActive ? t('subscriptionPlans.active') : t('subscriptionPlans.inactive')}
                       </span>
                     </div>
-                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-sm text-gray-500">{t('subscriptionPlans.isPopular')}:</span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        selectedPlan.isPopular 
-                          ? 'bg-yellow-100 text-yellow-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {selectedPlan.isPopular ? t('subscriptionPlans.popular') : t('subscriptionPlans.notPopular')}
+                    <div className="grid grid-cols-2 gap-4 py-2 items-center">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.isPopular')}
+                      </span>
+                      <span className={`${isRTL ? 'text-left' : 'text-right'}`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                          selectedPlan.isPopular 
+                            ? 'bg-yellow-100 text-yellow-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {selectedPlan.isPopular ? t('subscriptionPlans.popular') : t('subscriptionPlans.notPopular')}
+                        </span>
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Timestamps */}
-                <div className="border-t pt-4">
-                  <h4 className="font-medium text-gray-900 mb-2">{t('subscriptionPlans.timestamps')}</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-gray-500">{t('subscriptionPlans.createdAt')}:</span>
-                      <span className="font-medium">{new Date(selectedPlan.createdAt).toLocaleDateString()}</span>
+                {/* Timestamps Section */}
+                <div className="bg-green-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-base">
+                    {isRTL ? 'الطوابع الزمنية' : t('subscriptionPlans.timestamps')}
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.createdAt')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {new Date(selectedPlan.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
-                    <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-gray-500">{t('subscriptionPlans.updatedAt')}:</span>
-                      <span className="font-medium">{new Date(selectedPlan.updatedAt).toLocaleDateString()}</span>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.updatedAt')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {new Date(selectedPlan.updatedAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 </div>
