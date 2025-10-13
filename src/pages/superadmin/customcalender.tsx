@@ -107,6 +107,7 @@ export default function DateField({
                   lineHeight: 1.6,
                   height: "unset",
                   opacity: 1,
+                  direction: isRTL ? 'rtl' : 'ltr',
                   textAlign: isRTL ? 'right' : 'left',
                   "&.Mui-disabled": {
                     opacity: 1,

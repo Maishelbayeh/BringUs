@@ -52,14 +52,26 @@ body {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
+}
+/* دعم RTL لمكوّنات التاريخ من MUI */
+[dir="rtl"] .MuiPickersSectionList-root {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+[dir="rtl"] .MuiPickersPopper-root {
+  direction: rtl !important;
+}
+
+[dir="rtl"] .MuiPickersDay-root {
+  direction: rtl !important;
 }
 
 .line-clamp-3 {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  /* -webkit-line-clamp: 3; */
 }
 
 @layer base {
