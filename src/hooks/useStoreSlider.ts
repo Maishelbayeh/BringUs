@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { BASE_URL } from '../constants/api';
-import { getErrorMessage } from '../utils/errorUtils';
 import useLanguage from './useLanguage';
 import { useToastContext } from '../contexts/ToastContext';
 // Types
@@ -73,21 +72,26 @@ export const useStoreSlider = () => {
         setStoreSliders(data.data || data);
         return data.data || data;
       } else {
-        throw new Error(data.message || 'Failed to fetch store sliders');
+        const errorMessage = isRTL 
+          ? (data?.messageAr || data?.message_ar || 'فشل في جلب قائمة السلايدر')
+          : (data?.message || data?.message_en || 'Failed to fetch store sliders');
+        const errorTitle = isRTL ? 'خطأ في جلب السلايدر' : 'Error Fetching Sliders';
+        
+        setError(errorMessage);
+        showError(errorMessage, errorTitle);
+        return null;
       }
     } catch (err: any) {
-      const errorMsg = getErrorMessage(err, isRTL, {
-        title: isRTL ? 'خطأ في جلب السلايدر' : 'Error Fetching Sliders',
-        message: isRTL ? 'فشل في جلب قائمة السلايدر' : 'Failed to fetch store sliders'
-      });
-      setError(errorMsg.message);
-      showError(errorMsg.message, errorMsg.title);
-      console.error('Error fetching store sliders:', err);
+      console.error('Network error fetching store sliders:', err);
+      const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
+      const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
+      setError(errorMessage);
+      showError(errorMessage, errorTitle);
       return null;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isRTL, showError, getStoreId]);
 
 //---------------------------------------------------get store slider by id-----------------------------------------------------------
   const getStoreSliderById = useCallback(async (id: string) => {
@@ -110,21 +114,26 @@ export const useStoreSlider = () => {
       if (response.ok) {
         return data.data || data;
       } else {
-        throw new Error(data.message || 'Failed to fetch store slider');
+        const errorMessage = isRTL 
+          ? (data?.messageAr || data?.message_ar || 'فشل في جلب بيانات السلايدر')
+          : (data?.message || data?.message_en || 'Failed to fetch store slider');
+        const errorTitle = isRTL ? 'خطأ في جلب السلايدر' : 'Error Fetching Slider';
+        
+        setError(errorMessage);
+        showError(errorMessage, errorTitle);
+        return null;
       }
     } catch (err: any) {
-      const errorMsg = getErrorMessage(err, isRTL, {
-        title: isRTL ? 'خطأ في جلب السلايدر' : 'Error Fetching Slider',
-        message: isRTL ? 'فشل في جلب بيانات السلايدر' : 'Failed to fetch store slider'
-      });
-      setError(errorMsg.message);
-      showError(errorMsg.message, errorMsg.title);
-      console.error('Error fetching store slider:', err);
+      console.error('Network error fetching store slider:', err);
+      const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
+      const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
+      setError(errorMessage);
+      showError(errorMessage, errorTitle);
       return null;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isRTL, showError]);
 
 //---------------------------------------------------get active sliders by type-----------------------------------------------------------
   const getActiveByType = useCallback(async (type: 'slider' | 'video') => {
@@ -199,27 +208,40 @@ export const useStoreSlider = () => {
       if (response.ok) {
         // Refresh the list
         await getAllStoreSliders();
-        showSuccess(
-          isRTL ? 'تم إنشاء السلايدر بنجاح' : 'Store slider created successfully',
-          isRTL ? 'نجاح' : 'Success'
-        );
+        
+        // Show success message from backend
+        const successMessage = isRTL 
+          ? (responseData?.messageAr || responseData?.message_ar || 'تم إنشاء السلايدر بنجاح')
+          : (responseData?.message || responseData?.message_en || 'Store slider created successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        showSuccess(successMessage, successTitle);
+        
         return responseData.data || responseData;
       } else {
-        throw new Error(responseData.message || 'Failed to create store slider');
+        // Handle error response
+        const errorMessage = isRTL 
+          ? (responseData?.messageAr || responseData?.message_ar || 'فشل في إنشاء سلايدر المتجر')
+          : (responseData?.message || responseData?.message_en || 'Failed to create store slider');
+        const errorTitle = isRTL 
+          ? (responseData?.errorAr || responseData?.error_ar || 'خطأ في إنشاء السلايدر')
+          : (responseData?.error || responseData?.error_en || 'Error Creating Slider');
+        
+        setError(errorMessage);
+        showError(errorMessage, errorTitle);
+        console.error('Error creating store slider:', responseData);
+        return null;
       }
     } catch (err: any) {
-      const errorMsg = getErrorMessage(err, isRTL, {
-        title: isRTL ? 'خطأ في إنشاء السلايدر' : 'Error Creating Slider',
-        message: isRTL ? 'فشل في إنشاء سلايدر المتجر' : 'Failed to create store slider'
-      });
-      setError(errorMsg.message);
-      showError(errorMsg.message, errorMsg.title);
-      console.error('Error creating store slider:', err);
+      console.error('Network error creating store slider:', err);
+      const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
+      const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
+      setError(errorMessage);
+      showError(errorMessage, errorTitle);
       return null;
     } finally {
       setLoading(false);
     }
-  }, [getAllStoreSliders]);
+  }, [getAllStoreSliders, isRTL, showSuccess, showError, getStoreId]);
 
   //---------------------------------------------------update store slider-----------------------------------------------------------
   const updateStoreSlider = useCallback(async (id: string, data: UpdateStoreSliderData) => {
@@ -249,27 +271,40 @@ export const useStoreSlider = () => {
       if (response.ok) {
         // Refresh the list
         await getAllStoreSliders();
-        showSuccess(
-          isRTL ? 'تم تحديث السلايدر بنجاح' : 'Store slider updated successfully',
-          isRTL ? 'نجاح' : 'Success'
-        );
+        
+        // Show success message from backend
+        const successMessage = isRTL 
+          ? (responseData?.messageAr || responseData?.message_ar || 'تم تحديث السلايدر بنجاح')
+          : (responseData?.message || responseData?.message_en || 'Store slider updated successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        showSuccess(successMessage, successTitle);
+        
         return responseData.data || responseData;
       } else {
-        throw new Error(responseData.message || 'Failed to update store slider');
+        // Handle error response
+        const errorMessage = isRTL 
+          ? (responseData?.messageAr || responseData?.message_ar || 'فشل في تحديث سلايدر المتجر')
+          : (responseData?.message || responseData?.message_en || 'Failed to update store slider');
+        const errorTitle = isRTL 
+          ? (responseData?.errorAr || responseData?.error_ar || 'خطأ في تحديث السلايدر')
+          : (responseData?.error || responseData?.error_en || 'Error Updating Slider');
+        
+        setError(errorMessage);
+        showError(errorMessage, errorTitle);
+        console.error('Error updating store slider:', responseData);
+        return null;
       }
     } catch (err: any) {
-      const errorMsg = getErrorMessage(err, isRTL, {
-        title: isRTL ? 'خطأ في تحديث السلايدر' : 'Error Updating Slider',
-        message: isRTL ? 'فشل في تحديث سلايدر المتجر' : 'Failed to update store slider'
-      });
-      setError(errorMsg.message);
-      showError(errorMsg.message, errorMsg.title);
-      console.error('Error updating store slider:', err);
+      console.error('Network error updating store slider:', err);
+      const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
+      const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
+      setError(errorMessage);
+      showError(errorMessage, errorTitle);
       return null;
     } finally {
       setLoading(false);
     }
-  }, [getAllStoreSliders]);
+  }, [getAllStoreSliders, isRTL, showSuccess, showError, getStoreId]);
 
 //---------------------------------------------------delete store slider-----------------------------------------------------------
   const deleteStoreSlider = useCallback(async (id: string) => {
@@ -292,27 +327,38 @@ export const useStoreSlider = () => {
       if (response.ok) {
         // Refresh the list
         await getAllStoreSliders();
-        showSuccess(
-          isRTL ? 'تم حذف السلايدر بنجاح' : 'Store slider deleted successfully',
-          isRTL ? 'نجاح' : 'Success'
-        );
+        
+        // Show success message from backend
+        const successMessage = isRTL 
+          ? (data?.messageAr || data?.message_ar || 'تم حذف السلايدر بنجاح')
+          : (data?.message || data?.message_en || 'Store slider deleted successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        showSuccess(successMessage, successTitle);
+        
         return true;
       } else {
-        throw new Error(data.message || 'Failed to delete store slider');
+        const errorMessage = isRTL 
+          ? (data?.messageAr || data?.message_ar || 'فشل في حذف سلايدر المتجر')
+          : (data?.message || data?.message_en || 'Failed to delete store slider');
+        const errorTitle = isRTL 
+          ? (data?.errorAr || data?.error_ar || 'خطأ في حذف السلايدر')
+          : (data?.error || data?.error_en || 'Error Deleting Slider');
+        
+        setError(errorMessage);
+        showError(errorMessage, errorTitle);
+        return false;
       }
     } catch (err: any) {
-      const errorMsg = getErrorMessage(err, isRTL, {
-        title: isRTL ? 'خطأ في حذف السلايدر' : 'Error Deleting Slider',
-        message: isRTL ? 'فشل في حذف سلايدر المتجر' : 'Failed to delete store slider'
-      });
-      setError(errorMsg.message);
-      showError(errorMsg.message, errorMsg.title);
-      console.error('Error deleting store slider:', err);
+      console.error('Network error deleting store slider:', err);
+      const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
+      const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
+      setError(errorMessage);
+      showError(errorMessage, errorTitle);
       return false;
     } finally {
       setLoading(false);
     }
-  }, [getAllStoreSliders]);
+  }, [getAllStoreSliders, isRTL, showSuccess, showError, getStoreId]);
 
 //---------------------------------------------------toggle active status-----------------------------------------------------------
   const toggleActiveStatus = useCallback(async (id: string) => {
@@ -335,27 +381,38 @@ export const useStoreSlider = () => {
       if (response.ok) {
         // Refresh the list
         await getAllStoreSliders();
-        showSuccess(
-          isRTL ? 'تم تغيير حالة السلايدر بنجاح' : 'Slider status updated successfully',
-          isRTL ? 'نجاح' : 'Success'
-        );
+        
+        // Show success message from backend
+        const successMessage = isRTL 
+          ? (data?.messageAr || data?.message_ar || 'تم تغيير حالة السلايدر بنجاح')
+          : (data?.message || data?.message_en || 'Slider status updated successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        showSuccess(successMessage, successTitle);
+        
         return data.data || data;
       } else {
-        throw new Error(data.message || 'Failed to toggle active status');
+        const errorMessage = isRTL 
+          ? (data?.messageAr || data?.message_ar || 'فشل في تغيير حالة السلايدر')
+          : (data?.message || data?.message_en || 'Failed to toggle active status');
+        const errorTitle = isRTL 
+          ? (data?.errorAr || data?.error_ar || 'خطأ في تغيير الحالة')
+          : (data?.error || data?.error_en || 'Error Toggling Status');
+        
+        setError(errorMessage);
+        showError(errorMessage, errorTitle);
+        return null;
       }
     } catch (err: any) {
-      const errorMsg = getErrorMessage(err, isRTL, {
-        title: isRTL ? 'خطأ في تغيير الحالة' : 'Error Toggling Status',
-        message: isRTL ? 'فشل في تغيير حالة السلايدر' : 'Failed to toggle active status'
-      });
-      setError(errorMsg.message);
-      showError(errorMsg.message, errorMsg.title);
-      console.error('Error toggling active status:', err);
+      console.error('Network error toggling active status:', err);
+      const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
+      const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
+      setError(errorMessage);
+      showError(errorMessage, errorTitle);
       return null;
     } finally {
       setLoading(false);
     }
-  }, [getAllStoreSliders]);
+  }, [getAllStoreSliders, isRTL, showSuccess, showError]);
 
 //---------------------------------------------------increment views-----------------------------------------------------------
   const incrementViews = useCallback(async (id: string) => {

@@ -3,7 +3,6 @@ import axios from 'axios';
 import { BASE_URL } from '../constants/api';
 import { getStoreId } from '../utils/storeUtils';
 import { getAuthHeaders } from '../utils/apiUtils';
-import { useStore } from './useStore';
 import { getErrorMessage } from '../utils/errorUtils';
 import useLanguage from './useLanguage';
 
@@ -55,7 +54,6 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { getStore } = useStore();
   const { isRTL } = useLanguage();
 
 
@@ -89,10 +87,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
       console.log('Sample product:', products[0]);
       
       // جلب معلومات المتجر باستخدام useStore (سيتم تخزينها في localStorage تلقائياً)
-      const store = await getStore(storeId);
-      console.log('Store data:', store);
-      console.log('Store currency:', store?.settings?.currency);
-
+    
       // للتحقق من البيانات
       console.log('Orders data:', orders);
       if (orders.length > 0) {
@@ -240,7 +235,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
         cancelledOrders,
         monthlyRevenue: revenueChart[revenueChart.length - 1]?.revenue || 0,
         monthlyOrders: revenueChart[revenueChart.length - 1]?.orders || 0,
-        storeCurrency: store?.settings?.currency || 'ILS',
+        storeCurrency:  'ILS',
         topCategories,
         recentOrders,
         revenueChart,
