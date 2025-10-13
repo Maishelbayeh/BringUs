@@ -298,7 +298,7 @@ const Login: React.FC = () => {
                   </div>
                 </div>
               )}
-              <div className="flex items-center justify-between">
+              <div className={`flex items-center justify-between ${language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`} >
                 <label className="flex items-center">
                   <input
                     type="checkbox"

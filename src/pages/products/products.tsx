@@ -1129,6 +1129,17 @@ const ProductsPage: React.FC = () => {
         const newForm = { ...form, availableQuantity: numVal, maintainStock: 'Y' };
         setForm(newForm);
       }
+    } else if (e.target.name === 'stock') {
+      // التعامل مع stock (المستخدم عندما لا توجد مواصفات)
+      const val = e.target.value;
+      const numVal = val === '' ? 0 : Number(val);
+      if (!numVal || numVal <= 0) {
+        const newForm = { ...form, stock: numVal, availableQuantity: numVal, maintainStock: 'N' };
+        setForm(newForm);
+      } else {
+        const newForm = { ...form, stock: numVal, availableQuantity: numVal, maintainStock: 'Y' };
+        setForm(newForm);
+      }
     } else if (e.target.name === 'barcodes') {
       // التعامل مع الباركود كمصفوفة
       let barcodesValue: any = e.target.value;
