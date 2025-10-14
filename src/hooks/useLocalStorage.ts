@@ -1,4 +1,5 @@
 export const updateStoreData = (storeData: any) => {
+console.log('updateStoreDaddddddddddddddddddddddddddddddddddddddddddddddta', storeData);
   if (storeData) {
     localStorage.setItem('storeInfo', JSON.stringify({
       id: storeData.id || storeData._id,

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
-import { getStoreId } from '../utils/storeUtils';
+import { getStoreId, getStoreInfo } from '../utils/storeUtils';
 import { getAuthHeaders } from '../utils/apiUtils';
 import { getErrorMessage } from '../utils/errorUtils';
 import useLanguage from './useLanguage';
@@ -223,6 +223,10 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
           };
         });
 
+      // جلب العملة من معلومات المتجر
+      const storeInfo = getStoreInfo();
+      const storeCurrency = storeInfo?.settings?.currency || 'ILS';
+
       const dashboardStats: DashboardStats = {
         totalOrders,
         totalRevenue,
@@ -235,7 +239,7 @@ const useDashboardStats = (): UseDashboardStatsReturn => {
         cancelledOrders,
         monthlyRevenue: revenueChart[revenueChart.length - 1]?.revenue || 0,
         monthlyOrders: revenueChart[revenueChart.length - 1]?.orders || 0,
-        storeCurrency:  'ILS',
+        storeCurrency,
         topCategories,
         recentOrders,
         revenueChart,

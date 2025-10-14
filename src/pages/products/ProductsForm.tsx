@@ -32,7 +32,7 @@ import { useValidation } from '@/hooks/useValidation';
 
 import { productValidationSchema, validateBarcode, checkDuplicateBarcode } from '@/validation/productValidation';
 import { getStoreInfo } from '@/utils/storeUtils';
-import { currencyOptions } from '@/data/currencyOptions';
+import { getCurrencySymbol as getCurrencySymbolUtil } from '@/data/currencyOptions';
 
 
 
@@ -169,36 +169,8 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
     const storeInfo = getStoreInfo();
     const storeCurrency = storeInfo?.settings?.currency || 'ILS';
     
-    // البحث عن رمز العملة في قائمة العملات المتاحة
-    const currency = currencyOptions.find(option => option.code === storeCurrency);
-    if (currency) {
-      // إرجاع رمز العملة المناسب
-      const symbols: { [key: string]: string } = {
-        'ILS': '₪',
-        'USD': '$',
-        'EUR': '€',
-        'GBP': '£',
-        'SAR': 'ر.س',
-        'AED': 'د.إ',
-        'QAR': 'ر.ق',
-        'KWD': 'د.ك',
-        'BHD': 'د.ب',
-        'OMR': 'ر.ع',
-        'JOD': 'د.أ',
-        'EGP': 'ج.م',
-        'LBP': 'ل.ل',
-        'TRY': '₺',
-        'JPY': '¥',
-        'CNY': '¥',
-        'INR': '₹',
-        'CAD': 'C$',
-        'AUD': 'A$',
-        'CHF': 'CHF'
-      };
-      return symbols[storeCurrency] || storeCurrency;
-    }
-    
-    return '₪'; // رمز افتراضي
+    // استخدام الدالة المساعدة للحصول على رمز العملة المناسب للغة
+    return getCurrencySymbolUtil(storeCurrency, isRTL);
   };
 
 
@@ -1974,11 +1946,10 @@ const ProductsForm = forwardRef<unknown, ProductsFormProps>((props, ref) => {
 
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
 
-          <span className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-yellow-500 font-bold flex items-center justify-center`}  >
+          {/* <span className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-yellow-500 font-bold flex items-center justify-center`}  >
 {getCurrencySymbol()}
-            {/* <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /> */}
 
-          </span>
+          </span> */}
 
           {isRTL ? `الأسعار (${getCurrencySymbol()})` : `Pricing (${getCurrencySymbol()})`}
 
