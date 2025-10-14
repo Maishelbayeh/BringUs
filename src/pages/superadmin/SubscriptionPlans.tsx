@@ -70,7 +70,7 @@ const SubscriptionPlans: React.FC = () => {
       console.log(response.data.data);
     } catch (error: any) {
       console.error('Error fetching subscription plans:', error);
-      showError(t('general.error'), error.response?.data?.message || 'Failed to fetch plans');
+      showError(t('subscriptionPlans.fetchFailed'), error.response?.data?.message || t('subscriptionPlans.fetchFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -82,13 +82,13 @@ const SubscriptionPlans: React.FC = () => {
 
   // معالجة نجاح إضافة الخطة
   const handlePlanAdded = () => {
-    showSuccess('Subscription plan added successfully', t('general.success'));
+    showSuccess(t('subscriptionPlans.planCreated'));
     fetchPlans(); // إعادة جلب الخطط
   };
 
   // معالجة نجاح تحديث الخطة
   const handlePlanUpdated = () => {
-    showSuccess('Subscription plan updated successfully', t('general.success'));
+    showSuccess( t('subscriptionPlans.planUpdated'));
     fetchPlans();
     setShowEditModal(false);
     setSelectedPlan(null);
@@ -96,7 +96,7 @@ const SubscriptionPlans: React.FC = () => {
 
   // معالجة نجاح حذف الخطة
   const handlePlanDeleted = () => {
-    showSuccess('Subscription plan deleted successfully', t('general.success'));
+    showSuccess(t('subscriptionPlans.planDeleted'));
     fetchPlans();
     setShowDeleteModal(false);
     setSelectedPlan(null);
@@ -111,11 +111,11 @@ const SubscriptionPlans: React.FC = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      showSuccess('Plan status updated successfully', t('general.success'));
+      showSuccess(t('subscriptionPlans.planStatusUpdated'));
       fetchPlans();
     } catch (error: any) {
       console.error('Error toggling plan status:', error);
-      showError(t('general.error'), error.response?.data?.message || 'Failed to update plan status');
+      showError(t('subscriptionPlans.updateFailed'), error.response?.data?.message || t('subscriptionPlans.updateFailed'));
     } finally {
       setActionLoading(null);
     }
@@ -133,11 +133,11 @@ const SubscriptionPlans: React.FC = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      showSuccess('Plan popularity updated successfully', t('general.success'));
+      showSuccess(t('subscriptionPlans.planPopularityUpdated'));
       fetchPlans();
     } catch (error: any) {
       console.error('Error toggling plan popularity:', error);
-      showError(t('general.error'), error.response?.data?.message || 'Failed to update plan popularity');
+      showError(t('subscriptionPlans.updateFailed'), error.response?.data?.message || t('subscriptionPlans.updateFailed'));
     } finally {
       setActionLoading(null);
     }
@@ -155,7 +155,7 @@ const SubscriptionPlans: React.FC = () => {
       handlePlanDeleted();
     } catch (error: any) {
       console.error('Error deleting plan:', error);
-      showError(t('general.error'), error.response?.data?.message || 'Failed to delete plan');
+      showError(t('subscriptionPlans.deleteFailed'), error.response?.data?.message || t('subscriptionPlans.deleteFailed'));
     } finally {
       setActionLoading(null);
     }

@@ -67,21 +67,19 @@ const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> = ({
   const { t } = useTranslation();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
-  // Function to truncate text to specified number of lines
-  const truncateText = (text: string, maxLines: number = 3) => {
-    const words = text.split(' ');
-    const maxWords = maxLines * 8; // Approximate words per line
-    if (words.length <= maxWords) {
+  // Function to truncate text based on character length (better for line-clamp)
+  const truncateText = (text: string, maxChars: number = 50) => {
+    if (!text || text.length <= maxChars) {
       return { text, isTruncated: false };
     }
     return {
-      text: words.slice(0, maxWords).join(' ') + '...',
+      text: text.slice(0, maxChars) + '...',
       isTruncated: true
     };
   };
 
   const displayDescription = isRTL ? plan.descriptionAr : plan.description;
-  const { text: truncatedDescription, isTruncated } = truncateText(displayDescription, 3);
+  const { text: truncatedDescription, isTruncated } = truncateText(displayDescription, 50);
   const showDescription = isDescriptionExpanded ? displayDescription : truncatedDescription;
 
   return (
@@ -113,14 +111,14 @@ const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> = ({
 
       <div className="p-6">
         {/* Plan Name - Single Line */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-4 min-h-[90px]">
           <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1 overflow-hidden text-ellipsis whitespace-nowrap" title={isRTL ? plan.nameAr : plan.name}>
             {isRTL ? plan.nameAr : plan.name}
           </h3>
           
           {/* Description with Read More/Less */}
           <div className="text-sm text-gray-600">
-            <p className={`${isDescriptionExpanded ? '' : 'line-clamp-3'} leading-relaxed`}>
+            <p className={`leading-relaxed sub-description min-h-[25px] ${!isDescriptionExpanded ? 'line-clamp-1' : ''}`}>
               {showDescription}
             </p>
             {isTruncated && (
