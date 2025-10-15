@@ -278,6 +278,51 @@ export default function usAffiliations() {
     }
   };
 
+  const updateAffiliateTotalPaid = async (affiliationId: string, totalPaid: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const storeId = getStoreId();
+      const response = await axios.patch(`${BASE_URL}affiliations/public/${affiliationId}?storeId=${storeId}`, 
+        { totalPaid },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      // Show success message
+      const successMessage = isRTL 
+        ? (response.data?.messageAr || response.data?.message_ar || 'تم تحديث إجمالي المدفوع بنجاح')
+        : (response.data?.message || response.data?.message_en || 'Total paid amount updated successfully');
+      const successTitle = isRTL ? 'نجاح' : 'Success';
+      showSuccess(successMessage, successTitle);
+      
+      // Update the specific affiliate in the local state
+      setAffiliates(prev => prev.map(affiliate => 
+        (affiliate._id === affiliationId || affiliate.id === affiliationId) 
+          ? { ...affiliate, totalPaid, balance: (affiliate.totalCommission || 0) - totalPaid }
+          : affiliate
+      ));
+      
+      return response.data;
+    } catch (err: any) {
+      const errorData = err?.response?.data;
+      const errorMessage = isRTL 
+        ? (errorData?.messageAr || errorData?.message_ar || 'فشل في تحديث إجمالي المدفوع')
+        : (errorData?.message || errorData?.message_en || 'Failed to update total paid amount');
+      const errorTitle = isRTL ? 'خطأ في تحديث المدفوع' : 'Error Updating Total Paid';
+      
+      setError(errorMessage);
+      showError(errorMessage, errorTitle);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAffiliates();
   }, []);
@@ -291,6 +336,7 @@ export default function usAffiliations() {
     updateAffiliate,
     deleteAffiliate,
     getAffiliateById,
-    updateAffiliateData
+    updateAffiliateData,
+    updateAffiliateTotalPaid
   };
 } 
