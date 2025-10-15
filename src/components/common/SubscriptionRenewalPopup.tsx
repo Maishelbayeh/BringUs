@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { PAYMENT_API_CONFIG, CURRENCY_CONVERSION } from '../../constants/payment';
+import { PAYMENT_API_CONFIG } from '../../constants/payment';
 import SubscriptionDetails from './SubscriptionDetails';
 
 

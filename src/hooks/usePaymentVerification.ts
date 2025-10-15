@@ -14,13 +14,12 @@ interface PaymentVerificationResult {
  * Activate subscription after successful payment (frontend fallback)
  * This is used when webhook doesn't work (e.g., on localhost)
  */
-const activateSubscriptionAfterPayment = async (storeId: string, reference: string, paymentData: any) => {
+const activateSubscriptionAfterPayment = async (storeId: string, reference: string) => {
   try {
     console.log('🔄 Activating subscription via frontend...');
     
     // Get saved plan ID from localStorage
     const planId = localStorage.getItem('subscription_plan_id');
-    const metadata = localStorage.getItem('subscription_metadata');
     
     if (!planId) {
       console.warn('⚠️ No plan ID found in localStorage, skipping subscription activation');
@@ -121,7 +120,7 @@ export const usePaymentVerification = () => {
           localStorage.removeItem('subscription_payment_initiated');
           
           // **NEW: Activate subscription via frontend (fallback for when webhook doesn't work on localhost)**
-          await activateSubscriptionAfterPayment(storeId, reference, paymentData);
+          await activateSubscriptionAfterPayment(storeId, reference);
           
         } else if (paymentStatus === 'PENDING' || paymentStatus === 'INITIATED') {
           result.status = 'pending';
