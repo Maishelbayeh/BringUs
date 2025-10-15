@@ -51,8 +51,7 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
   const { t } = useTranslation();
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
-  const { showError } = useToastContext();  
-  const { showSuccess } = useToastContext();
+  const { showError } = useToastContext();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<SubscriptionPlan>({
     name: '',

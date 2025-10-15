@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import useLanguage from '../../../hooks/useLanguage';
 import useTopProducts, { TopProduct } from '../../../hooks/useTopProducts';
+import { getCurrencySymbol } from '../../../data/currencyOptions';
 
 interface TopProductsAnalyticsProps {
   isLoading?: boolean;
@@ -50,10 +51,21 @@ const TopProductsAnalytics: React.FC<TopProductsAnalyticsProps> = ({ isLoading =
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'ILS'
+    // الحصول على عملة المتجر من localStorage
+    const storeInfo = localStorage.getItem('storeInfo');
+    const storeCurrency = storeInfo ? JSON.parse(storeInfo).settings?.currency : 'ILS';
+    
+    // الحصول على رمز العملة المناسب للغة
+    const currencySymbol = getCurrencySymbol(storeCurrency || 'ILS', isRTL);
+    
+    // تنسيق المبلغ مع رمز العملة
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
+    
+    // عرض رمز العملة حسب اتجاه اللغة
+    return isRTL ? `${formattedAmount} ${currencySymbol}` : `${currencySymbol} ${formattedAmount}`;
   };
 
   const getProductName = (product: TopProduct) => {

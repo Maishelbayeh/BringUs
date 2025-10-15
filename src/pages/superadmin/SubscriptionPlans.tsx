@@ -2,18 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   CreditCardIcon,
-  StarIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  PencilIcon,
-  TrashIcon,
-  EyeIcon
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import CustomBreadcrumb from '../../components/common/CustomBreadcrumb';
 import HeaderWithAction from '@/components/common/HeaderWithAction';
 import { useToastContext } from '@/contexts/ToastContext';
 import useLanguage from '@/hooks/useLanguage';
 import AddSubscriptionPlanModal from './AddSubscriptionPlanModal';
+import SubscriptionPlanCard from '@/components/common/SubscriptionPlanCard';
 import axios from 'axios';
 
 interface Feature {
@@ -74,7 +70,7 @@ const SubscriptionPlans: React.FC = () => {
       console.log(response.data.data);
     } catch (error: any) {
       console.error('Error fetching subscription plans:', error);
-      showError(t('general.error'), error.response?.data?.message || 'Failed to fetch plans');
+      showError(t('subscriptionPlans.fetchFailed'), error.response?.data?.message || t('subscriptionPlans.fetchFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -86,13 +82,13 @@ const SubscriptionPlans: React.FC = () => {
 
   // معالجة نجاح إضافة الخطة
   const handlePlanAdded = () => {
-    showSuccess('Subscription plan added successfully', t('general.success'));
+    showSuccess(t('subscriptionPlans.planCreated'));
     fetchPlans(); // إعادة جلب الخطط
   };
 
   // معالجة نجاح تحديث الخطة
   const handlePlanUpdated = () => {
-    showSuccess('Subscription plan updated successfully', t('general.success'));
+    showSuccess( t('subscriptionPlans.planUpdated'));
     fetchPlans();
     setShowEditModal(false);
     setSelectedPlan(null);
@@ -100,7 +96,7 @@ const SubscriptionPlans: React.FC = () => {
 
   // معالجة نجاح حذف الخطة
   const handlePlanDeleted = () => {
-    showSuccess('Subscription plan deleted successfully', t('general.success'));
+    showSuccess(t('subscriptionPlans.planDeleted'));
     fetchPlans();
     setShowDeleteModal(false);
     setSelectedPlan(null);
@@ -115,11 +111,11 @@ const SubscriptionPlans: React.FC = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      showSuccess('Plan status updated successfully', t('general.success'));
+      showSuccess(t('subscriptionPlans.planStatusUpdated'));
       fetchPlans();
     } catch (error: any) {
       console.error('Error toggling plan status:', error);
-      showError(t('general.error'), error.response?.data?.message || 'Failed to update plan status');
+      showError(t('subscriptionPlans.updateFailed'), error.response?.data?.message || t('subscriptionPlans.updateFailed'));
     } finally {
       setActionLoading(null);
     }
@@ -137,11 +133,11 @@ const SubscriptionPlans: React.FC = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      showSuccess('Plan popularity updated successfully', t('general.success'));
+      showSuccess(t('subscriptionPlans.planPopularityUpdated'));
       fetchPlans();
     } catch (error: any) {
       console.error('Error toggling plan popularity:', error);
-      showError(t('general.error'), error.response?.data?.message || 'Failed to update plan popularity');
+      showError(t('subscriptionPlans.updateFailed'), error.response?.data?.message || t('subscriptionPlans.updateFailed'));
     } finally {
       setActionLoading(null);
     }
@@ -159,7 +155,7 @@ const SubscriptionPlans: React.FC = () => {
       handlePlanDeleted();
     } catch (error: any) {
       console.error('Error deleting plan:', error);
-      showError(t('general.error'), error.response?.data?.message || 'Failed to delete plan');
+      showError(t('subscriptionPlans.deleteFailed'), error.response?.data?.message || t('subscriptionPlans.deleteFailed'));
     } finally {
       setActionLoading(null);
     }
@@ -283,167 +279,19 @@ const SubscriptionPlans: React.FC = () => {
          style={{ direction: isRTL ? 'rtl' : 'ltr' }}
 >
             {sortedPlans.map((plan) => (
-              <div
+              <SubscriptionPlanCard
                 key={plan._id}
-                className={`relative bg-white rounded-lg shadow-md border-2 transition-all duration-200 hover:shadow-lg ${
-                  plan.isPopular 
-                    ? 'border-yellow-400 shadow-yellow-100' 
-                    : plan.isActive 
-                      ? 'border-green-200' 
-                      : 'border-gray-200 opacity-75'
-                }`}
-              >
-
-                {/* Popular Badge */}
-                {plan.isPopular && (
-                  <div className={`absolute -top-3 ${isRTL ? '-left-3' : '-right-3'} bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1`}>
-                    <StarIcon className="w-3 h-3" />
-                    {t('subscriptionPlans.popular')}
-                  </div>
-                )}
-
-                {/* Status Badge */}
-                <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'}`}>
-                  {plan.isActive ? (
-                    <CheckCircleIcon className="w-5 h-5 text-green-500" />
-                  ) : (
-                    <XCircleIcon className="w-5 h-5 text-red-500" />
-                  )}
-                </div>
-
-                <div className="p-6">
-                  {/* Plan Name */}
-                  <div className="text-center mb-4">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {isRTL ? plan.nameAr : plan.name}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {isRTL ? plan.descriptionAr : plan.description}
-                    </p>
-                  </div>
-
-                  {/* Price */}
-                  <div className="text-center mb-4">
-                    <div className="text-3xl font-bold text-purple-600">
-                      {plan.price === 0 ? (
-                        t('subscriptionPlans.free')
-                      ) : (
-                        <>
-                          {getCurrencySymbol(plan.currency)}{plan.price}
-                          <span className={`text-sm text-gray-500 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                            /{getPlanTypeLabel(plan.type)}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Plan Details */}
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span>{t('subscriptionPlans.planType')}</span>
-                      <span className="font-medium">{getPlanTypeLabel(plan.type)}</span>
-                    </div>
-                    <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span>{t('subscriptionPlans.durationDays')}</span>
-                      <span className="font-medium">{plan.duration}</span>
-                    </div>
-                    <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span>{t('subscriptionPlans.currency')}</span>
-                      <span className="font-medium">{plan.currency}</span>
-                    </div>
-                  </div>
-
-                  {/* Status */}
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className={`flex justify-between items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-sm text-gray-500">
-                        {t('subscriptionPlans.isActive')}
-                      </span>
-                      <span className={`text-sm font-medium ${
-                        plan.isActive ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {plan.isActive ? t('subscriptionPlans.active') : t('subscriptionPlans.inactive')}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {/* View Button */}
-                      <button
-                        onClick={() => openViewModal(plan)}
-                        className="flex-1 bg-purple-50 text-purple-600 hover:bg-purple-100 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1"
-                      >
-                        <EyeIcon className="w-4 h-4" />
-                       {isRTL ? 'عرض' : 'View'}
-                      </button>
-
-                      {/* Edit Button */}
-                      <button
-                        onClick={() => openEditModal(plan)}
-                        className="flex-1 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                        {t('general.edit')}
-                      </button>
-
-                      {/* Delete Button */}
-                      <button
-                        onClick={() => openDeleteModal(plan)}
-                        className="flex-1 bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                        {t('general.delete')}
-                      </button>
-                    </div>
-
-                    {/* Toggle Buttons */}
-                    <div className={`flex gap-2 mt-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {/* Toggle Status Button */}
-                      <button
-                        onClick={() => togglePlanStatus(plan._id)}
-                        disabled={actionLoading === plan._id}
-                        className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1 ${
-                          plan.isActive 
-                            ? 'bg-red-50 text-red-600 hover:bg-red-100' 
-                            : 'bg-green-50 text-green-600 hover:bg-green-100'
-                        } ${actionLoading === plan._id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        {actionLoading === plan._id ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                        ) : (
-                          <>
-                            {plan.isActive ? <XCircleIcon className="w-4 h-4" /> : <CheckCircleIcon className="w-4 h-4" />}
-                            {plan.isActive ? t('subscriptionPlans.deactivate') : t('subscriptionPlans.activate')}
-                          </>
-                        )}
-                      </button>
-
-                      {/* Toggle Popular Button */}
-                      <button
-                        onClick={() => togglePlanPopular(plan._id, plan.isPopular)}
-                        disabled={actionLoading === plan._id}
-                        className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1 ${
-                          plan.isPopular 
-                            ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' 
-                            : 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100'
-                        } ${actionLoading === plan._id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        {actionLoading === plan._id ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                        ) : (
-                          <>
-                            <StarIcon className="w-4 h-4" />
-                            {plan.isPopular ? t('subscriptionPlans.removePopular') : t('subscriptionPlans.makePopular')}
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                plan={plan}
+                isRTL={isRTL}
+                actionLoading={actionLoading}
+                onView={openViewModal}
+                onEdit={openEditModal}
+                onDelete={openDeleteModal}
+                onToggleStatus={togglePlanStatus}
+                onTogglePopular={togglePlanPopular}
+                getPlanTypeLabel={getPlanTypeLabel}
+                getCurrencySymbol={getCurrencySymbol}
+              />
             ))}
           </div>
         )}
@@ -512,18 +360,20 @@ const SubscriptionPlans: React.FC = () => {
 
         {/* View Plan Modal */}
         {showViewModal && selectedPlan && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className={`bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto ${isRTL ? 'text-right' : 'text-left'}`}
+              style={{ direction: isRTL ? 'rtl' : 'ltr' }}
+            >
+              <div className={`flex justify-between items-center mb-6 pb-4 border-b`}>
                 <h3 className="text-xl font-bold text-gray-900">
-                  {isRTL ? selectedPlan.nameAr : selectedPlan.name}
+                  {isRTL ? 'عرض الخطة' : 'View Plan'}
                 </h3>
                 <button
                   onClick={() => {
                     setShowViewModal(false);
                     setSelectedPlan(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -531,90 +381,135 @@ const SubscriptionPlans: React.FC = () => {
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {/* Plan Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">{t('subscriptionPlans.details')}</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.name')}:</span>
-                        <span className="font-medium">{isRTL ? selectedPlan.nameAr : selectedPlan.name}</span>
-                      </div>
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.description')}:</span>
-                        <span className="font-medium">{isRTL ? selectedPlan.descriptionAr : selectedPlan.description}</span>
-                      </div>
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.type')}:</span>
-                        <span className="font-medium">{getPlanTypeLabel(selectedPlan.type)}</span>
-                      </div>
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.duration')}:</span>
-                        <span className="font-medium">{selectedPlan.duration} {t('subscriptionPlans.days')}</span>
-                      </div>
+              <div className="space-y-6">
+                {/* Plan Details Section */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-base">
+                    {isRTL ? 'تفاصيل الخطة' : t('subscriptionPlans.details')}
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.name')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {isRTL ? selectedPlan.nameAr : selectedPlan.name}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.description')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {isRTL ? selectedPlan.descriptionAr : selectedPlan.description}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.type')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {getPlanTypeLabel(selectedPlan.type)}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.duration')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {selectedPlan.duration} {t('subscriptionPlans.days')}
+                      </span>
                     </div>
                   </div>
+                </div>
 
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">{t('subscriptionPlans.pricing')}</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.price')}:</span>
-                        <span className="font-medium text-lg text-purple-600">
-                          {selectedPlan.price === 0 ? (
-                            t('subscriptionPlans.free')
-                          ) : (
-                            `${getCurrencySymbol(selectedPlan.currency)}${selectedPlan.price}`
-                          )}
+                {/* Pricing Information Section */}
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-base">
+                    {isRTL ? 'معلومات التسعير' : t('subscriptionPlans.pricing')}
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.price')}
+                      </span>
+                      <span className={`text-base font-semibold text-purple-600 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {selectedPlan.price === 0 ? (
+                          t('subscriptionPlans.free')
+                        ) : (
+                          `${getCurrencySymbol(selectedPlan.currency)}${selectedPlan.price}`
+                        )}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.currency')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {selectedPlan.currency}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Information Section */}
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-base">
+                    {isRTL ? 'معلومات الحالة' : t('subscriptionPlans.status')}
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4 py-2 items-center">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.isActive')}
+                      </span>
+                      <span className={`${isRTL ? 'text-left' : 'text-right'}`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                          selectedPlan.isActive 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {selectedPlan.isActive ? t('subscriptionPlans.active') : t('subscriptionPlans.inactive')}
                         </span>
-                      </div>
-                      <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <span className="text-gray-500">{t('subscriptionPlans.currency')}:</span>
-                        <span className="font-medium">{selectedPlan.currency}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Status Information */}
-                <div className="border-t pt-4">
-                  <h4 className="font-medium text-gray-900 mb-2">{t('subscriptionPlans.status')}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-sm text-gray-500">{t('subscriptionPlans.isActive')}:</span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        selectedPlan.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {selectedPlan.isActive ? t('subscriptionPlans.active') : t('subscriptionPlans.inactive')}
                       </span>
                     </div>
-                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-sm text-gray-500">{t('subscriptionPlans.isPopular')}:</span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        selectedPlan.isPopular 
-                          ? 'bg-yellow-100 text-yellow-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {selectedPlan.isPopular ? t('subscriptionPlans.popular') : t('subscriptionPlans.notPopular')}
+                    <div className="grid grid-cols-2 gap-4 py-2 items-center">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.isPopular')}
+                      </span>
+                      <span className={`${isRTL ? 'text-left' : 'text-right'}`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                          selectedPlan.isPopular 
+                            ? 'bg-yellow-100 text-yellow-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {selectedPlan.isPopular ? t('subscriptionPlans.popular') : t('subscriptionPlans.notPopular')}
+                        </span>
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Timestamps */}
-                <div className="border-t pt-4">
-                  <h4 className="font-medium text-gray-900 mb-2">{t('subscriptionPlans.timestamps')}</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-gray-500">{t('subscriptionPlans.createdAt')}:</span>
-                      <span className="font-medium">{new Date(selectedPlan.createdAt).toLocaleDateString()}</span>
+                {/* Timestamps Section */}
+                <div className="bg-green-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-base">
+                    {isRTL ? 'الطوابع الزمنية' : t('subscriptionPlans.timestamps')}
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.createdAt')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {new Date(selectedPlan.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
-                    <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-gray-500">{t('subscriptionPlans.updatedAt')}:</span>
-                      <span className="font-medium">{new Date(selectedPlan.updatedAt).toLocaleDateString()}</span>
+                    <div className="grid grid-cols-2 gap-4 py-2">
+                      <span className={`text-sm text-gray-600 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('subscriptionPlans.updatedAt')}
+                      </span>
+                      <span className={`text-sm text-gray-900 ${isRTL ? 'text-left' : 'text-right'}`}>
+                        {new Date(selectedPlan.updatedAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 </div>

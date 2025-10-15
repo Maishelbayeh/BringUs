@@ -124,7 +124,17 @@
     "createdAt": "تاريخ الإنشاء",
     "updatedAt": "آخر تحديث",
     "days": "أيام",
-    "notPopular": "غير شائع"
+    "notPopular": "غير شائع",
+    "fetchFailed": "فشل في جلب الخطط",
+    "updateFailed": "فشل في تحديث الخطة",
+    "deleteFailed": "فشل في حذف الخطة",
+    "planCreated": "تمت إضافة خطة الاشتراك بنجاح",
+    "planUpdated": "تم تعديل خطة الاشتراك بنجاح",
+    "planDeleted": "تم حذف خطة الاشتراك بنجاح",
+    "planStatusUpdated": "تم تحديث حالة الخطة بنجاح",
+    "planPopularityUpdated": "تم تحديث شعبية الخطة بنجاح",
+    "readMore": "قراءة المزيد",
+    "readLess": "قراءة أقل"
   },
   "subscriptionHistory": {
     "title": "تاريخ الاشتراكات",
@@ -1258,7 +1268,7 @@
     "edit": "تعديل الاعلان",
     "title":"العنوان",
     "htmlMinLength":"يجب أن يكون الكود أطول من 10 أحرف",
-    "htmlPlaceholder":"أدخل الكود HTML هنا",
+    "htmlPlaceholder":" هنا HTML أدخل كود",
     "titlePlaceholder":"أدخل عنوان الاعلان",
     "add": "إضافة اعلان",
     "noPreview": "لا توجد معاينة متاحة",

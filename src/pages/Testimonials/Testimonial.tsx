@@ -168,7 +168,7 @@ const Testimonial: React.FC = () => {
                   <span className="font-bold text-lg text-primary">{item.personName}</span>
                   <span className="text-xs text-gray-400">{item.personTitle}</span>
                 </div>
-                <div className={`text-gray-700 text-sm mt-1 mb-2 line-clamp-3 ${isRtl ? 'text-right' : 'text-left'}`}>
+                <div className={`text-gray-700 text-sm mt-1 mb-2 line-clamp-1 ${isRtl ? 'text-right' : 'text-left'}`}>
                   {item.comment}
                 </div>
                 <div className="mt-auto" dir={isRtl ? 'rtl' : 'ltr'}>

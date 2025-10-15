@@ -6,6 +6,7 @@ import {
 } from '@heroicons/react/24/outline';
 import useLanguage from '../../../hooks/useLanguage';
 import useTopUsers from '../../../hooks/useTopUsers';
+import { getCurrencySymbol } from '../../../data/currencyOptions';
 
 interface TopUsersAnalyticsProps {
   isLoading?: boolean;
@@ -48,10 +49,21 @@ const TopUsersAnalytics: React.FC<TopUsersAnalyticsProps> = ({ isLoading = false
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'ILS'
+    // الحصول على عملة المتجر من localStorage
+    const storeInfo = localStorage.getItem('storeInfo');
+    const storeCurrency = storeInfo ? JSON.parse(storeInfo).settings?.currency : 'ILS';
+    
+    // الحصول على رمز العملة المناسب للغة
+    const currencySymbol = getCurrencySymbol(storeCurrency || 'ILS', isRTL);
+    
+    // تنسيق المبلغ مع رمز العملة
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
+    
+    // عرض رمز العملة حسب اتجاه اللغة
+    return isRTL ? `${formattedAmount} ${currencySymbol}` : `${currencySymbol} ${formattedAmount}`;
   };
 
   if (error) {

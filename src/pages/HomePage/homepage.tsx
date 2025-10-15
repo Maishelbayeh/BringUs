@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import useLanguage from '../../hooks/useLanguage';
 import useDashboardStats from '../../hooks/useDashboardStats';
+import { useStore } from '../../hooks/useStore';
+import { getStoreInfo } from '../../utils/storeUtils';
 import DashboardStatCard from './components/DashboardStatCard';
 import RevenueChart from './components/RevenueChart';
 import TopUsersAnalytics from './components/TopUsersAnalytics';
@@ -22,13 +24,28 @@ import {
   CreditCardIcon
 } from '@heroicons/react/24/outline';
 import { WarningAmber } from '@mui/icons-material';
+import { getCurrencySymbol } from '@/data/currencyOptions';
 
 const Homepage: React.FC = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
   const { stats, loading, error, refreshStats } = useDashboardStats();
+  const { getStore } = useStore();
   const storeActive = isStoreActive();
+
+  // استدعاء API لجلب معلومات المتجر عند تحميل الصفحة
+  useEffect(() => {
+    const fetchStoreInfo = async () => {
+      const storeInfo = getStoreInfo();
+      if (storeInfo?.slug) {
+        await getStore(storeInfo.slug);
+      }
+    };
+    
+    fetchStoreInfo();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -144,7 +161,7 @@ const Homepage: React.FC = () => {
                   {t('dashboard.totalRevenueSubtitle')}
                 </p>
                 <div className="text-4xl font-bold">
-                  {stats?.totalRevenue?.toLocaleString() || '0'} {stats?.storeCurrency || 'ILS'}
+                  {stats?.totalRevenue?.toLocaleString() || '0'} {getCurrencySymbol(stats?.storeCurrency || 'ILS', isRTL)}    
                 </div>
               </div>
               <div className="text-right">

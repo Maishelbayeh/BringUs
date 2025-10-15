@@ -124,7 +124,17 @@
     "createdAt": "Created At",
     "updatedAt": "Updated At",
     "days": "days",
-    "notPopular": "Not Popular"
+    "notPopular": "Not Popular",
+    "planCreated": "Subscription plan added successfully",
+    "planUpdated": "Subscription plan updated successfully",
+    "fetchFailed": "Failed to fetch plans",
+    "updateFailed": "Failed to update plan",
+    "deleteFailed": "Failed to delete plan",
+    "planDeleted": "Subscription plan deleted successfully",
+    "planStatusUpdated": "Plan status updated successfully",
+    "planPopularityUpdated": "Plan popularity updated successfully",
+    "readMore": "Read more",
+    "readLess": "Read less"
   },
   "subscriptionHistory": {
     "title": "Subscription History",

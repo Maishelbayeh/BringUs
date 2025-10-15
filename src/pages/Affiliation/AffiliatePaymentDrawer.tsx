@@ -3,6 +3,7 @@ import { CustomTable } from '../../components/common/CustomTable';
 import { useTranslation } from 'react-i18next';
 import PaymentForm from './PaymentForm';
 import useAffiliatePayments from '../../hooks/useAffiliatePayments';
+import useAffiliations from '../../hooks/useAffiliations';
 //------------------------------------------- AffiliatePaymentDrawerProps -------------------------------------------
 interface AffiliatePaymentDrawerProps{
   open: boolean;
@@ -15,6 +16,7 @@ interface AffiliatePaymentDrawerProps{
 //-------------------------------------------- AffiliatePaymentDrawer -------------------------------------------
 const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, onClose, isRTL, affiliate, onPaymentSuccess }) => {
   const { t, i18n } = useTranslation();
+  const { updateAffiliateTotalPaid, loading: updateLoading } = useAffiliations();
   
   // الحصول على عملة المتجر من localStorage
   const getStoreCurrency = () => {
@@ -31,6 +33,11 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
   };
   
   const storeCurrency = getStoreCurrency();
+  
+  // State for editing total paid amount
+  const [isEditingTotalPaid, setIsEditingTotalPaid] = React.useState(false);
+  const [editedTotalPaid, setEditedTotalPaid] = React.useState(affiliate?.totalPaid || 0);
+  const [validationError, setValidationError] = React.useState<string | null>(null);
   
   // تحديث النموذج بالبيانات الحقيقية من المسوق
   const [form, setForm] = React.useState(() => ({
@@ -51,10 +58,11 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
         paidDate: new Date().toISOString().slice(0, 10),
         balance: affiliate.balance || 0,
       });
+      setEditedTotalPaid(affiliate.totalPaid || 0);
     }
   }, [affiliate]);
 
-  const [activeTab, setActiveTab] = React.useState<'form' | 'table' | 'info'>('info');
+  const [activeTab] = React.useState<'form' | 'table' | 'info'>('info');
   const { payments, loading: paymentsLoading, error: paymentsError } = useAffiliatePayments(affiliate?._id || affiliate?.id || '');
 
   // Function to refresh data after payment creation
@@ -63,6 +71,61 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
     if (onPaymentSuccess) {
       onPaymentSuccess();
     }
+  };
+
+  // Function to handle saving total paid amount
+  const handleSaveTotalPaid = async () => {
+    try {
+      const affiliationId = affiliate?._id || affiliate?.id;
+      if (!affiliationId) return;
+      
+      // Clear previous validation errors
+      setValidationError(null);
+      
+      // Validation
+      if (editedTotalPaid < 0) {
+        setValidationError(isRTL ? 'لا يمكن أن يكون المبلغ أقل من صفر' : 'Amount cannot be negative');
+        return;
+      }
+      
+      if (isNaN(editedTotalPaid)) {
+        setValidationError(isRTL ? 'يرجى إدخال رقم صحيح' : 'Please enter a valid number');
+        return;
+      }
+      
+      // Check if amount exceeds total commission
+      if (editedTotalPaid > (affiliate?.totalCommission || 0)) {
+        setValidationError(isRTL 
+          ? `المبلغ المدخل (${editedTotalPaid}) أكبر من إجمالي العمولة (${affiliate?.totalCommission || 0})`
+          : `Entered amount (${editedTotalPaid}) exceeds total commission (${affiliate?.totalCommission || 0})`
+        );
+        return;
+      }
+      
+      await updateAffiliateTotalPaid(affiliationId, editedTotalPaid);
+      setIsEditingTotalPaid(false);
+      setValidationError(null);
+      
+      // Call parent callback to refresh data
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
+      }
+      
+      // Small delay to show success message before closing
+      setTimeout(() => {
+        onClose();
+      }, 500);
+    } catch (error) {
+      console.error('Error updating total paid:', error);
+      setValidationError(isRTL ? 'حدث خطأ أثناء حفظ البيانات' : 'An error occurred while saving data');
+    }
+  };
+
+  // Function to cancel editing
+  const handleCancelEdit = () => {
+    setEditedTotalPaid(affiliate?.totalPaid || 0);
+    setIsEditingTotalPaid(false);
+    setValidationError(null);
   };
 
   // تعريف الأعمدة داخل المكون للوصول إلى i18n
@@ -148,24 +211,24 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
 
           {/* التابات */}
           <div className={`flex gap-2 flex-1 justify-center`}>
-            <button
+            {/* <button
               className={`px-4 py-2 font-semibold rounded-lg transition-all duration-200 ${activeTab === 'info' ? 'bg-primary text-white shadow' : 'bg-gray-100 text-primary'} `}
               onClick={() => setActiveTab('info')}
             >
               {t('affiliation.affiliateInfo') || 'معلومات المسوق'}
-            </button>
-            <button
+            </button> */}
+            {/* <button
               className={`px-4 py-2 font-semibold rounded-lg transition-all duration-200 ${activeTab === 'form' ? 'bg-primary text-white shadow' : 'bg-gray-100 text-primary'} `}
               onClick={() => setActiveTab('form')}
             >
               {t('affiliation.paymentForm')}
-            </button>
-            <button
+            </button> */}
+            {/* <button
               className={`px-4 py-2 font-semibold rounded-lg transition-all duration-200 ${activeTab === 'table' ? 'bg-primary text-white shadow' : 'bg-gray-100 text-primary'} `}
               onClick={() => setActiveTab('table')}
             >
               {t('affiliation.paymentDetails')}
-            </button>
+            </button> */}
           </div>
 
           {/* زر الإغلاق */}
@@ -220,7 +283,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
               </div>
 
               {/* Performance Stats Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2  gap-4">
                 <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
@@ -249,16 +312,130 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className={`bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-shadow ${isEditingTotalPaid ? 'border-green-300 ring-2 ring-green-100' : 'border-gray-200'}`}>
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm text-gray-600">{t('affiliation.totalPaid') || 'إجمالي المدفوع'}</p>
-                      <p className="text-xl font-bold text-green-600">{affiliate?.totalPaid?.toLocaleString() || 0} {storeCurrency}</p>
+                      {isEditingTotalPaid ? (
+                        <div className="space-y-3 mt-2">
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="number"
+                              value={editedTotalPaid}
+                              onChange={(e) => {
+                                setEditedTotalPaid(Number(e.target.value));
+                                setValidationError(null); // Clear error when user types
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  // Only save if no validation errors
+                                  if (!validationError && editedTotalPaid >= 0 && !isNaN(editedTotalPaid) && editedTotalPaid <= (affiliate?.totalCommission || 0)) {
+                                    handleSaveTotalPaid();
+                                  }
+                                } else if (e.key === 'Escape') {
+                                  handleCancelEdit();
+                                }
+                              }}
+                              className={`text-lg font-bold bg-white border-2 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 w-48 shadow-sm ${
+                                validationError 
+                                  ? 'text-red-600 border-red-300 focus:border-red-500 focus:ring-red-200' 
+                                  : 'text-green-600 border-green-300 focus:border-green-500 focus:ring-green-200'
+                              }`}
+                              min="0"
+                              step="0.01"
+                              autoFocus
+                              placeholder="0"
+                            />
+                            <span className="text-lg font-bold text-green-600">{storeCurrency}</span>
+                          </div>
+                          
+                          {/* Max Amount Info */}
+                          <div className="text-xs text-gray-500 mt-1">
+                            {isRTL 
+                              ? `الحد الأقصى المسموح: ${(affiliate?.totalCommission || 0).toLocaleString()} ${storeCurrency}`
+                              : `Maximum allowed: ${(affiliate?.totalCommission || 0).toLocaleString()} ${storeCurrency}`
+                            }
+                          </div>
+                          
+                          {/* Validation Error Message */}
+                          {validationError && (
+                            <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                              <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <p className="text-sm text-red-600">{validationError}</p>
+                            </div>
+                          )}
+                          
+                          
+                          <div className="flex flex-col gap-2">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={handleSaveTotalPaid}
+                                disabled={updateLoading || validationError !== null || editedTotalPaid < 0 || isNaN(editedTotalPaid) || editedTotalPaid > (affiliate?.totalCommission || 0)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm ${
+                                  updateLoading || validationError !== null || editedTotalPaid < 0 || isNaN(editedTotalPaid) || editedTotalPaid > (affiliate?.totalCommission || 0)
+                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                    : 'bg-green-600 text-white hover:bg-green-700'
+                                }`}
+                              >
+                              {updateLoading ? (
+                                <>
+                                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  {t('common.saving') || 'جاري الحفظ...'}
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  {t('common.save') || 'حفظ'}
+                                </>
+                              )}
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-medium hover:bg-gray-600 flex items-center gap-2 shadow-sm"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                              {t('common.cancel') || 'إلغاء'}
+                            </button>
+                            </div>
+                            
+                            {/* Save Button Status Message */}
+                            {(validationError !== null || editedTotalPaid < 0 || isNaN(editedTotalPaid) || editedTotalPaid > (affiliate?.totalCommission || 0)) && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {isRTL ? 'يجب إصلاح الأخطاء قبل الحفظ' : 'Fix errors before saving'}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-xl font-bold text-green-600">{affiliate?.totalPaid?.toLocaleString() || 0} {storeCurrency}</p>
+                      )}
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                      {!isEditingTotalPaid && (
+                        <button
+                          onClick={() => setIsEditingTotalPaid(true)}
+                          className="p-2 text-gray-400 hover:text-green-600 transition-colors hover:bg-green-50 rounded-lg"
+                          title={t('common.edit') || 'تعديل'}
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -279,7 +456,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
               </div>
 
               {/* Main Information Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                 {/* Contact Information */}
                 <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                   <div className="flex items-center gap-3 mb-4">
@@ -326,7 +503,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
                 </div>
 
                 {/* Bank Information */}
-                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                {/* <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
                       <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,7 +544,7 @@ const AffiliatePaymentDrawer: React.FC<AffiliatePaymentDrawerProps> = ({ open, o
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               {/* Additional Stats and Settings */}
