@@ -187,7 +187,13 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
           }
         });
         console.log('Subscription plan updated:', response.data);
-        showSuccess(t('subscriptionPlans.planUpdated'));
+        
+        // Show success message from backend
+        const successMessage = isRTL 
+          ? (response.data?.messageAr || response.data?.message_ar || t('subscriptionPlans.planUpdated') || 'تم تحديث الخطة بنجاح')
+          : (response.data?.message || response.data?.message_en || t('subscriptionPlans.planUpdated') || 'Plan updated successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        showSuccess(successMessage, successTitle);
       } else {
         // Create new plan
         response = await axios.post('https://bringus-backend.onrender.com/api/subscription-plans', formData, {
@@ -196,14 +202,45 @@ const AddSubscriptionPlanModal: React.FC<AddSubscriptionPlanModalProps> = ({
           }
         });
         console.log('Subscription plan created:', response.data);
-        showSuccess(t('subscriptionPlans.planCreated'));
+        
+        // Show success message from backend
+        const successMessage = isRTL 
+          ? (response.data?.messageAr || response.data?.message_ar || t('subscriptionPlans.planCreated') || 'تم إنشاء الخطة بنجاح')
+          : (response.data?.message || response.data?.message_en || t('subscriptionPlans.planCreated') || 'Plan created successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        showSuccess(successMessage, successTitle);
       }
       
       onSuccess();
       onClose();
     } catch (error: any) {
       console.error(`Error ${isEdit ? 'updating' : 'creating'} subscription plan:`, error);
-       showError(error.response?.data?.message || `Error ${isEdit ? 'updating' : 'creating'} subscription plan`);
+      console.log('Error response data:', error.response?.data);
+      
+      // Handle validation errors from backend
+      const errorData = error.response?.data;
+      
+      // Check for validation errors array
+      if (errorData?.errors && Array.isArray(errorData.errors)) {
+        // Show each validation error
+        errorData.errors.forEach((err: any) => {
+          const fieldError = isRTL 
+            ? (err.messageAr || err.message_ar || err.msg || err.message || 'خطأ في التحقق من البيانات')
+            : (err.message || err.message_en || err.msg || 'Validation error');
+          showError(fieldError, isRTL ? 'خطأ في البيانات' : 'Validation Error');
+        });
+      } 
+      // Single error message
+      else {
+        const errorMessage = isRTL 
+          ? (errorData?.messageAr || errorData?.message_ar || `خطأ في ${isEdit ? 'تحديث' : 'إنشاء'} الخطة`)
+          : (errorData?.message || errorData?.message_en || `Error ${isEdit ? 'updating' : 'creating'} subscription plan`);
+        const errorTitle = isRTL 
+          ? (errorData?.errorAr || errorData?.error_ar || `خطأ في ${isEdit ? 'التحديث' : 'الإنشاء'}`)
+          : (errorData?.error || errorData?.error_en || `Error ${isEdit ? 'Updating' : 'Creating'}`);
+        
+        showError(errorMessage, errorTitle);
+      }
     } finally {
       setIsLoading(false);
     }

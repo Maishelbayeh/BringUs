@@ -151,6 +151,8 @@ const POSManager: React.FC<POSManagerProps> = ({
     if (!storeId) return;
     
     try {
+      console.log('🛒 Creating new cart from POSManager...');
+      
       const result = await pos.createCart(storeId);
       if (result.success && result.data) {
         await pos.getCart(result.data.cartId);
@@ -159,7 +161,7 @@ const POSManager: React.FC<POSManagerProps> = ({
           isRTL ? 'تم إنشاء سلة جديدة بنجاح' : 'New cart created successfully'
         );
         
-        // Open new tab if callback provided
+        // Open new tab if callback provided (parent will refresh products)
         if (onNewOrder && result.data.cartId) {
           onNewOrder(result.data.cartId);
         }
@@ -384,24 +386,16 @@ const POSManager: React.FC<POSManagerProps> = ({
       const result = await pos.completeCart(pos.currentCart._id, `POS Order - ${new Date().toLocaleString()}`);
       
       if (result.success) {
+        const cartId = pos.currentCart._id;
+        
         showToast('success',
           isRTL ? 'تم إكمال الطلب بنجاح!' : 'Order Completed Successfully!',
-          isRTL ? 'تم إنشاء الطلب بنجاح' : 'Order has been created successfully',
+          isRTL ? 'تم إنشاء الطلب بنجاح' : 'Order created successfully',
           result.data?.orderNumber || 'N/A'
         );
         
-        // Delete the completed cart
-        const cartId = pos.currentCart._id;
-        console.log('Deleting completed cart:', cartId);
-        const deleteResult = await pos.deleteCart(cartId);
-        
-        if (deleteResult.success) {
-          console.log('Cart deleted successfully after completion');
-        } else {
-          console.warn('Failed to delete cart after completion:', deleteResult.message);
-        }
-        
-        // Notify parent component that cart was completed and deleted
+        // Notify parent component that cart was completed
+        // Parent will refresh products and close the tab
         onCartUpdate?.(cartId);
       } else {
         showToast('error',

@@ -1,22 +1,38 @@
-import { getLahzaSecretKey } from '../hooks/useLocalStorage';
+import { getStoreInfo } from '../utils/storeUtils';
 
-// Get the secret key and log it for debugging
-const secretKey = getLahzaSecretKey() || '';
-console.log('🔐 Lahza Secret Key from localStorage:', secretKey || 'No key found - using empty string');
+// Get store info for dynamic callback URL
+const getCallbackUrl = () => {
+  const storeInfo = getStoreInfo();
+  const storeSlug = storeInfo?.slug;
+  
+  if (storeSlug) {
+    return `https://bringus.onrender.com/${storeSlug}`;
+  }
+  
+  // Fallback to localhost for development
+  return 'http://localhost:5174/';
+};
+
+// Get backend API base URL
+const getBackendBaseUrl = () => {
+  // Use environment variable or fallback to production
+  return import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
+};
+
 console.log('📊 Payment Config Loaded:', {
-  baseUrl: 'https://api.lahza.io/transaction',
-  secretKey:'sk_test_aJgxg75kYKtW6qVuTgijJyzpuhszRSvc4',
-  callbackUrl: 'http://localhost:5174/'
+  backendUrl: getBackendBaseUrl(),
+  callbackUrl: getCallbackUrl()
 });
 
-// Payment API Constants
+// Payment API Constants - Now using backend proxy for security
 export const PAYMENT_API_CONFIG = {
-  BASE_URL: 'https://api.lahza.io/transaction',
-  SECRET_KEY: 'sk_test_aJgxg75kYKtW6qVuTgijJyzpuhszRSvc4', // Using stored secret key or empty string
-  CALLBACK_URL: 'http://localhost:5174/',
+  BACKEND_URL: getBackendBaseUrl(),
+  CALLBACK_URL: getCallbackUrl(), // Dynamic callback URL based on store slug
   ENDPOINTS: {
-    CHARGES: '/initialize',
-    VERIFY: '/verify'
+    INITIALIZE: '/lahza-payment/:storeId/initialize',
+    VERIFY: '/lahza-payment/:storeId/verify',
+    STATUS: '/lahza-payment/:storeId/status/:reference',
+    WEBHOOK: '/lahza-payment/:storeId/webhook'
   }
 };
 

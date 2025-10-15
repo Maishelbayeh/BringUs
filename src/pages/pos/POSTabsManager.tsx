@@ -160,6 +160,17 @@ const POSTabsManager: React.FC = () => {
     
     setIsCreatingCart(true);
     try {
+      console.log('🛒 Creating new cart tab - Fetching latest products from API...');
+      
+      // Fetch fresh product data from API before creating cart
+      await Promise.all([
+        fetchProducts(true),      // Pass true to force refresh
+        fetchCategories(true),    // Pass true to force refresh
+        fetchSpecifications(true) // Pass true to force refresh
+      ]);
+      
+      console.log('✅ Products refreshed, creating new cart...');
+      
       const result = await pos.createCart(storeId);
       if (result.success && result.data) {
         const newTab: POSTab = {
@@ -177,6 +188,8 @@ const POSTabsManager: React.FC = () => {
         setActiveTabId(newTab.id);
         // Load the cart immediately to ensure it's available
         await pos.getCart(newTab.cartId);
+        
+        console.log('✅ New cart created with fresh product data');
       }
     } catch (error) {
       console.error('Error creating new tab:', error);
@@ -197,6 +210,15 @@ const POSTabsManager: React.FC = () => {
       // Clear current cart immediately to prevent data leakage
       console.log('Clearing cart data before switching to tab:', tabId);
       pos.setCurrentCart(null);
+      
+      // Fetch fresh products when switching tabs to get latest stock
+      console.log('🔄 Switching tab - Fetching latest products from API...');
+      await Promise.all([
+        fetchProducts(true),      // Force refresh products
+        fetchCategories(true),    // Force refresh categories
+        fetchSpecifications(true) // Force refresh specifications
+      ]);
+      console.log('✅ Products refreshed on tab switch');
       
       // Force reload the cart data to get latest updates
       await pos.getCart(tab.cartId);
@@ -254,20 +276,28 @@ const POSTabsManager: React.FC = () => {
   // Close tab by cart ID (used after completing an order)
   const closeTabByCartId = async (cartId: string) => {
     const tab = tabs.find(t => t.cartId === cartId);
-    if (!tab) return;
+    if (!tab) {
+      console.log('Tab not found for cartId:', cartId);
+      return;
+    }
     
     console.log('Closing tab after order completion:', tab.id);
     
-    // Remove from tabs
-    setTabs(prev => prev.filter(t => t.id !== tab.id));
+    // Calculate remaining tabs BEFORE updating state
+    const remainingTabs = tabs.filter(t => t.id !== tab.id);
+    console.log('Remaining tabs after close:', remainingTabs.length);
     
-    // If this was the active tab, switch to another tab
+    // Remove from tabs
+    setTabs(remainingTabs);
+    
+    // If this was the active tab, switch to another tab or clear
     if (activeTabId === tab.id) {
-      const remainingTabs = tabs.filter(t => t.id !== tab.id);
       if (remainingTabs.length > 0) {
+        console.log('Switching to next tab:', remainingTabs[0].id);
         setActiveTabId(remainingTabs[0].id);
         await pos.getCart(remainingTabs[0].cartId);
       } else {
+        console.log('No remaining tabs, clearing active tab');
         setActiveTabId(null);
         pos.setCurrentCart(null);
       }
@@ -496,9 +526,18 @@ const POSTabsManager: React.FC = () => {
               // Set the new cart as active
               setActiveTabId(cartId);
             }}
-            onCartUpdate={(completedCartId) => {
+            onCartUpdate={async (completedCartId) => {
               // If a cart was completed, close its tab
               if (completedCartId) {
+                // Refresh products when cart is completed
+                console.log('🔄 Cart completed - Refreshing products in parent...');
+                await Promise.all([
+                  fetchProducts(true),
+                  fetchCategories(true),
+                  fetchSpecifications(true)
+                ]);
+                console.log('✅ Products refreshed in parent after cart completion');
+                
                 closeTabByCartId(completedCartId);
               } else {
               //  console.log('Cart upfffffffffffffffffffffffffffffffffdated:', completedCartId);

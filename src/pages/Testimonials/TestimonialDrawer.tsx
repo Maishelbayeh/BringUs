@@ -71,6 +71,10 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
     }
   };
 
+  const handleRemoveImage = () => {
+    handleFormChange('image', '');
+  };
+
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     onSave(formData);
@@ -125,12 +129,44 @@ const TestimonialDrawer: React.FC<TestimonialDrawerProps> = ({ open, onClose, on
                 onChange={(e) => handleFormChange('active', e.target.checked)}
               />
               
-              <CustomFileInput
-                label={t('testimonials.picture') || 'Picture'}
-                onChange={handleImageChange}
-                value={formData.image}
-                isRTL={isRtl}
-              />
+              <div className="flex flex-col gap-2">
+                <CustomFileInput
+                  label={t('testimonials.picture') || 'Picture'}
+                  onChange={handleImageChange}
+                  value={formData.image}
+                  isRTL={isRtl}
+                />
+                
+                {/* Show current image and delete button in edit mode */}
+                {testimonial && formData.image && (
+                  <div className={`flex items-center gap-2 p-2 bg-gray-50 rounded ${isRtl ? 'flex-row-reverse' : ''}`}>
+                    <img 
+                      src={formData.image} 
+                      alt="Current" 
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                    <div className={`flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                      <p className="text-xs text-gray-600">
+                        {isRtl ? 'الصورة الحالية' : 'Current Image'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
+                    >
+                      {isRtl ? 'حذف الصورة' : 'Remove Image'}
+                    </button>
+                  </div>
+                )}
+                
+                {/* Show message when image is removed */}
+                {testimonial && !formData.image && (
+                  <p className="text-xs text-orange-600">
+                    {isRtl ? '⚠️ سيتم استخدام الصورة الافتراضية' : '⚠️ Default image will be used'}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           

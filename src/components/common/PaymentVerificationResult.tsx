@@ -46,9 +46,11 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
       );
     }
 
-    if (!result) return null;
+    if (!result || !result.status) return null;
 
-    switch (result.data.data.status.toLowerCase()) {
+    const status = result.status.toLowerCase();
+
+    switch (status) {
       case 'success':
         return (
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
@@ -58,6 +60,7 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
           </div>
         );
       case 'input':
+      case 'failed':
         return (
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
             <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,12 +89,15 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
 
   const getStatusColor = () => {
     if (isVerifying) return 'text-blue-600';
-    if (!result) return 'text-gray-600';
+    if (!result || !result.status) return 'text-gray-600';
 
-    switch (result.data.data.status.toLowerCase()) {
+    const status = result.status.toLowerCase();
+
+    switch (status) {
       case 'success':
         return 'text-green-600';
       case 'input':
+      case 'failed':
         return 'text-red-600';
       case 'pending':
         return 'text-yellow-600';
@@ -102,12 +108,15 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
 
   const getStatusTitle = () => {
     if (isVerifying) return t('payment.verifying');
-    if (!result) return t('payment.unknown');
+    if (!result || !result.status) return t('payment.unknown');
 
-    switch (result.data.data.status.toLowerCase()) {
+    const status = result.status.toLowerCase();
+
+    switch (status) {
       case 'success':
         return t('payment.success');
       case 'input':
+      case 'failed':
         return t('payment.failed');
       case 'pending':
         return t('payment.pending');
@@ -186,7 +195,7 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
           >
             {t('general.cancel')}
           </button>
-          {result?.data?.data?.status?.toLowerCase() === 'success' && (
+          {result?.status?.toLowerCase() === 'success' && (
             <button
               onClick={() => {
                 console.log('Setting up auto renewal...');

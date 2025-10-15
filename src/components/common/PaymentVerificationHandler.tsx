@@ -10,29 +10,40 @@ const PaymentVerificationHandler: React.FC = () => {
 
   useEffect(() => {
     const handlePaymentVerification = async () => {
-      // التحقق من وجود reference في URL أو localStorage
-      const urlParams = new URLSearchParams(window.location.search);
-      const reference = urlParams.get('reference') || urlParams.get('tap_id');
-      
-      if (reference) {
-        // إذا كان هناك reference في URL، قم بالتحقق
-        const result = await checkPaymentFromURL();
-        if (result) {
-          setShowVerificationModal(true);
+      try {
+        // التحقق من وجود reference في URL أو localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const reference = urlParams.get('reference') || urlParams.get('tap_id') || urlParams.get('trxref');
+        
+        console.log('🔍 Checking for payment reference in URL:', { reference, allParams: Object.fromEntries(urlParams.entries()) });
+        
+        if (reference) {
+          // Save reference to localStorage for backup
+          localStorage.setItem('payment_reference', reference);
           
-          // إزالة المعاملات من URL بعد التحقق
-          const newUrl = new URL(window.location.href);
-          newUrl.searchParams.delete('reference');
-          newUrl.searchParams.delete('tap_id');
-          window.history.replaceState({}, '', newUrl.toString());
+          // إذا كان هناك reference في URL، قم بالتحقق
+          console.log('✅ Found payment reference, verifying...');
+          const result = await checkPaymentFromURL();
+          
+          if (result) {
+            setShowVerificationModal(true);
+            
+            // إزالة المعاملات من URL بعد التحقق
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('reference');
+            newUrl.searchParams.delete('tap_id');
+            newUrl.searchParams.delete('trxref');
+            window.history.replaceState({}, '', newUrl.toString());
+          }
+        } else {
+          // التحقق من localStorage إذا لم يكن هناك reference في URL
+          const storedReference = localStorage.getItem('payment_reference');
+          if (storedReference) {
+            console.log('📦 Stored payment reference found:', storedReference);
+          }
         }
-      } else {
-        // التحقق من localStorage إذا لم يكن هناك reference في URL
-        const storedReference = localStorage.getItem('reference');
-        if (storedReference) {
-          // يمكن إضافة منطق إضافي هنا للتحقق من الدفع المحفوظ
-          console.log('Stored payment reference found:', storedReference);
-        }
+      } catch (error) {
+        console.error('❌ Error in payment verification handler:', error);
       }
     };
 

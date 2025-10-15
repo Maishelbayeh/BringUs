@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../constants/api';
+import { useToastContext } from '../contexts/ToastContext';
+import useLanguage from './useLanguage';
 
 interface StoreOwner {
   _id: string;
@@ -78,11 +80,25 @@ interface StoresResponse {
   data: Store[];
   count: number;
   message?: string;
+  messageAr?: string;
+  message_en?: string;
+  message_ar?: string;
+  error?: string;
+  errorAr?: string;
+  error_en?: string;
+  error_ar?: string;
 }
 
 interface StatusUpdateResponse {
   success: boolean;
   message: string;
+  messageAr?: string;
+  message_en?: string;
+  message_ar?: string;
+  error?: string;
+  errorAr?: string;
+  error_en?: string;
+  error_ar?: string;
 }
 
 export const useSuperAdmin = () => {
@@ -91,6 +107,8 @@ export const useSuperAdmin = () => {
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
   const [cachedStores, setCachedStores] = useState<Store[]>([]);
   const CACHE_DURATION = 60000; // 60 ثانية (دقيقة واحدة)
+  const { showSuccess, showError } = useToastContext();
+  const { isRTL } = useLanguage();
 
   // جلب جميع المتاجر
   const getAllStores = async (): Promise<Store[]> => {
@@ -126,28 +144,45 @@ export const useSuperAdmin = () => {
         setCachedStores(response.data.data);
         return response.data.data;
       } else {
-        throw new Error(response.data.message || 'Failed to fetch stores');
+        const errorMessage = isRTL 
+          ? (response.data?.messageAr || response.data?.message_ar || 'فشل في جلب المتاجر')
+          : (response.data?.message || response.data?.message_en || 'Failed to fetch stores');
+        throw new Error(errorMessage);
       }
     } catch (err: any) {
-      let errorMessage = 'An error occurred while fetching stores';
+      let errorMessage = isRTL ? 'حدث خطأ أثناء جلب المتاجر' : 'An error occurred while fetching stores';
+      let errorTitle = isRTL ? 'خطأ' : 'Error';
       
       if (err.code === 'ECONNABORTED') {
-        errorMessage = 'Request timeout - server is not responding';
+        errorMessage = isRTL ? 'انتهت مهلة الطلب - الخادم لا يستجيب' : 'Request timeout - server is not responding';
+        errorTitle = isRTL ? 'خطأ في الاتصال' : 'Connection Error';
       } else if (err.response) {
+        const errorData = err.response.data;
+        
         // إذا كان الخطأ 429 (Too Many Requests)، انتظر فترة أطول
         if (err.response.status === 429) {
           setLastFetchTime(Date.now() + 120000); // انتظر دقيقتين إضافيتين
-          errorMessage = 'Too many requests - please wait a moment and try again';
+          errorMessage = isRTL 
+            ? (errorData?.messageAr || errorData?.message_ar || 'طلبات كثيرة جداً - يرجى الانتظار لحظة والمحاولة مرة أخرى')
+            : (errorData?.message || errorData?.message_en || 'Too many requests - please wait a moment and try again');
+          errorTitle = isRTL ? 'تحذير' : 'Warning';
         } else {
-          errorMessage = err.response.data?.message || `Server error: ${err.response.status}`;
+          errorMessage = isRTL 
+            ? (errorData?.messageAr || errorData?.message_ar || `خطأ في الخادم: ${err.response.status}`)
+            : (errorData?.message || errorData?.message_en || `Server error: ${err.response.status}`);
+          errorTitle = isRTL 
+            ? (errorData?.errorAr || errorData?.error_ar || 'خطأ في الخادم')
+            : (errorData?.error || errorData?.error_en || 'Server Error');
         }
       } else if (err.request) {
-        errorMessage = 'No response from server - please check your connection';
+        errorMessage = isRTL ? 'لا يوجد رد من الخادم - يرجى التحقق من اتصالك' : 'No response from server - please check your connection';
+        errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
       } else {
         errorMessage = err.message || errorMessage;
       }
       
       setError(errorMessage);
+      showError(errorMessage, errorTitle);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -194,30 +229,55 @@ export const useSuperAdmin = () => {
         );
         // إعادة تعيين وقت الكاش لتجنب الطلبات المتكررة
         setLastFetchTime(Date.now());
+        
+        // Show success message
+        const successMessage = isRTL 
+          ? (response.data?.messageAr || response.data?.message_ar || 'تم تحديث حالة المتجر بنجاح')
+          : (response.data?.message || response.data?.message_en || 'Store status updated successfully');
+        const successTitle = isRTL ? 'نجاح' : 'Success';
+        showSuccess(successMessage, successTitle);
+        
         return true;
       } else {
-        throw new Error(response.data.message || 'Failed to update store status');
+        const errorMessage = isRTL 
+          ? (response.data?.messageAr || response.data?.message_ar || 'فشل في تحديث حالة المتجر')
+          : (response.data?.message || response.data?.message_en || 'Failed to update store status');
+        throw new Error(errorMessage);
       }
     } catch (err: any) {
-      let errorMessage = 'An error occurred while updating store status';
+      let errorMessage = isRTL ? 'حدث خطأ أثناء تحديث حالة المتجر' : 'An error occurred while updating store status';
+      let errorTitle = isRTL ? 'خطأ' : 'Error';
       
       if (err.code === 'ECONNABORTED') {
-        errorMessage = 'Request timeout - server is not responding';
+        errorMessage = isRTL ? 'انتهت مهلة الطلب - الخادم لا يستجيب' : 'Request timeout - server is not responding';
+        errorTitle = isRTL ? 'خطأ في الاتصال' : 'Connection Error';
       } else if (err.response) {
+        const errorData = err.response.data;
+        
         // إذا كان الخطأ 429 (Too Many Requests)، انتظر فترة أطول
         if (err.response.status === 429) {
           setLastFetchTime(Date.now() + 120000); // انتظر دقيقتين إضافيتين
-          errorMessage = 'Too many requests - please wait a moment and try again';
+          errorMessage = isRTL 
+            ? (errorData?.messageAr || errorData?.message_ar || 'طلبات كثيرة جداً - يرجى الانتظار لحظة والمحاولة مرة أخرى')
+            : (errorData?.message || errorData?.message_en || 'Too many requests - please wait a moment and try again');
+          errorTitle = isRTL ? 'تحذير' : 'Warning';
         } else {
-          errorMessage = err.response.data?.message || `Server error: ${err.response.status}`;
+          errorMessage = isRTL 
+            ? (errorData?.messageAr || errorData?.message_ar || `خطأ في الخادم: ${err.response.status}`)
+            : (errorData?.message || errorData?.message_en || `Server error: ${err.response.status}`);
+          errorTitle = isRTL 
+            ? (errorData?.errorAr || errorData?.error_ar || 'خطأ في الخادم')
+            : (errorData?.error || errorData?.error_en || 'Server Error');
         }
       } else if (err.request) {
-        errorMessage = 'No response from server - please check your connection';
+        errorMessage = isRTL ? 'لا يوجد رد من الخادم - يرجى التحقق من اتصالك' : 'No response from server - please check your connection';
+        errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
       } else {
         errorMessage = err.message || errorMessage;
       }
       
       setError(errorMessage);
+      showError(errorMessage, errorTitle);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
