@@ -51,6 +51,7 @@ interface LoginCredentials {
   email: string;
   password: string;
   rememberMe?: boolean;
+  panelType?: string;
 }
 
 export const useAuth = () => {

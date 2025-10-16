@@ -92,6 +92,7 @@ const Login: React.FC = () => {
       const result = await login({
         email: formData.email,
         password: formData.password,
+        panelType: "admin",
         rememberMe: rememberMe
       });
       
