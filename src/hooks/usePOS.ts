@@ -252,6 +252,30 @@ export function usePOS(): UsePOSResult {
       setCurrentCart(null);
     }
     
+    // Validate stock availability before making API call
+    const availableStock = product.availableQuantity ?? product.stock ?? 0;
+    if (availableStock <= 0) {
+      const errorMsg = isRTL 
+        ? 'المنتج غير متوفر في المخزون'
+        : 'Product is out of stock';
+      setError(errorMsg);
+      return { 
+        success: false, 
+        message: errorMsg
+      };
+    }
+    
+    if (quantity > availableStock) {
+      const errorMsg = isRTL 
+        ? `المخزون غير كافي. المتوفر: ${availableStock}`
+        : `Insufficient stock. Available: ${availableStock}`;
+      setError(errorMsg);
+      return { 
+        success: false, 
+        message: errorMsg
+      };
+    }
+    
     setIsLoading(true);
     setError(null);
     
