@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 
 interface ProductImageProps {
@@ -24,6 +24,17 @@ const ProductImage: React.FC<ProductImageProps> = ({
 }) => {
   const [imageSrc, setImageSrc] = useState<string>(src || fallbackSrc);
   const [hasError, setHasError] = useState<boolean>(false);
+
+  // تحديث imageSrc عندما يتغير src
+  useEffect(() => {
+    if (src) {
+      setImageSrc(src);
+      setHasError(false);
+    } else {
+      setImageSrc(fallbackSrc);
+      setHasError(false);
+    }
+  }, [src, fallbackSrc]);
 
   const handleError = () => {
     if (!hasError && imageSrc !== fallbackSrc) {

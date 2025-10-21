@@ -8,6 +8,8 @@ import useProducts from '../../hooks/useProducts';
 import useCategories from '../../hooks/useCategories';
 import CircularIndeterminate from '../../components/common/loading/CircularIndeterminate';
 import { CheckCircle, Inventory2, WarningAmber} from '@mui/icons-material';
+import TableImage from '../../components/common/TableImage';
+import { DEFAULT_PRODUCT_IMAGE } from '../../constants/config';
 
 const StockTable: React.FC = () => {
   const { i18n, t } = useTranslation();
@@ -23,7 +25,24 @@ const StockTable: React.FC = () => {
   const { categories, fetchCategories } = useCategories();
   
   const columns = [
-    { key: 'image', label: { ar: 'الصورة', en: 'Image' }, type: 'image' },
+    { 
+      key: 'image', 
+      label: { ar: 'الصورة', en: 'Image' }, 
+      type: 'custom',
+      render: (_value: any, item: any) => {
+        const mainImage = item.image || DEFAULT_PRODUCT_IMAGE;
+        console.log('mainImage', mainImage);
+        return (
+          <div className="flex justify-center">
+            <TableImage
+              src={mainImage}
+              alt={item.name}
+              size="md"
+            />
+          </div>
+        );
+      }
+    },
     { key: 'name', label: { ar: 'اسم المنتج', en: 'Product Name' }, type: 'text' },
     { 
       key: 'stockInfo', 
@@ -132,24 +151,6 @@ const StockTable: React.FC = () => {
 
 
 
-//------------------------------------------- getCategoryName -------------------------------------------
-  // const getCategoryName = (categoryId: string | number) => {
-  //   if (!categories || categories.length === 0) return '-';
-    
-  //   const category = categories.find((c: any) => c._id === categoryId || c.id === categoryId);
-  //   if (!category) return '-';
-    
-  //   return i18n.language === 'ar' || i18n.language === 'ARABIC' 
-  //     ? category.nameAr || category.name
-  //     : category.nameEn || category.name;
-  // };
-
-//------------------------------------------- getLabelName -------------------------------------------
-  // const getLabelName = (labelId: number | string) => {
-  //   const label = productLabelOptions.find((l: any) => l.id === labelId || l._id === labelId);
-  //   return label ? (i18n.language === 'ar' || i18n.language === 'ARABIC' ? label.nameAr : label.nameEn) : '-';
-  // };
-
 //------------------------------------------- tableData -------------------------------------------
   const tableData = React.useMemo(() => {
     if (!products || products.length === 0) return [];
@@ -161,7 +162,7 @@ const StockTable: React.FC = () => {
 
       return {
         _id: product._id,
-        image: product.mainImage || product.image || product.images?.[0] || '/placeholder-image.png',
+        image: product.mainImage || product.image || product.images?.[0] || DEFAULT_PRODUCT_IMAGE,
         name: i18n.language === 'ar' || i18n.language === 'ARABIC' 
           ? product.nameAr || product.name
           : product.nameEn || product.name,
@@ -180,8 +181,12 @@ const StockTable: React.FC = () => {
 
   // Filter data based on low stock filter
   const filteredData = React.useMemo(() => {
-    if (!showLowStockOnly) return tableData;
-    return tableData.filter(item => item.isLowStock);
+    if (!showLowStockOnly) {
+      console.log('tableData', tableData);
+      return tableData;}
+    else {
+      console.log('tableData-Filtered', tableData.filter(item => item.isLowStock));
+      return tableData.filter(item => item.isLowStock);}
   }, [tableData, showLowStockOnly]);
 
   // Calculate statistics
@@ -386,7 +391,7 @@ const StockTable: React.FC = () => {
             <div className="p-4 border-b border-gray-100 bg-gray-50">
               <div className={`flex items-center gap-3 ${i18n.language === 'ar' || i18n.language === 'ARABIC' ? 'flex-row-reverse' : 'flex-row'}`}>
                 <img 
-                  src={selectedProduct.image || '/placeholder-image.png'} 
+                  src={selectedProduct.image || DEFAULT_PRODUCT_IMAGE} 
                   alt={selectedProduct.name}
                   className="w-12 h-12 rounded-lg object-cover border border-gray-200"
                 />
