@@ -38,23 +38,67 @@ const PaymentPollingManager: React.FC = () => {
         console.log('🔄 Refreshing store info and subscription status...');
         
         // 1. Refresh subscription status
+        console.log('📊 Step 1: Fetching subscription status...');
         await fetchSubscriptionStatus();
+        console.log('✅ Subscription status fetched');
         
-        // 2. Refresh store info (to get updated subscription data)
+        // 2. Refresh store info (CRITICAL - to get updated subscription & status)
         const storeInfo = getStoreInfo();
+        const storeId = localStorage.getItem('storeId');
+        
+        console.log('🏪 Store Info:', { slug: storeInfo?.slug, storeId });
+        
         if (storeInfo?.slug) {
-          await getStore(storeInfo.slug);
+          console.log('📥 Step 2: Re-fetching store from backend...');
+          const freshStoreData = await getStore(storeInfo.slug);
           
-          // Trigger custom event to update StoreContext
-          window.dispatchEvent(new Event('storeDataUpdated'));
+          if (freshStoreData) {
+            console.log('✅ Fresh store data received:', {
+              status: freshStoreData.status,
+              hasSubscription: !!freshStoreData.subscription
+            });
+            
+            // Force update localStorage with fresh data
+            console.log('💾 Updating localStorage with fresh data...');
+            localStorage.setItem('storeInfo', JSON.stringify({
+              id: freshStoreData.id || freshStoreData._id,
+              nameAr: freshStoreData.nameAr,
+              nameEn: freshStoreData.nameEn,
+              slug: freshStoreData.slug,
+              status: freshStoreData.status, // This should now be 'active'
+              settings: freshStoreData.settings,
+              subscription: freshStoreData.subscription // Include subscription data
+            }));
+            
+            // Clear any cached inactive status
+            localStorage.removeItem('store_inactive_warning');
+            
+            // Trigger custom event to update StoreContext
+            window.dispatchEvent(new CustomEvent('storeDataUpdated', {
+              detail: { storeData: freshStoreData }
+            }));
+            
+            console.log('✅ localStorage updated with status:', freshStoreData.status);
+          } else {
+            console.warn('⚠️ No store data returned from backend');
+          }
+        } else {
+          console.warn('⚠️ No store slug found, skipping store refresh');
         }
         
         console.log('✅ All data refreshed successfully');
+        console.log('📋 Final localStorage state:', {
+          storeInfo: localStorage.getItem('storeInfo'),
+          storeId: localStorage.getItem('storeId')
+        });
+        
       } catch (error) {
-        console.error('⚠️ Error refreshing data:', error);
+        console.error('❌ Error refreshing data:', error);
+        // Still reload even if there's an error
       }
 
       // Reload page to ensure all components are updated (topNav, sidebar, dashboard, etc.)
+      console.log('⏳ Will reload page in 2 seconds...');
       setTimeout(() => {
         console.log('🔄 Reloading page to update all components (topNav, sidebar, dashboard)...');
         window.location.reload();

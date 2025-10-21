@@ -92,7 +92,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
       
       if (!storeId || !token) return false;
       
-      const response = await fetch(`http://localhost:5001/api/stores/${storeId}`, {
+      const response = await fetch(`https://bringus-backend.onrender.com/api/stores/${storeId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

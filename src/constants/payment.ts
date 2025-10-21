@@ -16,7 +16,7 @@ const getCallbackUrl = () => {
 // Get backend API base URL
 const getBackendBaseUrl = () => {
   // Use environment variable or fallback to production
-  return import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+  return import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
 };
 
 console.log('📊 Payment Config Loaded:', {

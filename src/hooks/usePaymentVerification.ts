@@ -27,7 +27,7 @@ const activateSubscriptionAfterPayment = async (storeId: string, reference: stri
     }
 
     // Call backend subscription activation endpoint
-    const activateUrl = `http://localhost:5001/api/subscription/stores/${storeId}`;
+    const activateUrl = `https://bringus-backend.onrender.com/api/subscription/stores/${storeId}`;
     const subscriptionData = {
       planId: planId,
       referenceId: reference,
@@ -128,6 +128,54 @@ export const usePaymentVerification = () => {
           
           // **NEW: Activate subscription via frontend (fallback for when webhook doesn't work on localhost)**
           await activateSubscriptionAfterPayment(storeId, reference);
+          
+          // **CRITICAL: Force refresh store info from backend after successful payment**
+          console.log('🔄 Payment verified successfully - refreshing store info...');
+          try {
+            const storeInfo = JSON.parse(localStorage.getItem('storeInfo') || '{}');
+            if (storeInfo.slug) {
+              // Import dynamically to avoid circular dependency
+              const { default: axios } = await import('axios');
+              const token = localStorage.getItem('token');
+              const apiUrl = import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
+              
+              const storeResponse = await axios.get(
+                `${apiUrl}/stores/slug/${storeInfo.slug}`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  }
+                }
+              );
+              
+              if (storeResponse.data.success && storeResponse.data.data) {
+                const freshStore = storeResponse.data.data;
+                console.log('✅ Fresh store data:', { status: freshStore.status });
+                
+                // Update localStorage with fresh store data
+                localStorage.setItem('storeInfo', JSON.stringify({
+                  id: freshStore.id || freshStore._id,
+                  nameAr: freshStore.nameAr,
+                  nameEn: freshStore.nameEn,
+                  slug: freshStore.slug,
+                  status: freshStore.status, // Should be 'active' now
+                  settings: freshStore.settings,
+                  subscription: freshStore.subscription
+                }));
+                
+                // Trigger store data update event
+                window.dispatchEvent(new CustomEvent('storeDataUpdated', {
+                  detail: { storeData: freshStore }
+                }));
+                
+                console.log('✅ Store info refreshed after payment verification');
+              }
+            }
+          } catch (error) {
+            console.error('⚠️ Error refreshing store info:', error);
+            // Continue anyway - page reload will fix it
+          }
           
         } else if (paymentStatus === 'PENDING' || paymentStatus === 'INITIATED') {
           result.status = 'pending';
