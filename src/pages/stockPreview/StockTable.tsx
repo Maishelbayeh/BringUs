@@ -31,6 +31,7 @@ const StockTable: React.FC = () => {
       type: 'custom',
       render: (_value: any, item: any) => {
         const mainImage = item.image || DEFAULT_PRODUCT_IMAGE;
+        console.log('mainImage', mainImage);
         return (
           <div className="flex justify-center">
             <TableImage
@@ -150,24 +151,6 @@ const StockTable: React.FC = () => {
 
 
 
-//------------------------------------------- getCategoryName -------------------------------------------
-  // const getCategoryName = (categoryId: string | number) => {
-  //   if (!categories || categories.length === 0) return '-';
-    
-  //   const category = categories.find((c: any) => c._id === categoryId || c.id === categoryId);
-  //   if (!category) return '-';
-    
-  //   return i18n.language === 'ar' || i18n.language === 'ARABIC' 
-  //     ? category.nameAr || category.name
-  //     : category.nameEn || category.name;
-  // };
-
-//------------------------------------------- getLabelName -------------------------------------------
-  // const getLabelName = (labelId: number | string) => {
-  //   const label = productLabelOptions.find((l: any) => l.id === labelId || l._id === labelId);
-  //   return label ? (i18n.language === 'ar' || i18n.language === 'ARABIC' ? label.nameAr : label.nameEn) : '-';
-  // };
-
 //------------------------------------------- tableData -------------------------------------------
   const tableData = React.useMemo(() => {
     if (!products || products.length === 0) return [];
@@ -198,8 +181,12 @@ const StockTable: React.FC = () => {
 
   // Filter data based on low stock filter
   const filteredData = React.useMemo(() => {
-    if (!showLowStockOnly) return tableData;
-    return tableData.filter(item => item.isLowStock);
+    if (!showLowStockOnly) {
+      console.log('tableData', tableData);
+      return tableData;}
+    else {
+      console.log('tableData-Filtered', tableData.filter(item => item.isLowStock));
+      return tableData.filter(item => item.isLowStock);}
   }, [tableData, showLowStockOnly]);
 
   // Calculate statistics
