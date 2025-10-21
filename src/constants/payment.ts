@@ -16,7 +16,7 @@ const getCallbackUrl = () => {
 // Get backend API base URL
 const getBackendBaseUrl = () => {
   // Use environment variable or fallback to production
-  return import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
+  return import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 };
 
 console.log('📊 Payment Config Loaded:', {
@@ -32,7 +32,8 @@ export const PAYMENT_API_CONFIG = {
     INITIALIZE: '/lahza-payment/:storeId/initialize',
     VERIFY: '/lahza-payment/:storeId/verify',
     STATUS: '/lahza-payment/:storeId/status/:reference',
-    WEBHOOK: '/lahza-payment/:storeId/webhook'
+    WEBHOOK: '/lahza-payment/:storeId/webhook',
+    POLL: '/lahza-payment/:storeId/poll/:reference'
   }
 };
 

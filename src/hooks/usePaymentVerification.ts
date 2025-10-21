@@ -27,7 +27,7 @@ const activateSubscriptionAfterPayment = async (storeId: string, reference: stri
     }
 
     // Call backend subscription activation endpoint
-    const activateUrl = `https://bringus-backend.onrender.com/api/subscription/stores/${storeId}`;
+    const activateUrl = `http://localhost:5001/api/subscription/stores/${storeId}`;
     const subscriptionData = {
       planId: planId,
       referenceId: reference,
@@ -72,17 +72,24 @@ export const usePaymentVerification = () => {
       // Get storeId from localStorage or context
       const storeId = localStorage.getItem('storeId') || '';
       
+      // Get planId from localStorage
+      const planId = localStorage.getItem('subscription_plan_id');
+      
       // Use backend API endpoint
       const endpoint = PAYMENT_API_CONFIG.ENDPOINTS.VERIFY.replace(':storeId', storeId);
       const backendUrl = `${PAYMENT_API_CONFIG.BACKEND_URL}${endpoint}`;
 
       console.log('🔍 Payment Verification Request:', {
         url: backendUrl,
-        reference
+        reference,
+        planId
       });
 
       const response = await axios.post(backendUrl, 
-        { reference },
+        { 
+          reference,
+          planId
+        },
         {
           headers: {
             'Content-Type': 'application/json',

@@ -12,6 +12,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { StoreProvider } from './contexts/StoreContext';
 import { useAuth } from './hooks/useAuth';
 import PaymentVerificationHandler from './components/common/PaymentVerificationHandler';
+import PaymentPollingManager from './components/common/PaymentPollingManager';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Component to check if we're on login page
@@ -67,6 +68,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <PaymentVerificationHandler />
+      <PaymentPollingManager />
       <div className={
           `flex h-screen w-full bg-main_bg_w overflow-x-hidden ${language === 'ARABIC' ? 'flex-row-reverse' : ''}`
         }>
