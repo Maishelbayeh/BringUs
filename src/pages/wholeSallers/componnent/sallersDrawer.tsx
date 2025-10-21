@@ -28,7 +28,7 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
   isEdit,
   password = ''
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const storeId = localStorage.getItem('storeId') || '';
   const token = localStorage.getItem('token') || '';
   const { wholesalers, createWholesaler, updateWholesaler, getWholesalers } = useWholesalers(storeId, token);
@@ -48,10 +48,17 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
     password: password || ''
   });
 
+  // Real-time email check states
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [emailCheckTimeout, setEmailCheckTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [emailMessage, setEmailMessage] = useState<{ message: string; messageAr: string } | null>(null);
+
   useEffect(() => {
     if (open) {
       if (initialData) {
         setForm(initialData);
+        setEmailAvailable(null); // Reset for edit mode
       } else {
         setForm({
           email: '',
@@ -63,50 +70,103 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
             status: 'Active',
             password: password || ''
         });
+        setEmailAvailable(null); // Reset for new entry
       }
       clearAllErrors();
+      setIsCheckingEmail(false);
+      
+      // Clear any pending timeout
+      if (emailCheckTimeout) {
+        clearTimeout(emailCheckTimeout);
+        setEmailCheckTimeout(null);
+      }
+      
       // Load current store wholesalers when drawer opens
       if (storeId) {
         getWholesalers().catch(console.error);
       }
     }
-  }, [open, initialData, clearAllErrors, getWholesalers, storeId]);
+  }, [open, initialData, clearAllErrors, getWholesalers, storeId, emailCheckTimeout]);
 
-  // Function to check email duplicates in real-time
-  const checkEmailDuplicate = useCallback((email: string) => {
-    if (!email.trim() || !wholesalers?.length) return;
-
-    console.log('All wholesalers:', wholesalers);
-    console.log('Current store ID:', storeId);
-    console.log('Checking email:', email);
-
-    const duplicate = wholesalers.find((w: any) => {
-      // Skip self when editing
-      if (w._id === initialData?._id) {
-        return false;
-      }
-      
-      // Check if same store
-      const wholesalerStoreId = w.store?._id || w.store || w.storeId;
-      if (wholesalerStoreId !== storeId) {
-        return false;
-      }
-      
-      return w.email?.trim().toLowerCase() === email.trim().toLowerCase();
-    });
-
-    console.log('Duplicate found:', duplicate);
-
-    if (duplicate) {
-      const newErrors = { ...errors, email: t('validation.duplicateEmailInStore') };
-      setErrors(newErrors);
-    } else {
-      // Clear email error if no duplicate
-      const newErrors = { ...errors };
-      delete newErrors.email;
-      setErrors(newErrors);
+  // Real-time email check with API
+  const checkEmailAvailability = useCallback(async (email: string) => {
+    // Skip check in edit mode or if email is empty
+    if (isEdit || !email.trim()) {
+      setEmailAvailable(null);
+      return;
     }
-  }, [wholesalers, storeId, initialData?._id, t, errors]);
+
+    // Validate email format first
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailAvailable(null);
+      return;
+    }
+
+    setIsCheckingEmail(true);
+    
+    try {
+      const storeInfo = JSON.parse(localStorage.getItem('storeInfo') || '{}');
+      const storeSlug = storeInfo.slug;
+      
+      if (!storeSlug) {
+        console.error('❌ No store slug found');
+        setEmailAvailable(null);
+        setIsCheckingEmail(false);
+        return;
+      }
+
+      console.log('🔍 Checking email availability:', { email, storeSlug });
+      
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
+      const response = await fetch(`${apiUrl}/auth/check-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          storeSlug: storeSlug
+        })
+      });
+
+      const data = await response.json();
+      console.log('📧 Email check response:', data);
+
+      if (response.ok && data.available !== false) {
+        // Email is available
+        console.log('✅ Email is available');
+        setEmailAvailable(true);
+        
+        // Store success message from backend
+        setEmailMessage({
+          message: data.message || 'Email is available',
+          messageAr: data.messageAr || 'البريد الإلكتروني متاح للاستخدام'
+        });
+        
+        const newErrors = { ...errors };
+        delete newErrors.email;
+        setErrors(newErrors);
+      } else if (!data.available || data.success === false) {
+        // Email already exists
+        console.log('❌ Email already exists');
+        const errorMessage = i18n.language === 'ar' || i18n.language === 'ar-EG'
+          ? (data.messageAr || t('signup.emailAlreadyExists'))
+          : (data.message || t('signup.emailAlreadyExists'));
+        
+        setEmailAvailable(false);
+        setEmailMessage(null);
+        setErrors({ ...errors, email: errorMessage });
+      } else {
+        setEmailAvailable(null);
+        setEmailMessage(null);
+      }
+    } catch (error) {
+      console.error('❌ Error checking email:', error);
+      setEmailAvailable(null);
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  }, [isEdit, errors, setErrors, t]);
 
     const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -120,11 +180,19 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
       setErrors(newErrors);
     }
 
-    // Check for email duplicate in real-time
-    if (name === 'email' && value.trim() !== '') {
-      setTimeout(() => {
-        checkEmailDuplicate(value);
-      }, 300); // Wait 300ms after user stops typing
+    // Check for email availability via API with debounce
+    if (name === 'email') {
+      // Clear previous timeout
+      if (emailCheckTimeout) {
+        clearTimeout(emailCheckTimeout);
+      }
+
+      // Set new timeout
+      const timeout = setTimeout(() => {
+        checkEmailAvailability(value);
+      }, 500); // 500ms debounce
+      
+      setEmailCheckTimeout(timeout);
     }
   };
 
@@ -151,6 +219,16 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
   };
 
   const handleSave = async () => {
+    // Check if email is available before proceeding (for new wholesalers)
+    if (!isEdit && (emailAvailable === false || isCheckingEmail)) {
+      const newErrors = { 
+        ...errors, 
+        email: t('users.emailNotAvailable') || 'Email is not available or still being checked'
+      };
+      setErrors(newErrors);
+      return;
+    }
+
     // Prepare form data for validation
     const formData = {
       ...form,
@@ -221,7 +299,10 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
             onPhoneChange={handlePhoneChange}
             isRTL={isRTL} 
             isEdit={isEdit} 
-            errors={errors} 
+            errors={errors}
+            isCheckingEmail={isCheckingEmail}
+            emailAvailable={emailAvailable}
+            emailMessage={emailMessage}
           />
         </div>
         
@@ -239,6 +320,7 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
             textColor="white"
             text={t('common.save') || 'Save'}
             action={handleSave}
+            disabled={!isEdit && (emailAvailable === false || isCheckingEmail)}
           />
         </div>
       </div>

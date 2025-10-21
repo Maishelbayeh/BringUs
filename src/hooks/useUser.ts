@@ -114,9 +114,16 @@ export const useUser = () => {
       console.log('📋 تفاصيل الخطأ:', err.response?.data);
       
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء إنشاء المستخدم';
+      const errorMessageAr = err.response?.data?.messageAr || 'حدث خطأ أثناء إنشاء المستخدم';
+      
       setError(errorMessage);
       console.error('❌ خطأ في إنشاء المستخدم:', errorMessage);
-      return null;
+      
+      // Throw error with both languages
+      const error = new Error(errorMessage);
+      (error as any).messageAr = errorMessageAr;
+      (error as any).response = err.response;
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -220,9 +227,16 @@ export const useUser = () => {
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء تحديث المستخدم';
+      const errorMessageAr = err.response?.data?.messageAr || 'حدث خطأ أثناء تحديث المستخدم';
+      
       setError(errorMessage);
       //CONSOLE.error('❌ خطأ في تحديث المستخدم:', errorMessage);
-      return null;
+      
+      // Throw error with both languages
+      const error = new Error(errorMessage);
+      (error as any).messageAr = errorMessageAr;
+      (error as any).response = err.response;
+      throw error;
     } finally {
       setLoading(false);
     }

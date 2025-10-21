@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductsDrawer from './ProductsDrawer';
@@ -155,6 +155,21 @@ const ProductsPage: React.FC = () => {
     categories,
     fetchCategories
   } = useCategories();
+  
+  // Flatten categories for easier filtering
+  const flatCategories = useMemo(() => {
+    const flatten = (cats: any[]): any[] => {
+      let result: any[] = [];
+      cats.forEach(cat => {
+        result.push(cat);
+        if (cat.children && Array.isArray(cat.children) && cat.children.length > 0) {
+          result = result.concat(flatten(cat.children));
+        }
+      });
+      return result;
+    };
+    return flatten(categories || []);
+  }, [categories]);
 
   const {
     units,
@@ -225,6 +240,28 @@ const ProductsPage: React.FC = () => {
   //   { value: 'oldest', label: t('products.sort.oldest') || 'Oldest' },
   // ];
   //-------------------------------------------- useEffect -------------------------------------------
+  // Helper function to get all descendant category IDs (including the selected category itself)
+  const getAllCategoryIds = useCallback((categoryId: string, allCategories: any[]): string[] => {
+    const result = new Set<string>([categoryId]);
+    
+    const findChildren = (parentId: string): void => {
+      allCategories.forEach(cat => {
+        const catId = (cat._id || cat.id)?.toString();
+        const catParentId = cat.parentId?.toString() || 
+                           (typeof cat.parent === 'object' ? (cat.parent?._id || cat.parent?.id)?.toString() : cat.parent?.toString());
+        
+        // If this category's parent matches the current parentId, add it and find its children
+        if (catParentId === parentId && !result.has(catId)) {
+          result.add(catId);
+          findChildren(catId); // Recursively find children of this category
+        }
+      });
+    };
+    
+    findChildren(categoryId);
+    return Array.from(result);
+  }, []);
+
   useEffect(() => {
     if (categoryIdParam) setSelectedCategoryId(categoryIdParam);
     if (subcategoryIdParam) _setSelectedSubcategoryId(subcategoryIdParam);
@@ -247,8 +284,28 @@ const ProductsPage: React.FC = () => {
           return false;
         });
         
-        // فلترة حسب البحث والفئة
-        const matchesCategory = selectedCategoryId ? product.category?._id === selectedCategoryId : true;
+        // فلترة حسب الفئة - تحسين للتعامل مع التصنيفات الفرعية
+        let matchesCategory = true;
+        if (selectedCategoryId) {
+          // Get all related category IDs (parent + all children)
+          const relatedCategoryIds = getAllCategoryIds(selectedCategoryId, flatCategories);
+          
+          // Check if product matches any of the related categories
+          const productCategoryId = product.category?._id || product.category?.id || product.categoryId;
+          
+          // Check in product's single category
+          const matchesSingleCategory = productCategoryId && relatedCategoryIds.includes(productCategoryId);
+          
+          // Check in product's categories array
+          const matchesMultipleCategories = product.categories && Array.isArray(product.categories) && 
+            product.categories.some((cat: any) => {
+              const catId = typeof cat === 'object' ? (cat._id || cat.id) : cat;
+              return catId && relatedCategoryIds.includes(catId);
+            });
+          
+          matchesCategory = matchesSingleCategory || matchesMultipleCategories;
+        }
+        
         const matchesSearch = isRTL
           ? product.nameAr.toLowerCase().includes(search.toLowerCase())
           : product.nameEn.toLowerCase().includes(search.toLowerCase());

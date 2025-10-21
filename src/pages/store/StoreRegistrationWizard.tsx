@@ -53,7 +53,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
   const isRTL = language === 'ARABIC';
   
   // استخدام الـ hooks
-  const { createUser, checkEmailExists } = useUser();
+  const { createUser } = useUser();
   const { createStore, uploadStoreLogo } = useStore();
   const { createOwner } = useOwner();
   const { sendOTP } = useOTP();
@@ -224,27 +224,58 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
       }
     }
 
-    // تحقق من تكرار البريد الإلكتروني فقط إذا لم يكن هناك خطأ آخر
+    // Real-time email check using API
     if (name === 'email' && value && !error) {
       // Add delay to avoid too many API calls
       const timeoutId = setTimeout(async () => {
         if (value && /\S+@\S+\.\S+/.test(value)) {
           setIsCheckingEmail(true);
           try {
-            const emailExists = await checkEmailExists(value);
-            if (emailExists) {
+            // Use new API endpoint instead of getAllUsers
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
+            
+            // For store registration, we don't have storeSlug yet, so check globally
+            // or we can skip storeSlug parameter (backend should handle this case)
+            const response = await fetch(`${apiUrl}/auth/check-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                email: value
+              })
+            });
+
+            const data = await response.json();
+            console.log('📧 Email check response:', data);
+
+            if (response.ok && data.available !== false) {
+              // Email is available
+              console.log('✅ Email is available');
+              setMerchantErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors.email;
+                return newErrors;
+              });
+            } else if (!data.available || data.success === false) {
+              // Email already exists
+              console.log('❌ Email already exists');
+              const errorMessage = isRTL 
+                ? (data.messageAr || t('signup.emailAlreadyExists'))
+                : (data.message || t('signup.emailAlreadyExists'));
+              
               setMerchantErrors(prev => ({ 
                 ...prev, 
-                email: t('signup.emailAlreadyExists') 
+                email: errorMessage
               }));
             }
           } catch (error) {
-            //CONSOLE.error('Error checking email:', error);
+            console.error('❌ Error checking email:', error);
           } finally {
             setIsCheckingEmail(false);
           }
         }
-      }, 500); // 1 second delay
+      }, 500); // 500ms delay
 
       // Cleanup timeout on next change
       return () => clearTimeout(timeoutId);

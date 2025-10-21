@@ -20,10 +20,26 @@ import {
 // Function to get store status from localStorage
 const getStoreStatus = (): string => {
   try {
-    const status = localStorage.getItem('status');
-    console.log(localStorage.getItem('status'))
-    return status || 'inactive';
+    // Read from storeInfo object (not direct 'status' key)
+    const storeInfoStr = localStorage.getItem('storeInfo');
+    if (storeInfoStr) {
+      const storeInfo = JSON.parse(storeInfoStr);
+      const status = storeInfo.status || 'inactive';
+      console.log('📊 Store status from localStorage:', status);
+      return status;
+    }
+    
+    // Fallback: try direct 'status' key (legacy)
+    const directStatus = localStorage.getItem('status');
+    if (directStatus) {
+      console.log('📊 Store status from direct key:', directStatus);
+      return directStatus;
+    }
+    
+    console.warn('⚠️ No store status found in localStorage - defaulting to inactive');
+    return 'inactive';
   } catch (error) {
+    console.error('❌ Error reading store status:', error);
     return 'inactive';
   }
 };
