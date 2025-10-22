@@ -20,7 +20,6 @@ const PaymentPollingManager: React.FC = () => {
 
   const {
     pollStatus,
-    result,
     checkAndResumePolling
   } = usePaymentPolling({
     onSuccess: async (result) => {
