@@ -369,3 +369,4 @@ Now wholesalers form has the same real-time email check as users form!
 *Implemented: 2025-01-20*  
 *Status: ✅ COMPLETE*
 
+

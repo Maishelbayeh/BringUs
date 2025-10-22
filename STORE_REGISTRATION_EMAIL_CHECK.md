@@ -378,3 +378,4 @@ Now **ALL forms** use the same `/api/auth/check-email` API for consistent email 
 *Status: ✅ COMPLETE*  
 *No Linter Errors: ✅*
 
+
