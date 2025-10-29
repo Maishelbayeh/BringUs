@@ -25,6 +25,11 @@ const PaymentPollingManager: React.FC = () => {
     onSuccess: async (result) => {
       console.log('🎉 Payment successful callback triggered');
       
+      // وضع flag فوراً قبل أي شيء آخر لمنع reload
+      // هذا مهم جداً لأنه قد يكون هناك race condition
+      console.log('🔒 Setting flags to prevent reload...');
+      localStorage.setItem('payment_verification_modal_open', 'true');
+      
       // Show success message
       const message = isRTL ? result.messageAr : result.message;
       showSuccess(

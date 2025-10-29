@@ -26,6 +26,12 @@ const PaymentVerificationHandler: React.FC = () => {
           const result = await checkPaymentFromURL();
           
           if (result) {
+            // وضع flag فوراً قبل فتح النافذة لمنع reload من PaymentPollingManager
+            if (result.status === 'success') {
+              console.log('🔒 Setting payment_verification_modal_open flag to prevent reload...');
+              localStorage.setItem('payment_verification_modal_open', 'true');
+            }
+            
             setShowVerificationModal(true);
             
             // إزالة المعاملات من URL بعد التحقق
