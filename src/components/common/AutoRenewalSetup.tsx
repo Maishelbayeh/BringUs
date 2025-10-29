@@ -109,7 +109,7 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
       };
 
       const response = await axios.post(
-        `http://localhost:5001/api/subscription/stores/${storeId}`,
+        `https://bringus-backend.onrender.com/api/subscription/stores/${storeId}`,
         subscriptionData,
         {
           headers: {

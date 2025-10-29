@@ -128,7 +128,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId, onCanSubmi
 
         console.log('🔍 Checking email availability:', { email: formData.email, storeSlug });
         
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
         const response = await fetch(`${apiUrl}/auth/check-email`, {
           method: 'POST',
           headers: {
