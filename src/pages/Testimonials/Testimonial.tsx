@@ -23,7 +23,6 @@ export const platformOptions = [
   { value: 'Twitter', label: 'Twitter' },
   { value: 'WhatsApp', label: 'WhatsApp' },
   { value: 'YouTube', label: 'YouTube' },
-  { value: 'LinkedIn', label: 'LinkedIn' },
   { value: 'TikTok', label: 'TikTok' },
 ];
 const Testimonial: React.FC = () => {

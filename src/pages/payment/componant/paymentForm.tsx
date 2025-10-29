@@ -29,6 +29,7 @@ interface Props {
   isEditMode?: boolean;
   onValidationChange?: (isValid: boolean) => void;
   onSubmittingChange?: (isSubmitting: boolean) => void;
+  onUnsavedChangesChange?: (hasChanges: boolean) => void;
 }
 
 interface ValidationErrors {
@@ -47,7 +48,7 @@ export interface PaymentFormRef {
   handleSubmit: () => Promise<void>;
 }
 
-const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, language, onValidationChange, isEditMode, onSubmittingChange }, ref) => {
+const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, language, onValidationChange, isEditMode, onSubmittingChange, onUnsavedChangesChange }, ref) => {
   const { t } = useTranslation();
   const isRTL = language === 'ARABIC';
   const { showError, showSuccess } = useToast();
@@ -83,6 +84,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [showLahzaCredentialsModal, setShowLahzaCredentialsModal] = useState(false);
   const [, setIsSubmitting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Check Lahza credentials status
   const checkLahzaCredentialsStatus = async () => {
@@ -92,7 +94,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
       
       if (!storeId || !token) return false;
       
-      const response = await fetch(`https://bringus-backend.onrender.com/api/stores/${storeId}`, {
+      const response = await fetch(`http://localhost:5001/api/stores/${storeId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -171,6 +173,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
           }
 
           await onSubmit(newMethod);
+          setHasUnsavedChanges(false); // Reset after successful submit
           setIsSubmitting(false);
           onSubmittingChange?.(false);
         } catch (error: any) {
@@ -248,12 +251,18 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
     setQrCodeFile(null);
     setPaymentImageFiles([]);
     setErrors({});
+    setHasUnsavedChanges(false); // Reset unsaved changes when method changes
   }, [method]);
 
   // Validate form whenever formData changes
   useEffect(() => {
     validateForm();
   }, [formData, logoFile, qrCodeFile, paymentImageFiles]);
+
+  // Notify parent about unsaved changes
+  useEffect(() => {
+    onUnsavedChangesChange?.(hasUnsavedChanges);
+  }, [hasUnsavedChanges, onUnsavedChangesChange]);
 
   // Initial validation when component mounts or method changes
   useEffect(() => {
@@ -311,6 +320,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
       setLogoFile(null);
     }
     clearError('file');
+    setHasUnsavedChanges(true); // Mark as having unsaved changes
   };
 
   const handleQrCodeFileChange = (files: File | File[] | null) => {
@@ -322,6 +332,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
       setQrCodeFile(null);
     }
     clearError('qrCode');
+    setHasUnsavedChanges(true); // Mark as having unsaved changes
   };
 
   // const handlePaymentImageFileChange = (files: File | File[] | null, index: number) => {
@@ -364,6 +375,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     clearError(field as keyof ValidationErrors);
+    setHasUnsavedChanges(true); // Mark as having unsaved changes
     
     // If user selects Lahza as payment method type, open credentials modal
     if (field === 'methodType' && value === 'lahza') {
@@ -380,6 +392,7 @@ const PaymentForm = forwardRef<PaymentFormRef, Props>(({ method, onSubmit, langu
       }
     }));
     clearError('qrCode');
+    setHasUnsavedChanges(true); // Mark as having unsaved changes
   };
 
   return (

@@ -5,6 +5,7 @@ import { useUserStore } from '@/hooks/useUserStore';
 import { useToastContext } from '@/contexts/ToastContext';
 import { getErrorMessage, getPredefinedErrorMessage } from '@/utils/errorUtils';
 import { getAuthToken } from '@/utils/authUtils';
+import PermissionModal from './PermissionModal';
 
 interface AutoRenewalSetupProps {
   isOpen: boolean;
@@ -39,6 +40,8 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // جلب الخطة المختارة من localStorage
   useEffect(() => {
@@ -70,8 +73,26 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
       
       setStartDate(now.toISOString().split('T')[0]);
       setEndDate(end.toISOString().split('T')[0]);
+      setHasUnsavedChanges(false); // Reset when modal opens
+      setShowConfirmModal(false);
     }
   }, [isOpen]);
+
+  // Prevent page refresh when there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isOpen && hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = ''; // Required for Chrome
+        return ''; // Required for some browsers
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isOpen, hasUnsavedChanges]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +109,7 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
       };
 
       const response = await axios.post(
-        `https://bringus-backend.onrender.com/api/subscription/stores/${storeId}`,
+        `http://localhost:5001/api/subscription/stores/${storeId}`,
         subscriptionData,
         {
           headers: {
@@ -98,9 +119,7 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
         }
       );
       if(response.status === 200){
-        onClose();
-        onClose();
-
+        setHasUnsavedChanges(false);
         // Show success message using utility function
         const successMsg = getPredefinedErrorMessage('SUBSCRIPTION_SETUP_SUCCESS', isRTL);
         showSuccess(successMsg.title, successMsg.message);
@@ -159,7 +178,13 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
             {isRTL ? 'إعداد الاشتراك' : 'Subscription Setup'}
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => {
+              if (hasUnsavedChanges && !isLoading) {
+                setShowConfirmModal(true);
+              } else {
+                onClose();
+              }
+            }}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,8 +229,11 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
               {isRTL ? 'التجديد التلقائي' : 'Auto Renewal'}
             </label>
             <button
-              type="button"
-              onClick={() => setAutoRenew(!autoRenew)}
+            type="button"
+            onClick={() => {
+              setAutoRenew(!autoRenew);
+              setHasUnsavedChanges(true);
+            }}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                 autoRenew ? 'bg-primary' : 'bg-gray-200'
               }`}
@@ -247,7 +275,10 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
             <input
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setHasUnsavedChanges(true);
+              }}
               required
               className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                 isRTL ? 'text-right' : 'text-left'
@@ -263,7 +294,10 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
             <input
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setHasUnsavedChanges(true);
+              }}
               required
               className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                 isRTL ? 'text-right' : 'text-left'
@@ -291,7 +325,13 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
         <div className={`flex gap-3 p-6 border-t border-gray-200 mt-auto ${isRTL ? 'flex-row-reverse' : ''}`}>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              if (hasUnsavedChanges && !isLoading) {
+                setShowConfirmModal(true);
+              } else {
+                onClose();
+              }
+            }}
             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
             {t('general.cancel')}
@@ -316,6 +356,27 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Confirmation Modal for Unsaved Changes */}
+      <PermissionModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={() => {
+          setShowConfirmModal(false);
+          setHasUnsavedChanges(false);
+          onClose();
+        }}
+        title={isRTL ? 'هل تريد الإغلاق بدون حفظ؟' : 'Close without saving?'}
+        message={isRTL 
+          ? 'لديك تغييرات غير محفوظة في إعدادات الاشتراك. إذا أغلقت الآن، سيتم فقدان التغييرات.' 
+          : 'You have unsaved changes in subscription settings. If you close now, your changes will be lost.'}
+        itemType={isRTL ? 'إعدادات الاشتراك' : 'subscription settings'}
+        requirePermission={false}
+        confirmButtonText={isRTL ? 'إغلاق بدون حفظ' : 'Close without saving'}
+        cancelButtonText={isRTL ? 'إلغاء' : 'Cancel'}
+        isRTL={isRTL}
+        severity="warning"
+      />
     </div>
   );
 };

@@ -61,7 +61,7 @@ const SubscriptionPlans: React.FC = () => {
   const fetchPlans = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('https://bringus-backend.onrender.com/api/subscription-plans', {
+      const response = await axios.get('http://localhost:5001/api/subscription-plans', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -106,7 +106,7 @@ const SubscriptionPlans: React.FC = () => {
   const togglePlanStatus = async (planId: string) => {
     setActionLoading(planId);
     try {
-      await axios.post(`https://bringus-backend.onrender.com/api/subscription-plans/${planId}/toggle`, {}, {
+      await axios.post(`http://localhost:5001/api/subscription-plans/${planId}/toggle`, {}, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -128,7 +128,7 @@ const SubscriptionPlans: React.FC = () => {
       isPopular: !isPopular
     };
     try {
-      await axios.post(`https://bringus-backend.onrender.com/api/subscription-plans/${planId}/popular`, body, {
+      await axios.post(`http://localhost:5001/api/subscription-plans/${planId}/popular`, body, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -147,7 +147,7 @@ const SubscriptionPlans: React.FC = () => {
   const deletePlan = async (planId: string) => {
     setActionLoading(planId);
     try {
-      await axios.delete(`https://bringus-backend.onrender.com/api/subscription-plans/${planId}`, {
+      await axios.delete(`http://localhost:5001/api/subscription-plans/${planId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

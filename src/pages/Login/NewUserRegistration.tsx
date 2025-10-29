@@ -66,6 +66,25 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
   const { showSuccess, showError } = useToastContext();
   const { sendOTP } = useOTP();
 
+  // Check if form is valid for button enable/disable
+  const isFormValid = React.useMemo(() => {
+    // Check all required fields
+    if (!formData.firstName || !formData.firstName.trim()) return false;
+    if (!formData.lastName || !formData.lastName.trim()) return false;
+    if (!formData.email || !formData.email.trim()) return false;
+    if (!/\S+@\S+\.\S+/.test(formData.email)) return false;
+    if (!formData.password || formData.password.length < 6) return false;
+    if (!formData.confirmPassword || formData.password !== formData.confirmPassword) return false;
+    if (!formData.phone || !formData.phone.trim()) return false;
+    if (!agreeTerms) return false;
+    
+    // Check phone validation
+    const phoneError = validateWhatsApp(formData.phone, t);
+    if (phoneError) return false;
+    
+    return true;
+  }, [formData, agreeTerms, t]);
+
   // دالة إعادة تعيين الفورم
   const resetForm = () => {
     setFormData({
@@ -625,8 +644,8 @@ const NewUserRegistration: React.FC<NewUserRegistrationProps> = ({ onUserCreated
               text={isLoading || createUserLoading ? t('newUser.creatingUser') : t('newUser.createUser')}
               color="purple"
               type="submit"
-              disabled={isLoading || createUserLoading}
-              className="w-full py-3 text-base font-semibold bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200"
+              disabled={!isFormValid || isLoading || createUserLoading}
+              className="w-full py-3 text-base font-semibold bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               icon={isLoading || createUserLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
               ) : <PersonAdd />}

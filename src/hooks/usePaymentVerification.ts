@@ -27,7 +27,7 @@ const activateSubscriptionAfterPayment = async (storeId: string, reference: stri
     }
 
     // Call backend subscription activation endpoint
-    const activateUrl = `https://bringus-backend.onrender.com/api/subscription/stores/${storeId}`;
+    const activateUrl = `http://localhost:5001/api/subscription/stores/${storeId}`;
     const subscriptionData = {
       planId: planId,
       referenceId: reference,
@@ -137,7 +137,7 @@ export const usePaymentVerification = () => {
               // Import dynamically to avoid circular dependency
               const { default: axios } = await import('axios');
               const token = localStorage.getItem('token');
-              const apiUrl = import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
+              const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
               
               const storeResponse = await axios.get(
                 `${apiUrl}/stores/slug/${storeInfo.slug}`,

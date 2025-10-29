@@ -3,6 +3,7 @@ import PaymentForm, { PaymentFormRef } from './paymentForm';
 import { PaymentMethod } from '../../../Types';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '@/components/common/CustomButton';
+import PermissionModal from '../../../components/common/PermissionModal';
 
 interface Props {
   open: boolean;
@@ -18,11 +19,17 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
   const formRef = useRef<PaymentFormRef>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
   
   useEffect(() => {
     if (open) {
       // Reset validation and submission state when drawer opens
       setIsSubmitting(false);
+      setHasUnsavedChanges(false);
+      setShowConfirmModal(false);
+      setPendingClose(false);
     }
   }, [open]);
   
@@ -30,8 +37,25 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
   useEffect(() => {
     if (!open) {
       setIsSubmitting(false);
+      setHasUnsavedChanges(false);
     }
   }, [open]);
+
+  // Prevent page refresh when there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (open && hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = ''; // Required for Chrome
+        return ''; // Required for some browsers
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [open, hasUnsavedChanges]);
   
   if (!open) return null;
   const isRTL = language === 'ARABIC';
@@ -51,6 +75,7 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
     try {
       await onSave(method);
       // Close modal on success
+      setHasUnsavedChanges(false);
       onClose();
     } catch (error) {
       throw error;
@@ -58,8 +83,28 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
   };
 
   const handleClose = () => {
+    if (hasUnsavedChanges && !isSubmitting) {
+      // Show confirmation modal before closing
+      setShowConfirmModal(true);
+      setPendingClose(true);
+    } else {
+      setIsSubmitting(false);
+      setHasUnsavedChanges(false);
+      onClose();
+    }
+  };
+
+  const handleConfirmClose = () => {
+    setShowConfirmModal(false);
+    setHasUnsavedChanges(false);
     setIsSubmitting(false);
+    setPendingClose(false);
     onClose();
+  };
+
+  const handleCancelClose = () => {
+    setShowConfirmModal(false);
+    setPendingClose(false);
   };
   
   return (
@@ -92,6 +137,7 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
             language={language} 
             isEditMode={isEditMode}
             onSubmittingChange={setIsSubmitting}
+            onUnsavedChangesChange={setHasUnsavedChanges}
           />
         </div>
 
@@ -116,6 +162,23 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
           />
         </div>
       </div>
+
+      {/* Confirmation Modal for Unsaved Changes */}
+      <PermissionModal
+        isOpen={showConfirmModal}
+        onClose={handleCancelClose}
+        onConfirm={handleConfirmClose}
+        title={language === 'ARABIC' ? 'هل تريد الإغلاق بدون حفظ؟' : 'Close without saving?'}
+        message={language === 'ARABIC' 
+          ? 'لديك تغييرات غير محفوظة. إذا أغلقت الآن، سيتم فقدان التغييرات.' 
+          : 'You have unsaved changes. If you close now, your changes will be lost.'}
+        itemType={language === 'ARABIC' ? 'التغييرات غير المحفوظة' : 'unsaved changes'}
+        requirePermission={false}
+        confirmButtonText={language === 'ARABIC' ? 'إغلاق بدون حفظ' : 'Close without saving'}
+        cancelButtonText={language === 'ARABIC' ? 'إلغاء' : 'Cancel'}
+        isRTL={language === 'ARABIC'}
+        severity="warning"
+      />
     </div>
   );
 };

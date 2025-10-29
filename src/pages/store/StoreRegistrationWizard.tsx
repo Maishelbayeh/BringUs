@@ -232,7 +232,7 @@ const StoreRegistrationWizard: React.FC<StoreRegistrationWizardProps> = ({
           setIsCheckingEmail(true);
           try {
             // Use new API endpoint instead of getAllUsers
-            const apiUrl = import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
             
             // For store registration, we don't have storeSlug yet, so check globally
             // or we can skip storeSlug parameter (backend should handle this case)
