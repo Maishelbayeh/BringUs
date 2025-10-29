@@ -31,6 +31,19 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
 
   // فتح نافذة الإعداد إذا تم إغلاق نافذة النتيجة يدوياً ولكن الدفع نجح
 
+  // وضع flag عند فتح النافذة لمنع reload من PaymentPollingManager
+  useEffect(() => {
+    if (isOpen) {
+      localStorage.setItem('payment_verification_modal_open', 'true');
+    } else {
+      localStorage.removeItem('payment_verification_modal_open');
+    }
+    return () => {
+      // تنظيف عند unmount
+      localStorage.removeItem('payment_verification_modal_open');
+    };
+  }, [isOpen]);
+
   // إعادة تعيين الحالة عند فتح النافذة من جديد
   useEffect(() => {
     if (isOpen && isVerifying) {
@@ -38,6 +51,28 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
       setShowAutoRenewalSetup(false);
     }
   }, [isOpen, isVerifying]);
+
+  // فتح نافذة إعداد الاشتراك التلقائي تلقائياً بعد نجاح الدفع
+  useEffect(() => {
+    // إذا كانت النتيجة نجحت ولم يتم فتح نافذة الإعداد بعد والنافذة الحالية مفتوحة
+    if (
+      isOpen && 
+      !isVerifying && 
+      result?.status?.toLowerCase() === 'success' && 
+      !hasOpenedAutoRenewal &&
+      !showAutoRenewalSetup
+    ) {
+      // انتظر 1.5 ثانية لعرض رسالة النجاح ثم افتح نافذة الإعداد
+      const timer = setTimeout(() => {
+        setHasOpenedAutoRenewal(true);
+        setShowAutoRenewalSetup(true);
+        // إغلاق نافذة النتيجة بعد فتح نافذة الإعداد
+        onClose();
+      }, 1500); // انتظر 1.5 ثانية لعرض رسالة النجاح
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isVerifying, result, hasOpenedAutoRenewal, showAutoRenewalSetup, onClose]);
 
   // إغلاق النافذة الأولى بعد فتح النافذة الثانية
   useEffect(() => {
@@ -151,7 +186,20 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
             {t('payment.verificationTitle')}
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => {
+              // إزالة flag من localStorage
+              localStorage.removeItem('payment_verification_modal_open');
+              onClose();
+              
+              // عمل reload بعد ثانية إذا لم تكن هناك نافذة إعداد مفتوحة
+              setTimeout(() => {
+                const hasAutoRenewalOpen = localStorage.getItem('auto_renewal_setup_open') === 'true';
+                if (!hasAutoRenewalOpen) {
+                  console.log('🔄 Reloading page after closing payment verification modal via X...');
+                  window.location.reload();
+                }
+              }, 1000);
+            }}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,17 +264,33 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
         {/* Footer */}
         <div className="flex gap-3 p-6 border-t border-gray-200">
           <button
-            onClick={onClose}
+            onClick={() => {
+              // إزالة flag من localStorage
+              localStorage.removeItem('payment_verification_modal_open');
+              onClose();
+              
+              // عمل reload بعد ثانية إذا لم تكن هناك نافذة إعداد مفتوحة
+              setTimeout(() => {
+                const hasAutoRenewalOpen = localStorage.getItem('auto_renewal_setup_open') === 'true';
+                if (!hasAutoRenewalOpen) {
+                  console.log('🔄 Reloading page after closing payment verification modal...');
+                  window.location.reload();
+                }
+              }, 1000);
+            }}
             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
             {t('general.cancel')}
           </button>
           {result?.status?.toLowerCase() === 'success' && (
             <button
-              onClick={() => {
-                console.log('Setting up auto renewal...');
-                setShowAutoRenewalSetup(true);
-              }}
+          onClick={() => {
+            console.log('Setting up auto renewal...');
+            setShowAutoRenewalSetup(true);
+            setHasOpenedAutoRenewal(true);
+            // إزالة flag النافذة الحالية لأننا سنفتح نافذة الإعداد
+            localStorage.removeItem('payment_verification_modal_open');
+          }}
               className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
             >
               {isRTL ? 'إعداد الاشتراك' : 'Setup Subscription'}
@@ -244,8 +308,9 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
           onClose={() => {
             setShowAutoRenewalSetup(false);
             setHasOpenedAutoRenewal(false);
-            // إزالة flag من localStorage عند إغلاق النافذة يدوياً (بدون حفظ)
+            // إزالة جميع الـ flags من localStorage
             localStorage.removeItem('auto_renewal_setup_open');
+            localStorage.removeItem('payment_verification_modal_open');
             
             // عمل reload بعد إغلاق النافذة (إذا أُغلقت بدون حفظ)
             setTimeout(() => {

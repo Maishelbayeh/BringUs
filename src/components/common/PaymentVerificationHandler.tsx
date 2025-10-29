@@ -52,6 +52,8 @@ const PaymentVerificationHandler: React.FC = () => {
 
   const handleCloseVerificationModal = () => {
     setShowVerificationModal(false);
+    // إزالة flag من localStorage عند إغلاق النافذة
+    localStorage.removeItem('payment_verification_modal_open');
   };
 
   return (

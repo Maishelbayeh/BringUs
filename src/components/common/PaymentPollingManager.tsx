@@ -96,14 +96,20 @@ const PaymentPollingManager: React.FC = () => {
         // Still reload even if there's an error
       }
 
-      // التحقق من وجود نافذة إعداد الاشتراك مفتوحة
-      // إذا كانت مفتوحة، لن نعمل reload حتى يتم إغلاقها
+      // التحقق من وجود نافذة إعداد الاشتراك أو نافذة التحقق من الدفع مفتوحة
+      // إذا كانت أي منهما مفتوحة، لن نعمل reload حتى يتم إغلاقها
       const hasAutoRenewalOpen = localStorage.getItem('auto_renewal_setup_open') === 'true';
+      const hasVerificationModalOpen = localStorage.getItem('payment_verification_modal_open') === 'true';
       
-      if (hasAutoRenewalOpen) {
-        console.log('⏸️ Auto-renewal setup is open, delaying page reload...');
-        console.log('🔄 Will reload after auto-renewal setup is completed or cancelled');
-        // لن نعمل reload هنا - سيتم عمله عند إغلاق نافذة الإعداد
+      if (hasAutoRenewalOpen || hasVerificationModalOpen) {
+        if (hasAutoRenewalOpen) {
+          console.log('⏸️ Auto-renewal setup is open, delaying page reload...');
+        }
+        if (hasVerificationModalOpen) {
+          console.log('⏸️ Payment verification modal is open, delaying page reload...');
+        }
+        console.log('🔄 Will reload after modal/setup is completed or cancelled');
+        // لن نعمل reload هنا - سيتم عمله عند إغلاق النافذة
       } else {
         // Reload page to ensure all components are updated (topNav, sidebar, dashboard, etc.)
         console.log('⏳ Will reload page in 2 seconds...');
