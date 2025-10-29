@@ -96,12 +96,22 @@ const PaymentPollingManager: React.FC = () => {
         // Still reload even if there's an error
       }
 
-      // Reload page to ensure all components are updated (topNav, sidebar, dashboard, etc.)
-      console.log('⏳ Will reload page in 2 seconds...');
-      setTimeout(() => {
-        console.log('🔄 Reloading page to update all components (topNav, sidebar, dashboard)...');
-        window.location.reload();
-      }, 2000);
+      // التحقق من وجود نافذة إعداد الاشتراك مفتوحة
+      // إذا كانت مفتوحة، لن نعمل reload حتى يتم إغلاقها
+      const hasAutoRenewalOpen = localStorage.getItem('auto_renewal_setup_open') === 'true';
+      
+      if (hasAutoRenewalOpen) {
+        console.log('⏸️ Auto-renewal setup is open, delaying page reload...');
+        console.log('🔄 Will reload after auto-renewal setup is completed or cancelled');
+        // لن نعمل reload هنا - سيتم عمله عند إغلاق نافذة الإعداد
+      } else {
+        // Reload page to ensure all components are updated (topNav, sidebar, dashboard, etc.)
+        console.log('⏳ Will reload page in 2 seconds...');
+        setTimeout(() => {
+          console.log('🔄 Reloading page to update all components (topNav, sidebar, dashboard)...');
+          window.location.reload();
+        }, 2000);
+      }
     },
     onFailure: (result) => {
       console.log('❌ Payment failed callback triggered');

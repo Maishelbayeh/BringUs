@@ -46,6 +46,9 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
   // جلب الخطة المختارة من localStorage
   useEffect(() => {
     if (isOpen) {
+      // وضع flag في localStorage لإعلام PaymentPollingManager بأن النافذة مفتوحة
+      localStorage.setItem('auto_renewal_setup_open', 'true');
+      
       const planId = localStorage.getItem('selected_plan_id');
       const planName = localStorage.getItem('selected_plan_name');
       const planNameAr = localStorage.getItem('selected_plan_nameAr');
@@ -78,10 +81,11 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
     }
   }, [isOpen]);
 
-  // Prevent page refresh when there are unsaved changes
+  // Prevent page refresh when there are unsaved changes or when modal is open
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isOpen && hasUnsavedChanges) {
+      // منع reload دائماً عندما تكون النافذة مفتوحة (أو عند وجود تغييرات غير محفوظة)
+      if (isOpen) {
         e.preventDefault();
         e.returnValue = ''; // Required for Chrome
         return ''; // Required for some browsers
@@ -92,7 +96,17 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [isOpen, hasUnsavedChanges]);
+  }, [isOpen]);
+
+  // تنظيف flag عند إغلاق النافذة (أو unmount)
+  useEffect(() => {
+    return () => {
+      // إذا كانت النافذة مغلقة، تأكد من إزالة flag
+      if (!isOpen) {
+        localStorage.removeItem('auto_renewal_setup_open');
+      }
+    };
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +137,18 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
         // Show success message using utility function
         const successMsg = getPredefinedErrorMessage('SUBSCRIPTION_SETUP_SUCCESS', isRTL);
         showSuccess(successMsg.title, successMsg.message);
+        
+        // إزالة flag من localStorage
+        localStorage.removeItem('auto_renewal_setup_open');
+        
+        // عمل reload بعد إغلاق النافذة
         onClose();
+        
+        // عمل reload بعد ثانية واحدة من إغلاق النافذة
+        setTimeout(() => {
+          console.log('🔄 Reloading page after subscription setup completion...');
+          window.location.reload();
+        }, 1000);
       }else{
         // Handle error response with language support using utility function
         const errorMsg = getErrorMessage(response.data, isRTL, {
@@ -182,7 +207,16 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
               if (hasUnsavedChanges && !isLoading) {
                 setShowConfirmModal(true);
               } else {
+                // إزالة flag من localStorage
+                localStorage.removeItem('auto_renewal_setup_open');
+                
                 onClose();
+                
+                // عمل reload بعد إغلاق النافذة (إذا لم تكن هناك تغييرات)
+                setTimeout(() => {
+                  console.log('🔄 Reloading page after closing subscription setup via X button (no changes)...');
+                  window.location.reload();
+                }, 1000);
               }
             }}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -329,7 +363,16 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
               if (hasUnsavedChanges && !isLoading) {
                 setShowConfirmModal(true);
               } else {
+                // إزالة flag من localStorage
+                localStorage.removeItem('auto_renewal_setup_open');
+                
                 onClose();
+                
+                // عمل reload بعد إغلاق النافذة (إذا لم تكن هناك تغييرات)
+                setTimeout(() => {
+                  console.log('🔄 Reloading page after canceling subscription setup (no changes)...');
+                  window.location.reload();
+                }, 1000);
               }
             }}
             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
@@ -364,7 +407,17 @@ const AutoRenewalSetup: React.FC<AutoRenewalSetupProps> = ({
         onConfirm={() => {
           setShowConfirmModal(false);
           setHasUnsavedChanges(false);
+          
+          // إزالة flag من localStorage
+          localStorage.removeItem('auto_renewal_setup_open');
+          
           onClose();
+          
+          // عمل reload بعد إغلاق النافذة (إذا كان المستخدم رفض الإعداد)
+          setTimeout(() => {
+            console.log('🔄 Reloading page after canceling subscription setup...');
+            window.location.reload();
+          }, 1000);
         }}
         title={isRTL ? 'هل تريد الإغلاق بدون حفظ؟' : 'Close without saving?'}
         message={isRTL 
