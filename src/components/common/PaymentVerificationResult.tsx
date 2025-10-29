@@ -270,7 +270,8 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
             </button>
           )}
         </div>
-      </div>
+          </div>
+        </div>
       )}
       
       {/* Auto Renewal Setup Modal - يمكن عرضها حتى لو كانت نافذة النتيجة مغلقة */}
