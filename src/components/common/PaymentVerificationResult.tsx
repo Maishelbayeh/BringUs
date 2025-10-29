@@ -28,45 +28,8 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
   const [hasOpenedAutoRenewal, setHasOpenedAutoRenewal] = useState(false);
 
   // فتح نافذة إعداد الاشتراك التلقائي تلقائياً بعد نجاح الدفع
-  useEffect(() => {
-    // إذا كانت النتيجة نجحت ولم يتم فتح نافذة الإعداد بعد والنافذة الحالية مفتوحة
-    if (
-      isOpen && 
-      !isVerifying && 
-      result?.status?.toLowerCase() === 'success' && 
-      !hasOpenedAutoRenewal &&
-      !showAutoRenewalSetup
-    ) {
-      // انتظر 1.5 ثانية لعرض رسالة النجاح ثم افتح نافذة الإعداد
-      const timer = setTimeout(() => {
-        setHasOpenedAutoRenewal(true);
-        setShowAutoRenewalSetup(true);
-        // إغلاق نافذة النتيجة بعد فتح نافذة الإعداد
-        onClose();
-      }, 1500); // انتظر 1.5 ثانية لعرض رسالة النجاح
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, isVerifying, result, hasOpenedAutoRenewal, showAutoRenewalSetup, onClose]);
 
   // فتح نافذة الإعداد إذا تم إغلاق نافذة النتيجة يدوياً ولكن الدفع نجح
-  useEffect(() => {
-    // إذا كانت النافذة مغلقة والدفع نجح ولم يتم فتح نافذة الإعداد بعد
-    if (
-      !isOpen && 
-      result?.status?.toLowerCase() === 'success' && 
-      !hasOpenedAutoRenewal &&
-      !showAutoRenewalSetup
-    ) {
-      // افتح نافذة الإعداد تلقائياً حتى لو تم إغلاق نافذة النتيجة
-      const timer = setTimeout(() => {
-        setHasOpenedAutoRenewal(true);
-        setShowAutoRenewalSetup(true);
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, result, hasOpenedAutoRenewal, showAutoRenewalSetup]);
 
   // إعادة تعيين الحالة عند فتح النافذة من جديد
   useEffect(() => {
