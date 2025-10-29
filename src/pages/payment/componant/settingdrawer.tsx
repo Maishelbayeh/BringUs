@@ -21,7 +21,6 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pendingClose, setPendingClose] = useState(false);
   
   useEffect(() => {
     if (open) {
@@ -29,7 +28,6 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
       setIsSubmitting(false);
       setHasUnsavedChanges(false);
       setShowConfirmModal(false);
-      setPendingClose(false);
     }
   }, [open]);
   
@@ -86,7 +84,6 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
     if (hasUnsavedChanges && !isSubmitting) {
       // Show confirmation modal before closing
       setShowConfirmModal(true);
-      setPendingClose(true);
     } else {
       setIsSubmitting(false);
       setHasUnsavedChanges(false);
@@ -98,13 +95,11 @@ const PaymentModal: React.FC<Props> = ({ open, onClose, method, onSave, language
     setShowConfirmModal(false);
     setHasUnsavedChanges(false);
     setIsSubmitting(false);
-    setPendingClose(false);
     onClose();
   };
 
   const handleCancelClose = () => {
     setShowConfirmModal(false);
-    setPendingClose(false);
   };
   
   return (
