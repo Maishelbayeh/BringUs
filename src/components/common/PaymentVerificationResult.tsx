@@ -25,6 +25,54 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
   const { t } = useTranslation();
   const [showAutoRenewalSetup, setShowAutoRenewalSetup] = useState(false);
   const [shouldCloseFirstModal, setShouldCloseFirstModal] = useState(false);
+  const [hasOpenedAutoRenewal, setHasOpenedAutoRenewal] = useState(false);
+
+  // فتح نافذة إعداد الاشتراك التلقائي تلقائياً بعد نجاح الدفع
+
+  // فتح نافذة الإعداد إذا تم إغلاق نافذة النتيجة يدوياً ولكن الدفع نجح
+
+  // وضع flag عند فتح النافذة لمنع reload من PaymentPollingManager
+  useEffect(() => {
+    if (isOpen) {
+      localStorage.setItem('payment_verification_modal_open', 'true');
+    } else {
+      localStorage.removeItem('payment_verification_modal_open');
+    }
+    return () => {
+      // تنظيف عند unmount
+      localStorage.removeItem('payment_verification_modal_open');
+    };
+  }, [isOpen]);
+
+  // إعادة تعيين الحالة عند فتح النافذة من جديد
+  useEffect(() => {
+    if (isOpen && isVerifying) {
+      setHasOpenedAutoRenewal(false);
+      setShowAutoRenewalSetup(false);
+    }
+  }, [isOpen, isVerifying]);
+
+  // فتح نافذة إعداد الاشتراك التلقائي تلقائياً بعد نجاح الدفع
+  useEffect(() => {
+    // إذا كانت النتيجة نجحت ولم يتم فتح نافذة الإعداد بعد والنافذة الحالية مفتوحة
+    if (
+      isOpen && 
+      !isVerifying && 
+      result?.status?.toLowerCase() === 'success' && 
+      !hasOpenedAutoRenewal &&
+      !showAutoRenewalSetup
+    ) {
+      // انتظر 1.5 ثانية لعرض رسالة النجاح ثم افتح نافذة الإعداد
+      const timer = setTimeout(() => {
+        setHasOpenedAutoRenewal(true);
+        setShowAutoRenewalSetup(true);
+        // إغلاق نافذة النتيجة بعد فتح نافذة الإعداد
+        onClose();
+      }, 1500); // انتظر 1.5 ثانية لعرض رسالة النجاح
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isVerifying, result, hasOpenedAutoRenewal, showAutoRenewalSetup, onClose]);
 
   // إغلاق النافذة الأولى بعد فتح النافذة الثانية
   useEffect(() => {
@@ -37,7 +85,8 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
     }
   }, [shouldCloseFirstModal, onClose]);
 
-  if (!isOpen) return null;
+  // إذا كانت النافذة مغلقة ولم يكن هناك نافذة إعداد مفتوحة، لا نعرض شيئاً
+  if (!isOpen && !showAutoRenewalSetup) return null;
 
   const getStatusIcon = () => {
     if (isVerifying) {
@@ -126,15 +175,31 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
   };
 
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 flex-col  ${isRTL ? 'row-reverse' : ''}`}>
-      <div className={`bg-white rounded-lg shadow-xl max-w-md w-full ${isRTL ? 'text-right' : 'text-left'}`}>
+    <>
+      {/* Payment Verification Result Modal - تعرض فقط إذا كانت مفتوحة */}
+      {isOpen && (
+        <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 flex-col  ${isRTL ? 'row-reverse' : ''}`}>
+          <div className={`bg-white rounded-lg shadow-xl max-w-md w-full ${isRTL ? 'text-right' : 'text-left'}`}>
         {/* Header */}
         <div className={`flex items-center justify-between p-6 border-b border-gray-200   ${isRTL ? 'flex-row-reverse' : ''}`}>
           <h2 className={`text-xl font-semibold text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
             {t('payment.verificationTitle')}
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => {
+              // إزالة flag من localStorage
+              localStorage.removeItem('payment_verification_modal_open');
+              onClose();
+              
+              // عمل reload بعد ثانية إذا لم تكن هناك نافذة إعداد مفتوحة
+              setTimeout(() => {
+                const hasAutoRenewalOpen = localStorage.getItem('auto_renewal_setup_open') === 'true';
+                if (!hasAutoRenewalOpen) {
+                  console.log('🔄 Reloading page after closing payment verification modal via X...');
+                  window.location.reload();
+                }
+              }, 1000);
+            }}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,9 +218,18 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
             </h3>
             
             {result && (
-              <p className="mt-2 text-sm text-gray-600">
-                {result.message}
-              </p>
+              <>
+                <p className="mt-2 text-sm text-gray-600">
+                  {result.message}
+                </p>
+                {result.status?.toLowerCase() === 'success' && !hasOpenedAutoRenewal && (
+                  <p className="mt-3 text-sm text-blue-600 font-medium animate-pulse">
+                    {isRTL 
+                      ? 'سيتم فتح نافذة إعداد الاشتراك تلقائياً...'
+                      : 'Subscription setup window will open automatically...'}
+                  </p>
+                )}
+              </>
             )}
 
             {/* Payment Details */}
@@ -190,37 +264,65 @@ const PaymentVerificationResult: React.FC<PaymentVerificationResultProps> = ({
         {/* Footer */}
         <div className="flex gap-3 p-6 border-t border-gray-200">
           <button
-            onClick={onClose}
+            onClick={() => {
+              // إزالة flag من localStorage
+              localStorage.removeItem('payment_verification_modal_open');
+              onClose();
+              
+              // عمل reload بعد ثانية إذا لم تكن هناك نافذة إعداد مفتوحة
+              setTimeout(() => {
+                const hasAutoRenewalOpen = localStorage.getItem('auto_renewal_setup_open') === 'true';
+                if (!hasAutoRenewalOpen) {
+                  console.log('🔄 Reloading page after closing payment verification modal...');
+                  window.location.reload();
+                }
+              }, 1000);
+            }}
             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
             {t('general.cancel')}
           </button>
           {result?.status?.toLowerCase() === 'success' && (
             <button
-              onClick={() => {
-                console.log('Setting up auto renewal...');
-                setShowAutoRenewalSetup(true);
-              }}
+          onClick={() => {
+            console.log('Setting up auto renewal...');
+            setShowAutoRenewalSetup(true);
+            setHasOpenedAutoRenewal(true);
+            // إزالة flag النافذة الحالية لأننا سنفتح نافذة الإعداد
+            localStorage.removeItem('payment_verification_modal_open');
+          }}
               className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
             >
               {isRTL ? 'إعداد الاشتراك' : 'Setup Subscription'}
             </button>
           )}
         </div>
-      </div>
+          </div>
+        </div>
+      )}
       
-      {/* Auto Renewal Setup Modal */}
+      {/* Auto Renewal Setup Modal - يمكن عرضها حتى لو كانت نافذة النتيجة مغلقة */}
       {showAutoRenewalSetup && (
         <AutoRenewalSetup
           isOpen={showAutoRenewalSetup}
-          onClose={() => {setShowAutoRenewalSetup(false)
-            onClose();
+          onClose={() => {
+            setShowAutoRenewalSetup(false);
+            setHasOpenedAutoRenewal(false);
+            // إزالة جميع الـ flags من localStorage
+            localStorage.removeItem('auto_renewal_setup_open');
+            localStorage.removeItem('payment_verification_modal_open');
+            
+            // عمل reload بعد إغلاق النافذة (إذا أُغلقت بدون حفظ)
+            setTimeout(() => {
+              console.log('🔄 Reloading page after closing subscription setup without saving...');
+              window.location.reload();
+            }, 1000);
           }}
           isRTL={isRTL}
-          referenceId={result?.data?.data?.authorization.authorization_code  || ''}
+          referenceId={result?.data?.data?.authorization?.authorization_code || result?.data?.data?.reference || ''}
         />
       )}
-    </div>
+    </>
   );
 };
 

@@ -32,7 +32,8 @@ export const PAYMENT_API_CONFIG = {
     INITIALIZE: '/lahza-payment/:storeId/initialize',
     VERIFY: '/lahza-payment/:storeId/verify',
     STATUS: '/lahza-payment/:storeId/status/:reference',
-    WEBHOOK: '/lahza-payment/:storeId/webhook'
+    WEBHOOK: '/lahza-payment/:storeId/webhook',
+    POLL: '/lahza-payment/:storeId/poll/:reference'
   }
 };
 

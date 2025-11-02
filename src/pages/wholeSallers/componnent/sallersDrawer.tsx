@@ -28,7 +28,7 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
   isEdit,
   password = ''
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const storeId = localStorage.getItem('storeId') || '';
   const token = localStorage.getItem('token') || '';
   const { wholesalers, createWholesaler, updateWholesaler, getWholesalers } = useWholesalers(storeId, token);
@@ -48,10 +48,17 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
     password: password || ''
   });
 
+  // Real-time email check states
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [emailCheckTimeout, setEmailCheckTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [emailMessage, setEmailMessage] = useState<{ message: string; messageAr: string } | null>(null);
+
   useEffect(() => {
     if (open) {
       if (initialData) {
         setForm(initialData);
+        setEmailAvailable(null); // Reset for edit mode
       } else {
         setForm({
           email: '',
@@ -63,14 +70,23 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
             status: 'Active',
             password: password || ''
         });
+        setEmailAvailable(null); // Reset for new entry
       }
       clearAllErrors();
+      setIsCheckingEmail(false);
+      
+      // Clear any pending timeout
+      if (emailCheckTimeout) {
+        clearTimeout(emailCheckTimeout);
+        setEmailCheckTimeout(null);
+      }
+      
       // Load current store wholesalers when drawer opens
       if (storeId) {
         getWholesalers().catch(console.error);
       }
     }
-  }, [open, initialData, clearAllErrors, getWholesalers, storeId]);
+  }, [open, initialData, clearAllErrors, getWholesalers, storeId, emailCheckTimeout]);
 
   // Function to check email duplicates in real-time
   const checkEmailDuplicate = useCallback((email: string) => {
@@ -158,6 +174,16 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
   };
 
   const handleSave = async () => {
+    // Check if email is available before proceeding (for new wholesalers)
+    if (!isEdit && (emailAvailable === false || isCheckingEmail)) {
+      const newErrors = { 
+        ...errors, 
+        email: t('users.emailNotAvailable') || 'Email is not available or still being checked'
+      };
+      setErrors(newErrors);
+      return;
+    }
+
     // Prepare form data for validation
     const formData = {
       ...form,
@@ -228,7 +254,10 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
             onPhoneChange={handlePhoneChange}
             isRTL={isRTL} 
             isEdit={isEdit} 
-            errors={errors} 
+            errors={errors}
+            isCheckingEmail={isCheckingEmail}
+            emailAvailable={emailAvailable}
+            emailMessage={emailMessage}
           />
         </div>
         
@@ -246,6 +275,7 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
             textColor="white"
             text={t('common.save') || 'Save'}
             action={handleSave}
+            disabled={!isEdit && (emailAvailable === false || isCheckingEmail)}
           />
         </div>
       </div>

@@ -6,7 +6,7 @@ import {
   
 } from '@mui/icons-material';
 import CustomInput from '@/components/common/CustomInput';
-
+import CustomPhoneInput from '@/components/common/CustomPhoneInput';
 
 import useLanguage from '@/hooks/useLanguage';
 import { getStoreId } from '@/hooks/useLocalStorage';
@@ -21,9 +21,10 @@ interface UserFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   formId?: string; // لربط زر الحفظ في الفوتر من الخارج
+  onCanSubmitChange?: (canSubmit: boolean) => void; // Callback to notify parent about submit availability
 }
 
-const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
+const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId, onCanSubmitChange }) => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const isRTL = language === 'ARABIC';
@@ -55,6 +56,9 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
   // Allow dynamic keys like 'address.street'
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [_isLoading, setIsLoading] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [emailMessage, setEmailMessage] = useState<{ message: string; messageAr: string } | null>(null);
   
   const { createUser, updateUser, loading: _apiLoading, error: _apiError, checkEmailExists, checkPhoneExists, getAllUsers } = useUser();
   const { showSuccess, showError } = useToastContext();
@@ -92,6 +96,97 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
       console.log('🆕 New user mode - no user data to load');
     }
   }, [user]);
+
+  // Real-time email availability check with debounce
+  useEffect(() => {
+    // Skip check in edit mode or if email is empty
+    if (isEditMode || !formData.email.trim()) {
+      setEmailAvailable(null);
+      return;
+    }
+
+    // Validate email format first
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      setEmailAvailable(null);
+      return;
+    }
+
+    // Debounce: wait 500ms after user stops typing
+    const timeoutId = setTimeout(async () => {
+      setIsCheckingEmail(true);
+      
+      try {
+        const storeInfo = JSON.parse(localStorage.getItem('storeInfo') || '{}');
+        const storeSlug = storeInfo.slug;
+        
+        if (!storeSlug) {
+          console.error('❌ No store slug found');
+          setEmailAvailable(null);
+          setIsCheckingEmail(false);
+          return;
+        }
+
+        console.log('🔍 Checking email availability:', { email: formData.email, storeSlug });
+        
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
+        const response = await fetch(`${apiUrl}/auth/check-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            storeSlug: storeSlug
+          })
+        });
+
+      const data = await response.json();
+      console.log('📧 Email check response:', data);
+
+      if (response.ok && data.available !== false) {
+        // Email is available (no user found with this email)
+        console.log('✅ Email is available');
+        setEmailAvailable(true);
+        
+        // Store success message from backend
+        setEmailMessage({
+          message: data.message || 'Email is available',
+          messageAr: data.messageAr || 'البريد الإلكتروني متاح للاستخدام'
+        });
+        
+        setErrors(prev => ({
+          ...prev,
+          email: undefined
+        }));
+      } else if (!data.available || data.success === false) {
+        // Email already exists
+        console.log('❌ Email already exists');
+        const errorMessage = isRTL 
+          ? (data.messageAr || t('signup.emailAlreadyExists'))
+          : (data.message || t('signup.emailAlreadyExists'));
+        
+        setEmailAvailable(false);
+        setEmailMessage(null);
+        setErrors(prev => ({
+          ...prev,
+          email: errorMessage
+        }));
+      } else {
+        // Other error
+        console.error('⚠️ Email check failed with status:', response.status);
+        setEmailAvailable(null);
+        setEmailMessage(null);
+      }
+      } catch (error) {
+        console.error('❌ Error checking email:', error);
+        setEmailAvailable(null);
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [formData.email, isEditMode, t]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -204,27 +299,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
       }
     }
 
-    // التحقق من العنوان
-    if (!addressData.street.trim()) {
-      newErrors['address.street'] = t('newUser.streetRequired');
-      console.log('❌ Street validation failed');
-    }
-    if (!addressData.city.trim()) {
-      newErrors['address.city'] = t('newUser.cityRequired');
-      console.log('❌ City validation failed');
-    }
-    if (!addressData.state.trim()) {
-      newErrors['address.state'] = t('newUser.stateRequired');
-      console.log('❌ State validation failed');
-    }
-    if (!addressData.zipCode.trim()) {
-      newErrors['address.zipCode'] = t('newUser.zipCodeRequired');
-      console.log('❌ Zip code validation failed');
-    }
-    if (!addressData.country.trim()) {
-      newErrors['address.country'] = t('newUser.countryRequired');
-      console.log('❌ Country validation failed');
-    }
+    // Address fields are optional - no validation needed
 
     console.log('📋 Validation errors:', newErrors);
     setErrors(newErrors);
@@ -238,6 +313,16 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
     console.log('🚀 Form submitted!');
     console.log('📝 Form data:', formData);
     console.log('🏠 Address data:', addressData);
+    
+    // Check if email is available before proceeding (for new users)
+    if (!canSubmit) {
+      console.log('❌ Cannot submit: Email not available or still checking');
+      showError(
+        t('users.emailNotAvailable') || 'Email is not available or still being checked',
+        t('general.error')
+      );
+      return;
+    }
     
     if (!validateForm()) {
       console.log('❌ Validation failed');
@@ -289,7 +374,11 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
         }
       }
 
-      const newUserData = {
+      // Build addresses array only if at least one field is filled
+      const hasAddressData = addressData.street || addressData.city || 
+                            addressData.state || addressData.zipCode || addressData.country;
+      
+      const newUserData: any = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -297,7 +386,12 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
         role: 'admin' as const,
         phone: formData.phone,
         status: formData.status as 'active' | 'inactive',
-        addresses: [{
+        store: storeId
+      };
+      
+      // Add addresses only if address data is provided
+      if (hasAddressData) {
+        newUserData.addresses = [{
           type: 'home' as const,
           street: addressData.street,
           city: addressData.city,
@@ -305,25 +399,24 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
           zipCode: addressData.zipCode,
           country: addressData.country,
           isDefault: true
-        }],
-        store: storeId
-      };
+        }];
+      }
       
       console.log('📤 User data to send:', newUserData);
 
       let result;
       if (isEditMode) {
         // تحديث المستخدم
-        const updateData = { ...newUserData } as any;
+        const updateData = { ...newUserData };
         if (!formData.password) {
           delete updateData.password;
         }
         console.log('🔄 Updating user...');
-        result = await updateUser(user._id, updateData);
+        result = await updateUser(user._id, updateData as any);
       } else {
         // إنشاء مستخدم جديد
         console.log('➕ Creating new user...');
-        result = await createUser(newUserData);
+        result = await createUser(newUserData as any);
       }
       
       console.log('📥 API result:', result);
@@ -340,10 +433,20 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
           t('general.error')
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error saving user:', error);
+      
+      // Extract error messages from backend (both languages)
+      const errorMessage = error?.message || (isEditMode ? t('users.updateError') : t('users.createError'));
+      const errorMessageAr = error?.messageAr || (isEditMode ? t('users.updateError') : t('users.createError'));
+      
+      // Display the appropriate language message
+      const displayMessage = isRTL ? errorMessageAr : errorMessage;
+      
+      console.log('📋 Error messages:', { errorMessage, errorMessageAr, displayMessage, isRTL });
+      
       showError(
-        isEditMode ? t('users.updateError') : t('users.createError'), 
+        displayMessage,
         t('general.error')
       );
     } finally {
@@ -351,8 +454,66 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
     }
   };
 
+  // Check if form can be submitted
+  const canSubmit = isEditMode 
+    ? true // In edit mode, always allow submit
+    : emailAvailable === true && !isCheckingEmail; // In create mode, email must be available
+
+  // Notify parent component about submit availability
+  useEffect(() => {
+    if (onCanSubmitChange) {
+      onCanSubmitChange(canSubmit);
+    }
+  }, [canSubmit, onCanSubmitChange]);
+
   return (
     <form onSubmit={handleSubmit} id={formId} className="space-y-6">
+      {/* Form submission status indicator */}
+      {!isEditMode && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center space-x-2">
+            {isCheckingEmail && (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                <span className="text-sm text-blue-700">
+                  {t('users.checkingEmail') || 'Checking email availability...'}
+                </span>
+              </>
+            )}
+            {!isCheckingEmail && emailAvailable === true && (
+              <>
+                <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-green-700">
+                  {isRTL 
+                    ? (emailMessage?.messageAr || t('users.emailAvailable') || 'البريد الإلكتروني متاح')
+                    : (emailMessage?.message || t('users.emailAvailable') || 'Email is available')
+                  }
+                </span>
+              </>
+            )}
+            {!isCheckingEmail && emailAvailable === false && (
+              <>
+                <svg className="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-red-700">
+                  {isRTL 
+                    ? (errors.email || t('signup.emailAlreadyExists') || 'البريد الإلكتروني مستخدم بالفعل')
+                    : (errors.email || t('signup.emailAlreadyExists') || 'Email already exists')
+                  }
+                </span>
+              </>
+            )}
+            {!isCheckingEmail && emailAvailable === null && formData.email.trim() && (
+              <span className="text-sm text-gray-600">
+                {t('users.enterValidEmail') || 'Enter a valid email to check availability'}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
       {/* معلومات أساسية */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <CustomInput
@@ -377,25 +538,47 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CustomInput
-          label={t('signup.email')}
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          error={errors.email}
-          required
-         
-        />
+        <div className="relative">
+          <CustomInput
+            label={t('signup.email')}
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            error={errors.email}
+            required
+          />
+          {/* Email availability indicator */}
+          {!isEditMode && formData.email && formData.email.includes('@') && (
+            <div className={`absolute top-9 flex items-center ${isRTL ? 'left-3' : 'right-3'}`}>
+              {isCheckingEmail && (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+              )}
+              {!isCheckingEmail && emailAvailable === true && (
+                <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              )}
+              {!isCheckingEmail && emailAvailable === false && (
+                <svg className="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              )}
+            </div>
+          )}
+        </div>
         
-        <CustomInput
+        <CustomPhoneInput
           label={t('signup.phone')}
-          name="phone"
           value={formData.phone}
-          onChange={handleInputChange}
+          onChange={(value) => {
+            const event = {
+              target: { name: 'phone', value }
+            } as React.ChangeEvent<HTMLInputElement>;
+            handleInputChange(event);
+          }}
           error={errors.phone}
           required
-         
         />
       </div>
 
@@ -470,7 +653,6 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
             value={addressData.street}
             onChange={handleInputChange}
             error={errors['address.street']}
-           
           />
           
           <CustomInput
@@ -479,7 +661,6 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
             value={addressData.city}
             onChange={handleInputChange}
             error={errors['address.city']}
-           
           />
         </div>
 
@@ -490,7 +671,6 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
             value={addressData.state}
             onChange={handleInputChange}
             error={errors['address.state']}
-           
           />
           
           <CustomInput
@@ -499,7 +679,6 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
             value={addressData.zipCode}
             onChange={handleInputChange}
             error={errors['address.zipCode']}
-           
           />
           
           <CustomInput
@@ -508,7 +687,6 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, formId }) => {
             value={addressData.country}
             onChange={handleInputChange}
             error={errors['address.country']}
-           
           />
         </div>
       </div>

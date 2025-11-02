@@ -88,6 +88,7 @@ interface StoreResponse {
   updatedAt?: string;
   lahzaToken: string;
   lahzaSecretKey: string;
+  subscription?: any; // Store's active subscription data
 }
 
 

@@ -60,6 +60,7 @@ const UsersPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<any | null>(null);
+  const [canSubmitForm, setCanSubmitForm] = useState(true); // Track if form can be submitted
   // const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
  
@@ -130,14 +131,21 @@ const UsersPage: React.FC = () => {
   // };
 
   // عرض الاسم الكامل
-  const renderFullName = ( item: any) => (
-    <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-      <span className="font-medium text-gray-900">
-        {item.firstName} {item.lastName}
-      </span>
-     
-    </div>
-  );
+  const renderFullName = (_value: any, item: any) => {
+    // Check if item exists first
+    if (!item) {
+      return <span className="text-gray-400">-</span>;
+    }
+    
+    return (
+      <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
+        <span className="font-medium text-gray-900">
+          {item.firstName} {item.lastName}
+        </span>
+       
+      </div>
+    );
+  };
 
   // عرض الدور
   const renderRole = (value: any) => {
@@ -182,7 +190,12 @@ const UsersPage: React.FC = () => {
   };
 
   // عرض العنوان
-  const renderAddress = ( item: any) => {
+  const renderAddress = (_value: any, item: any) => {
+    // Check if item exists first
+    if (!item) {
+      return <span className="text-gray-400">-</span>;
+    }
+    
     const defaultAddress = item.addresses?.find((addr: any) => addr.isDefault) || item.addresses?.[0];
     
     if (!defaultAddress) {
@@ -223,6 +236,7 @@ const UsersPage: React.FC = () => {
   // معالجة التعديل
   const handleEdit = (user: any) => {
     setSelectedUser(user);
+    setCanSubmitForm(true); // In edit mode, always allow submit
     setShowNewUserModal(true);
   };
 
@@ -252,6 +266,7 @@ const UsersPage: React.FC = () => {
   // إضافة مستخدم جديد
   const handleAddUser = useCallback(() => {
     setSelectedUser(null); // مسح المستخدم المحدد
+    setCanSubmitForm(false); // Reset to false for new user (will be enabled when email is available)
     setShowNewUserModal(true);
   }, []);
 
@@ -259,6 +274,7 @@ const UsersPage: React.FC = () => {
   const handleCloseNewUserModal = useCallback(() => {
     setShowNewUserModal(false);
     setSelectedUser(null); // مسح المستخدم المحدد
+    setCanSubmitForm(true); // Reset to default
   }, []);
 
   // تعريف أعمدة الجدول
@@ -391,6 +407,7 @@ const UsersPage: React.FC = () => {
                   onSuccess={handleUserCreated}
                   onCancel={handleCloseNewUserModal}
                   formId="user-form"
+                  onCanSubmitChange={setCanSubmitForm}
                 />
               </div>
               {/* Footer */}
@@ -405,7 +422,13 @@ const UsersPage: React.FC = () => {
                 <button
                   type="submit"
                   form="user-form"
-                  className="bg-primary text-white px-5 py-2.5 rounded-lg"
+                  disabled={!canSubmitForm}
+                  className={`px-5 py-2.5 rounded-lg transition-colors ${
+                    canSubmitForm
+                      ? 'bg-primary text-white hover:bg-primary-dark'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                  title={!canSubmitForm ? (t('users.emailNotAvailable') || 'Email not available') : ''}
                 >
                   {selectedUser ? t('general.update') : t('general.create')}
                 </button>

@@ -72,17 +72,24 @@ export const usePaymentVerification = () => {
       // Get storeId from localStorage or context
       const storeId = localStorage.getItem('storeId') || '';
       
+      // Get planId from localStorage
+      const planId = localStorage.getItem('subscription_plan_id');
+      
       // Use backend API endpoint
       const endpoint = PAYMENT_API_CONFIG.ENDPOINTS.VERIFY.replace(':storeId', storeId);
       const backendUrl = `${PAYMENT_API_CONFIG.BACKEND_URL}${endpoint}`;
 
       console.log('🔍 Payment Verification Request:', {
         url: backendUrl,
-        reference
+        reference,
+        planId
       });
 
       const response = await axios.post(backendUrl, 
-        { reference },
+        { 
+          reference,
+          planId
+        },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -121,6 +128,54 @@ export const usePaymentVerification = () => {
           
           // **NEW: Activate subscription via frontend (fallback for when webhook doesn't work on localhost)**
           await activateSubscriptionAfterPayment(storeId, reference);
+          
+          // **CRITICAL: Force refresh store info from backend after successful payment**
+          console.log('🔄 Payment verified successfully - refreshing store info...');
+          try {
+            const storeInfo = JSON.parse(localStorage.getItem('storeInfo') || '{}');
+            if (storeInfo.slug) {
+              // Import dynamically to avoid circular dependency
+              const { default: axios } = await import('axios');
+              const token = localStorage.getItem('token');
+              const apiUrl = import.meta.env.VITE_API_URL || 'https://bringus-backend.onrender.com/api';
+              
+              const storeResponse = await axios.get(
+                `${apiUrl}/stores/slug/${storeInfo.slug}`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  }
+                }
+              );
+              
+              if (storeResponse.data.success && storeResponse.data.data) {
+                const freshStore = storeResponse.data.data;
+                console.log('✅ Fresh store data:', { status: freshStore.status });
+                
+                // Update localStorage with fresh store data
+                localStorage.setItem('storeInfo', JSON.stringify({
+                  id: freshStore.id || freshStore._id,
+                  nameAr: freshStore.nameAr,
+                  nameEn: freshStore.nameEn,
+                  slug: freshStore.slug,
+                  status: freshStore.status, // Should be 'active' now
+                  settings: freshStore.settings,
+                  subscription: freshStore.subscription
+                }));
+                
+                // Trigger store data update event
+                window.dispatchEvent(new CustomEvent('storeDataUpdated', {
+                  detail: { storeData: freshStore }
+                }));
+                
+                console.log('✅ Store info refreshed after payment verification');
+              }
+            }
+          } catch (error) {
+            console.error('⚠️ Error refreshing store info:', error);
+            // Continue anyway - page reload will fix it
+          }
           
         } else if (paymentStatus === 'PENDING' || paymentStatus === 'INITIATED') {
           result.status = 'pending';

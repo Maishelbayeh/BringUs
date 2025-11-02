@@ -97,6 +97,7 @@ export const useTestimonials = () => {
         
         return data.data;
       } else {
+        // Backend error - show toast and throw error without showing duplicate toasts
         const errorMessage = isRTL 
           ? (data?.messageAr || data?.message_ar || 'فشل في إنشاء التقييم')
           : (data?.message || data?.message_en || 'Failed to create testimonial');
@@ -106,10 +107,15 @@ export const useTestimonials = () => {
         
         setError(errorMessage);
         showError(errorMessage, errorTitle);
-        throw new Error(errorMessage);
+        
+        // Throw error with flag to prevent duplicate toast in catch block
+        const error = new Error(errorMessage);
+        (error as any).isBackendError = true;
+        throw error;
       }
     } catch (err: any) {
-      if (!err.message?.includes('Failed to create testimonial') && !err.message?.includes('فشل في إنشاء التقييم')) {
+      // Only show toast for network/connection errors, not backend errors (already shown above)
+      if (!err.isBackendError) {
         console.error('Network error creating testimonial:', err);
         const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
         const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
@@ -153,6 +159,7 @@ export const useTestimonials = () => {
         
         return data.data;
       } else {
+        // Backend error - show toast and throw error without showing duplicate toasts
         const errorMessage = isRTL 
           ? (data?.messageAr || data?.message_ar || 'فشل في تحديث التقييم')
           : (data?.message || data?.message_en || 'Failed to update testimonial');
@@ -162,10 +169,15 @@ export const useTestimonials = () => {
         
         setError(errorMessage);
         showError(errorMessage, errorTitle);
-        throw new Error(errorMessage);
+        
+        // Throw error with flag to prevent duplicate toast in catch block
+        const error = new Error(errorMessage);
+        (error as any).isBackendError = true;
+        throw error;
       }
     } catch (err: any) {
-      if (!err.message?.includes('Failed to update testimonial') && !err.message?.includes('فشل في تحديث التقييم')) {
+      // Only show toast for network/connection errors, not backend errors (already shown above)
+      if (!err.isBackendError) {
         console.error('Network error updating testimonial:', err);
         const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
         const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
@@ -206,6 +218,7 @@ export const useTestimonials = () => {
         
         return true;
       } else {
+        // Backend error - show toast and throw error without showing duplicate toasts
         const errorMessage = isRTL 
           ? (data?.messageAr || data?.message_ar || 'فشل في حذف التقييم')
           : (data?.message || data?.message_en || 'Failed to delete testimonial');
@@ -215,10 +228,15 @@ export const useTestimonials = () => {
         
         setError(errorMessage);
         showError(errorMessage, errorTitle);
-        throw new Error(errorMessage);
+        
+        // Throw error with flag to prevent duplicate toast in catch block
+        const error = new Error(errorMessage);
+        (error as any).isBackendError = true;
+        throw error;
       }
     } catch (err: any) {
-      if (!err.message?.includes('Failed to delete testimonial') && !err.message?.includes('فشل في حذف التقييم')) {
+      // Only show toast for network/connection errors, not backend errors (already shown above)
+      if (!err.isBackendError) {
         console.error('Network error deleting testimonial:', err);
         const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
         const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';
@@ -251,16 +269,22 @@ export const useTestimonials = () => {
       if (response.ok) {
         return data.data.url;
       } else {
+        // Backend error - show toast and throw error without showing duplicate toasts
         const errorMessage = isRTL 
           ? (data?.messageAr || data?.message_ar || 'فشل في رفع الصورة')
           : (data?.message || data?.message_en || 'Failed to upload image');
         const errorTitle = isRTL ? 'خطأ في رفع الصورة' : 'Error Uploading Image';
         
         showError(errorMessage, errorTitle);
-        throw new Error(errorMessage);
+        
+        // Throw error with flag to prevent duplicate toast in catch block
+        const error = new Error(errorMessage);
+        (error as any).isBackendError = true;
+        throw error;
       }
     } catch (err: any) {
-      if (!err.message?.includes('Failed to upload image') && !err.message?.includes('فشل في رفع الصورة')) {
+      // Only show toast for network/connection errors, not backend errors (already shown above)
+      if (!err.isBackendError) {
         console.error('Network error uploading image:', err);
         const errorMessage = isRTL ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
         const errorTitle = isRTL ? 'خطأ في الشبكة' : 'Network Error';

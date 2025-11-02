@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { PAYMENT_API_CONFIG } from '../../constants/payment';
 import SubscriptionDetails from './SubscriptionDetails';
+import usePaymentPolling from '../../hooks/usePaymentPolling';
 
 
 
@@ -67,6 +68,9 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
 
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [paymentInProgress, setPaymentInProgress] = useState(false);
+
+  // Payment polling hook - للمراقبة التلقائية للدفع
+  const { startPolling } = usePaymentPolling();
 
   // إعادة تعيين النموذج عند فتح الـ popup
   useEffect(() => {
@@ -177,7 +181,16 @@ const SubscriptionRenewalPopup: React.FC<SubscriptionRenewalPopupProps> = ({
         localStorage.setItem('subscription_plan_id', selectedPlan?.id || '');
         localStorage.setItem('subscription_payment_initiated', 'true');
         
+        // حفظ بيانات المراقبة التلقائية للدفع
+        localStorage.setItem('payment_planId', selectedPlan?.id || '');
+        localStorage.setItem('payment_storeId', storeId);
+        localStorage.setItem('payment_started_at', new Date().toISOString());
+        
         console.log('💾 Payment state saved to localStorage');
+        
+        // بدء المراقبة التلقائية للدفع
+        console.log('🔄 Starting payment polling...');
+        startPolling(storeId, reference, selectedPlan?.id || '');
         
         // إغلاق الـ popup بعد ثانية واحدة
         setTimeout(() => {
