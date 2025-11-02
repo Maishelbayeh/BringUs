@@ -1618,6 +1618,10 @@
     "actions": {
       "edit": "Edit",
       "delete": "Delete"
-    }
+    },
+    "checkingEmail": "Checking email availability...",
+    "emailAvailable": "Email is available",
+    "emailNotAvailable": "Email is not available or still being checked",
+    "enterValidEmail": "Enter a valid email to check availability"
   }
 }

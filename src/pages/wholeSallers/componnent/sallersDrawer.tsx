@@ -28,7 +28,7 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
   isEdit,
   password = ''
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const storeId = localStorage.getItem('storeId') || '';
   const token = localStorage.getItem('token') || '';
   const { wholesalers, createWholesaler, updateWholesaler, getWholesalers } = useWholesalers(storeId, token);
@@ -52,7 +52,8 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [emailCheckTimeout, setEmailCheckTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [emailMessage, setEmailMessage] = useState<{ message: string; messageAr: string } | null>(null);
+  const [emailMessage] = useState<{ message: string; messageAr: string } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -74,6 +75,7 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
       }
       clearAllErrors();
       setIsCheckingEmail(false);
+      setIsSaving(false);
       
       // Clear any pending timeout
       if (emailCheckTimeout) {
@@ -210,6 +212,8 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
     clearAllErrors();
 
     try {
+      setIsSaving(true);
+      
       // Prepare data with store object containing _id
       const dataToSend = {
         ...form,
@@ -231,6 +235,8 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
       onSaveSuccess();
     } catch (error) {
       console.error("Save failed:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -275,7 +281,9 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
             textColor="white"
             text={t('common.save') || 'Save'}
             action={handleSave}
-            disabled={!isEdit && (emailAvailable === false || isCheckingEmail)}
+            disabled={(!isEdit && (emailAvailable === false || isCheckingEmail)) || isSaving}
+            loading={isSaving}
+            loadingText={t('common.saving') || 'Saving...'}
           />
         </div>
       </div>
