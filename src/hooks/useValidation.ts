@@ -35,7 +35,7 @@ export interface UseValidationReturn {
   clearError: (fieldName: string) => void;
   clearAllErrors: () => void;
   setError: (fieldName: string, message: string) => void;
-  setErrors: (newErrors: { [key: string]: string }) => void;
+  setErrors: (newErrors: { [key: string]: string } | ((prevErrors: { [key: string]: string }) => { [key: string]: string })) => void;
   hasError: (fieldName: string) => boolean;
 }
 
@@ -149,8 +149,12 @@ export const useValidation = ({
   }, []);
 
   // دالة تعيين أخطاء متعددة
-  const setErrorsMultiple = useCallback((newErrors: { [key: string]: string }) => {
-    setErrors(newErrors);
+  const setErrorsMultiple = useCallback((newErrors: { [key: string]: string } | ((prev: { [key: string]: string }) => { [key: string]: string })) => {
+    if (typeof newErrors === 'function') {
+      setErrors(newErrors);
+    } else {
+      setErrors(newErrors);
+    }
   }, []);
 
   // دالة للتحقق من وجود خطأ في حقل معين

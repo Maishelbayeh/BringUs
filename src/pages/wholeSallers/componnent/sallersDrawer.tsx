@@ -97,16 +97,17 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
 
     console.log('Duplicate found:', duplicate);
 
-    if (duplicate) {
-      const newErrors = { ...errors, email: t('validation.duplicateEmailInStore') };
-      setErrors(newErrors);
-    } else {
-      // Clear email error if no duplicate
-      const newErrors = { ...errors };
-      delete newErrors.email;
-      setErrors(newErrors);
-    }
-  }, [wholesalers, storeId, initialData?._id, t, errors]);
+    setErrors((prevErrors: any) => {
+      if (duplicate) {
+        return { ...prevErrors, email: t('validation.duplicateEmailInStore') };
+      } else {
+        // Clear email error if no duplicate
+        const newErrors = { ...prevErrors };
+        delete newErrors.email;
+        return newErrors;
+      }
+    });
+  }, [wholesalers, storeId, initialData?._id, t]);
 
     const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -114,11 +115,14 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
     setForm(newForm);
     
     // Clear error for this field when user starts typing
-    if (errors[name]) {
-      const newErrors = { ...errors };
-      delete newErrors[name];
-      setErrors(newErrors);
-    }
+    setErrors((prevErrors) => {
+      if (prevErrors[name]) {
+        const newErrors = { ...prevErrors };
+        delete newErrors[name];
+        return newErrors;
+      }
+      return prevErrors;
+    });
 
     // Check for email duplicate in real-time
     if (name === 'email' && value.trim() !== '') {
@@ -133,11 +137,14 @@ const SallersDrawer: React.FC<SallersDrawerProps> = ({
     setForm(newForm);
     
     // Clear error for mobile field when user starts typing
-    if (errors.mobile) {
-      const newErrors = { ...errors };
-      delete newErrors.mobile;
-      setErrors(newErrors);
-    }
+    setErrors((prevErrors) => {
+      if (prevErrors.mobile) {
+        const newErrors = { ...prevErrors };
+        delete newErrors.mobile;
+        return newErrors;
+      }
+      return prevErrors;
+    });
     
     // التحقق من رقم الهاتف في الوقت الحقيقي (real-time validation)
     // if (value && value.trim() !== '') {
